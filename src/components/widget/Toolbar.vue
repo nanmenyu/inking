@@ -253,7 +253,7 @@ const addFile = () => {
                 categories: [],
                 tag: [],
                 desc: '',
-                imgSrc: '/static/img/default-cover.jpg',
+                imgSrc: '',
                 data: [{
                     vid: v4(),
                     volumeName: '默认卷',

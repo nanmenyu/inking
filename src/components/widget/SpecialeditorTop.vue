@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits } from 'vue';
+import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 const emit = defineEmits(['switchModular']);
 

@@ -306,7 +306,7 @@
                     <img
                         @mouseenter="wrapper = true"
                         @mouseleave="wrapper = false"
-                        :src="booksData.data.imgSrc"
+                        :src="booksData.data.imgSrc === '' ? defaultCover : booksData.data.imgSrc"
                         @click="replaceCover"
                         title="建议长宽比例4:3"
                     />
@@ -628,6 +628,8 @@ import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { v4 } from 'uuid';
+import defaultCover from '../../public/static/img/default-cover.jpg';
+
 const { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
 const $message = proxy.$message;

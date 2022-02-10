@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, defineExpose, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import getStyle from '../utils/getStyle';
 import { throttle } from '../utils/flowControl';
 import hexToRgba from '../utils/hexToRgba';

@@ -1,24 +1,30 @@
 const {
     app,
-    // protocol,
+    protocol,
     BrowserWindow,
     session,
-    Menu,
+    // Menu,
     ipcMain,
     // dialog
 } = require('electron');
 const path = require('path');
-// const fs = require('fs');
-// const log = require('electron-log'); // 日志输出模块 
 const fontList = require('./nodelib/getFontList');
 const b64toFile = require('./nodelib/b64toFile');
 const deleteFolder = require('./nodelib/deleteFolder');
-const isDevelopment = process.env.NODE_ENV !== 'production';
-// const NODE_ENV = process.env.NODE_ENV;
-// 取消顶部默认菜单栏（开发状态开启）
-isDevelopment ? null : Menu.setApplicationMenu(null);
 
-// 创建主窗口
+const createProtocol = require('./nodelib/createProtocol');
+
+const NODE_ENV = process.env.NODE_ENV
+
+// 自定义协议到系统协议中
+protocol.registerSchemesAsPrivileged([{
+    scheme: 'app',
+    privileges: {
+        secure: true,
+        standard: true
+    }
+}]);
+
 let win;
 async function createWindow() {
     // 创建浏览器窗口
@@ -28,49 +34,57 @@ async function createWindow() {
         minWidth: 1150,
         minHeight: 700,
         frame: false, //实现头部的隐藏
-        // transparent: true,
-        // backgroundColor: '#00000000',
         webPreferences: {
-            nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-            contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
-            preload: path.join(__dirname, '/preload.js')
+            preload: path.join(__dirname, 'preload.js')
         }
     })
-    console.log(process.env.ELECTRON_NODE_INTEGRATION);
-    // 加载 index.html
-    await win.loadURL(
-        isDevelopment ?
-            'http://localhost:3000' :
-            `file://${path.join(__dirname, '../dist/index.html')}`
-    );
-    // 打开开发工具
-    if (isDevelopment) {
+    // win.loadURL(
+    //     NODE_ENV === 'development'
+    //         ? 'http://localhost:3000'
+    //         : `file://${path.join(__dirname, '../dist/index.html')}`
+    // );
+    if (NODE_ENV === 'development') {
+        // 如果处于开发模式，则加载开发时服务的url
+        await win.loadURL('http://localhost:3000');
         win.webContents.openDevTools();
+    } else {
+        // createProtocol('app');
+        // 不在开发模式时加载 index.html
+        win.loadURL(`file://${path.join(__dirname, '../dist/index.html')}`);
     }
+    // // 打开开发工具
+    // if (NODE_ENV === "development") {
+    //     win.webContents.openDevTools()
+    // }
 
 }
 
-// 这段程序将会在 Electron 结束初始化
-// 和创建浏览器窗口的时候调用
-// 部分 API 在 ready 事件触发后才能使用。
-app.on('ready', () => {
-    if (isDevelopment) {
-        // vue开发者工具扩展(插件)
-        session.defaultSession.loadExtension('C:/Users/Administrator/AppData/Local/Google/Chrome/User Data/Default/Extensions/ljjemllljcmogpfapbkkighbhhppjdbg/6.0.0.21_0');
-    }
-    createWindow();
+app.whenReady().then(() => {
+    createWindow()
+
+    app.on('activate', function () {
+        // 通常在 macOS 上，当点击 dock 中的应用程序图标时，如果没有其他
+        // 打开的窗口，那么程序会重新创建一个窗口。
+        if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    })
 })
 
-app.on('activate', () => {
-    // 通常在 macOS 上,当点击 dock 中的应用程序图标时,如果没有其他
-    // 打开的窗口,那么程序会重新创建一个窗口。
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-})
-
+// 除了 macOS 外，当所有窗口都被关闭的时候退出程序。 因此，通常对程序和它们在
+// 任务栏上的图标来说，应当保持活跃状态，直到用户使用 Cmd + Q 退出。
 app.on('window-all-closed', function () {
-    // 在macOS上,应用程序及其菜单栏通常保持活动状态,直到用户使用Cmd+Q明确退出
-    if (process.platform !== 'darwin') app.quit();
+    if (process.platform !== 'darwin') app.quit()
 })
+
+
+// 当Electron完成初始化并准备创建浏览器窗口时，将调用此方法
+// 某些API只能在此事件发生后使用
+// app.on('ready', () => {
+//     if (NODE_ENV === 'development') {
+//         // vue开发者工具扩展(插件)
+//         session.defaultSession.loadExtension('C:/Users/Administrator/AppData/Local/Google/Chrome/User Data/Default/Extensions/ljjemllljcmogpfapbkkighbhhppjdbg/6.0.0.21_0');
+//     }
+//     createWindow();
+// })
 
 ipcMain.on('count-fonts-item', function (e) {
     // 获取系统的字体列表
@@ -84,7 +98,7 @@ ipcMain.on('count-fonts-item', function (e) {
         })
 });
 
-// 实现自定义标题栏,最小化,最大化,关闭
+// 实现自定义标题栏，最小化，最大化，关闭
 ipcMain.on('window-min', () =>
     win.minimize()
 );
@@ -112,16 +126,16 @@ ipcMain.on('deleteFolder', (e, path) => {
 })
 
 // 在开发模式下根据父进程的请求干净退出
-if (isDevelopment) {
-    if (process.platform === 'win32') {
-        process.on('message', (data) => {
-            if (data === 'graceful-exit') {
-                app.quit();
-            }
-        })
-    } else {
-        process.on('SIGTERM', () => {
-            app.quit();
-        })
-    }
-}
+// if (NODE_ENV === 'development') {
+//     if (process.platform === 'win32') {
+//         process.on('message', (data) => {
+//             if (data === 'graceful-exit') {
+//                 app.quit();
+//             }
+//         })
+//     } else {
+//         process.on('SIGTERM', () => {
+//             app.quit();
+//         })
+//     }
+// }

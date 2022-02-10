@@ -17,7 +17,10 @@
                         @change="_replaceCover(5 / 7)"
                         style="display: none;"
                     />
-                    <img @click="replaceCover(1)" :src="form.keyword.cardImg" />
+                    <img
+                        @click="replaceCover(1)"
+                        :src="form.keyword.cardImg === '' ? defaultImg : form.keyword.cardImg"
+                    />
                     <h3>点击更换主题图片</h3>
                 </div>
                 <div class="detail-right">
@@ -125,7 +128,7 @@
                         />
                         <img
                             @click="replaceCover(2)"
-                            :src="currentListData.data.itemImg"
+                            :src="currentListData.data.itemImg === '' ? defaultImg : currentListData.data.itemImg"
                             title="点击修改"
                         />
                         <div class="right-top-right">
@@ -555,7 +558,7 @@
                 class="card-delete"
                 :style="{ fontSize: '32px' }"
             />
-            <img :src="item.cardImg" class="card__image" />
+            <img :src="item.cardImg === '' ? defaultImg : item.cardImg" class="card__image" />
             <div class="card__overlay">
                 <div class="card__header">
                     <svg class="card__arc" xmlns="http://www.w3.org/2000/svg">
@@ -589,8 +592,9 @@ import 'cropperjs/dist/cropper.css';
 import * as echarts from 'echarts';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { v4 } from 'uuid';
-const { proxy } = useCurrentInstance();
+import defaultImg from '../../public/static/img/default.png';
 
+const { proxy } = useCurrentInstance();
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
 const $modal = proxy.$modal;
@@ -620,7 +624,7 @@ const form = reactive({
     keyword: {
         title: '',
         desc: '',
-        cardImg: '/static/img/default.png'
+        cardImg: ''
     },
     template: {
         title: '',
@@ -639,7 +643,7 @@ const choiceEdit = (id?: string, isnew?: boolean) => {
         form.keyword = {
             title: '',
             desc: '',
-            cardImg: '/static/img/default.png'
+            cardImg: ''
         };
         isCardEdit.value = true;
     } else {

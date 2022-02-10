@@ -22,7 +22,7 @@
      height: 205px;
      background-color: red;
      margin: 30px 40px;
-     background: url('/static/img/book-border.png') no-repeat;
+     background: url('../../public//static//img/book-border.png') no-repeat;
      background-size: 100% 100%;
  }
 
@@ -85,7 +85,7 @@
      margin-top: 14px;
      width: 150px;
      height: 16px;
-     background: url('/static/img/book-shadow.png') no-repeat;
+     background: url('../../public//static//img/book-shadow.png') no-repeat;
      background-size: 100% 70%;
  }
 

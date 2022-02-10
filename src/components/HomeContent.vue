@@ -72,7 +72,12 @@
                                     <icon-check style="color: #fff;font-size: 18px;" />
                                 </div>
                             </div>
-                            <img class="img" :src="item.imgSrc" :alt="item.title" title="右键查看更多" />
+                            <img
+                                class="img"
+                                :src="item.imgSrc === '' ? defaultCover : item.imgSrc"
+                                :alt="item.title"
+                                title="右键查看更多"
+                            />
                             <div class="title">{{ item.title }}</div>
                         </div>
                     </div>
@@ -110,7 +115,11 @@
                         :style="{ display: 'block' }"
                     >
                         <div class="li">
-                            <img @click="routerLink(item.id as number)" :src="item.imgSrc" alt="封面" />
+                            <img
+                                @click="routerLink(item.id as number)"
+                                :src="item.imgSrc === '' ? defaultCover : item.imgSrc"
+                                alt="封面"
+                            />
                             <div @click="routerLink(item.id as number)" class="sub">
                                 <p>
                                     <span>{{ item.title }}</span>
@@ -149,6 +158,7 @@ import { db } from "../db/db";
 import { useRouter } from 'vue-router';
 import timeFormat from "../utils/timeFormat";
 import useCurrentInstance from '../utils/useCurrentInstance';
+import defaultCover from '../../public/static/img/default-cover.jpg';
 
 const { proxy } = useCurrentInstance();
 
