@@ -1,0 +1,63 @@
+ .recycle-content {
+     box-sizing: border-box;
+     position: relative;
+     float: right;
+     width: calc(100vw - 250px);
+     height: calc(100vh - 75px);
+     margin-top: 35px;
+     border-radius: 4px 0 0 0;
+     background-color: #fff;
+ }
+
+ .discard-item {
+     width: 100%;
+     height: calc(100vh - 180px);
+     overflow-y: scroll;
+ }
+
+ .card {
+     float: left;
+     display: flex;
+     align-items: center;
+     justify-content: space-around;
+     width: 200px;
+     height: 60px;
+     margin: 10px 20px;
+     border: 1px solid #e5e6eb;
+     border-radius: 4px;
+ }
+
+ .card:hover {
+     box-shadow: 0 4px 10px #0000001a;
+     transform: box-shadow 0.3s cubic-bezier(0, 0, 1, 1);
+ }
+
+ .card span {
+     display: block;
+     width: 100px;
+     display: -webkit-box;
+     -webkit-box-orient: vertical;
+     -webkit-line-clamp: 1;
+     overflow: hidden;
+ }
+
+ .card-checked {
+     /* position: relative; */
+     border: 1px solid #f54040;
+ }
+
+ .btn-unchecked {
+     width: 18px;
+     height: 18px;
+     border-radius: 50%;
+     background-color: #f2f3f5;
+     border: 2px solid #e5e6eb;
+ }
+
+ .btn-checked {
+     width: 18px;
+     height: 18px;
+     border-radius: 50%;
+     background-color: #f53f3f;
+     border: 2px solid #f53f3f;
+ }

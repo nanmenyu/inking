@@ -1,0 +1,41 @@
+body {
+    background-color: #fff;
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #e5e6eb;
+    border-radius: 5px;
+}
+
+/* 组件库微调 */
+.arco-modal {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.arco-layout-sider-children {
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.arco-menu-inner {
+    overflow: hidden;
+}
+
+.arco-menu-vertical .arco-menu-item, .arco-menu-vertical .arco-menu-group-title, .arco-menu-vertical .arco-menu-pop-header, .arco-menu-vertical .arco-menu-inline-header {
+    margin-bottom: 0;
+}
+
+/* 拾色器样式重置（BUG */
+.vc-hue-slider__bar {
+    background: -webkit-linear-gradient(left, red 0%, yellow 16.66%, lime 33.33%, aqua 50%, blue 66.66%, fuchsia 83.33%, red 100%);
+}
