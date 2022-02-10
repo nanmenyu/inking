@@ -7,7 +7,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 module.exports = (b64, _path, fname, cb) => {
     let exePath;
     if (isDevelopment) {
-        exePath = __dirname + _path;
+        exePath = _path;
     } else {
         exePath = path.dirname(app.getPath('exe')) + _path;
     }

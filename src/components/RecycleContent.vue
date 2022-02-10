@@ -13,7 +13,7 @@
         <a-empty
             v-if="!booksData.data.length"
             style="margin-top: 100px;"
-            description="暂无数据，回收站的数据将会保留30天"
+            description="暂无数据,回收站的数据将会保留30天"
         >
             <template #image>
                 <svg
@@ -210,7 +210,7 @@ const choiceItem = (i: number) => {
 const getDeleteAll = () => {
     $modal.warning({
         title: "全部删除",
-        content: "将全部清空并彻底删除回收站内的文件，该过程将不可逆",
+        content: "将全部清空并彻底删除回收站内的文件,该过程将不可逆",
         simple: true,
         onOk: () => {
             db.opus.bulkDelete(booksData.data.map(item => {
@@ -219,7 +219,7 @@ const getDeleteAll = () => {
                 .then(() => {
                     booksData.data.forEach(item => {
                         // 将该作品的文件夹一并清除
-                        const path = '/workspace/opus/' + item.id + item.title;
+                        const path = 'workspace/opus/' + item.id + item.title;
                         window.$API.ipcSend('deleteFolder', path);
                     })
                     loadData();
@@ -236,7 +236,7 @@ const getDeleteSelect = () => {
     });
     $modal.warning({
         title: "删除选中",
-        content: "将目标清空并彻底删除，该过程将不可逆",
+        content: "将目标清空并彻底删除, 该过程将不可逆",
         simple: true,
         onOk: () => {
             db.opus.bulkDelete(tarArr.map(item => {
@@ -244,7 +244,7 @@ const getDeleteSelect = () => {
             })).then(() => {
                 tarArr.forEach(item => {
                     // 将该作品的文件夹一并清除
-                    const path = '/workspace/opus/' + item.id + item.title;
+                    const path = 'workspace/opus/' + item.id + item.title;
                     window.$API.ipcSend('deleteFolder', path);
                 })
                 loadData();

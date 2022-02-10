@@ -54,7 +54,7 @@
             <a-empty
                 v-if="!booksData.data.length"
                 style="margin-top: 100px;"
-                description="暂无数据，左上角添加"
+                description="暂无数据,左上角添加"
             />
             <div v-for="(item, i) in booksData.data" :key="item.id" class="cover-block">
                 <a-dropdown
@@ -93,7 +93,7 @@
             <a-empty
                 v-if="!booksData.data.length"
                 style="margin-top: 100px;"
-                description="暂无数据，左上角添加"
+                description="暂无数据,左上角添加"
             />
             <ul class="list">
                 <div
@@ -189,7 +189,7 @@ function loadData() {
             if (localStorage.getItem('isReverse') === 'true') {
                 getReverse();
             }
-            // 按顺序排序(必须剔除type1的情况，不然会死循环调用)
+            // 按顺序排序(必须剔除type1的情况,不然会死循环调用)
             if (localStorage.getItem('sortType') !== '1') {
                 getSort(localStorage.getItem('sortType')!);
             }
@@ -243,7 +243,7 @@ const refresh = loadData;
 
 // 时间格式化计算属性
 const standTime = computed(() => (ts: number, mode?: boolean) => {
-    // 选择格式，是否裁切后半部分的准确时间
+    // 选择格式,是否裁切后半部分的准确时间
     mode = mode || false;
     if (mode) {
         return timeFormat(ts).split(" ")[0];

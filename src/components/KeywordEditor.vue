@@ -761,7 +761,7 @@ const confirmKeywordGroup = () => {
                         }
                     );
                     // 获得保存图片的路径
-                    path = '/workspace/opus/' + item.id + '/keyword/' + kid;
+                    path = 'workspace/opus/' + item.id + '/keyword/' + kid;
                 })
                 .then(() => {
                     window.$API.ipcSend('saveBase64-toImg', { b64: form.keyword.cardImg, path: path, fname: 'kcover.jpeg' });
@@ -786,7 +786,7 @@ const confirmKeywordGroup = () => {
                         }
                     });
                     // 获得保存图片的路径
-                    path = '/workspace/opus/' + item.id + '/keyword/' + curKid;
+                    path = 'workspace/opus/' + item.id + '/keyword/' + curKid;
                 }).then(() => {
                     window.$API.ipcSend('saveBase64-toImg', { b64: form.keyword.cardImg, path: path, fname: 'kcover.jpeg' });
                     window.$API.ipcOnce('saveBase64-toImg-successful', () => {
@@ -1603,7 +1603,7 @@ const showChart = (value: string) => {
             nowUnit.value = rightListData.value[0]; // 选择当前的单位组
             maxValue.value = Math.max(...(maxValueObj[nowUnit.value] || [1]));
         }
-        // 切换组的情况下，另一组不存在前一组的单位时，将max置为1
+        // 切换组的情况下,另一组不存在前一组的单位时,将max置为1
         if (!manualModify[nowUnit.value]) maxValue.value = Math.max(...(maxValueObj[nowUnit.value] || [1]));
         nextTick(() => {
             // 传递默认项
@@ -1631,7 +1631,7 @@ const inputMaxValue = (value: number) => {
     maxValue.value = value;
     setNumberChart(targetChartObj.data[nowUnit.value], nowUnit.value, maxValue.value);
 }
-// 监视Kid是否改变，判断是否有更换组的操作
+// 监视Kid是否改变,判断是否有更换组的操作
 watch(tempKid, () => {
     // 切换组就重置maxValue
     maxValue.value = Math.max(...(maxValueObj[nowUnit.value] || [1]));
@@ -1738,7 +1738,7 @@ function setNumberChart(targetData: Array<{ key: string, value: number }>, unit:
             indicator: indicatorData,
             axisName: {
                 formatter: function (params: string) {
-                    // 限制name的长度，多余部分用省略号代替
+                    // 限制name的长度,多余部分用省略号代替
                     return params.length > 10 ? params.slice(1, 10) + '...' : params;
                 },
                 color: '#165dff'

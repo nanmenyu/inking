@@ -107,7 +107,7 @@
             <a-layout-header>
                 <div class="head-item">
                     <!-- 全屏洁净模式 -->
-                    <a-tooltip content="全屏洁净模式(F1)">
+                    <a-tooltip background-color="#3491FA" mini content="全屏洁净模式(F1)">
                         <a-button class="headerBtn">
                             <icon-fullscreen />&nbsp;全屏
                         </a-button>
@@ -166,16 +166,13 @@
                                     </svg>&nbsp;&nbsp;字体大小
                                 </a-doption>
                                 <template #content>
-                                    <a-space
-                                        class="trigger"
-                                        style="margin-top: 10px; padding: 10px 20px;"
-                                    >
+                                    <a-space class="trigger" style="padding:0 10px;">
                                         <a-input-number
                                             v-model="fontSize"
                                             :min="1"
                                             :max="50"
                                             mode="button"
-                                            :style="{ width: '50px' }"
+                                            style="width:108px"
                                             @change="changeFontSize()"
                                         />
                                         <a-slider
@@ -187,7 +184,7 @@
                                             :format-tooltip="(value: number) => {
                                                 return `${value}px`;
                                             }"
-                                            :style="{ width: '280px', paddingTop: '10px' }"
+                                            :style="{ width: '280px', transform: 'translateY(4px)' }"
                                             @change="changeFontSize()"
                                         />
                                     </a-space>
@@ -1326,7 +1323,7 @@ const deletedCid = ref('');
 const deleteChapter = (dvid: string, dcid: string, cname: string) => {
     $modal.warning({
         title: "删除章",
-        content: `目标章《${cname}》将放入废纸篓，并保留30天`,
+        content: `目标章《${cname}》将放入废纸篓,并保留30天`,
         simple: true,
         onOk: () => {
             db.opus
@@ -1371,7 +1368,7 @@ const deleteChapter = (dvid: string, dcid: string, cname: string) => {
 const deleteVolume = (vid: string, vname: string) => {
     $modal.warning({
         title: "删除卷",
-        content: `目标卷【${vname}】将放入废纸篓，并保留30天`,
+        content: `目标卷【${vname}】将放入废纸篓,并保留30天`,
         simple: true,
         onOk: () => {
             db.opus

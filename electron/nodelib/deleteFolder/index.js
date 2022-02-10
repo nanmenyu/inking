@@ -16,7 +16,7 @@ module.exports = (_path) => {
         files = fs.readdirSync(exePath); //返回文件和子目录的数组
         files.forEach(file => {
             let curPath = path.join(exePath, file);
-            //fs.statSync同步读取文件夹文件，如果是文件夹，在重复触发函数
+            //fs.statSync同步读取文件夹文件,如果是文件夹,在重复触发函数
             if (fs.statSync(curPath).isDirectory()) { // recurse
                 deleteFolderRecursive(curPath);
             } else {
@@ -26,6 +26,6 @@ module.exports = (_path) => {
         // 清除文件夹
         fs.rmdirSync(exePath);
     } else {
-        console.log("给定的路径不存在，请给出正确的路径");
+        console.log("给定的路径不存在,请给出正确的路径");
     }
 }

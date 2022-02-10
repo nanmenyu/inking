@@ -727,7 +727,7 @@ const rotateIcon = (i: number | string) => {
 
 /*----时间格式化计算属性----*/
 const standTime = computed(() => (ts: number, mode?: boolean) => {
-    // 选择格式，是否裁切后半部分的准确时间
+    // 选择格式,是否裁切后半部分的准确时间
     mode = mode || false;
     if (mode) {
         return timeFormat(ts).split(' ')[0];
@@ -1457,7 +1457,7 @@ const addNewChapter = () => {
 const deleteVolume = (vid: string, vname: string) => {
     $modal.warning({
         title: "删除卷",
-        content: `目标卷【${vname}】将放入废纸篓，并保留30天`,
+        content: `目标卷【${vname}】将放入废纸篓, 并保留30天`,
         simple: true,
         onOk: () => {
             db.opus
@@ -1483,7 +1483,7 @@ const deleteVolume = (vid: string, vname: string) => {
 const deleteChapter = (vid: string, cid: string, cname: string) => {
     $modal.warning({
         title: "删除章",
-        content: `目标章《${cname}》将放入废纸篓，并保留30天`,
+        content: `目标章《${cname}》将放入废纸篓, 并保留30天`,
         simple: true,
         onOk: () => {
             db.opus
@@ -1724,7 +1724,7 @@ const saveImgData = () => {
         imageSmoothingQuality: 'high'
     }).toDataURL('image/jpeg'); // 设置图片格式
     // 设置图片本地保存的路径
-    const path = '/workspace/opus/' + booksData.data.id;
+    const path = 'workspace/opus/' + booksData.data.id;
     window.$API.ipcSend('saveBase64-toImg', { b64: base64Img, path: path, fname: 'cover.jpeg' });
     window.$API.ipcOnce('saveBase64-toImg-successful', () => {
         db.opus.update(query_id, { imgSrc: base64Img }).then(() => {
@@ -1766,7 +1766,7 @@ function loadData() {
                             if (it.discard) {
                                 wastepaperBasketData.push(it);
                             } else {
-                                wordNum += it.chapterNum!;
+                                wordNum += it.chapterNum || 0;
                                 num++;
                             }
                             return !it.discard;

@@ -77,7 +77,7 @@ if (route.query.category === 'opus') {
                 // 生成对应数量的圆环坐标
                 let tempCount = 0;
                 for (let i in categorieCount) {
-                    // 坐标只是确定相对位置，并非屏幕上的准确位置
+                    // 坐标只是确定相对位置,并非屏幕上的准确位置
                     // ( n%3,-1*paseInt(n/3)) 生成3*n网格偏移布局
                     // console.log((tempCount % 3) * 100, parseInt(tempCount / 3) * 100);
                     categorieCoord[i] = generateCirculCoord((tempCount % 3) * 120, Math.floor(tempCount / 3) * 120, 50, categorieCount[i]);

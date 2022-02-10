@@ -12,7 +12,7 @@ db.version(1).stores({
 });
 ```
 
-**注意：不要像在 SQL 中那样声明所有列。您只声明要索引的属性，即要在 where(...) 查询中使用的属性。**
+**注意：不要像在 SQL 中那样声明所有列。您只声明要索引的属性,即要在 where(...) 查询中使用的属性。**
 
 #### 模式语法
 
@@ -83,7 +83,7 @@ db.version(2).stores({
 
 // 不覆盖更新-主键为8的name数据
  db.friends.update(8, {name: "Bar"});
-// 查询条件'age',inAnyRange设置年龄区间，按条件查询，为他们添加项目discount: 0.5
+// 查询条件'age',inAnyRange设置年龄区间,按条件查询,为他们添加项目discount: 0.5
  db.friends
     .where("age")
     .inAnyRange([ [0, 18], [65, Infinity] ])

@@ -47,10 +47,12 @@
                 style="margin-right: 2px;"
             >云同步</a-button>
             <a-dropdown>
-                <a-button type="primary" title="导入 | 新建">
-                    <template #icon>
-                        <icon-plus style="font-size: 18px;" />
-                    </template>
+                <a-button
+                    type="primary"
+                    style="padding: 5px;transform: translateY(1px);"
+                    title="导入 | 新建"
+                >
+                    <icon-plus :style="{ fontSize: '18px' }" />
                 </a-button>
                 <template #content>
                     <a-doption @click="addto">
@@ -125,19 +127,14 @@
                 mini
             >
                 <a-button
+                    v-if="displyBlock"
                     :disabled="disableSwitch"
-                    v-show="displyBlock"
                     @click="swDisplay"
                     type="text"
                 >
                     <icon-apps />
                 </a-button>
-                <a-button
-                    :disabled="disableSwitch"
-                    v-show="!displyBlock"
-                    @click="swDisplay"
-                    type="text"
-                >
+                <a-button v-else :disabled="disableSwitch" @click="swDisplay" type="text">
                     <icon-unordered-list />
                 </a-button>
             </a-tooltip>
@@ -157,8 +154,8 @@
     </div>
 </template>
 
-<script  setup lang="ts">
-import { ref, computed, getCurrentInstance, defineEmits } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 import {
     IconClose,
     IconPlus,
@@ -201,8 +198,8 @@ if (route.path === '/') {
 }
 
 // 是否以作品封面的方式显示
-const displyBlock = ref(true),
-    getDisplyBlock = localStorage.getItem('displyBlock');
+const displyBlock = ref(true);
+const getDisplyBlock = localStorage.getItem('displyBlock');
 if (getDisplyBlock === null) {
     localStorage.setItem('displyBlock', 'true');
 } else {
@@ -212,9 +209,10 @@ if (getDisplyBlock === null) {
 //切换显示样式(封面/列表)
 const swDisplay = () => {
     displyBlock.value = !displyBlock.value;
+    console.log(displyBlock.value);
     // 将该值通过'onBack'事件传予父组件
     emit('onBack', displyBlock.value);
-    localStorage.setItem("displyBlock", displyBlock.value.toString());
+    localStorage.setItem('displyBlock', displyBlock.value.toString());
 }
 
 /*----新建|导入功能----*/
@@ -334,6 +332,7 @@ const toSort = (type: string) => {
 
 .bar-left {
     position: absolute;
+    align-items: center;
     top: 0px;
     left: 28px;
     line-height: 80px;

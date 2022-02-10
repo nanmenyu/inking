@@ -28,7 +28,7 @@ export class MySubClassedDexie extends Dexie {
         super('uDatabase');
         this.version(1).stores({
             // 作品集
-            opus: '++id, author, title',
+            opus: '++id, author, title, discard',
             // 笔记集
             note: '++id, author, title',
             // markdown
