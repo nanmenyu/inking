@@ -8,9 +8,7 @@ declare module '*.vue' {
 }
 declare module '*.ts';
 declare module '*.js';
-declare module 'file-saver';
 declare module 'uuid';
-// declare module 'html-docx-js/dist/html-docx';
 
 declare interface Window {
   $API: any

@@ -14,16 +14,28 @@ import { throttle } from '../utils/flowControl';
 import hexToRgba from '../utils/hexToRgba';
 import pureTextEditor from '../common/pEditor/index.js';
 import { db } from '../db/db';
-import html2pdf from 'html2pdf.js';
+import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
 import { useRoute } from 'vue-router';
-import { saveAs } from 'file-saver';
-// import htmlDocx from 'html-docx-js/dist/html-docx';
 import useCurrentInstance from '../utils/useCurrentInstance';
 
-/*----初始化----*/
 const emit = defineEmits(['todata']), { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
+
+// 修改键盘控制
+onMounted(() => {
+    editor.value.addEventListener('keydown', insertSpace);
+    editor.value.addEventListener('keyup', () => {
+        paraFocus.value === 'open' ?
+            ParagraphFocus() :
+            currentColor.value = focusColor;
+    });
+    editor.value.addEventListener('click', () => {
+        paraFocus.value === 'open' ?
+            ParagraphFocus() :
+            currentColor.value = focusColor;
+    });
+})
 
 // 纸张的宽度 = 内容区 + 40px的左右边距
 const paperSize: { [key: string]: number } = {
@@ -63,7 +75,7 @@ const getData = () => {
         wordCount: chapterNumber,
         charCount: editor.value.innerText.replaceAll('\n', '').length, // 字符数（不包含换行）
         paragraphs: editor.value.children[0].children[0].children.length // 段落数
-    }
+    };
     // 适应纸张高度
     adaHeight();
     // 节流
@@ -96,40 +108,45 @@ const saveDocData = () => {
         dataArr.push(editorData[i].innerText);
     }
     // 直接修改
-    db.opus
-        .where(':id')
-        .equals(query_id)
-        .modify(value => {
-            for (let i = 0; i < value.data.length; i++) {
-                if (value.data[i].vid === vid) {
-                    for (let j = 0; j < value.data[i].volume.length; j++) {
-                        if (value.data[i].volume[j].cid === cid) {
-                            value.data[i].volume[j].chapter = dataArr;
-                            value.data[i].volume[j].chapterNum = chapterNumber;
-                            value.data[i].volume[j].updateTime = new Date().getTime();
-                            value.updateTime = new Date().getTime();// 更新修改时间;
-                            break;
-                        }
+    db.opus.where(':id').equals(query_id).modify(value => {
+        for (let i = 0; i < value.data.length; i++) {
+            if (value.data[i].vid === vid) {
+                for (let j = 0; j < value.data[i].volume.length; j++) {
+                    if (value.data[i].volume[j].cid === cid) {
+                        value.data[i].volume[j].chapter = dataArr;
+                        value.data[i].volume[j].chapterNum = chapterNumber;
+                        value.data[i].volume[j].updateTime = new Date().getTime();
+                        value.updateTime = new Date().getTime();// 更新修改时间;
+                        break;
                     }
-                    break;
                 }
+                break;
             }
-        }).then(() => {
-            $message.success('保存成功');
-        })
+        }
+    }).then(() => {
+        $message.success('保存成功');
+    })
 }
 
 /*----另存为文件----*/
-let currentChapter = '未命名章', paperType, converted;
+let currentChapter = '未命名章', paperType;
 const pBox = ref();
 const expFile = (type: string) => {
     switch (type) {
         case 'txt':
-            saveAs(new Blob([editor.value.innerText], { type: 'text/plain;charset=utf-8' }), currentChapter + '.txt');
+            window.$API.ipcSend('expFile', {
+                type: 'TXT',
+                name: currentChapter,
+                file: editor.value.innerText
+            });
             break;
         case 'docx':
-            // converted = htmlDocx.asBlob('<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>' + pBox.value.outerHTML + '</body></html>');
-            // saveAs(converted, currentChapter + '.docx');
+            const htmlString = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>' + pBox.value.outerHTML + '</body></html>';
+            window.$API.ipcSend('expFile', {
+                type: 'DOCX',
+                name: currentChapter,
+                file: htmlString
+            });
             break;
         case 'pdf':
             paperType = JSON.parse((localStorage.getItem('uWritingOption') as string)).uPaperSize;
@@ -151,6 +168,7 @@ const expFile = (type: string) => {
 
 // 导出为PDF
 function exportPDF() {
+    console.log(html2pdf);
     // 单章17k字左右的极限~~~15K
     // 输出配置项 见：https://ekoopmans.github.io/html2pdf.js/
     html2pdf().set({
@@ -274,21 +292,6 @@ const refreshPaper = (toDisplay: Array<object>) => {
     mEditor.value.firstElementChild.setAttribute('spellcheck', 'false');
 }
 
-// 修改键盘控制
-onMounted(() => {
-    editor.value.addEventListener('keydown', insertSpace);
-    editor.value.addEventListener('keyup', () => {
-        paraFocus.value === 'open' ?
-            ParagraphFocus() :
-            currentColor.value = focusColor;
-    });
-    editor.value.addEventListener('click', () => {
-        paraFocus.value === 'open' ?
-            ParagraphFocus() :
-            currentColor.value = focusColor;
-    });
-})
-
 // TAB键插入两个中文空格
 function insertSpace(e: KeyboardEvent) {
     const selection = window.getSelection(),
@@ -331,6 +334,8 @@ function ParagraphFocus() {
     }
 }
 
+
+
 // 移动光标到指定位置
 function moveCursor(selection: Selection, range: Range, startNode: Node, startOffset: number) {
     range.setStart(startNode, startOffset);
@@ -338,7 +343,6 @@ function moveCursor(selection: Selection, range: Range, startNode: Node, startOf
     selection.removeAllRanges();
     selection.addRange(range);
 }
-
 
 defineExpose({
     saveDocData, expFile, setFont, setFontSize, setLineHeight, setFontWeight, setColor, setSegSpacing, setTextIndent, setBgcColor, setPaperSize, setParaFocus, setBooksData, refreshPaper, setId

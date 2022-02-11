@@ -24,6 +24,7 @@
      margin: 30px 40px;
      background: url('../../public//static//img/book-border.png') no-repeat;
      background-size: 100% 100%;
+     cursor: pointer;
  }
 
  .cover {

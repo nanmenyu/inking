@@ -211,17 +211,14 @@
                                     </svg>&nbsp;&nbsp;字符行高
                                 </a-doption>
                                 <template #content>
-                                    <a-space
-                                        class="trigger"
-                                        style="margin-top: 10px; padding: 10px 20px;"
-                                    >
+                                    <a-space class="trigger" style="padding:0 10px;">
                                         <a-input-number
                                             v-model="lineHeight"
                                             :step="0.05"
                                             :min="0"
                                             :max="5"
                                             mode="button"
-                                            :style="{ width: '60px' }"
+                                            :style="{ width: '108px' }"
                                             @change="changeLineHeight()"
                                         />
                                         <a-slider
@@ -233,7 +230,7 @@
                                             :format-tooltip="(value: number) => {
                                                 return `${value}em`;
                                             }"
-                                            :style="{ width: '270px', paddingTop: '10px' }"
+                                            :style="{ width: '280px', transform: 'translateY(4px)' }"
                                             @change="changeLineHeight()"
                                         />
                                     </a-space>
@@ -269,6 +266,7 @@
                                         <a-radio-group
                                             v-model="fontWeight"
                                             @change="changeFontWeight"
+                                            direction="vertical"
                                         >
                                             <a-radio value="lighter">lighter</a-radio>
                                             <a-radio value="normal">normal</a-radio>
@@ -414,16 +412,13 @@
                                     </svg>&nbsp;&nbsp;段落间距
                                 </a-doption>
                                 <template #content>
-                                    <a-space
-                                        class="trigger"
-                                        style="margin-top: 10px; padding: 10px 20px;"
-                                    >
+                                    <a-space class="trigger" style="padding: 0 10px;">
                                         <a-input-number
                                             v-model="segSpacing"
                                             :min="0"
                                             :max="100"
                                             mode="button"
-                                            :style="{ width: '50px' }"
+                                            :style="{ width: '108px' }"
                                             @change="changeSegSpacing()"
                                         />
                                         <a-slider
@@ -434,7 +429,7 @@
                                             :format-tooltip="(value: number) => {
                                                 return `${value}px`;
                                             }"
-                                            :style="{ width: '280px', paddingTop: '10px' }"
+                                            :style="{ width: '280px', transform: 'translateY(4px)' }"
                                             @change="changeSegSpacing()"
                                         />
                                     </a-space>
@@ -1002,12 +997,35 @@ import { v4 } from 'uuid';
 const { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
-
-const route = useRoute(),
-    query_id = parseInt(<string>route.query.id),
-    vid = ref(route.query.vid),
-    cid = ref(route.query.cid);
+const route = useRoute();
+const query_id = parseInt(<string>route.query.id);
+const vid = ref(route.query.vid);
+const cid = ref(route.query.cid);
 loadListData();
+
+onMounted(() => {
+    nextTick(() => {
+        myRef.value.setFont(uWritingOption.value.uFont, true);
+        myRef.value.setFontSize(uWritingOption.value.uFontSize, true);
+        myRef.value.setLineHeight(uWritingOption.value.uLineHeight, true);
+        myRef.value.setFontWeight(uWritingOption.value.uFontWeight, true);
+        myRef.value.setSegSpacing(uWritingOption.value.uSpacing, true);
+        myRef.value.setTextIndent(uWritingOption.value.uTextIndent, true);
+        myRef.value.setColor(uWritingOption.value.uColor, true);
+        myRef.value.setBgcColor(uWritingOption.value.uBgcColor, true);
+        myRef.value.setPaperSize(uWritingOption.value.uPaperSize, true);
+        myRef.value.setParaFocus(uWritingOption.value.uParaFocus, true);
+    })
+})
+onBeforeUnmount(() => {
+    setScrollTop(<string>vid.value, <string>cid.value);
+    db.opus.update(query_id, { historRecord: { vid: vid.value, cid: cid.value } });
+})
+
+onUnmounted(() => {
+    window.removeEventListener('keydown', shortcut);
+    window.removeEventListener('click', leftMoreControl);
+})
 
 /*----数据统计与初始化----*/
 const wordCount = ref(0),
@@ -1038,29 +1056,6 @@ const getScrollTop = (e: Event) => {
     temp_scrollTop = (<HTMLElement>e.target).scrollTop;
 }
 
-onBeforeUnmount(() => {
-    setScrollTop(<string>vid.value, <string>cid.value);
-    db.opus.update(query_id, { historRecord: { vid: vid.value, cid: cid.value } });
-})
-
-function setScrollTop(tvid: string, tcid: string) {
-    db.opus
-        .where(':id')
-        .equals(query_id)
-        .modify(item => {
-            for (let i = 0; i < item.data.length; i++) {
-                if (item.data[i].vid === tvid) {
-                    for (let j = 0; j < item.data[i].volume.length; j++) {
-                        if (item.data[i].volume[j].cid === tcid) {
-                            item.data[i].volume[j].scrollTop = temp_scrollTop;
-                            break;
-                        }
-                    }
-                    break;
-                }
-            }
-        })
-}
 // 读取本地用户缓存设置(localStorage缓存状态)
 const uWritingOption = ref({
     uFontSize: 22,
@@ -1230,41 +1225,35 @@ const onClickMenuItem = (tvid: string, tcid: string) => {
         cid.value = tcid;
         myRef.value.setId(tvid, tcid);
         const toDisplay: Array<object> = [];
-        db.opus.get(query_id)
-            .then(value => {
-                if (value) {
-                    for (let i = 0; i < value.data.length; i++) {
-                        if (value.data[i].vid === tvid) {
-                            for (let j = 0; j < value.data[i].volume.length; j++) {
-                                if (value.data[i].volume[j].cid === tcid) {
-                                    value.data[i].volume[j].chapter.forEach((item: string) => {
-                                        toDisplay.push({
-                                            type: "paragraph",
-                                            content: [
-                                                {
-                                                    type: "text",
-                                                    text: item
-                                                }
-                                            ]
-                                        });
+
+        db.opus.get(query_id).then(value => {
+            if (value) {
+                for (let i = 0; i < value.data.length; i++) {
+                    if (value.data[i].vid === tvid) {
+                        for (let j = 0; j < value.data[i].volume.length; j++) {
+                            if (value.data[i].volume[j].cid === tcid) {
+                                value.data[i].volume[j].chapter.forEach((item: string) => {
+                                    toDisplay.push({
+                                        type: "paragraph",
+                                        content: [
+                                            {
+                                                type: "text",
+                                                text: item
+                                            }
+                                        ]
                                     });
-                                    break;
-                                }
+                                });
+                                break;
                             }
-                            break;
                         }
+                        break;
                     }
                 }
-                loadListData();
-                myRef.value.refreshPaper(toDisplay);
-            })
+            }
+            loadListData();
+            myRef.value.refreshPaper(toDisplay);
+        })
     }
-}
-
-const modify = () => {
-    isRename.value = false;
-    isNewVolume.value = false;
-    isNewChapter.value = false;
 }
 
 // 左栏展开更多操作
@@ -1282,39 +1271,33 @@ const showReName = (type: string, id: string, vname: string) => {
 const reName = () => {
     // 修改卷
     if (reType === 'v') {
-        db.opus
-            .where(':id')
-            .equals(query_id)
-            .modify(item => {
-                for (let i = 0; i < item.data.length; i++) {
-                    if (item.data[i].vid === temp_id) {
-                        item.data[i].volumeName = showName.value;
-                        break;
-                    }
+        db.opus.where(':id').equals(query_id).modify(item => {
+            for (let i = 0; i < item.data.length; i++) {
+                if (item.data[i].vid === temp_id) {
+                    item.data[i].volumeName = showName.value;
+                    break;
                 }
-            }).then(() => {
-                isRename.value = false;
-                loadListData();
-            })
+            }
+        }).then(() => {
+            isRename.value = false;
+            loadListData();
+        })
     }
     // 修改章
     else if (reType === 'c') {
-        db.opus
-            .where(':id')
-            .equals(query_id)
-            .modify(item => {
-                for (let i = 0; i < item.data.length; i++) {
-                    for (let j = 0; j < item.data[i].volume.length; j++) {
-                        if (item.data[i].volume[j].cid === temp_id) {
-                            item.data[i].volume[j].chapterName = showName.value;
-                            break;
-                        }
+        db.opus.where(':id').equals(query_id).modify(item => {
+            for (let i = 0; i < item.data.length; i++) {
+                for (let j = 0; j < item.data[i].volume.length; j++) {
+                    if (item.data[i].volume[j].cid === temp_id) {
+                        item.data[i].volume[j].chapterName = showName.value;
+                        break;
                     }
                 }
-            }).then(() => {
-                isRename.value = false;
-                loadListData();
-            })
+            }
+        }).then(() => {
+            isRename.value = false;
+            loadListData();
+        })
     }
 }
 
@@ -1326,40 +1309,37 @@ const deleteChapter = (dvid: string, dcid: string, cname: string) => {
         content: `目标章《${cname}》将放入废纸篓,并保留30天`,
         simple: true,
         onOk: () => {
-            db.opus
-                .where(':id')
-                .equals(query_id)
-                .modify(item => {
-                    for (let i = 0; i < item.data.length; i++) {
-                        if (item.data[i].vid === dvid) {
-                            for (let j = 0; j < item.data[i].volume.length; j++) {
-                                if (item.data[i].volume[j].cid === dcid) {
-                                    item.data[i].volume[j].discard = true;
-                                    item.data[i].volume[j].discardTime = new Date().getTime();
-                                    break;
-                                }
+            db.opus.where(':id').equals(query_id).modify(item => {
+                for (let i = 0; i < item.data.length; i++) {
+                    if (item.data[i].vid === dvid) {
+                        for (let j = 0; j < item.data[i].volume.length; j++) {
+                            if (item.data[i].volume[j].cid === dcid) {
+                                item.data[i].volume[j].discard = true;
+                                item.data[i].volume[j].discardTime = new Date().getTime();
+                                break;
                             }
-                            break;
                         }
+                        break;
                     }
-                }).then(() => {
-                    // 删除的目标是当前编辑的目标
-                    if (dvid === vid.value && dcid === cid.value) {
-                        deletedCid.value = dcid;
-                        myRef.value.refreshPaper([{
-                            type: "paragraph",
-                            content: [
-                                {
-                                    type: "text",
-                                    text: ''
-                                }
-                            ]
-                        }]);
-                    } else {
-                        loadListData();
-                    }
-                    $message.success('删除成功!');
-                })
+                }
+            }).then(() => {
+                // 删除的目标是当前编辑的目标
+                if (dvid === vid.value && dcid === cid.value) {
+                    deletedCid.value = dcid;
+                    myRef.value.refreshPaper([{
+                        type: "paragraph",
+                        content: [
+                            {
+                                type: "text",
+                                text: ''
+                            }
+                        ]
+                    }]);
+                } else {
+                    loadListData();
+                }
+                $message.success('删除成功!');
+            })
         }
     })
 }
@@ -1371,22 +1351,18 @@ const deleteVolume = (vid: string, vname: string) => {
         content: `目标卷【${vname}】将放入废纸篓,并保留30天`,
         simple: true,
         onOk: () => {
-            db.opus
-                .where(':id')
-                .equals(query_id)
-                .modify(item => {
-                    for (let i = 0; i < item.data.length; i++) {
-                        if (item.data[i].vid === vid) {
-                            item.data[i].discard = true;
-                            item.data[i].discardTime = new Date().getTime();
-                            break;
-                        }
+            db.opus.where(':id').equals(query_id).modify(item => {
+                for (let i = 0; i < item.data.length; i++) {
+                    if (item.data[i].vid === vid) {
+                        item.data[i].discard = true;
+                        item.data[i].discardTime = new Date().getTime();
+                        break;
                     }
-                })
-                .then(() => {
-                    loadListData();
-                    $message.success('删除成功!');
-                })
+                }
+            }).then(() => {
+                loadListData();
+                $message.success('删除成功!');
+            })
         }
     })
 }
@@ -1399,53 +1375,45 @@ const newChapter = (vid: string) => {
     isNewChapter.value = true;
 }
 const addNewChapter = () => {
-    db.opus
-        .where(':id')
-        .equals(query_id)
-        .modify(item => {
-            for (let i = 0; i < item.data.length; i++) {
-                if (item.data[i].vid === volumeId) {
-                    item.data[i].volume.push({
-                        cid: v4(),
-                        chapterName: chapterName.value,
-                        updateTime: new Date().getTime(),
-                        chapter: ['HELLO 用户1234']
-                    });
-                    break;
-                }
+    db.opus.where(':id').equals(query_id).modify(item => {
+        for (let i = 0; i < item.data.length; i++) {
+            if (item.data[i].vid === volumeId) {
+                item.data[i].volume.push({
+                    cid: v4(),
+                    chapterName: chapterName.value,
+                    updateTime: new Date().getTime(),
+                    chapter: ['HELLO 用户1234']
+                });
+                break;
             }
-        })
-        .then(() => {
-            isNewChapter.value = false;
-            loadListData();
-            $message.success('添加成功!');
-        })
+        }
+    }).then(() => {
+        isNewChapter.value = false;
+        loadListData();
+        $message.success('添加成功!');
+    })
 }
 
 // 点击添加卷
 const isNewVolume = ref(false), volumeName = ref('未命名卷');
 const addNewVolume = () => {
-    db.opus
-        .where(':id')
-        .equals(query_id)
-        .modify(item => {
-            item.data.push({
-                vid: v4(),
-                volumeName: volumeName.value,
+    db.opus.where(':id').equals(query_id).modify(item => {
+        item.data.push({
+            vid: v4(),
+            volumeName: volumeName.value,
+            updateTime: new Date().getTime(),
+            volume: [{
+                cid: v4(),
+                chapterName: '未命名章',
                 updateTime: new Date().getTime(),
-                volume: [{
-                    cid: v4(),
-                    chapterName: '未命名章',
-                    updateTime: new Date().getTime(),
-                    chapter: ['HELLO 用户1234']
-                }]
-            });
-        })
-        .then(() => {
-            isNewVolume.value = false;
-            loadListData();
-            $message.success('添加成功!');
-        })
+                chapter: ['HELLO 用户1234']
+            }]
+        });
+    }).then(() => {
+        isNewVolume.value = false;
+        loadListData();
+        $message.success('添加成功!');
+    })
 }
 
 /*----右侧滚动条的样式设置----*/
@@ -1457,91 +1425,89 @@ const closeScroll = () => {
     scrollbarColor.value = '#f5f5f5';
 }
 
-/*----自定义全局快捷键----*/
-//获取路由参数确定详情页显示的目标
-window.addEventListener('keydown', shortcut);
-function shortcut(e: KeyboardEvent) {
-    if (deletedCid.value === cid.value) {
-        // Ctrl+S
-        if (e.ctrlKey === true && e.key === 's') {
-            $message.error('目标已被删除!');
-        }
-    } else {
-        // Ctrl+S
-        if (e.ctrlKey === true && e.key === 's') {
-            myRef.value.saveDocData();
-        }
-    }
-
-}
-window.addEventListener('click', leftMoreControl)
-function leftMoreControl() {
-    showLeftMore.value = '';
+const modify = () => {
+    isRename.value = false;
+    isNewVolume.value = false;
+    isNewChapter.value = false;
 }
 
 // 获取列表数据
 const router = useRouter();
 const booksLists: { data: Array<Volume> } = reactive({ data: [] });
 function loadListData() {
-    db.opus.get(query_id)
-        .then(value => {
-            if (value) {
-                myRef.value.setBooksData(value);
-                booksLists.data = value.data.filter((item: Volume) => {
-                    // 判断目标卷是否有删除标记
-                    return !item.discard;
-                });
-                booksLists.data.forEach((item: Volume) => {
-                    item.volume = item.volume.filter((it: Chapter) => {
-                        // 判断目标章是否有删除标记
-                        return !it.discard;
-                    })
-                });
-                if (booksLists.data.length === 0) {
-                    router.push({
-                        path: '/detail',
-                        query: {
-                            type: 'opus',
-                            id: query_id
+    db.opus.get(query_id).then(value => {
+        if (value) {
+            myRef.value.setBooksData(value);
+            booksLists.data = value.data.filter((item: Volume) => {
+                // 判断目标卷是否有删除标记
+                return !item.discard;
+            });
+            booksLists.data.forEach((item: Volume) => {
+                item.volume = item.volume.filter((it: Chapter) => {
+                    // 判断目标章是否有删除标记
+                    return !it.discard;
+                })
+            });
+            if (booksLists.data.length === 0) {
+                router.push({
+                    path: '/detail',
+                    query: {
+                        type: 'opus',
+                        id: query_id
+                    }
+                })
+            }
+            for (let i = 0; i < booksLists.data.length; i++) {
+                if (booksLists.data[i].vid === vid.value) {
+                    for (let j = 0; j < booksLists.data[i].volume.length; j++) {
+                        if (booksLists.data[i].volume[j].cid === cid.value) {
+                            (<HTMLElement>document.querySelector('.arco-layout-content')).scrollTop =
+                                <number>booksLists.data[i].volume[j].scrollTop;
+                            break;
                         }
-                    })
+                    }
+                    break;
                 }
-                for (let i = 0; i < booksLists.data.length; i++) {
-                    if (booksLists.data[i].vid === vid.value) {
-                        for (let j = 0; j < booksLists.data[i].volume.length; j++) {
-                            if (booksLists.data[i].volume[j].cid === cid.value) {
-                                (<HTMLElement>document.querySelector('.arco-layout-content')).scrollTop = <number>booksLists.data[i].volume[j].scrollTop;
-                                break;
-                            }
-                        }
+            }
+        }
+
+    })
+}
+
+// 设置纸张距离顶部的高度（用户跳转至编辑位置
+function setScrollTop(tvid: string, tcid: string) {
+    db.opus.where(':id').equals(query_id).modify(item => {
+        for (let i = 0; i < item.data.length; i++) {
+            if (item.data[i].vid === tvid) {
+                for (let j = 0; j < item.data[i].volume.length; j++) {
+                    if (item.data[i].volume[j].cid === tcid) {
+                        item.data[i].volume[j].scrollTop = temp_scrollTop;
                         break;
                     }
                 }
+                break;
             }
+        }
+    })
+}
+/*----自定义全局快捷键----*/
+//获取路由参数确定详情页显示的目标
+window.addEventListener('keydown', shortcut);
+window.addEventListener('click', leftMoreControl);
 
-        })
+function shortcut(e: KeyboardEvent) {
+    if (deletedCid.value === cid.value) {
+        // Ctrl+S
+        if (e.ctrlKey === true && e.key === 's') $message.error('目标已被删除!');
+    } else {
+        // Ctrl+S
+        if (e.ctrlKey === true && e.key === 's') myRef.value.saveDocData();
+    }
 }
 
-onMounted(() => {
-    nextTick(() => {
-        myRef.value.setFont(uWritingOption.value.uFont, true);
-        myRef.value.setFontSize(uWritingOption.value.uFontSize, true);
-        myRef.value.setLineHeight(uWritingOption.value.uLineHeight, true);
-        myRef.value.setFontWeight(uWritingOption.value.uFontWeight, true);
-        myRef.value.setSegSpacing(uWritingOption.value.uSpacing, true);
-        myRef.value.setTextIndent(uWritingOption.value.uTextIndent, true);
-        myRef.value.setColor(uWritingOption.value.uColor, true);
-        myRef.value.setBgcColor(uWritingOption.value.uBgcColor, true);
-        myRef.value.setPaperSize(uWritingOption.value.uPaperSize, true);
-        myRef.value.setParaFocus(uWritingOption.value.uParaFocus, true);
-    })
-})
-
-/*----离开页面销毁----*/
-onUnmounted(() => {
-    window.removeEventListener('keydown', shortcut);
-    window.removeEventListener('click', leftMoreControl);
-})
+function leftMoreControl() {
+    showLeftMore.value = '';
+}
 
 </script>
 

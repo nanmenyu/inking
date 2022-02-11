@@ -125,7 +125,7 @@
                     <a-button
                         type="primary"
                         @click="determine"
-                        :disabled="form.name.length === 0 && form.opus.length === 0"
+                        :disabled="form.name.length === 0 || form.opus.length === 0"
                     >确定</a-button>
                 </a-space>
             </div>

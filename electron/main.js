@@ -5,13 +5,14 @@ const {
     session,
     // Menu,
     ipcMain,
-    // dialog
+    dialog
 } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const fontList = require('./nodelib/getFontList');
 const b64toFile = require('./nodelib/b64toFile');
 const deleteFolder = require('./nodelib/deleteFolder');
-
+const HTMLtoDOCX = require('../node_modules/html-to-docx/dist/html-to-docx.umd');
 const createProtocol = require('./nodelib/createProtocol');
 
 const NODE_ENV = process.env.NODE_ENV
@@ -61,7 +62,10 @@ async function createWindow() {
 
 app.whenReady().then(() => {
     createWindow()
-
+    if (NODE_ENV === 'development') {
+        // vue开发者工具扩展(插件)
+        session.defaultSession.loadExtension('C:/Users/Administrator/AppData/Local/Google/Chrome/User Data/Default/Extensions/ljjemllljcmogpfapbkkighbhhppjdbg/6.0.0.21_0');
+    }
     app.on('activate', function () {
         // 通常在 macOS 上，当点击 dock 中的应用程序图标时，如果没有其他
         // 打开的窗口，那么程序会重新创建一个窗口。
@@ -125,17 +129,38 @@ ipcMain.on('deleteFolder', (e, path) => {
     deleteFolder(path);
 })
 
-// 在开发模式下根据父进程的请求干净退出
-// if (NODE_ENV === 'development') {
-//     if (process.platform === 'win32') {
-//         process.on('message', (data) => {
-//             if (data === 'graceful-exit') {
-//                 app.quit();
-//             }
-//         })
-//     } else {
-//         process.on('SIGTERM', () => {
-//             app.quit();
-//         })
-//     }
-// }
+// 转html至txt/docx
+ipcMain.on('expFile', async (e, data) => {
+    if (data.type === 'DOCX') {
+        const fileBuffer = await HTMLtoDOCX(data.file, null, {
+            table: { row: { cantSplit: true } },
+            footer: true,
+            pageNumber: true,
+        });
+
+        dialog.showSaveDialog({
+            title: '导出为DOCX',
+            defaultPath: data.name + '.docx',
+            filters: [{ name: 'DOCX', extensions: ['docx'] }]
+        }).then(file => {
+            if (file) {
+                fs.writeFile(file.filePath, fileBuffer, err => {
+                    if (err) console.log(err);
+                });
+            }
+        })
+    } else if (data.type === 'TXT') {
+        dialog.showSaveDialog({
+            title: '导出为TXT',
+            defaultPath: data.name + '.txt',
+            filters: [{ name: 'TXT', extensions: ['txt'] }]
+        }).then(file => {
+            if (file) {
+                fs.writeFile(file.filePath, data.file, err => {
+                    if (err) console.log(err);
+                });
+            }
+        })
+    }
+
+})
