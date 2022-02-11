@@ -12,7 +12,8 @@ import { ref, onMounted } from 'vue';
 import getStyle from '../utils/getStyle';
 import { throttle } from '../utils/flowControl';
 import hexToRgba from '../utils/hexToRgba';
-import pureTextEditor from '../common/pEditor/index.js';
+// import pureTextEditor from '../common/pEditor/index.js';
+import pureTextEditor from '../common/editor';
 import { db } from '../db/db';
 import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
 import { useRoute } from 'vue-router';
@@ -31,6 +32,7 @@ onMounted(() => {
             currentColor.value = focusColor;
     });
     editor.value.addEventListener('click', () => {
+        console.log();
         paraFocus.value === 'open' ?
             ParagraphFocus() :
             currentColor.value = focusColor;
@@ -313,12 +315,15 @@ function insertSpace(e: KeyboardEvent) {
 
 // 段落聚焦功能
 let oldElement: HTMLElement;
+const test = ref(1);
 function ParagraphFocus() {
     const selection = window.getSelection(),
         range = selection!.getRangeAt(0),
         start = range.startContainer;
-    const targetElement = (<HTMLElement>start.parentElement).tagName === 'P' ? start.parentElement : (<HTMLElement>start.parentElement).parentElement;
-
+    const targetElement = (<HTMLElement>start.parentElement).tagName === 'P' ?
+        start.parentElement :
+        (<HTMLElement>start.parentElement).parentElement;
+    console.log();
     if (oldElement !== targetElement) {
         // 将当前选择的文字颜色变为透明的rgba
         currentColor.value = hexToRgba(focusColor, 0.3);
@@ -329,12 +334,12 @@ function ParagraphFocus() {
         while ((node = iterator.nextNode()) != null) {
             (<HTMLElement>node).removeAttribute('style'); //清除其它元素的style
         }
-        targetElement!.style.color = focusColor;
+        // targetElement!.setAttribute('test', 'sb');
+        // targetElement!.style.color = focusColor;
         oldElement = targetElement!;
+        console.log(targetElement);
     }
 }
-
-
 
 // 移动光标到指定位置
 function moveCursor(selection: Selection, range: Range, startNode: Node, startOffset: number) {
@@ -369,7 +374,6 @@ defineExpose({
     outline: none;
 }
 
-/* @import url("../assets/lib/pEditor/style.css"); */
 #mainEditor .ProseMirror {
     font-family: v-bind(currentFont);
     box-sizing: border-box;
@@ -393,4 +397,7 @@ defineExpose({
     margin-top: v-bind(currentSpacing + "px");
     text-indent: v-bind(currentTextIndent + "em");
 }
+/* #mainEditor .ProseMirror p:nth-child(v-bind(test)) {
+    color: red;
+} */
 </style>

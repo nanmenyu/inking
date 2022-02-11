@@ -496,6 +496,7 @@
                                         <a-radio-group
                                             v-model="paraFocus"
                                             @change="changeParaFocus"
+                                            direction="vertical"
                                         >
                                             <a-radio value="open">开启</a-radio>
                                             <a-radio value="close">关闭</a-radio>
