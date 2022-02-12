@@ -16,67 +16,7 @@
             description="暂无数据,回收站的数据将会保留30天"
         >
             <template #image>
-                <svg
-                    t="1642567735953"
-                    class="icon"
-                    viewBox="0 0 1024 1024"
-                    version="1.1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    p-id="2446"
-                    width="50"
-                    height="50"
-                >
-                    <path
-                        d="M277.333333 266.666667m-32 0a32 32 0 1 0 64 0 32 32 0 1 0-64 0Z"
-                        fill="#a9aeb8"
-                        p-id="2447"
-                    />
-                    <path
-                        d="M448 266.666667m-32 0a32 32 0 1 0 64 0 32 32 0 1 0-64 0Z"
-                        fill="#a9aeb8"
-                        p-id="2448"
-                    />
-                    <path
-                        d="M341.333333 181.333333m-32 0a32 32 0 1 0 64 0 32 32 0 1 0-64 0Z"
-                        fill="#a9aeb8"
-                        p-id="2449"
-                    />
-                    <path
-                        d="M469.333333 160m-32 0a32 32 0 1 0 64 0 32 32 0 1 0-64 0Z"
-                        fill="#a9aeb8"
-                        p-id="2450"
-                    />
-                    <path
-                        d="M522.666667 74.666667m-32 0a32 32 0 1 0 64 0 32 32 0 1 0-64 0Z"
-                        fill="#a9aeb8"
-                        p-id="2451"
-                    />
-                    <path
-                        d="M576 181.333333m-32 0a32 32 0 1 0 64 0 32 32 0 1 0-64 0Z"
-                        fill="#a9aeb8"
-                        p-id="2452"
-                    />
-                    <path
-                        d="M618.666667 266.666667m-32 0a32 32 0 1 0 64 0 32 32 0 1 0-64 0Z"
-                        fill="#a9aeb8"
-                        p-id="2453"
-                    />
-                    <path
-                        d="M746.666667 245.333333m-32 0a32 32 0 1 0 64 0 32 32 0 1 0-64 0Z"
-                        fill="#a9aeb8"
-                        p-id="2454"
-                    />
-                    <path
-                        d="M661.333333 117.333333m-32 0a32 32 0 1 0 64 0 32 32 0 1 0-64 0Z"
-                        fill="#a9aeb8"
-                        p-id="2455"
-                    />
-                    <path
-                        d="M722.688 341.333333H301.312c-52.053333 0-92.714667 43.584-87.530667 93.824l48.384 469.333334C266.666667 948.117333 304.490667 981.333333 349.696 981.333333h324.608c45.205333 0 83.029333-33.216 87.530667-76.842666l48.384-469.333334C815.402667 384.917333 774.741333 341.333333 722.688 341.333333zM426.666667 832a32 32 0 0 1-64 0V490.666667a32 32 0 0 1 64 0v341.333333z m117.333333 0a32 32 0 0 1-64 0V490.666667a32 32 0 0 1 64 0v341.333333z m117.333333 0a32 32 0 0 1-64 0V490.666667a32 32 0 0 1 64 0v341.333333z"
-                        fill="#a9aeb8"
-                        p-id="2456"
-                    />
-                </svg>
+                <object :data="svg_trashcan" type="image/svg+xml"></object>
             </template>
         </a-empty>
         <div v-else class="discard-item">
@@ -119,6 +59,7 @@ import MultipleBar from "./widget/MultipleBar.vue";
 import { db } from "../db/db";
 import timeFormat from "../utils/timeFormat";
 import useCurrentInstance from '../utils/useCurrentInstance';
+import svg_trashcan from '../assets/svg/trashcan.svg';
 
 interface Bookdata {
     id?: number,
@@ -127,6 +68,11 @@ interface Bookdata {
     reTime: number,
     checked: boolean
 }
+/*----离开页面销毁----*/
+onUnmounted(() => {
+    window.removeEventListener("keydown", multiChoice);
+    window.removeEventListener("keyup", multiCancel);
+});
 
 /*----数据库取值----*/
 const booksData: { data: Array<Bookdata> } = reactive({ data: [] }),
@@ -137,21 +83,26 @@ loadData();
 
 // 取出被discard的数据,即索引discard为't'
 function loadData() {
-    db.opus
-        .where("discard")
-        .equalsIgnoreCase("t")
-        .toArray()
-        .then(value => {
-            booksData.data = value.map(item => {
-                return {
-                    id: item.id,
-                    title: item.title,
-                    discardTime: item.discardTime,
-                    reTime: 30 - Math.floor((new Date().getTime() - item.discardTime!) / 86400000), // 倒计时多少天销毁
-                    checked: false,
-                };
-            });
+    db.opus.where("discard").equalsIgnoreCase("t").toArray().then(value => {
+        booksData.data = value.map(item => {
+            return {
+                id: item.id,
+                title: item.title,
+                discardTime: item.discardTime,
+                reTime: 30 - Math.floor((new Date().getTime() - item.discardTime!) / 86400000), // 倒计时多少天销毁
+                checked: false,
+            };
         });
+        // 删除过期数据
+        const overdue: Array<number> = [];
+        booksData.data.forEach(item => {
+            if (item.reTime <= 0) overdue.push(<number>item.id);
+        })
+        if (overdue.length > 0) {
+            db.opus.bulkDelete(overdue);
+            loadData();
+        }
+    });
 }
 
 // 计算头像颜色
@@ -173,39 +124,6 @@ const markRestore = (id: number) => {
     });
 }
 
-// 多选功能: Ctrl + 鼠标左键
-let switchMult = false;
-window.addEventListener("keydown", multiChoice);
-window.addEventListener("keyup", multiCancel);
-function multiChoice(e: KeyboardEvent) {
-    if (e.key === "Control") {
-        switchMult = true;
-    }
-}
-function multiCancel(e: KeyboardEvent) {
-    if (e.key === "Control") {
-        switchMult = false;
-    }
-}
-const multi = ref(false),
-    myRef = ref();
-const choiceItem = (i: number) => {
-    if (switchMult) {
-        switchMult = true;
-        window.removeEventListener("keyup", multiCancel);
-        multi.value = true;
-        booksData.data[i].checked = !booksData.data[i].checked;
-        // 调用子组件的方法给子组件传递总个数和选中的个数
-        nextTick(() => {
-            let len = booksData.data.length,
-                sele = 0;
-            for (let i = 0; i < len; i++) {
-                sele += booksData.data[i].checked ? 1 : 0;
-            }
-            myRef.value.getData(len, sele);
-        });
-    }
-};
 // 点击一键全清
 const getDeleteAll = () => {
     $modal.warning({
@@ -290,12 +208,38 @@ const getComplete = () => {
         item.checked = false;
     });
 };
-
-/*----离开页面销毁----*/
-onUnmounted(() => {
-    window.removeEventListener("keydown", multiChoice);
-    window.removeEventListener("keyup", multiCancel);
-});
+// 多选功能: Ctrl + 鼠标左键
+const multi = ref(false), myRef = ref();
+const choiceItem = (i: number) => {
+    if (switchMult) {
+        switchMult = true;
+        window.removeEventListener("keyup", multiCancel);
+        multi.value = true;
+        booksData.data[i].checked = !booksData.data[i].checked;
+        // 调用子组件的方法给子组件传递总个数和选中的个数
+        nextTick(() => {
+            let len = booksData.data.length,
+                sele = 0;
+            for (let i = 0; i < len; i++) {
+                sele += booksData.data[i].checked ? 1 : 0;
+            }
+            myRef.value.getData(len, sele);
+        });
+    }
+};
+let switchMult = false;
+window.addEventListener("keydown", multiChoice);
+window.addEventListener("keyup", multiCancel);
+function multiChoice(e: KeyboardEvent) {
+    if (e.key === "Control") {
+        switchMult = true;
+    }
+}
+function multiCancel(e: KeyboardEvent) {
+    if (e.key === "Control") {
+        switchMult = false;
+    }
+}
 
 </script>
 <style src="../style/recyclecontent.css" scoped></style>

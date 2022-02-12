@@ -186,24 +186,20 @@ const routerLink = (id: number) => {
 }
 
 function loadData() {
-    db.opus
-        .where(":id")
-        .between(1, Infinity)
-        .toArray()
-        .then(value => {
-            booksData.data = value.filter(item => {
-                item.checked = false;
-                return item.discard === 'f';
-            })
-            // 读取用户设置缓存选取相应操作
-            if (localStorage.getItem('isReverse') === 'true') {
-                getReverse();
-            }
-            // 按顺序排序(必须剔除type1的情况,不然会死循环调用)
-            if (localStorage.getItem('sortType') !== '1') {
-                getSort(localStorage.getItem('sortType')!);
-            }
-        });
+    db.opus.where(":id").between(1, Infinity).toArray().then(value => {
+        booksData.data = value.filter(item => {
+            item.checked = false;
+            return item.discard === 'f';
+        })
+        // 读取用户设置缓存选取相应操作
+        if (localStorage.getItem('isReverse') === 'true') {
+            getReverse();
+        }
+        // 按顺序排序(必须剔除type1的情况,不然会死循环调用)
+        if (localStorage.getItem('sortType') !== '1') {
+            getSort(localStorage.getItem('sortType')!);
+        }
+    });
 }
 
 // 反转顺序
