@@ -9,6 +9,7 @@ declare module '*.vue' {
 declare module '*.ts';
 declare module '*.js';
 declare module 'uuid';
+declare module 'prosemirror-schema-basic';
 declare module 'prosemirror-commands';
 declare module 'prosemirror-history';
 declare module 'prosemirror-keymap';
@@ -19,6 +20,19 @@ declare module 'prosemirror-view';
 declare interface Window {
   $API: any
 }
+
+interface NodeDOC {
+  type: 'doc',
+  content: Array<NodePara>
+}
+interface NodePara {
+  type: 'paragraph',
+  content: Array<{
+    type: "text",
+    text: string
+  }>
+}
+
 // 页面记数
 interface Pagecount {
   paperHeight: string;

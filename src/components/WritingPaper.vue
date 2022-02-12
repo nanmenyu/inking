@@ -26,17 +26,16 @@ const $message = proxy.$message;
 // 修改键盘控制
 onMounted(() => {
     editor.value.addEventListener('keydown', insertSpace);
-    editor.value.addEventListener('keyup', () => {
-        paraFocus.value === 'open' ?
-            ParagraphFocus() :
-            currentColor.value = focusColor;
-    });
-    editor.value.addEventListener('click', () => {
-        console.log();
-        paraFocus.value === 'open' ?
-            ParagraphFocus() :
-            currentColor.value = focusColor;
-    });
+    // editor.value.addEventListener('keyup', () => {
+    //     paraFocus.value === 'open' ?
+    //         ParagraphFocus() :
+    //         currentColor.value = focusColor;
+    // });
+    // editor.value.addEventListener('click', () => {
+    //     paraFocus.value === 'open' ?
+    //         ParagraphFocus() :
+    //         currentColor.value = focusColor;
+    // });
 })
 
 // 纸张的宽度 = 内容区 + 40px的左右边距
@@ -225,9 +224,9 @@ const setFontWeight = (weight: string, isInit: boolean) => {
 }
 
 // 聚焦模式时存储当前的字体hex码
-let focusColor = '';
+const focusColor = ref('');
 const setColor = (color: string, isInit: boolean) => {
-    focusColor = color;
+    focusColor.value = color;
     currentColor.value = color;
     if (!isInit) getData();
 }
@@ -247,14 +246,19 @@ const setPaperSize = (type: string, isInit: boolean) => {
     boxWidth.value = paperSize[type];
     if (!isInit) getData();
 }
-const paraFocus = ref('close');
 const setParaFocus = (type: string, isInit: boolean) => {
-    paraFocus.value = type;
+    if (type === 'open') {
+        // 将当前选择的文字颜色变为透明的rgba
+        currentColor.value = hexToRgba(focusColor.value, 0.3);
+    } else {
+        // 文字颜色恢复原状
+        currentColor.value = focusColor.value;
+    }
     if (!isInit) getData();
 }
 
 const setBooksData = (value: Userdb) => {
-    const toDisplay: Array<object> = [];
+    const toDisplay: Array<NodePara> = [];
     for (let i = 0; i < value.data.length; i++) {
         if (value.data[i].vid === vid) {
             for (let j = 0; j < value.data[i].volume.length; j++) {
@@ -284,7 +288,7 @@ const setBooksData = (value: Userdb) => {
 // 刷新纸张内容
 // 读取数据并显示在当前页面
 const mEditor = ref();
-const refreshPaper = (toDisplay: Array<object>) => {
+const refreshPaper = (toDisplay: Array<NodePara>) => {
     mEditor.value.innerHTML = '';
     pureTextEditor({
         type: "doc",
@@ -314,32 +318,30 @@ function insertSpace(e: KeyboardEvent) {
 }
 
 // 段落聚焦功能
-let oldElement: HTMLElement;
-const test = ref(1);
-function ParagraphFocus() {
-    const selection = window.getSelection(),
-        range = selection!.getRangeAt(0),
-        start = range.startContainer;
-    const targetElement = (<HTMLElement>start.parentElement).tagName === 'P' ?
-        start.parentElement :
-        (<HTMLElement>start.parentElement).parentElement;
-    console.log();
-    if (oldElement !== targetElement) {
-        // 将当前选择的文字颜色变为透明的rgba
-        currentColor.value = hexToRgba(focusColor, 0.3);
-        // 创建迭代器
-        let iterator = document.createNodeIterator(mEditor.value, NodeFilter.SHOW_ELEMENT, null);
-        // 用循环反复调用节点迭代器对象的nextNode().跳向下一个节点
-        let node;
-        while ((node = iterator.nextNode()) != null) {
-            (<HTMLElement>node).removeAttribute('style'); //清除其它元素的style
-        }
-        // targetElement!.setAttribute('test', 'sb');
-        // targetElement!.style.color = focusColor;
-        oldElement = targetElement!;
-        console.log(targetElement);
-    }
-}
+// let oldElement: HTMLElement;
+// function ParagraphFocus() {
+//     const selection = window.getSelection(),
+//         range = selection!.getRangeAt(0),
+//         start = range.startContainer;
+//     const targetElement = (<HTMLElement>start.parentElement).tagName === 'P' ?
+//         start.parentElement :
+//         (<HTMLElement>start.parentElement).parentElement;
+//     if (oldElement !== targetElement) {
+//         // 将当前选择的文字颜色变为透明的rgba
+//         currentColor.value = hexToRgba(focusColor, 0.3);
+//         // 创建迭代器
+//         let iterator = document.createNodeIterator(mEditor.value, NodeFilter.SHOW_ELEMENT, null);
+//         // 用循环反复调用节点迭代器对象的nextNode().跳向下一个节点
+//         let node;
+//         while ((node = iterator.nextNode()) != null) {
+//             (<HTMLElement>node).removeAttribute('style'); //清除其它元素的style
+//         }
+//         targetElement!.setAttribute('test', 'sb');
+//         // targetElement!.style.color = focusColor;
+//         oldElement = targetElement!;
+//         console.log(targetElement);
+//     }
+// }
 
 // 移动光标到指定位置
 function moveCursor(selection: Selection, range: Range, startNode: Node, startOffset: number) {
@@ -400,4 +402,7 @@ defineExpose({
 /* #mainEditor .ProseMirror p:nth-child(v-bind(test)) {
     color: red;
 } */
+#mainEditor .ProseMirror .onfocused {
+    color: v-bind(focusColor);
+}
 </style>

@@ -1383,7 +1383,7 @@ const addNewChapter = () => {
                     cid: v4(),
                     chapterName: chapterName.value,
                     updateTime: new Date().getTime(),
-                    chapter: ['HELLO 用户1234']
+                    chapter: ['\u3000\u3000']
                 });
                 break;
             }
@@ -1407,7 +1407,7 @@ const addNewVolume = () => {
                 cid: v4(),
                 chapterName: '未命名章',
                 updateTime: new Date().getTime(),
-                chapter: ['HELLO 用户1234']
+                chapter: ['\u3000\u3000']
             }]
         });
     }).then(() => {

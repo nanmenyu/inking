@@ -264,7 +264,7 @@ const addFile = () => {
                         chapterNum: 0,
                         scrollTop: 0,
                         updateTime: new Date().getTime(),
-                        chapter: ['HELLO 用户1234']
+                        chapter: ['\u3000\u3000']
                     }]
                 }],
                 discard: 'f', //因为boolean无法索引  f即false t即true
