@@ -37,57 +37,5 @@ const moveStart = (e: MouseEvent) => {
 
 </script>
 
-<style scoped>
-/* 悬浮框样式 */
-
-#floatBox {
-    z-index: 999;
-    position: fixed;
-    top: 300px;
-    left: 500px;
-    width: 300px;
-    height: 250px;
-    background-color: #fff;
-    border-radius: 4px;
-    box-shadow: 0 4px 10px #0000001a;
-}
-.floatBox-header {
-    display: flex;
-    align-items: center;
-    box-sizing: border-box;
-    width: 100%;
-    height: 40px;
-    padding: 0 20px;
-    border-bottom: 1px solid #e5e6eb;
-    cursor: move;
-}
-.floatBox-header .header-title {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    margin-top: 4px;
-    color: #1d2129;
-    font-weight: 500;
-    font-size: 16px;
-}
-.floatBox-header .header-close {
-    margin-left: -12px;
-    padding: 4px;
-    color: #1d2129;
-    font-size: 12px;
-    cursor: pointer;
-    border-radius: 50%;
-}
-.floatBox-header .header-close:hover {
-    background-color: #f2f3f5;
-}
-
-.floatBox-body {
-    box-sizing: border-box;
-    width: 80%;
-    height: 70%;
-    background-color: pink;
-    margin: 0 auto;
-}
+<style src="../../style/FloatBox.css" scoped>
 </style>

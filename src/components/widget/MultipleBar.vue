@@ -116,27 +116,5 @@ defineExpose({
 
 </script>
 
-<style scoped>
-.multiplebar {
-    position: relative;
-    width: 92%;
-    height: 60px;
-    padding: 20px 26px;
-    color: #333;
-}
-.bar {
-    width: 100%;
-    height: 100%;
-}
-
-.bar span {
-    font-size: 20px;
-    font-weight: bold;
-    margin-right: 40px;
-}
-.separate {
-    width: 2px;
-    height: 25px;
-    background-color: #ccc;
-}
+<style src="../../style/MultipleBar.css" scoped>
 </style>

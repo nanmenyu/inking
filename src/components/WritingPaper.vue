@@ -399,9 +399,6 @@ defineExpose({
     margin-top: v-bind(currentSpacing + "px");
     text-indent: v-bind(currentTextIndent + "em");
 }
-/* #mainEditor .ProseMirror p:nth-child(v-bind(test)) {
-    color: red;
-} */
 #mainEditor .ProseMirror .onfocused {
     color: v-bind(focusColor);
 }

@@ -375,8 +375,8 @@
                 </div>
                 <div
                     class="right"
-                    @mouseenter="isspread = true"
-                    @mouseleave="isspread = false"
+                    @mouseenter.stop="rightExpansion(true)"
+                    @mouseleave.stop="rightExpansion(false)"
                     :class="isspread === null ? '' : isspread ? 'spread' : '-spread'"
                 >
                     <div class="right-inside">
@@ -386,11 +386,7 @@
                                 type="primary"
                                 style="width: 120px;text-align: left;border-radius: 8px 0 0 8px;"
                             >
-                                <object
-                                    :data="svg_plot"
-                                    style="vertical-align:bottom"
-                                    type="image/svg+xml"
-                                ></object>&nbsp;&nbsp;&nbsp;剧&nbsp;情
+                                <img :src="svg_plot" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;剧&nbsp;情
                             </a-button>
                         </div>
                         <div class="right-inside-item">
@@ -399,11 +395,7 @@
                                 type="primary"
                                 style="width: 120px;text-align: left;border-radius: 8px 0 0 8px;"
                             >
-                                <object
-                                    :data="svg_keyword"
-                                    style="vertical-align:bottom"
-                                    type="image/svg+xml"
-                                ></object>&nbsp;&nbsp;&nbsp;关键词
+                                <img :src="svg_keyword" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;关键词
                             </a-button>
                         </div>
                         <div class="right-inside-item">
@@ -412,11 +404,7 @@
                                 type="primary"
                                 style="width: 120px;text-align: left;border-radius: 8px 0 0 8px;"
                             >
-                                <object
-                                    :data="svg_diagram"
-                                    style="vertical-align:bottom"
-                                    type="image/svg+xml"
-                                ></object>&nbsp;&nbsp;&nbsp;关系图
+                                <img :src="svg_diagram" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;关系图
                             </a-button>
                         </div>
                         <div class="right-inside-item">
@@ -425,11 +413,7 @@
                                 type="primary"
                                 style="width: 120px;text-align: left;border-radius: 8px 0 0 8px;"
                             >
-                                <object
-                                    :data="svg_timeline"
-                                    style="vertical-align:bottom"
-                                    type="image/svg+xml"
-                                ></object>&nbsp;&nbsp;&nbsp;时间线
+                                <img :src="svg_timeline" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;时间线
                             </a-button>
                         </div>
                         <div class="right-inside-item">
@@ -438,11 +422,7 @@
                                 type="primary"
                                 style="width: 120px;text-align: left;border-radius: 8px 0 0 8px;"
                             >
-                                <object
-                                    :data="svg_map"
-                                    style="vertical-align:bottom"
-                                    type="image/svg+xml"
-                                ></object>&nbsp;&nbsp;&nbsp;地&nbsp;图
+                                <img :src="svg_map" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;地&nbsp;图
                             </a-button>
                         </div>
                     </div>
@@ -559,6 +539,7 @@ import svg_keyword from '../assets/svg/keyword2.svg';
 import svg_diagram from '../assets/svg/diagram2.svg';
 import svg_timeline from '../assets/svg/timeline2.svg';
 import svg_map from '../assets/svg/map2.svg';
+import category from '../assets/json/book_category.json';
 
 const { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
@@ -648,6 +629,18 @@ const booksData: { data: Userdb } = reactive({
 const totalNumber = ref(0);
 loadData();
 
+// let timer: NodeJS.Timeout, isAllow: boolean = false;
+const rightExpansion = (spread: boolean) => {
+    // if (isAllow) {
+    isspread.value = spread;
+    // }
+    // timer = setTimeout(() => {
+    //     console.log('sdsdsd');
+    //     isAllow = true;
+    //     clearTimeout(timer);
+    // }, 100)
+}
+
 /*----旋转动画----*/
 const rotated = ref([false, false, false, false]);
 const tagRotated = ref(false);
@@ -677,566 +670,17 @@ const form: Form = reactive({
     category: [],
     briefintro: ''
 })
-const category = [{
-    value: '男生',
-    label: '男生',
-    children: [
-        {
-            value: '玄幻',
-            label: '玄幻',
-            children: [{
-                value: '东方玄幻',
-                label: '东方玄幻'
-            }, {
-                value: '异世大陆',
-                label: '异世大陆'
-            }, {
-                value: '王朝争霸',
-                label: '王朝争霸'
-            }, {
-                value: '高武世界',
-                label: '高武世界'
-            }]
-        }, {
-            value: '奇幻',
-            label: '奇幻',
-            children: [{
-                value: '现代魔法',
-                label: '现代魔法'
-            }, {
-                value: '剑与魔法',
-                label: '剑与魔法'
-            }, {
-                value: '史诗奇幻',
-                label: '史诗奇幻'
-            }, {
-                value: '神秘幻想',
-                label: '神秘幻想'
-            }, {
-                value: '历史神话',
-                label: '历史神话'
-            }, {
-                value: '另类幻想',
-                label: '另类幻想'
-            }]
-        }, {
-            value: '武侠',
-            label: '武侠',
-            children: [{
-                value: '传统武侠',
-                label: '传统武侠'
-            }, {
-                value: '武侠幻想',
-                label: '武侠幻想'
-            }, {
-                value: '国术无双',
-                label: '国术无双'
-            }, {
-                value: '古武未来',
-                label: '古武未来'
-            }, {
-                value: '武侠同人',
-                label: '武侠同人'
-            }]
-        }, {
-            value: '仙侠',
-            label: '仙侠',
-            children: [{
-                value: '修真文明',
-                label: '修真文明'
-            }, {
-                value: '幻想修仙',
-                label: '幻想修仙'
-            }, {
-                value: '现代修真',
-                label: '现代修真'
-            }, {
-                value: '神话修真',
-                label: '神话修真'
-            }, {
-                value: '古典仙侠',
-                label: '古典仙侠'
-            }]
-        }, {
-            value: '都市',
-            label: '都市',
-            children: [{
-                value: '都市生活',
-                label: '都市生活'
-            }, {
-                value: '都市异能',
-                label: '都市异能'
-            }, {
-                value: '异术超能',
-                label: '异术超能'
-            }, {
-                value: '青春校园',
-                label: '青春校园'
-            }, {
-                value: '娱乐明星',
-                label: '娱乐明星'
-            }, {
-                value: '商战职场',
-                label: '商战职场'
-            }]
-        }, {
-            value: '现实',
-            label: '现实',
-            children: [{
-                value: '社会乡土',
-                label: '社会乡土'
-            }, {
-                value: '生活时尚',
-                label: '生活时尚'
-            }, {
-                value: '文学艺术',
-                label: '文学艺术'
-            }, {
-                value: '成功励志',
-                label: '成功励志'
-            }, {
-                value: '青春文学',
-                label: '青春文学'
-            }, {
-                value: '爱情婚姻',
-                label: '爱情婚姻'
-            }, {
-                value: '现实百态',
-                label: '现实百态'
-            }]
-        }, {
-            value: '军事',
-            label: '军事',
-            children: [{
-                value: '军旅生涯',
-                label: '军旅生涯'
-            }, {
-                value: '军事战争',
-                label: '军事战争'
-            }, {
-                value: '战争幻想',
-                label: '战争幻想'
-            }, {
-                value: '抗战烽火',
-                label: '抗战烽火'
-            }, {
-                value: '谍战特工',
-                label: '谍战特工'
-            }]
-        }, {
-            value: '历史',
-            label: '历史',
-            children: [{
-                value: '架空历史',
-                label: '架空历史'
-            }, {
-                value: '秦汉三国',
-                label: '秦汉三国'
-            }, {
-                value: '上古先秦',
-                label: '上古先秦'
-            }, {
-                value: '历史传记',
-                label: '历史传记'
-            }, {
-                value: '两晋隋唐',
-                label: '两晋隋唐'
-            }, {
-                value: '五代十国',
-                label: '五代十国'
-            }, {
-                value: '两宋元明',
-                label: '两宋元明'
-            }, {
-                value: '清史民国',
-                label: '清史民国'
-            }, {
-                value: '外国历史',
-                label: '外国历史'
-            }, {
-                value: '民间传说',
-                label: '民间传说'
-            }]
-        }, {
-            value: '游戏',
-            label: '游戏',
-            children: [{
-                value: '电子竞技',
-                label: '电子竞技'
-            }, {
-                value: '虚拟网游',
-                label: '虚拟网游'
-            }, {
-                value: '游戏异界',
-                label: '游戏异界'
-            }, {
-                value: '游戏系统',
-                label: '游戏系统'
-            }, {
-                value: '游戏主播',
-                label: '游戏主播'
-            }]
-        }, {
-            value: '体育',
-            label: '体育',
-            children: [{
-                value: '篮球运动',
-                label: '篮球运动'
-            }, {
-                value: '体育赛事',
-                label: '体育赛事'
-            }, {
-                value: '足球运动',
-                label: '足球运动'
-            }]
-        }, {
-            value: '科幻',
-            label: '科幻',
-            children: [{
-                value: '古武机甲',
-                label: '古武机甲'
-            }, {
-                value: '未来世界',
-                label: '未来世界'
-            }, {
-                value: '星际文明',
-                label: '星际文明'
-            }, {
-                value: '超级科技',
-                label: '超级科技'
-            }, {
-                value: '时空穿梭',
-                label: '时空穿梭'
-            }, {
-                value: '进化变异',
-                label: '进化变异'
-            }, {
-                value: '末世危机',
-                label: '末世危机'
-            }]
-        }, {
-            value: '悬疑',
-            label: '悬疑',
-            children: [{
-                value: '诡秘悬疑',
-                label: '诡秘悬疑'
-            }, {
-                value: '奇妙世界',
-                label: '奇妙世界'
-            }, {
-                value: '侦探推理',
-                label: '侦探推理'
-            }, {
-                value: '探险生存',
-                label: '探险生存'
-            }, {
-                value: '古今传奇',
-                label: '古今传奇'
-            }]
-        }, {
-            value: '轻小说',
-            label: '轻小说',
-            children: [{
-                value: '原生幻想',
-                label: '原生幻想'
-            }, {
-                value: '恋爱日常',
-                label: '恋爱日常'
-            }, {
-                value: '衍生同人',
-                label: '衍生同人'
-            }, {
-                value: '搞笑吐槽',
-                label: '搞笑吐槽'
-            }]
-        }, {
-            value: '短篇',
-            label: '短篇',
-            children: [{
-                value: '诗歌散文',
-                label: '诗歌散文'
-            }, {
-                value: '人物传记',
-                label: '人物传记'
-            }, {
-                value: '影视剧本',
-                label: '影视剧本'
-            }, {
-                value: '评论文集',
-                label: '评论文集'
-            }, {
-                value: '生活随笔',
-                label: '生活随笔'
-            }, {
-                value: '美文游记',
-                label: '美文游记'
-            }, {
-                value: '短篇小说',
-                label: '短篇小说'
-            }]
-        }
-    ],
-}, {
-    value: '女生',
-    label: '女生',
-    children: [{
-        value: '古代言情',
-        label: '古代言情',
-        children: [{
-            value: '古代情缘',
-            label: '古代情缘',
-        }, {
-            value: '宫闱宅斗',
-            label: '宫闱宅斗',
-        }, {
-            value: '经商种田',
-            label: '经商种田',
-        }, {
-            value: '古典架空',
-            label: '古典架空',
-        }, {
-            value: '女尊王朝',
-            label: '女尊王朝',
-        }, {
-            value: '穿越奇情',
-            label: '穿越奇情',
-        }, {
-            value: '西方时空',
-            label: '西方时空',
-        }, {
-            value: '清穿民国',
-            label: '清穿民国',
-        }, {
-            value: '上古蛮荒',
-            label: '上古蛮荒',
-        }, {
-            value: '热血江湖',
-            label: '热血江湖',
-        }]
-    }, {
-        value: '仙侠奇缘',
-        label: '仙侠奇缘',
-        children: [{
-            value: '武侠情缘',
-            label: '武侠情缘',
-        }, {
-            value: '古典仙侠',
-            label: '古典仙侠',
-        }, {
-            value: '现代修真',
-            label: '现代修真',
-        }, {
-            value: '远古洪荒',
-            label: '远古洪荒',
-        }, {
-            value: '仙侣奇缘',
-            label: '仙侣奇缘',
-        }]
-    }, {
-        value: '现代言情',
-        label: '现代言情',
-        children: [{
-            value: '商战职场',
-            label: '商战职场',
-        }, {
-            value: '豪门世家',
-            label: '豪门世家',
-        }, {
-            value: '都市生活',
-            label: '都市生活',
-        }, {
-            value: '婚恋情缘',
-            label: '婚恋情缘',
-        }, {
-            value: '娱乐明星',
-            label: '娱乐明星',
-        }, {
-            value: '都市异能',
-            label: '都市异能',
-        }, {
-            value: '极道江湖',
-            label: '极道江湖',
-        }, {
-            value: '民国情缘',
-            label: '民国情缘',
-        }, {
-            value: '异国情缘',
-            label: '异国情缘',
-        }]
-    }, {
-        value: '浪漫青春',
-        label: '浪漫青春',
-        children: [{
-            value: '青春校园',
-            label: '青春校园',
-        }, {
-            value: '青春疼痛',
-            label: '青春疼痛',
-        }, {
-            value: '叛逆成长',
-            label: '叛逆成长',
-        }, {
-            value: '青春纯爱',
-            label: '青春纯爱',
-        }]
-    }, {
-        value: '玄幻言情',
-        label: '玄幻言情',
-        children: [{
-            value: '东方玄幻',
-            label: '东方玄幻',
-        }, {
-            value: '异世大陆',
-            label: '异世大陆',
-        }, {
-            value: '西方奇幻',
-            label: '西方奇幻',
-        }, {
-            value: '远古神话',
-            label: '远古神话',
-        }, {
-            value: '异族恋情',
-            label: '异族恋情',
-        }, {
-            value: '魔法幻情',
-            label: '魔法幻情',
-        }, {
-            value: '异能超术',
-            label: '异能超术',
-        }]
-    }, {
-        value: '悬疑推理',
-        label: '悬疑推理',
-        children: [{
-            value: '推理侦探',
-            label: '推理侦探',
-        }, {
-            value: '诡秘惊险',
-            label: '诡秘惊险',
-        }, {
-            value: '悬疑探险',
-            label: '悬疑探险',
-        }, {
-            value: '奇妙世界',
-            label: '奇妙世界',
-        }, {
-            value: '神秘文化',
-            label: '神秘文化',
-        }, {
-            value: '幽情奇缘',
-            label: '幽情奇缘',
-        }]
-    }, {
-        value: '科幻空间',
-        label: '科幻空间',
-        children: [{
-            value: '星际恋歌',
-            label: '星际恋歌',
-        }, {
-            value: '时空穿梭',
-            label: '时空穿梭',
-        }, {
-            value: '未来世界',
-            label: '未来世界',
-        }, {
-            value: '古武机甲',
-            label: '古武机甲',
-        }, {
-            value: '超级科技',
-            label: '超级科技',
-        }, {
-            value: '进化变异',
-            label: '进化变异',
-        }, {
-            value: '末世危机',
-            label: '末世危机',
-        }]
-    }, {
-        value: '游戏竞技',
-        label: '游戏竞技',
-        children: [{
-            value: '电子竞技',
-            label: '电子竞技',
-        }, {
-            value: '网游情缘',
-            label: '网游情缘',
-        }, {
-            value: '游戏异界',
-            label: '游戏异界',
-        }, {
-            value: '体育竞技',
-            label: '体育竞技',
-        }]
-    }, {
-        value: '轻小说',
-        label: '轻小说',
-        children: [{
-            value: '同人衍生',
-            label: '同人衍生',
-        }, {
-            value: '唯美幻想',
-            label: '唯美幻想',
-        }, {
-            value: '萌系变身',
-            label: '萌系变身',
-        }, {
-            value: '恋爱日常',
-            label: '恋爱日常',
-        }, {
-            value: '搞笑吐槽',
-            label: '搞笑吐槽',
-        }, {
-            value: '古典衍生',
-            label: '古典衍生',
-        }, {
-            value: '影视衍生',
-            label: '影视衍生',
-        }, {
-            value: '动漫衍生',
-            label: '动漫衍生',
-        }, {
-            value: '其他衍生',
-            label: '其他衍生',
-        }]
-    }, {
-        value: '现实生活',
-        label: '现实生活',
-        children: [{
-            value: '家与情感',
-            label: '家与情感',
-        }, {
-            value: '行业人生',
-            label: '行业人生',
-        }, {
-            value: '探索科幻',
-            label: '探索科幻',
-        }, {
-            value: '人文博览',
-            label: '人文博览',
-        }]
-    }, {
-        value: '短篇小说',
-        label: '短篇小说',
-    }]
-}, {
-    value: '其它',
-    label: '其它'
-}];
+
 // 随机生成tag的颜色
 const tagColor = computed(() => {
-    let color = [
-        'red',
-        'orangered',
-        'orange',
-        'gold',
-        'lime',
-        'green',
-        'cyan',
-        'blue',
-        'arcoblue',
-        'purple',
-        'pinkpurple',
-        'magenta'], temp = [];
+    const color = [
+        'red', 'orangered',
+        'orange', 'gold',
+        'lime', 'green',
+        'cyan', 'blue',
+        'arcoblue', 'purple',
+        'pinkpurple', 'magenta'];
+    const temp = [];
     for (let i = 0; i < tagData['qidian'].length; i++) {
         temp.push(color[randomNum(0, 11)]);
     }
@@ -1698,7 +1142,7 @@ function loadData() {
                             if (it.discard) {
                                 wastepaperBasketData.push(it);
                             } else {
-                                wordNum += i
+                                wordNum += it.chapterNum || 0;
                                 num++;
                             }
                             return !it.discard;

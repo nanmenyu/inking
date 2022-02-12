@@ -16,7 +16,7 @@
             description="暂无数据,回收站的数据将会保留30天"
         >
             <template #image>
-                <object :data="svg_trashcan" type="image/svg+xml"></object>
+                <img :src="svg_trashcan" />
             </template>
         </a-empty>
         <div v-else class="discard-item">
@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onUnmounted, nextTick, getCurrentInstance } from "vue";
+import { ref, reactive, onUnmounted, nextTick } from "vue";
 import { IconCheck } from "@arco-design/web-vue/es/icon";
 import Toolbar from "./widget/Toolbar.vue";
 import MultipleBar from "./widget/MultipleBar.vue";

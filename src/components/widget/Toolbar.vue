@@ -84,19 +84,12 @@
                 >
                     <svg
                         t="1642600478490"
-                        class="icon"
                         viewBox="0 0 1024 1024"
-                        version="1.1"
                         xmlns="http://www.w3.org/2000/svg"
-                        p-id="2748"
                         width="14"
                         height="14"
                     >
-                        <path
-                            d="M158.5047493 423.62618732l353.4952507-353.49525069 353.4952507 353.49525069z m0 176.74762536l353.4952507 353.49525069 353.4952507-353.49525069z"
-                            p-id="2749"
-                            :fill="disableSort ? '#94bfff' : '#165dff'"
-                        />
+                        <path p-id="2749" :fill="disableSort ? '#94bfff' : '#165dff'" />
                     </svg>
                 </a-button>
             </a-tooltip>
@@ -320,114 +313,5 @@ const toSort = (type: string) => {
 
 </script>
 
-<style scoped>
-.toolbar {
-    position: relative;
-    width: 92%;
-    height: 60px;
-    padding: 20px 26px;
-    font-size: 30px;
-    color: #737373;
-}
-
-.bar-left {
-    position: absolute;
-    align-items: center;
-    top: 0px;
-    left: 28px;
-    line-height: 80px;
-}
-
-.bar-midd {
-    position: absolute;
-    top: 20px;
-    right: 400px;
-}
-
-.bar-right {
-    position: absolute;
-    top: 20px;
-    right: 40px;
-}
-
-/* 弹窗 */
-#addnew-box {
-    z-index: 999;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-#addnew-box .box {
-    position: relative;
-    top: 50%;
-    width: 550px;
-    margin: 0 auto;
-    background-color: #fff;
-    border-radius: 4px;
-    transform: translateY(-50%);
-    animation: spredModify 0.3s ease-out;
-}
-
-.box-header {
-    display: flex;
-    align-items: center;
-    box-sizing: border-box;
-    width: 100%;
-    height: 40px;
-    padding: 0 20px;
-    border-bottom: 1px solid #e5e6eb;
-}
-.box-header .header-title {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    margin-top: 4px;
-    color: #1d2129;
-    font-weight: 500;
-    font-size: 16px;
-}
-.box-header .header-close {
-    margin-left: -12px;
-    padding: 4px;
-    color: #1d2129;
-    font-size: 12px;
-    cursor: pointer;
-    border-radius: 50%;
-}
-.box-header .header-close:hover {
-    background-color: #f2f3f5;
-}
-
-.box-body {
-    position: relative;
-    padding: 24px 20px;
-    color: #1d2129;
-    font-size: 14px;
-}
-
-.box-footer {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 16px 20px;
-    text-align: right;
-    border-top: 1px solid #e5e6eb;
-}
-@keyframes spredModify {
-    0% {
-        width: 0;
-        opacity: 0;
-    }
-    30% {
-        opacity: 0;
-    }
-    100% {
-        width: 550px;
-        opacity: 1;
-    }
-}
+<style src="../../style/Toolbar.css" scoped>
 </style>

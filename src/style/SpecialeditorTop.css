@@ -1,0 +1,24 @@
+.head-item {
+    float: right;
+    width: 100%;
+    user-select: none;
+}
+
+.head-item span {
+    display: inline-block;
+    height: 32px;
+    line-height: 32px;
+    padding: 0 15px;
+    color: #4e5969;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.head-item span:hover {
+    background-color: #f2f3f5;
+}
+
+.checked {
+    background-color: #f2f3f5;
+}
