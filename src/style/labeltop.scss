@@ -1,0 +1,50 @@
+.label-top {
+    position: fixed;
+    top: 40px;
+    left: 250px;
+    user-select: none;
+}
+
+.root-title {
+    position: relative;
+    display: inline-block;
+    max-width: 100px;
+    height: 33px;
+    line-height: 35px;
+    margin: 0 25px;
+    margin-top: 2px;
+    cursor: pointer;
+
+    &:last-of-type {
+        width: 35px;
+        border-radius: 0;
+    }
+}
+
+.lock {
+    font-size: 14px;
+    color: #737373;
+}
+
+#seleId,
+#seleId::after,
+#seleId::before,
+#seleId .lock {
+    color: #165dff;
+    background-color: #fff;
+}
+
+#seleId span::after,
+#seleId span::before {
+    background-color: #f5f5f5;
+}
+
+.add-label {
+    font-size: 20px;
+    color: #165dff;
+    transform: translateY(12.5%);
+
+    &:active {
+        color: #009a29;
+    }
+}

@@ -1158,5 +1158,5 @@ function loadData() {
 
 </script>
 
-<style src="../style/bookdetail.css" scoped>
+<style lang="scss" src="../style/bookdetail.scss" scoped>
 </style>

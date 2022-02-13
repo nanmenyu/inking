@@ -1,0 +1,580 @@
+.detail-content {
+    box-sizing: border-box;
+    position: relative;
+    float: right;
+    width: calc(100vw - 250px);
+    height: calc(100vh - 75px);
+    margin-top: 35px;
+    border-radius: 4px 0 0 0;
+    background-color: #fff;
+}
+
+.content {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 180px);
+    overflow-y: scroll;
+}
+
+.head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 95%;
+    margin: 0 auto;
+}
+
+.left {
+    display: flex;
+    flex-direction: column;
+    width: 255px;
+
+    img {
+        width: 204px;
+        height: 272px;
+        border-radius: 6px;
+        box-shadow: 6px 6px 6px #aaa;
+        cursor: pointer;
+        transition: opacity 0.3s;
+
+        &:hover {
+            opacity: 0.5;
+        }
+    }
+
+    .wrapper {
+        width: 204px;
+        height: 204px;
+        line-height: 70px;
+        margin-top: -204px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        pointer-events: none;
+    }
+}
+
+.middle {
+    width: calc(100% - 410px);
+    height: 100%;
+    margin: 0 10px 0 20px;
+    text-align: left;
+}
+
+.right {
+    position: absolute;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 45px;
+    height: 300px;
+}
+
+.right-inside {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 120px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.right-inside-item {
+    width: 100%;
+    height: 30px;
+}
+
+.title {
+    margin: 6px 0;
+    padding: 0 6px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #105177;
+
+    span {
+        &:first-child {
+            margin-right: 4px;
+        }
+
+        &:last-child {
+            margin-left: 14px;
+            font-size: 14px;
+            font-weight: normal;
+            color: #333;
+        }
+    }
+}
+
+.edit {
+    font-size: 20px;
+}
+
+.tag {
+    margin: 5px 5px 10px 20px;
+}
+
+.desc {
+    min-height: 100px;
+    font-size: 16px;
+    margin-bottom: 12px;
+    padding-right: 20px;
+    line-height: 1.5em;
+}
+
+.info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 25px;
+    color: #105177;
+}
+
+.control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 40px;
+
+    button {
+        border: none;
+        color: #fff;
+        cursor: pointer;
+
+        &:first-child {
+            width: 100px;
+            height: 30px;
+            margin-right: 4px;
+            border-radius: 15px 0 0 15px;
+            background-color: #ff5722;
+
+            &:hover {
+                background-color: #ff8159;
+            }
+        }
+
+        &:nth-child(2) {
+            width: 100px;
+            height: 30px;
+            margin-right: 4px;
+            background-color: #165dff;
+        }
+
+        &:nth-child(2):hover {
+            background-color: #4080ff;
+        }
+
+        &:last-child {
+            width: 150px;
+            height: 30px;
+            border-radius: 0 15px 15px 0;
+            background-color: #165dff;
+
+            &:hover {
+                background-color: #4080ff;
+            }
+        }
+    }
+}
+
+.cata {
+    width: 95%;
+    height: 300px;
+    margin: 0 auto;
+    text-align: left;
+
+    h2 {
+        text-indent: 2em;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #3f5a93;
+        color: #3f5a93;
+
+        .btn {
+            float: right;
+            padding: 0;
+            border: 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #3f5a93;
+            background-color: #fff;
+            cursor: pointer;
+
+            &:hover {
+                color: #165dff;
+            }
+        }
+    }
+}
+
+.volume {
+    width: 95%;
+    padding: 15px;
+    font-size: 16px;
+    text-indent: 2em;
+    font-weight: bold;
+    border-bottom: 1px solid #e5e6eb;
+    color: #3f5a93;
+    cursor: pointer;
+
+    &:hover {
+        .btn2 {
+            display: block;
+        }
+    }
+
+    .btn2 {
+        display: none;
+        float: right;
+        padding: 0;
+        border: 0;
+        margin-right: 10px;
+        font-size: 14px;
+        font-weight: bold;
+        color: #3f5a93;
+        background-color: #fff;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #f2f3f5;
+            color: #165dff;
+        }
+    }
+}
+
+.volume:hover,
+.volume:hover .btn2 {
+    background-color: #f2f3f5;
+}
+
+.chapter {
+    display: none;
+    flex-wrap: wrap;
+    width: 95%;
+    margin: 10px auto;
+    margin-bottom: 0;
+    padding: 0 10px;
+    cursor: pointer;
+
+    ._chapter {
+        position: relative;
+        width: 33%;
+        height: 46px;
+        text-indent: 2em;
+        border-bottom: 1px solid #e5e6eb;
+        text-decoration: none;
+
+        .btn {
+            display: none;
+            position: absolute;
+            top: 3px;
+            right: 0;
+            padding: 2px;
+            border: 0;
+            font-size: 12px;
+            font-weight: bold;
+            color: #3f5a93;
+            background-color: #fff;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #f2f3f5;
+                color: #165dff;
+            }
+        }
+
+        .btn2 {
+            top: 22px;
+            right: 0;
+        }
+
+        &:hover {
+            .btn {
+                display: block;
+            }
+        }
+
+        p {
+            margin: 0;
+
+            &:first-child {
+                margin-top: 8px;
+                margin-left: 4px;
+                color: #333;
+            }
+
+            &:nth-child(2) {
+                margin-top: 4px;
+                margin-left: 4px;
+                font-size: 12px;
+                color: #999;
+            }
+        }
+    }
+}
+
+.chapter ._chapter:hover,
+.chapter ._chapter:hover .btn {
+    background-color: #f2f3f5;
+}
+
+/* 控制图标90度旋转/复位 */
+.rotate {
+    transition-duration: .3s;
+    transform: rotateZ(90deg);
+}
+
+.-rotate {
+    transition-duration: .3s;
+    transform: rotateZ(0);
+}
+
+/* 弹窗 */
+#modify-box {
+    z-index: 999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+
+    .box,
+    .box-replace,
+    .wastepaperBasket {
+        position: relative;
+        top: 50%;
+        width: 550px;
+        margin: 0 auto;
+        background-color: #fff;
+        border-radius: 4px;
+        transform: translateY(-50%);
+    }
+
+    .box {
+        animation: spredModify 0.3s ease-out;
+    }
+
+    .wastepaperBasket {
+        width: 400px;
+    }
+}
+
+// #modify-box .box,
+// #modify-box .box-replace,
+// #modify-box .wastepaperBasket {
+//     position: relative;
+//     top: 50%;
+//     width: 550px;
+//     margin: 0 auto;
+//     background-color: #fff;
+//     border-radius: 4px;
+//     transform: translateY(-50%);
+// }
+
+/* 裁剪图片框不能加动画 */
+.box-header {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+    padding: 0 20px;
+    border-bottom: 1px solid #e5e6eb;
+
+    .header-title {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        margin-top: 4px;
+        color: #1d2129;
+        font-weight: 500;
+        font-size: 16px;
+    }
+
+    .header-close {
+        margin-left: -12px;
+        padding: 4px;
+        color: #1d2129;
+        font-size: 12px;
+        cursor: pointer;
+        border-radius: 50%;
+
+        &:hover {
+            background-color: #f2f3f5;
+        }
+    }
+}
+
+.box-body {
+    position: relative;
+    max-height: 300px;
+    padding: 24px 20px;
+    color: #1d2129;
+    font-size: 14px;
+    overflow-y: scroll;
+
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        text-align: left;
+
+        li {
+            font-size: 15px;
+            height: 40px;
+            margin: 5px 0;
+            padding: 5px;
+
+            &:hover {
+                background-color: #f2f3f5;
+            }
+
+            .left {
+                float: left;
+                width: 90%;
+                height: 100%;
+
+                span {
+                    display: block;
+                    width: 100%;
+                    height: 20px;
+                    line-height: 1.5em;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+
+                    &:nth-child(2) {
+                        font-size: 14px;
+                        color: #999;
+                    }
+                }
+            }
+
+            .right {
+                float: right;
+                width: 10%;
+                height: 40px;
+            }
+        }
+    }
+}
+
+.box-body-replace {
+    img {
+        display: block;
+        max-width: 100%;
+    }
+}
+
+.box-footer {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 16px 20px;
+    text-align: right;
+    border-top: 1px solid #e5e6eb;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 16px 20px;
+    text-align: right;
+    border-top: 1px solid #e5e6eb;
+}
+
+.btn-unchecked {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #f2f3f5;
+    border: 2px solid #e5e6eb;
+    cursor: pointer;
+}
+
+.btn-checked {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #f53f3f;
+    border: 2px solid #f53f3f;
+}
+
+#tagWall {
+    width: 370px;
+    margin: 0 auto;
+    padding: 0 40px;
+    padding-bottom: 20px;
+    background-color: #f7f8fa;
+    overflow: hidden;
+
+    h4 {
+        margin: 0;
+        margin-bottom: 10px;
+    }
+
+    .arco-tag {
+        cursor: pointer;
+    }
+}
+
+/* .fade-enter-active, .fade-leave-active {
+      transition: opacity 0.6s;
+  }
+  .fade-enter, .fade-leave-to {
+      opacity: 0;
+  } */
+/* ----------标签墙展开效果----------- */
+.expansion {
+    transition-duration: .3s;
+    height: 450px;
+    visibility: visible;
+}
+
+.-expansion {
+    transition-duration: .3s;
+    height: 0;
+    visibility: hidden;
+}
+
+/* 右侧栏展开关闭效果 */
+.spread {
+    animation: spread 0.3s ease-in-out forwards;
+}
+
+.-spread {
+    animation: -spread 0.3s ease-in-out forwards;
+}
+
+@keyframes spread {
+    from {
+        width: 45px;
+    }
+
+    to {
+        width: 120px;
+    }
+}
+
+@keyframes -spread {
+    from {
+        width: 120px;
+    }
+
+    to {
+        width: 45px;
+    }
+}
+
+@keyframes spredModify {
+    0% {
+        width: 0;
+        opacity: 0;
+    }
+
+    30% {
+        opacity: 0;
+    }
+
+    100% {
+        width: 550px;
+        opacity: 1;
+    }
+}

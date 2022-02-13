@@ -71,17 +71,8 @@
             </a-dropdown>
         </div>
         <div class="bar-midd">
-            <a-tooltip
-                :content="isReverse ? '取消反转' : '反转顺序'"
-                position="top"
-                background-color="#3491fa"
-                mini
-            >
-                <a-button
-                    @click="reOrder"
-                    :type="isReverse ? 'secondary' : 'text'"
-                    :disabled="disableSort"
-                >
+            <a-tooltip content="反转顺序" position="top" background-color="#3491fa" mini>
+                <a-button type="text" @click="reOrder" :disabled="disableSort">
                     <svg
                         t="1642600478490"
                         viewBox="0 0 1024 1024"
@@ -202,7 +193,6 @@ if (getDisplyBlock === null) {
 //切换显示样式(封面/列表)
 const swDisplay = () => {
     displyBlock.value = !displyBlock.value;
-    console.log(displyBlock.value);
     // 将该值通过'onBack'事件传予父组件
     emit('onBack', displyBlock.value);
     localStorage.setItem('displyBlock', displyBlock.value.toString());
@@ -284,17 +274,8 @@ const deleteAll = () => {
 }
 
 // 顺序反转
-const isReverse = ref(false),
-    getIsReverse = localStorage.getItem('isReverse');
-if (getIsReverse === null) {
-    localStorage.setItem('isReverse', 'false');
-} else {
-    isReverse.value = getIsReverse === 'true' ? true : false;
-}
 const reOrder = () => {
-    isReverse.value = !isReverse.value;
     emit('toReverse');
-    localStorage.setItem('isReverse', isReverse.value.toString());
 }
 
 // 控制排序
@@ -310,8 +291,7 @@ const toSort = (type: string) => {
     emit('toSort', type);
     localStorage.setItem('sortType', sortType.value);
 }
-
 </script>
 
-<style src="../../style/Toolbar.css" scoped>
+<style lang="scss" src="../../style/toolbar.scss" scoped>
 </style>

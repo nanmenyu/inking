@@ -585,7 +585,7 @@ import expTXTIcon from '../assets/svg/expTXTIcon.svg';
 import expDOCXIcon from '../assets/svg/expDOCXIcon.svg';
 import expPDFIcon from '../assets/svg/expPDFIcon.svg';
 import addVolumeIcon from '../assets/svg/addVolumeIcon.svg';
-import '../style/writerPage.css';
+import '../style/writerPage.scss';
 
 const { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
@@ -818,7 +818,6 @@ const onClickMenuItem = (tvid: string, tcid: string) => {
         cid.value = tcid;
         myRef.value.setId(tvid, tcid);
         const toDisplay: Array<object> = [];
-
         db.opus.get(query_id).then(value => {
             if (value) {
                 for (let i = 0; i < value.data.length; i++) {

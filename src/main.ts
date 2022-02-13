@@ -4,8 +4,8 @@ import ArcoVue from '@arco-design/web-vue';
 import router from './router/index';
 import '@arco-design/web-vue/dist/arco.css';
 
-//引入全局用css/js
-import './style/global.css';
+//引入全局用scss/js
+import './style/global.scss';
 
 // App.config.globalProperties.$USER_PATH = ''
 

@@ -191,11 +191,7 @@ function loadData() {
             item.checked = false;
             return item.discard === 'f';
         })
-        // 读取用户设置缓存选取相应操作
-        if (localStorage.getItem('isReverse') === 'true') {
-            getReverse();
-        }
-        // 按顺序排序(必须剔除type1的情况,不然会死循环调用)
+        // 按顺序排序(必须剔除type1的情况,不然会死循环调用loadData)
         if (localStorage.getItem('sortType') !== '1') {
             getSort(localStorage.getItem('sortType')!);
         }
@@ -377,4 +373,4 @@ onUnmounted(() => {
 });
 </script>
 
-<style src="../style/homecontent.css" scoped></style>
+<style lang="scss" src="../style/homecontent.scss" scoped></style>

@@ -242,4 +242,4 @@ function multiCancel(e: KeyboardEvent) {
 }
 
 </script>
-<style src="../style/recyclecontent.css" scoped></style>
+<style lang="scss" src="../style/recyclecontent.scss" scoped></style>

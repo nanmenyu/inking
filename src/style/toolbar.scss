@@ -36,17 +36,17 @@
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
-}
 
-#addnew-box .box {
-    position: relative;
-    top: 50%;
-    width: 550px;
-    margin: 0 auto;
-    background-color: #fff;
-    border-radius: 4px;
-    transform: translateY(-50%);
-    animation: spredModify 0.3s ease-out;
+    .box {
+        position: relative;
+        top: 50%;
+        width: 550px;
+        margin: 0 auto;
+        background-color: #fff;
+        border-radius: 4px;
+        transform: translateY(-50%);
+        animation: spredModify 0.3s ease-out;
+    }
 }
 
 .box-header {
@@ -57,30 +57,30 @@
     height: 40px;
     padding: 0 20px;
     border-bottom: 1px solid #e5e6eb;
-}
 
-.box-header .header-title {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    margin-top: 4px;
-    color: #1d2129;
-    font-weight: 500;
-    font-size: 16px;
-}
+    .header-title {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        margin-top: 4px;
+        color: #1d2129;
+        font-weight: 500;
+        font-size: 16px;
+    }
 
-.box-header .header-close {
-    margin-left: -12px;
-    padding: 4px;
-    color: #1d2129;
-    font-size: 12px;
-    cursor: pointer;
-    border-radius: 50%;
-}
+    .header-close {
+        margin-left: -12px;
+        padding: 4px;
+        color: #1d2129;
+        font-size: 12px;
+        cursor: pointer;
+        border-radius: 50%;
 
-.box-header .header-close:hover {
-    background-color: #f2f3f5;
+        &:hover {
+            background-color: #f2f3f5;
+        }
+    }
 }
 
 .box-body {

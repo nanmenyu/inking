@@ -9,4 +9,4 @@
 
 </script>
 
-<style src="../style/bigworldcontent.css" scoped></style>
+<style lang="scss" src="../style/bigworldcontent.scss" scoped></style>

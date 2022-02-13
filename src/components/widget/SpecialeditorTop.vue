@@ -39,5 +39,5 @@ const toSpecialEditor = (_type: string) => {
 }
 </script>
 
-<style src="../../style/SpecialeditorTop.css" scoped>
+<style lang="scss" src="../../style/specialeditorTop.scss" scoped>
 </style>

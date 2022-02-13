@@ -1,9 +1,9 @@
 body {
     background-color: #fff;
-}
 
-body::-webkit-scrollbar {
-    display: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 ::-webkit-scrollbar {
@@ -31,7 +31,10 @@ body::-webkit-scrollbar {
     overflow: hidden;
 }
 
-.arco-menu-vertical .arco-menu-item, .arco-menu-vertical .arco-menu-group-title, .arco-menu-vertical .arco-menu-pop-header, .arco-menu-vertical .arco-menu-inline-header {
+.arco-menu-vertical .arco-menu-item,
+.arco-menu-vertical .arco-menu-group-title,
+.arco-menu-vertical .arco-menu-pop-header,
+.arco-menu-vertical .arco-menu-inline-header {
     margin-bottom: 0;
 }
 

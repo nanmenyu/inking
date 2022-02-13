@@ -9,4 +9,4 @@
 
 </script>
 
-<style src="../style/readingcontent.css" scoped></style>
+<style lang="scss" src="../style/readingcontent.scss" scoped></style>

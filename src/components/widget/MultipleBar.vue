@@ -116,5 +116,5 @@ defineExpose({
 
 </script>
 
-<style src="../../style/MultipleBar.css" scoped>
+<style lang="scss" src="../../style/multipleBar.scss" scoped>
 </style>

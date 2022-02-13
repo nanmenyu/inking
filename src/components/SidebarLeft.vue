@@ -156,5 +156,5 @@ onMounted(() => {
 
 </script>
 
-<style src="../style/sidebarleft.css" scoped>
+<style lang="scss" src="../style/sidebarleft.scss" scoped>
 </style>

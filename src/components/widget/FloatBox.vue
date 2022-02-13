@@ -37,5 +37,5 @@ const moveStart = (e: MouseEvent) => {
 
 </script>
 
-<style src="../../style/FloatBox.css" scoped>
+<style lang="scss" src="../../style/floatBox.scss" scoped>
 </style>

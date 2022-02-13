@@ -48,8 +48,7 @@ let selected = ref('all');
 function getLabel(na: string) {
     selected.value = na;
 }
-
 </script>
 
-<style src="../style/labeltop.css" scoped>
+<style lang="scss" src="../style/labeltop.scss" scoped>
 </style>

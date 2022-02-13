@@ -1766,6 +1766,6 @@ function setNumberChart(targetData: Array<{ key: string, value: number }>, unit:
 
 </script>
 
-<style src="../style/KeywordEditor.css" scoped>
+<style lang="scss" src="../style/KeywordEditor.scss" scoped>
 </style> 
 

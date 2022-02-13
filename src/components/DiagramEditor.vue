@@ -227,5 +227,5 @@ function setDiagramChart(graph: GraphData) {
 
 </script>
 
-<style src="../style/DiagramEditor.css" scoped>
+<style lang="scss" src="../style/diagramEditor.scss" scoped>
 </style>
