@@ -1104,20 +1104,18 @@ function leftMoreControl() {
 </script>
 
 <style scoped>
-::-webkit-scro ::-webkit-scrollbar {
-    width: 14px;
-}
-
 ::-webkit-scrollbar-track {
     box-shadow: none;
     border-radius: 0;
     border-left: 1px dashed #e5e6eb;
 }
-
 ::-webkit-scrollbar-thumb {
     background-color: v-bind(scrollbarColor);
     border-radius: 0;
     border-left: 1px dashed #e5e6eb;
+}
+.trigger::-webkit-scrollbar-thumb {
+    background-color: #f2f3f5;
 }
 .layout-write :deep(.arco-layout-header) {
     height: 35px;

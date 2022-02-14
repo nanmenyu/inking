@@ -1,7 +1,28 @@
 <!-- 时间线编辑模块 -->
 <template>
     <div class="timeline">
-        <section @scroll="sectionScroll" ref="timelineSection" class="timeline__section">
+        <div class="timeline__block">
+            <div class="slider-box" ref="sliderBox">
+                <div class="slider" :style="{ width: '1500px' }" ref="slider">
+                    <a-slider
+                        @mousedown.stop
+                        :min="timeLine.min"
+                        :max="timeLine.max"
+                        :step="100"
+                        show-ticks
+                        style="width: 100%;margin: 0 ;padding:0;margin-top: 100px;"
+                        :marks="{ '-9900': '', 9900: '' }"
+                    />
+                </div>
+            </div>
+            <div @mousemove.stop class="time-spiral" ref="spiralChart"></div>
+        </div>
+        <section
+            @mousemove.stop
+            @scroll="sectionScroll"
+            ref="timelineSection"
+            class="timeline__section"
+        >
             <div class="timeline__nav">
                 <ul ref="timelineUl">
                     <li v-for="item in tempData.data" :key="item.id" :id="'nav_' + item.id">
@@ -9,7 +30,8 @@
                             @click.prevent="toAnchor('con_' + item.id)"
                             :class="checkedId === ('con_' + item.id) ? 'active' : ''"
                             :href="'#' + item.id"
-                        >{{ item.timeSlot }}</a>
+                            :title="item.timeSlot.toString()"
+                        >{{ timeSlot_format(item.timeSlot) }}</a>
                     </li>
                 </ul>
             </div>
@@ -37,9 +59,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, Ref, onMounted } from 'vue';
+import { ref, reactive, Ref, onMounted, computed } from 'vue';
 import { throttle } from '../utils/flowControl';
+import * as echarts from 'echarts';
+import '../style/fine-tune-timeLine.scss';// 局部组件库样式微调
 
+const timeLine = reactive({ min: -10000, max: 10000 });
 const tempData = reactive({
     data: [
         { id: 1, timeSlot: 999999, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
@@ -74,9 +99,41 @@ const tempData = reactive({
 
 // 初始化
 const offsetTop_el: { data: Array<{ id: string, offsetTop: number }> } = reactive({ data: [] });
+const slider = ref(), sliderBox = ref(), spiralChart = ref();
 onMounted(() => {
     calculateOffsetTop();
+    setSpiralChart();
+    // 左右滑动时间轴
+    slider.value.onmousedown = function (e: MouseEvent) {
+        const x = e.pageX - slider.value.offsetLeft;
+        document.onmousemove = fn;
+        document.onmouseup = function () {
+            document.onmousemove = null;
+        }
+        function fn(e: MouseEvent) {
+            // 时间轴宽度  - 时间轴视口宽度
+            const max = 1500 - sliderBox.value.offsetWidth;
+            let targetX = e.pageX - x;
+            targetX > 0 ? targetX = 0 : null;
+            targetX < -1 * max ? targetX = -1 * max : null;
+            slider.value.style.left = targetX + 'px';
+        }
+    }
+    // 窗口大小改变时自动适应时间轴右侧
+    window.addEventListener('resize', () => {
+        const sliderLeft = parseInt(slider.value.style.left) || 0;
+        const distance = sliderBox.value.clientWidth - (1500 + sliderLeft);
+        if (distance > 0) slider.value.style.left = sliderLeft + distance + 'px';
+    })
+    // window.onresize = function () {
+
+    // }
 })
+
+// 裁切太长的数字以省略号表示
+const timeSlot_format = (timeSlot: number): number | string => {
+    return timeSlot > 99999 ? timeSlot.toString().slice(0, 5) + '...' : timeSlot;
+}
 
 // 锚点跳转
 const checkedId = ref('con_1');
@@ -125,7 +182,51 @@ function toNavCenter() {
         timelineUl_tran.value = (274 - currentElement.offsetTop) + 'px';
     }
 }
-
+function setSpiralChart() {
+    let myChart = echarts.getInstanceByDom(spiralChart.value);
+    if (myChart == null) {
+        myChart = echarts.init(spiralChart.value);
+    }
+    const data = [];
+    for (let i = 0; i <= 100; i++) {
+        let theta = (i / 100) * 360;
+        let r = i * theta;
+        data.push([r, theta]);
+    }
+    const option = {
+        title: {
+            text: 'Two Value-Axes in Polar'
+        },
+        legend: {
+            data: ['line']
+        },
+        polar: {},
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross'
+            }
+        },
+        angleAxis: {
+            type: 'value',
+            startAngle: 0
+        },
+        radiusAxis: {},
+        series: [
+            {
+                coordinateSystem: 'polar',
+                name: 'line',
+                type: 'line',
+                data: data
+            }
+        ]
+    };
+    myChart.setOption(option);
+    window.onresize = function () {
+        //自适应大小
+        myChart!.resize();
+    };
+}
 </script>
 
 <style lang="scss" scoped>
@@ -135,6 +236,46 @@ function toNavCenter() {
     padding: 0;
     text-align: left;
     overflow: hidden;
+    .timeline__block {
+        float: left;
+        width: calc(100% - 600px);
+        height: 100%;
+        .slider-box {
+            box-sizing: border-box;
+            position: relative;
+            width: 100%;
+            height: 150px;
+            // margin-left: 10px;
+            // overflow-x: scroll;
+            overflow: hidden;
+            user-select: none;
+            cursor: move;
+            border-bottom: 2px dotted #f2f3f5;
+            .slider {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                // background-color: #f2f3f5;
+                // padding: 0 0 0 20px;
+                // padding: 0 20px;
+                // background: radial-gradient(
+                //     circle,
+                //     rgba(2, 0, 36, 1) 0%,
+                //     rgba(17, 111, 69, 1) 18%,
+                //     rgba(33, 33, 181, 1) 35%,
+                //     rgba(25, 80, 200, 1) 52%,
+                //     rgba(21, 99, 208, 1) 59%,
+                //     rgba(234, 9, 70, 1) 82%,
+                //     rgba(0, 212, 255, 1) 100%
+                // );
+            }
+        }
+        .time-spiral {
+            width: 100%;
+            height: calc(100% - 150px);
+        }
+    }
 
     .timeline__section {
         position: relative;

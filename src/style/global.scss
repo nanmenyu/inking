@@ -38,6 +38,28 @@ body {
     margin-bottom: 0;
 }
 
+// .timeline__block .arco-slider-bar {
+//     background-color: #e5e6eb;
+// }
+.arco-slider-track::before {
+    background-color: #165dff;
+}
+
+.arco-slider-ticks .arco-slider-tick {
+    background-color: #165dff;
+}
+
+.arco-slider-btn::after {
+    height: 30px;
+    background: hsla(0, 0%, 100%, .11);
+    box-shadow: 0 0 7px 0 hsl(0deg 0% 100% / 50%);
+    border-radius: 4px;
+    border: 2px solid #165dff;
+    position: absolute;
+    cursor: pointer;
+    margin-top: -10px;
+}
+
 /* 拾色器样式重置（BUG */
 .vc-hue-slider__bar {
     background: -webkit-linear-gradient(left, red 0%, yellow 16.66%, lime 33.33%, aqua 50%, blue 66.66%, fuchsia 83.33%, red 100%);

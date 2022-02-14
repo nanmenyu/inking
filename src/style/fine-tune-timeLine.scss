@@ -1,0 +1,12 @@
+.arco-tooltip {
+    .arco-tooltip-content {
+        background-color: #3491fa;
+        padding: 4px 6px;
+        transform: translateY(-10px);
+    }
+
+    .arco-tooltip-popup-arrow {
+        background-color: #3491fa;
+        transform: translate(-50%, -6px) rotate(45deg) !important;
+    }
+}
