@@ -3,26 +3,50 @@
     <div class="timeline">
         <div class="timeline__block">
             <div class="slider-box" ref="sliderBox">
-                <div class="slider" :style="{ width: '1500px' }" ref="slider">
+                <div class="slider-lable">
+                    <a-progress type="circle" size="mini" status="normal" :percent="percentYear" />
+                    当前:&nbsp;{{ currentYear }}年
+                </div>
+                <div class="slider-tools">
+                    <a-space size="mini">
+                        <a-button type="text" size="mini" title="前一个事件">
+                            <template #icon>
+                                <icon-to-left :style="{ fontSize: '18px' }" />
+                            </template>
+                        </a-button>
+                        <a-button type="text" size="mini" title="放大视图">
+                            <template #icon>
+                                <icon-zoom-in :style="{ fontSize: '18px' }" />
+                            </template>
+                        </a-button>
+                        <a-button type="text" size="mini" title="缩小视图">
+                            <template #icon>
+                                <icon-zoom-out :style="{ fontSize: '18px' }" />
+                            </template>
+                        </a-button>
+                        <a-button type="text" size="mini" title="后一个事件">
+                            <template #icon>
+                                <icon-to-right :style="{ fontSize: '18px' }" />
+                            </template>
+                        </a-button>
+                    </a-space>
+                </div>
+                <div class="slider" :style="{ width: sliderWidth + 'px' }" ref="slider">
                     <a-slider
+                        v-model="currentYear"
                         @mousedown.stop
                         :min="timeLine.min"
                         :max="timeLine.max"
                         :step="100"
                         show-ticks
                         style="width: 100%;margin: 0 ;padding:0;margin-top: 100px;"
-                        :marks="{ '-9900': '', 9900: '' }"
+                        :marks="{ [timeLine.min]: '', [timeLine.max]: '' }"
                     />
                 </div>
             </div>
-            <div @mousemove.stop class="time-spiral" ref="spiralChart"></div>
+            <div class="time-spiral" ref="spiralChart"></div>
         </div>
-        <section
-            @mousemove.stop
-            @scroll="sectionScroll"
-            ref="timelineSection"
-            class="timeline__section"
-        >
+        <section @scroll="sectionScroll" ref="timelineSection" class="timeline__section">
             <div class="timeline__nav">
                 <ul ref="timelineUl">
                     <li v-for="item in tempData.data" :key="item.id" :id="'nav_' + item.id">
@@ -60,11 +84,16 @@
 
 <script setup lang="ts">
 import { ref, reactive, Ref, onMounted, computed } from 'vue';
+import {
+    IconZoomIn,
+    IconZoomOut,
+    IconToLeft,
+    IconToRight
+} from '@arco-design/web-vue/es/icon';
 import { throttle } from '../utils/flowControl';
 import * as echarts from 'echarts';
 import '../style/fine-tune-timeLine.scss';// 局部组件库样式微调
 
-const timeLine = reactive({ min: -10000, max: 10000 });
 const tempData = reactive({
     data: [
         { id: 1, timeSlot: 999999, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
@@ -96,38 +125,105 @@ const tempData = reactive({
         { id: 27, timeSlot: 2019, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
         { id: 28, timeSlot: 2020, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' }]
 })
+const timeLine = reactive({ min: -10000, max: 10000 });
+// 当前年份
+const currentYear = ref(0);
+// 当前年份占总时间轴的长度比例
+const percentYear = computed(() => {
+    return (currentYear.value - timeLine.min) / (timeLine.max - timeLine.min);
+})
+// 时间轴的长度'px'
+const sliderWidth = computed(() => {
+    return Math.round((timeLine.max - timeLine.min) / 10);
+})
 
-// 初始化
+/*
+跨度：(-999999<year<+999999) 默认：-5000<year<+5000
+时间格式：年-月-日 (剔除0值)
+    年份：(-999999<year<+999999) 自定义单位(默认: >=1公元 / <0公元前 )
+    月份：(-999<month<+999) 自定义单位(默认: >=1月 / <0未定义 )
+    日：(-999<day<999) 自定义单位(默认: >=1日 / <0 未定义)
+*/
+// const myData = {
+//     max: 5000,
+//     min: -5000,
+//     remarks: { // 范围备注
+//         year: [
+//             {
+//                 name: '公元前',
+//                 range: [-999999, -1]
+//             }, {
+//                 name: '公元',
+//                 range: [1, -999999]
+//             }
+//         ],
+//         month: [],
+//         day: []
+//     },
+//     eveYear: [{
+//         id: 1,
+//         timeSlot: -100, // 公元前100年
+//         title: '',
+//         desc: '',
+//         eveMonth: [
+//             {
+//                 timeSlot: 7, // 7月
+//                 title: '',
+//                 desc: '',
+//                 eveDay: [{
+//                     timeSlot: 3, // 3日
+//                     title: '',
+//                     desc: '',
+//                 }]
+//             },
+//             {
+//                 timeSlot: 12 // 12月
+//             },
+//             {
+//                 timeSlot: 19 // 19月
+//             }
+//         ]
+//     }, {
+//         id: 1,
+//         timeSlot: 1999, // 公元1999年
+//     }, {
+//         id: 1,
+//         timeSlot: 2000,
+//     }]
+// }
+
 const offsetTop_el: { data: Array<{ id: string, offsetTop: number }> } = reactive({ data: [] });
 const slider = ref(), sliderBox = ref(), spiralChart = ref();
 onMounted(() => {
     calculateOffsetTop();
     setSpiralChart();
     // 左右滑动时间轴
-    slider.value.onmousedown = function (e: MouseEvent) {
+    sliderBox.value.onmousedown = function (e: MouseEvent) {
         const x = e.pageX - slider.value.offsetLeft;
-        document.onmousemove = fn;
+        sliderBox.value.onmousemove = fn;
         document.onmouseup = function () {
-            document.onmousemove = null;
+            sliderBox.value.onmousemove = null;
         }
         function fn(e: MouseEvent) {
             // 时间轴宽度  - 时间轴视口宽度
-            const max = 1500 - sliderBox.value.offsetWidth;
+            const max = sliderWidth.value - sliderBox.value.offsetWidth;
             let targetX = e.pageX - x;
             targetX > 0 ? targetX = 0 : null;
             targetX < -1 * max ? targetX = -1 * max : null;
             slider.value.style.left = targetX + 'px';
         }
     }
+    sliderBox.value.addEventListener('mouseleave', () => {
+        // 主动触发mouseup避免滑块越界
+        const evt = new Event('mouseup', { "bubbles": true, "cancelable": true });
+        document.body.dispatchEvent(evt);
+    })
     // 窗口大小改变时自动适应时间轴右侧
     window.addEventListener('resize', () => {
         const sliderLeft = parseInt(slider.value.style.left) || 0;
-        const distance = sliderBox.value.clientWidth - (1500 + sliderLeft);
+        const distance = sliderBox.value.clientWidth - (sliderWidth.value + sliderLeft);
         if (distance > 0) slider.value.style.left = sliderLeft + distance + 'px';
     })
-    // window.onresize = function () {
-
-    // }
 })
 
 // 裁切太长的数字以省略号表示
@@ -245,30 +341,29 @@ function setSpiralChart() {
             position: relative;
             width: 100%;
             height: 150px;
-            // margin-left: 10px;
-            // overflow-x: scroll;
             overflow: hidden;
             user-select: none;
             cursor: move;
             border-bottom: 2px dotted #f2f3f5;
+            .slider-lable {
+                position: absolute;
+                top: 5px;
+                right: 50%;
+                // transform: translateX(-50%);
+                color: #165dff;
+            }
+            .slider-tools {
+                position: absolute;
+                top: 5px;
+                right: 10px;
+                cursor: pointer;
+                z-index: 99;
+            }
             .slider {
                 position: absolute;
                 top: 0;
                 left: 0;
                 height: 100%;
-                // background-color: #f2f3f5;
-                // padding: 0 0 0 20px;
-                // padding: 0 20px;
-                // background: radial-gradient(
-                //     circle,
-                //     rgba(2, 0, 36, 1) 0%,
-                //     rgba(17, 111, 69, 1) 18%,
-                //     rgba(33, 33, 181, 1) 35%,
-                //     rgba(25, 80, 200, 1) 52%,
-                //     rgba(21, 99, 208, 1) 59%,
-                //     rgba(234, 9, 70, 1) 82%,
-                //     rgba(0, 212, 255, 1) 100%
-                // );
             }
         }
         .time-spiral {
