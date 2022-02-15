@@ -10,3 +10,16 @@
         transform: translate(-50%, -6px) rotate(45deg) !important;
     }
 }
+
+.arco-slider-dots .arco-slider-dot-wrapper[style="left: 100%;"] {
+    .arco-slider-dot {
+        width: 0;
+        height: 0;
+        border: none;
+        border-radius: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-bottom: 10px solid #165dff;
+        transform: rotateZ(90deg);
+    }
+}
