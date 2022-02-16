@@ -1,5 +1,22 @@
 <!-- 时间线编辑模块 -->
 <template>
+    <div v-if="isAddEvent" id="modify-box">
+        <div class="box">
+            <div class="box-header">
+                <div class="header-title">添加历史事件</div>
+                <div class="header-close" @click="modify">
+                    <icon-close />
+                </div>
+            </div>
+            <div class="box-body"></div>
+            <div class="box-footer">
+                <a-space size="large">
+                    <a-button @click="modify">取消</a-button>
+                    <a-button type="primary">添加</a-button>
+                </a-space>
+            </div>
+        </div>
+    </div>
     <div class="timeline">
         <div class="timeline__block">
             <div class="slider-box" ref="sliderBox">
@@ -7,8 +24,25 @@
                     <a-progress type="circle" size="mini" status="normal" :percent="percentYear" />
                     当前:&nbsp;{{ currentYear }}年
                 </div>
-                <div class="slider-tools">
+                <div @mousemove.stop class="slider-tools">
                     <a-space size="mini">
+                        <a-button @click="addHistoryEvent" type="text" size="mini" title="添加历史事件">
+                            <template #icon>
+                                <icon-plus-circle :style="{ fontSize: '18px' }" />
+                            </template>
+                        </a-button>
+                        <a-button @click="positionTimePoint" type="text" size="mini" title="定位时间点">
+                            <template #icon>
+                                <icon-location :style="{ fontSize: '18px' }" />
+                            </template>
+                        </a-button>
+                        <a-input-number
+                            v-show="isPosition"
+                            size="mini"
+                            :default-value="currentYear"
+                            style="width: 100px;"
+                            @change="confirmPosition"
+                        />
                         <a-button type="text" size="mini" title="前一个事件">
                             <template #icon>
                                 <icon-to-left :style="{ fontSize: '18px' }" />
@@ -82,7 +116,10 @@
                         :key="item.id"
                         :id="'con_' + item.id"
                     >
-                        <h2>{{ item.timeSlot }}</h2>
+                        <h2>
+                            {{ item.timeSlot }}
+                            <span style="font-size: 16px;">黑暗圣经事件</span>
+                        </h2>
                         <p>
                             <img
                                 width="40"
@@ -99,17 +136,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, Ref, onMounted, computed } from 'vue';
+import { ref, reactive, Ref, onMounted, computed, nextTick } from 'vue';
 import {
+    IconPlusCircle,
+    IconLocation,
     IconZoomIn,
     IconZoomOut,
     IconToLeft,
-    IconToRight
+    IconToRight,
+    IconClose
 } from '@arco-design/web-vue/es/icon';
 import { throttle } from '../utils/flowControl';
 import * as echarts from 'echarts';
 import '../style/fine-tune-timeLine.scss';// 局部组件库样式微调
-import { nextTick } from 'process';
+// import { nextTick } from 'process';
+import useCurrentInstance from '../utils/useCurrentInstance';
+const { proxy } = useCurrentInstance();
 
 const test = () => {
     // console.log(sliderBox.value.clientWidth);
@@ -152,7 +194,7 @@ const tempData = reactive({
 })
 const timeLine = reactive({ min: -5000, max: 5000 });
 // 当前年份
-const currentYear = ref(0);
+const currentYear = ref(2022);
 // 当前年份占总时间轴的长度比例
 const percentYear = computed(() => {
     return (currentYear.value - timeLine.min) / (timeLine.max - timeLine.min);
@@ -327,6 +369,31 @@ const controlScaling = (type: string) => {
     }
     setSliderState();
 }
+// 定位时间点
+const isPosition = ref(false);
+const positionTimePoint = () => {
+    isPosition.value = !isPosition.value;
+}
+// 设置快捷跳转
+const confirmPosition = (value: number) => {
+    if (value === 0) {
+        proxy.$message.error('0年是无意义的!');
+    } else if (value < timeLine.min || value > timeLine.max) {
+        proxy.$message.error('年份越界!');
+    } else {
+        currentYear.value = value;
+        setSliderState();
+    }
+}
+// 添加历史事件
+const isAddEvent = ref(false);
+const addHistoryEvent = () => {
+    isAddEvent.value = true;
+}
+const modify = () => {
+    isPosition.value = false;
+    isAddEvent.value = false;
+}
 // 时间轴状态设置
 function setSliderState() {
     nextTick(() => {
@@ -428,6 +495,10 @@ function slidingTimeline(e: MouseEvent) {
 </script>
 
 <style lang="scss" scoped>
+/* 弹窗 */
+#modify-box {
+    @include popupBase;
+}
 .timeline {
     width: 100%;
     height: calc(100vh - 90px);
@@ -452,6 +523,7 @@ function slidingTimeline(e: MouseEvent) {
                 top: 5px;
                 right: 50%;
                 color: #165dff;
+                z-index: 99;
             }
             .slider-tools {
                 position: absolute;
@@ -472,7 +544,6 @@ function slidingTimeline(e: MouseEvent) {
             height: calc(100% - 150px);
         }
     }
-
     .timeline__section {
         position: relative;
         float: right;
@@ -549,6 +620,21 @@ function slidingTimeline(e: MouseEvent) {
                 transform: scale(1.2);
             }
         }
+    }
+}
+@keyframes spredModify {
+    0% {
+        width: 0;
+        opacity: 0;
+    }
+
+    30% {
+        opacity: 0;
+    }
+
+    100% {
+        width: 550px;
+        opacity: 1;
     }
 }
 </style>
