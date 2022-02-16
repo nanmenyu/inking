@@ -103,15 +103,6 @@ declare interface KeyWord {
   itemString: Array<{ key: string; value: string; }>;
   otherName: Array<string>;
 }
-// interface ItemNumber {
-//   key: string;
-//   unit: string;
-//   value: number
-// }
-// interface ItemString {
-//   key: string;
-//   value: string;
-// }
 // 关联项
 interface Associated {
   iid: string;
@@ -125,4 +116,34 @@ interface Template {
   numberKey: string;
   stringKey: string;
   title: string;
+}
+// 时间线组
+declare interface TimeLineGroup {
+  tid: string,
+  name: string,
+  max: number,
+  min: number,
+  remarks: {
+    year: Array<{ name: string, range: [number, number] }>,
+    month: Array<{ name: string, range: [number, number] }>,
+    day: Array<{ name: string, range: [number, number] }>
+  },
+  eveYear?: Array<Eveyear>
+}
+interface Eveyear {
+  yid: string,
+  timeSlot: number,
+  data: Array<{ id: number, title: string, desc: string }>,
+  eveMonth: Array<Evemonth>
+}
+interface Evemonth {
+  mid: string,
+  timeSlot: number,
+  data: Array<{ id: number, title: string, desc: string }>,
+  eveDay: Array<Eveday>
+}
+interface Eveday {
+  did: string,
+  timeSlot: number,
+  data: Array<{ id: number, title: string, desc: string }>,
 }

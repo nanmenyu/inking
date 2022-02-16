@@ -17,6 +17,7 @@ export interface Userdb {
     historRecord: { vid: string, cid: string };
     theKeyWord: Array<KeyWordGroup>;
     checked?: boolean;
+    theTimeLine: Array<TimeLineGroup>
 }
 
 export class MySubClassedDexie extends Dexie {

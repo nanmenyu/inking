@@ -9,10 +9,10 @@
                 </div>
             </div>
             <div class="box-body" style="padding: 0 0 0 20px;overflow: hidden;">
-                <a-tabs type="text" @change="chocieTab" default-active-key="1">
-                    <a-tab-pane key="1" title="年事件"></a-tab-pane>
-                    <a-tab-pane key="2" title="*月事件"></a-tab-pane>
-                    <a-tab-pane key="3" title="*日事件"></a-tab-pane>
+                <a-tabs type="text" @change="chocieTab" default-active-key="y">
+                    <a-tab-pane key="y" title="年事件"></a-tab-pane>
+                    <a-tab-pane key="m" title="*月事件"></a-tab-pane>
+                    <a-tab-pane key="d" title="*日事件"></a-tab-pane>
                 </a-tabs>
                 <div class="tab-content">
                     <a-space style="width: 100%;margin: 0 0 0 15px;cursor: pointer;" wrap>
@@ -35,29 +35,48 @@
                             </span>
                         </a-tag>
                         <a-tag color="#7816ff">
-                            123sgxdhfghhhhhhhhhhhhhhhhhhhhh
-                            <span class="tag-close" title="删除">
-                                <icon-close />
-                            </span>
-                        </a-tag>
-                        <a-tag color="#7816ff">
                             123
                             <span class="tag-close" title="删除">
                                 <icon-close />
                             </span>
                         </a-tag>
                     </a-space>
-                    <a-form layout="inline" style="margin: 10px 0 50px 0;">
-                        <a-form-item field="time" label="选择年份">
+                    <a-form :model="formData" layout="inline" style="margin: 10px 0 50px 0;">
+                        <a-form-item v-if="curTabType === 'y'" field="year" label="选择何年">
                             <a-input-number
                                 :default-value="currentYear"
                                 @change="confirmPosition"
+                                :min="timeLine.min"
+                                :max="timeLine.max"
                                 size="samll"
                                 style="width: 100px;"
                             />
                         </a-form-item>
-                        <a-form-item field="event" label="事件名">
-                            <a-
+                        <a-form-item
+                            v-if="curTabType === 'm' || curTabType === 'd'"
+                            field="month"
+                            label="选择何月"
+                        >
+                            <a-input-number
+                                v-model="formData.month"
+                                :min="-999"
+                                :max="999"
+                                size="samll"
+                                style="width: 100px;"
+                            />
+                        </a-form-item>
+                        <a-form-item v-if="curTabType === 'd'" field="day" label="选择何日">
+                            <a-input-number
+                                v-model="formData.day"
+                                :min="-999"
+                                :max="999"
+                                size="samll"
+                                style="width: 100px;"
+                            />
+                        </a-form-item>
+                        <a-form-item field="event" label="事件名称">
+                            <a-input
+                                v-model="formData.event"
                                 :max-length="15"
                                 placeholder="请填写事件名"
                                 size="samll"
@@ -67,6 +86,7 @@
                         </a-form-item>
                         <a-form-item field="eventdesc" label="事件描述">
                             <a-textarea
+                                v-model="formData.eventdesc"
                                 placeholder="填写事件的相关描述"
                                 :auto-size="{
                                     minRows: 5,
@@ -84,7 +104,7 @@
             <div class="box-footer">
                 <a-space size="large">
                     <a-button @click="modify">取消</a-button>
-                    <a-button type="primary">添加</a-button>
+                    <a-button @click="addHistoryEvent" type="primary">添加</a-button>
                 </a-space>
             </div>
         </div>
@@ -94,11 +114,11 @@
             <div class="slider-box" ref="sliderBox">
                 <div class="slider-lable">
                     <a-progress type="circle" size="mini" status="normal" :percent="percentYear" />
-                    当前:&nbsp;{{ currentYear }}年
+                    默认线:&nbsp;{{ currentYear }}年
                 </div>
                 <div @mousemove.stop class="slider-tools">
                     <a-space size="mini">
-                        <a-button @click="addHistoryEvent" type="text" size="mini" title="添加历史事件">
+                        <a-button @click="isAddEvent = true" type="text" size="mini" title="添加历史事件">
                             <template #icon>
                                 <icon-plus-circle :style="{ fontSize: '18px' }" />
                             </template>
@@ -166,7 +186,42 @@
                     />
                 </div>
             </div>
-            <div class="time-spiral" ref="spiralChart"></div>
+            <div class="slider-setting">
+                <div class="setting-item">
+                    <a-result :status="null" title="添加时间线">
+                        <template #icon>
+                            <img :src="timeline3" />
+                        </template>
+                        <template #extra>
+                            <a-button type="primary" size="small">
+                                <template #icon>
+                                    <icon-plus />
+                                </template>添加
+                            </a-button>
+                        </template>
+                    </a-result>
+                </div>
+                <div class="setting-item">
+                    <a-result :status="null" title="切换时间线">
+                        <template #icon>
+                            <img :src="timeline4" />
+                        </template>
+                        <template #extra>
+                            <a-dropdown @popup-visible-change="isRotate = !isRotate">
+                                <a-button type="primary" size="small">
+                                    <template #icon>
+                                        <icon-down :class="isRotate ? 'rotate' : '_rotate'" />
+                                    </template>切换
+                                </a-button>
+                                <template #content>
+                                    <a-doption>默认线</a-doption>
+                                    <a-doption>xxx线</a-doption>
+                                </template>
+                            </a-dropdown>
+                        </template>
+                    </a-result>
+                </div>
+            </div>
         </div>
         <section @scroll="sectionScroll" ref="timelineSection" class="timeline__section">
             <div class="timeline__nav">
@@ -210,6 +265,8 @@
 <script setup lang="ts">
 import { ref, reactive, Ref, onMounted, computed, nextTick } from 'vue';
 import {
+    IconPlus,
+    IconDown,
     IconPlusCircle,
     IconLocation,
     IconZoomIn,
@@ -221,9 +278,15 @@ import {
 import { throttle } from '../utils/flowControl';
 import * as echarts from 'echarts';
 import '../style/fine-tune-timeLine.scss';// 局部组件库样式微调
-// import { nextTick } from 'process';
+import { db } from '../db/db';
+import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
+import timeline3 from '../assets/svg/timeline3.svg';
+import timeline4 from '../assets/svg/timeline4.svg';
+
 const { proxy } = useCurrentInstance();
+const route = useRoute();
+const query_id = parseInt(<string>route.query.id);
 
 const tempData = reactive({
     data: [
@@ -308,67 +371,73 @@ const timeLineMarks = computed(() => {
     }
     return stepObj;
 })
-
 /*
+theTimeLine:[{
+    tid:xxxx,
+    name:'默认线',
+    max: 5000,
+    min: -5000,
+    remarks: { // 别名
+        year: [
+            {
+                name: '公元前',
+                range: [-999999, -1]
+            }, {
+                name: '公元',
+                range: [1, -999999]
+            }
+        ],
+        month: [],
+        day: []
+    },
+    eveYear: [{
+        id: 1,
+        timeSlot: -100, // 公元前100年
+        data:[{ 
+            title: '',
+        desc: '',
+        },{},{}],
+        eveMonth: [
+            {
+                timeSlot: 7, // 7月
+                title: '',
+                desc: '',
+                eveDay: [{
+                    timeSlot: 3, // 3日
+                    title: '',
+                    desc: '',
+                }]
+            },
+            {
+                timeSlot: 12 // 12月
+            },
+            {
+                timeSlot: 19 // 19月
+            }
+        ]
+    }, {
+        id: 1,
+        timeSlot: 1999, // 公元1999年
+    }, {
+        id: 1,
+        timeSlot: 2000,
+    }]
+	
+},{
+    tid:xxxx
+}]
 跨度：(-999999<year<+999999) 默认：-5000<year<+5000
 时间格式：年-月-日 (剔除0值)
     年份：(-999999<year<+999999) 自定义单位(默认: >=1公元 / <0公元前 )
     月份：(-999<month<+999) 自定义单位(默认: >=1月 / <0未定义 )
     日：(-999<day<999) 自定义单位(默认: >=1日 / <0 未定义)
 */
-// const myData = {
-//     max: 5000,
-//     min: -5000,
-//     remarks: { // 范围备注
-//         year: [
-//             {
-//                 name: '公元前',
-//                 range: [-999999, -1]
-//             }, {
-//                 name: '公元',
-//                 range: [1, -999999]
-//             }
-//         ],
-//         month: [],
-//         day: []
-//     },
-//     eveYear: [{
-//         id: 1,
-//         timeSlot: -100, // 公元前100年
-//         title: '',
-//         desc: '',
-//         eveMonth: [
-//             {
-//                 timeSlot: 7, // 7月
-//                 title: '',
-//                 desc: '',
-//                 eveDay: [{
-//                     timeSlot: 3, // 3日
-//                     title: '',
-//                     desc: '',
-//                 }]
-//             },
-//             {
-//                 timeSlot: 12 // 12月
-//             },
-//             {
-//                 timeSlot: 19 // 19月
-//             }
-//         ]
-//     }, {
-//         id: 1,
-//         timeSlot: 1999, // 公元1999年
-//     }, {
-//         id: 1,
-//         timeSlot: 2000,
-//     }]
-// }
 
 const offsetTop_el: { data: Array<{ id: string, offsetTop: number }> } = reactive({ data: [] });
 const slider = ref(), sliderBox = ref(), spiralChart = ref();
 onMounted(() => {
     calculateOffsetTop();
-    setSpiralChart();
+    // setSpiralChart();
     setSliderState();
     // 左右滑动时间轴
     sliderBox.value.onmousedown = slidingTimeline;
@@ -442,33 +511,75 @@ const positionTimePoint = () => {
 const confirmPosition = (value: number) => {
     if (value === 0) {
         proxy.$message.error('0年是无意义的!');
-    } else if (value < timeLine.min || value > timeLine.max) {
-        proxy.$message.error('年份越界!');
     } else {
         currentYear.value = value;
         setSliderState();
     }
 }
+
 // 添加历史事件
 const isAddEvent = ref(false);
-const addHistoryEvent = () => {
-    isAddEvent.value = true;
-}
-const modify = () => {
-    isPosition.value = false;
-    isAddEvent.value = false;
-}
 // 选择标签页
 const curTabType = ref('y');
 const formData = reactive({
-    time: 0,
+    month: 1,
+    day: 1,
     event: '',
     eventdesc: ''
 });
 const chocieTab = (type: string) => {
     curTabType.value = type;
 }
+const addHistoryEvent = () => {
+    let targetData;
+    switch (curTabType.value) {
+        case 'y':
+            targetData = {
+                year: currentYear.value,
+                event: formData.event,
+                eventdesc: formData.eventdesc
+            }
+            console.log(targetData);
+            db.opus
+                .where(':id')
+                .equals(query_id)
+                .modify(item => {
+                    console.log(item);
+                    item.theTimeLine
+                })
+            break;
+        case 'm':
+            targetData = {
+                year: currentYear.value,
+                month: formData.month,
+                event: formData.event,
+                eventdesc: formData.eventdesc
+            }
+            console.log(targetData);
+            break;
+        case 'd':
+            targetData = {
+                year: currentYear.value,
+                month: formData.month,
+                day: formData.day,
+                event: formData.event,
+                eventdesc: formData.eventdesc
+            }
+            console.log(targetData);
+            break;
+    }
+}
 
+function getTimeLineData() {
+
+}
+// 旋转图标
+const isRotate = ref(false);
+// 取消弹框
+const modify = () => {
+    isPosition.value = false;
+    isAddEvent.value = false;
+}
 // 时间轴状态设置
 function setSliderState() {
     nextTick(() => {
@@ -511,14 +622,14 @@ function setSpiralChart() {
         myChart = echarts.init(spiralChart.value);
     }
     const data = [];
-    for (let i = 0; i <= 100; i++) {
-        let theta = (i / 100) * 360;
+    for (let i = 0; i <= 10000; i++) {
+        let theta = (i / 10000) * 1440;
         let r = i * theta;
         data.push([r, theta]);
     }
     const option = {
         title: {
-            text: 'Two Value-Axes in Polar'
+            text: '时间线总览'
         },
         legend: {
             data: ['line']
@@ -532,7 +643,9 @@ function setSpiralChart() {
         },
         angleAxis: {
             type: 'value',
-            startAngle: 0
+            startAngle: 0,
+            min: 0,
+            max: 360,
         },
         radiusAxis: {},
         series: [
@@ -540,6 +653,7 @@ function setSpiralChart() {
                 coordinateSystem: 'polar',
                 name: 'line',
                 type: 'line',
+                showSymbol: false,
                 data: data
             }
         ]
@@ -555,7 +669,7 @@ function slidingTimeline(e: MouseEvent) {
     const x = e.pageX - slider.value.offsetLeft;
     sliderBox.value.onmousemove = fn;
     document.onmouseup = function () {
-        sliderBox.value.onmousemove = null;
+        if (sliderBox.value.onmousemove) sliderBox.value.onmousemove = null;
     }
     function fn(e: MouseEvent) {
         // 时间轴宽度  - 时间轴视口宽度
@@ -587,7 +701,7 @@ function slidingTimeline(e: MouseEvent) {
     text-align: left;
     overflow: hidden;
     .timeline__block {
-        float: left;
+        float: right;
         width: calc(100% - 600px);
         height: 100%;
         .slider-box {
@@ -620,17 +734,24 @@ function slidingTimeline(e: MouseEvent) {
                 height: 100%;
             }
         }
-        .time-spiral {
-            width: 100%;
-            height: calc(100% - 150px);
+        .slider-setting {
+            float: right;
+            width: 100px;
+            height: 100%;
+            .setting-item {
+                width: 100%;
+                margin: 5px 0;
+            }
         }
     }
     .timeline__section {
+        box-sizing: border-box;
         position: relative;
-        float: right;
+        float: left;
         width: 500px;
         height: 100%;
-        margin-right: 100px;
+        margin-left: 100px;
+        border-right: 2px solid #f2f3f5;
         overflow: scroll;
         &::-webkit-scrollbar-thumb {
             background-color: rgba(0, 0, 0, 0);
@@ -649,14 +770,14 @@ function slidingTimeline(e: MouseEvent) {
         }
         .timeline__nav {
             position: fixed;
-            right: 20px;
+            left: 20px;
             top: calc(50% + 20px);
             width: 55px;
             max-height: 600px;
             padding: 0 10px;
             transform: translateY(-50%);
             user-select: none;
-            text-align: center;
+            text-align: left;
             overflow: hidden;
             ul {
                 width: 100%;
@@ -713,6 +834,15 @@ function slidingTimeline(e: MouseEvent) {
     &:hover {
         border: 1px solid #fff;
     }
+}
+.rotate {
+    transition-duration: 0.3s;
+    transform: rotateZ(180deg);
+}
+
+.-rotate {
+    transition-duration: 0.3s;
+    transform: rotateZ(0);
 }
 @keyframes spredModify {
     0% {

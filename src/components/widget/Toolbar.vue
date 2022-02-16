@@ -252,7 +252,25 @@ const addFile = () => {
                 }],
                 discard: 'f', //因为boolean无法索引  f即false t即true
                 historRecord: { vid: '', cid: '' },
-                theKeyWord: [] // 关键词模块
+                theKeyWord: [], // 关键词模块
+                theTimeLine: [{
+                    tid: v4(),
+                    name: '默认线',
+                    max: 5000,
+                    min: -5000,
+                    remarks: {
+                        year: [{
+                            name: '公元前',
+                            range: [-999999, -1]
+                        }, {
+                            name: '公元',
+                            range: [1, -999999]
+                        }],
+                        month: [],
+                        day: []
+                    },
+                    eveYear: []
+                }] // 时间线模块
             }).then(() => {
                 emit('refresh');
             });
