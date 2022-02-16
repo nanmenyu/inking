@@ -8,7 +8,79 @@
                     <icon-close />
                 </div>
             </div>
-            <div class="box-body"></div>
+            <div class="box-body" style="padding: 0 0 0 20px;overflow: hidden;">
+                <a-tabs type="text" @change="chocieTab" default-active-key="1">
+                    <a-tab-pane key="1" title="年事件"></a-tab-pane>
+                    <a-tab-pane key="2" title="*月事件"></a-tab-pane>
+                    <a-tab-pane key="3" title="*日事件"></a-tab-pane>
+                </a-tabs>
+                <div class="tab-content">
+                    <a-space style="width: 100%;margin: 0 0 0 15px;cursor: pointer;" wrap>
+                        <a-tag color="#7816ff">
+                            123
+                            <span class="tag-close" title="删除">
+                                <icon-close />
+                            </span>
+                        </a-tag>
+                        <a-tag color="#7816ff">
+                            123
+                            <span class="tag-close" title="删除">
+                                <icon-close />
+                            </span>
+                        </a-tag>
+                        <a-tag color="#7816ff">
+                            123
+                            <span class="tag-close" title="删除">
+                                <icon-close />
+                            </span>
+                        </a-tag>
+                        <a-tag color="#7816ff">
+                            123sgxdhfghhhhhhhhhhhhhhhhhhhhh
+                            <span class="tag-close" title="删除">
+                                <icon-close />
+                            </span>
+                        </a-tag>
+                        <a-tag color="#7816ff">
+                            123
+                            <span class="tag-close" title="删除">
+                                <icon-close />
+                            </span>
+                        </a-tag>
+                    </a-space>
+                    <a-form layout="inline" style="margin: 10px 0 50px 0;">
+                        <a-form-item field="time" label="选择年份">
+                            <a-input-number
+                                :default-value="currentYear"
+                                @change="confirmPosition"
+                                size="samll"
+                                style="width: 100px;"
+                            />
+                        </a-form-item>
+                        <a-form-item field="event" label="事件名">
+                            <a-
+                                :max-length="15"
+                                placeholder="请填写事件名"
+                                size="samll"
+                                style="width: 200px;"
+                                allow-clear
+                            />
+                        </a-form-item>
+                        <a-form-item field="eventdesc" label="事件描述">
+                            <a-textarea
+                                placeholder="填写事件的相关描述"
+                                :auto-size="{
+                                    minRows: 5,
+                                    maxRows: 5
+                                }"
+                                style="width: 420px;"
+                                :max-length="500"
+                                show-word-limit
+                                allow-clear
+                            />
+                        </a-form-item>
+                    </a-form>
+                </div>
+            </div>
             <div class="box-footer">
                 <a-space size="large">
                     <a-button @click="modify">取消</a-button>
@@ -68,7 +140,7 @@
                                 <icon-zoom-out :style="{ fontSize: '18px' }" />
                             </template>
                         </a-button>
-                        <a-button @click="test" type="text" size="mini" title="后一个事件">
+                        <a-button type="text" size="mini" title="后一个事件">
                             <template #icon>
                                 <icon-to-right :style="{ fontSize: '18px' }" />
                             </template>
@@ -152,14 +224,6 @@ import '../style/fine-tune-timeLine.scss';// 局部组件库样式微调
 // import { nextTick } from 'process';
 import useCurrentInstance from '../utils/useCurrentInstance';
 const { proxy } = useCurrentInstance();
-
-const test = () => {
-    // console.log(sliderBox.value.clientWidth);
-    // console.log(slider.value.clientWidth);
-    // console.log(sliderBox.value.onmousedown);
-    // console.log(timeLineMarks.value);
-    console.log(scaleFactor.value);
-}
 
 const tempData = reactive({
     data: [
@@ -394,6 +458,17 @@ const modify = () => {
     isPosition.value = false;
     isAddEvent.value = false;
 }
+// 选择标签页
+const curTabType = ref('y');
+const formData = reactive({
+    time: 0,
+    event: '',
+    eventdesc: ''
+});
+const chocieTab = (type: string) => {
+    curTabType.value = type;
+}
+
 // 时间轴状态设置
 function setSliderState() {
     nextTick(() => {
@@ -410,7 +485,6 @@ function setSliderState() {
         }
     })
 }
-
 // 计算每个元素距离父元素顶部的大小
 function calculateOffsetTop() {
     let targetElement: HTMLElement;
@@ -498,6 +572,13 @@ function slidingTimeline(e: MouseEvent) {
 /* 弹窗 */
 #modify-box {
     @include popupBase;
+    .tab-content {
+        // box-sizing: border-box;
+        width: 100%;
+        height: 300px;
+        overflow: hidden;
+        overflow-y: scroll;
+    }
 }
 .timeline {
     width: 100%;
@@ -620,6 +701,17 @@ function slidingTimeline(e: MouseEvent) {
                 transform: scale(1.2);
             }
         }
+    }
+}
+.tag-close {
+    margin-left: 4px;
+    padding: 2px 3px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0);
+    transition: border 0.2s;
+
+    &:hover {
+        border: 1px solid #fff;
     }
 }
 @keyframes spredModify {
