@@ -629,16 +629,8 @@ const booksData: { data: Userdb } = reactive({
 const totalNumber = ref(0);
 loadData();
 
-// let timer: NodeJS.Timeout, isAllow: boolean = false;
 const rightExpansion = (spread: boolean) => {
-    // if (isAllow) {
     isspread.value = spread;
-    // }
-    // timer = setTimeout(() => {
-    //     console.log('sdsdsd');
-    //     isAllow = true;
-    //     clearTimeout(timer);
-    // }, 100)
 }
 
 /*----旋转动画----*/
@@ -759,8 +751,7 @@ const isspread: any = ref(null);
 
 /*----删除作品----*/
 const deleteOpus = () => {
-    db.opus
-        .update(query_id, { discard: 't', discardTime: new Date().getTime() })
+    db.opus.update(query_id, { discard: 't', discardTime: new Date().getTime() })
         .then(() => {
             router.push({
                 path: '/',
@@ -774,27 +765,23 @@ const deleteOpus = () => {
 // 点击添加卷
 const isNewVolume = ref(false), volumeName = ref('未命名卷');
 const addNewVolume = () => {
-    db.opus
-        .where(':id')
-        .equals(query_id)
-        .modify(item => {
-            item.data.push({
-                vid: v4(),
-                volumeName: volumeName.value,
+    db.opus.where(':id').equals(query_id).modify(item => {
+        item.data.push({
+            vid: v4(),
+            volumeName: volumeName.value,
+            updateTime: new Date().getTime(),
+            volume: [{
+                cid: v4(),
+                chapterName: '未命名章',
                 updateTime: new Date().getTime(),
-                volume: [{
-                    cid: v4(),
-                    chapterName: '未命名章',
-                    updateTime: new Date().getTime(),
-                    chapter: ['\u3000\u3000']
-                }]
-            });
-        })
-        .then(() => {
-            isNewVolume.value = false;
-            loadData();
-            $message.success('添加成功!');
-        })
+                chapter: ['\u3000\u3000']
+            }]
+        });
+    }).then(() => {
+        isNewVolume.value = false;
+        loadData();
+        $message.success('添加成功!');
+    })
 }
 // 点击添加章
 const isNewChapter = ref(false), chapterName = ref('未命名章');
@@ -804,29 +791,25 @@ const newChapter = (vid: string) => {
     isNewChapter.value = true;
 }
 const addNewChapter = () => {
-    db.opus
-        .where(':id')
-        .equals(query_id)
-        .modify(item => {
-            for (let i = 0; i < item.data.length; i++) {
-                if (item.data[i].vid === volumeId) {
-                    item.data[i].volume.push({
-                        cid: v4(),
-                        chapterName: chapterName.value,
-                        chapterNum: 0,
-                        scrollTop: 0,
-                        updateTime: new Date().getTime(),
-                        chapter: ['\u3000\u3000']
-                    });
-                    break;
-                }
+    db.opus.where(':id').equals(query_id).modify(item => {
+        for (let i = 0; i < item.data.length; i++) {
+            if (item.data[i].vid === volumeId) {
+                item.data[i].volume.push({
+                    cid: v4(),
+                    chapterName: chapterName.value,
+                    chapterNum: 0,
+                    scrollTop: 0,
+                    updateTime: new Date().getTime(),
+                    chapter: ['\u3000\u3000']
+                });
+                break;
             }
-        })
-        .then(() => {
-            isNewChapter.value = false;
-            loadData();
-            $message.success('添加成功!');
-        })
+        }
+    }).then(() => {
+        isNewChapter.value = false;
+        loadData();
+        $message.success('添加成功!');
+    })
 }
 
 // 删除卷（移至废纸篓）
@@ -836,22 +819,18 @@ const deleteVolume = (vid: string, vname: string) => {
         content: `目标卷【${vname}】将放入废纸篓, 并保留30天`,
         simple: true,
         onOk: () => {
-            db.opus
-                .where(':id')
-                .equals(query_id)
-                .modify(item => {
-                    for (let i = 0; i < item.data.length; i++) {
-                        if (item.data[i].vid === vid) {
-                            item.data[i].discard = true;
-                            item.data[i].discardTime = new Date().getTime();
-                            break;
-                        }
+            db.opus.where(':id').equals(query_id).modify(item => {
+                for (let i = 0; i < item.data.length; i++) {
+                    if (item.data[i].vid === vid) {
+                        item.data[i].discard = true;
+                        item.data[i].discardTime = new Date().getTime();
+                        break;
                     }
-                })
-                .then(() => {
-                    loadData();
-                    $message.success('删除成功!');
-                })
+                }
+            }).then(() => {
+                loadData();
+                $message.success('删除成功!');
+            })
         }
     })
 }
@@ -862,26 +841,23 @@ const deleteChapter = (vid: string, cid: string, cname: string) => {
         content: `目标章《${cname}》将放入废纸篓, 并保留30天`,
         simple: true,
         onOk: () => {
-            db.opus
-                .where(':id')
-                .equals(query_id)
-                .modify(item => {
-                    for (let i = 0; i < item.data.length; i++) {
-                        if (item.data[i].vid === vid) {
-                            for (let j = 0; j < item.data[i].volume.length; j++) {
-                                if (item.data[i].volume[j].cid === cid) {
-                                    item.data[i].volume[j].discard = true;
-                                    item.data[i].volume[j].discardTime = new Date().getTime();
-                                    break;
-                                }
+            db.opus.where(':id').equals(query_id).modify(item => {
+                for (let i = 0; i < item.data.length; i++) {
+                    if (item.data[i].vid === vid) {
+                        for (let j = 0; j < item.data[i].volume.length; j++) {
+                            if (item.data[i].volume[j].cid === cid) {
+                                item.data[i].volume[j].discard = true;
+                                item.data[i].volume[j].discardTime = new Date().getTime();
+                                break;
                             }
-                            break;
                         }
+                        break;
                     }
-                }).then(() => {
-                    loadData();
-                    $message.success('删除成功!');
-                })
+                }
+            }).then(() => {
+                loadData();
+                $message.success('删除成功!');
+            })
         }
     })
 }
@@ -897,39 +873,33 @@ const showReName = (type: string, id: string, vname: string) => {
 const reName = () => {
     // 修改卷
     if (reType === 'v') {
-        db.opus
-            .where(':id')
-            .equals(query_id)
-            .modify(item => {
-                for (let i = 0; i < item.data.length; i++) {
-                    if (item.data[i].vid === temp_id) {
-                        item.data[i].volumeName = showName.value;
-                        break;
-                    }
+        db.opus.where(':id').equals(query_id).modify(item => {
+            for (let i = 0; i < item.data.length; i++) {
+                if (item.data[i].vid === temp_id) {
+                    item.data[i].volumeName = showName.value;
+                    break;
                 }
-            }).then(() => {
-                isRename.value = false;
-                loadData();
-            })
+            }
+        }).then(() => {
+            isRename.value = false;
+            loadData();
+        })
     }
     // 修改章
     else if (reType === 'c') {
-        db.opus
-            .where(':id')
-            .equals(query_id)
-            .modify(item => {
-                for (let i = 0; i < item.data.length; i++) {
-                    for (let j = 0; j < item.data[i].volume.length; j++) {
-                        if (item.data[i].volume[j].cid === temp_id) {
-                            item.data[i].volume[j].chapterName = showName.value;
-                            break;
-                        }
+        db.opus.where(':id').equals(query_id).modify(item => {
+            for (let i = 0; i < item.data.length; i++) {
+                for (let j = 0; j < item.data[i].volume.length; j++) {
+                    if (item.data[i].volume[j].cid === temp_id) {
+                        item.data[i].volume[j].chapterName = showName.value;
+                        break;
                     }
                 }
-            }).then(() => {
-                isRename.value = false;
-                loadData();
-            })
+            }
+        }).then(() => {
+            isRename.value = false;
+            loadData();
+        })
     }
 }
 
@@ -985,31 +955,27 @@ const restoreSelect = () => {
         if (item.checked) targetId.push(item.id);
     });
     if (targetId.length > 0) {
-        db.opus
-            .where(':id')
-            .equals(query_id)
-            .modify(item => {
-                for (let i = 0; i < targetId.length; i++) {
-                    for (let j = 0; j < item.data.length; j++) {
-                        if (item.data[j].vid === targetId[i]) {
-                            item.data[j].discard = false;
-                            break;
-                        } else {
-                            for (let m = 0; m < item.data[j].volume.length; m++) {
-                                if (item.data[j].volume[m].cid === targetId[i]) {
-                                    item.data[j].volume[m].discard = false;
-                                    break;
-                                }
+        db.opus.where(':id').equals(query_id).modify(item => {
+            for (let i = 0; i < targetId.length; i++) {
+                for (let j = 0; j < item.data.length; j++) {
+                    if (item.data[j].vid === targetId[i]) {
+                        item.data[j].discard = false;
+                        break;
+                    } else {
+                        for (let m = 0; m < item.data[j].volume.length; m++) {
+                            if (item.data[j].volume[m].cid === targetId[i]) {
+                                item.data[j].volume[m].discard = false;
+                                break;
                             }
                         }
                     }
                 }
-            })
-            .then(() => {
-                isWastepaperBasket.value = false;
-                loadData();
-                $message.success('还原成功!');
-            })
+            }
+        }).then(() => {
+            isWastepaperBasket.value = false;
+            loadData();
+            $message.success('还原成功!');
+        })
     }
 }
 // 点击删除选中键
@@ -1019,31 +985,27 @@ const deleteSelect = () => {
         if (item.checked) targetId.push(item.id);
     });
     if (targetId.length > 0) {
-        db.opus
-            .where(':id')
-            .equals(query_id)
-            .modify(item => {
-                for (let i = 0; i < targetId.length; i++) {
-                    for (let j = 0; j < item.data.length; j++) {
-                        if (item.data[j].vid === targetId[i]) {
-                            item.data.splice(j, 1);
-                            break;
-                        } else {
-                            for (let m = 0; m < item.data[j].volume.length; m++) {
-                                if (item.data[j].volume[m].cid === targetId[i]) {
-                                    item.data[j].volume.splice(m, 1);
-                                    break;
-                                }
+        db.opus.where(':id').equals(query_id).modify(item => {
+            for (let i = 0; i < targetId.length; i++) {
+                for (let j = 0; j < item.data.length; j++) {
+                    if (item.data[j].vid === targetId[i]) {
+                        item.data.splice(j, 1);
+                        break;
+                    } else {
+                        for (let m = 0; m < item.data[j].volume.length; m++) {
+                            if (item.data[j].volume[m].cid === targetId[i]) {
+                                item.data[j].volume.splice(m, 1);
+                                break;
                             }
                         }
                     }
                 }
-            })
-            .then(() => {
-                isWastepaperBasket.value = false;
-                loadData();
-                $message.success('删除成功!');
-            })
+            }
+        }).then(() => {
+            isWastepaperBasket.value = false;
+            loadData();
+            $message.success('删除成功!');
+        })
     }
 }
 

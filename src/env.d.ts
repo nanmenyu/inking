@@ -128,7 +128,7 @@ declare interface TimeLineGroup {
     month: Array<{ name: string, range: [number, number] }>,
     day: Array<{ name: string, range: [number, number] }>
   },
-  eveYear?: Array<Eveyear>
+  eveYear: Array<Eveyear>
 }
 interface Eveyear {
   yid: string,

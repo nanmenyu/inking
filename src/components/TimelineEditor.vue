@@ -114,7 +114,7 @@
             <div class="slider-box" ref="sliderBox">
                 <div class="slider-lable">
                     <a-progress type="circle" size="mini" status="normal" :percent="percentYear" />
-                    默认线:&nbsp;{{ currentYear }}年
+                    {{ timeLine.name }}:&nbsp;{{ currentYear }}年
                 </div>
                 <div @mousemove.stop class="slider-tools">
                     <a-space size="mini">
@@ -186,6 +186,7 @@
                     />
                 </div>
             </div>
+            <div class="slider-detail"></div>
             <div class="slider-setting">
                 <div class="setting-item">
                     <a-result :status="null" title="添加时间线">
@@ -225,8 +226,8 @@
         </div>
         <section @scroll="sectionScroll" ref="timelineSection" class="timeline__section">
             <div class="timeline__nav">
-                <ul ref="timelineUl">
-                    <li v-for="item in tempData.data" :key="item.id" :id="'nav_' + item.id">
+                <ul :style="`transform: translateY(${timelineUl_tran})`" ref="timelineUl">
+                    <li v-for="item in yearData.data" :key="item.id" :id="'nav_' + item.id">
                         <a
                             @click.prevent="toAnchor('con_' + item.id)"
                             :class="checkedId === ('con_' + item.id) ? 'active' : ''"
@@ -237,24 +238,18 @@
                 </ul>
             </div>
             <div class="wrapper">
-                <a-timeline>
+                <a-empty v-if="yearData.data.length === 0" style="margin-top: 100px;">点击时间轴右上角添加历史事件</a-empty>
+                <a-timeline v-else>
                     <a-timeline-item
-                        v-for="item in tempData.data"
+                        v-for="item in yearData.data"
                         :key="item.id"
                         :id="'con_' + item.id"
                     >
                         <h2>
                             {{ item.timeSlot }}
-                            <span style="font-size: 16px;">黑暗圣经事件</span>
+                            <span style="font-size: 16px;">{{ item.title }}</span>
                         </h2>
-                        <p>
-                            <img
-                                width="40"
-                                :style="{ marginRight: '16px', marginBottom: '12px' }"
-                                src="https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/b5d834b83708a269b4562924436eac48.png~tplv-uwbnlip3yd-png.png"
-                            />
-                            {{ item.desc }}
-                        </p>
+                        <p style="text-indent: 2em;">{{ item.desc }}</p>
                     </a-timeline-item>
                 </a-timeline>
             </div>
@@ -279,6 +274,7 @@ import { throttle } from '../utils/flowControl';
 import * as echarts from 'echarts';
 import '../style/fine-tune-timeLine.scss';// 局部组件库样式微调
 import { db } from '../db/db';
+import { v4 } from 'uuid';
 import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import timeline3 from '../assets/svg/timeline3.svg';
@@ -287,41 +283,16 @@ import timeline4 from '../assets/svg/timeline4.svg';
 const { proxy } = useCurrentInstance();
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
+const theTimeLineData: { data: Array<TimeLineGroup> } = reactive({ data: [] });
+getTimeLineData();
 
-const tempData = reactive({
-    data: [
-        { id: 1, timeSlot: 999999, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 2, timeSlot: 1994, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 3, timeSlot: 1995, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 4, timeSlot: 1996, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 5, timeSlot: 1997, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 6, timeSlot: 1998, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 7, timeSlot: 1999, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 8, timeSlot: 2000, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 9, timeSlot: 2001, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 10, timeSlot: 2002, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 11, timeSlot: 2003, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 12, timeSlot: 2004, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 13, timeSlot: 2005, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 14, timeSlot: 2006, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 15, timeSlot: 2007, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 16, timeSlot: 2008, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 17, timeSlot: 2009, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 18, timeSlot: 2010, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 19, timeSlot: 2011, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 20, timeSlot: 2012, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 21, timeSlot: 2013, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 22, timeSlot: 2014, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 23, timeSlot: 2015, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 24, timeSlot: 2016, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 25, timeSlot: 2017, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 26, timeSlot: 2018, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 27, timeSlot: 2019, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' },
-        { id: 28, timeSlot: 2020, title: 'xxxxx', desc: 'По сути, стратегия позиционирования определяет рекламный макет. Маркетинговая активность отражает медиаплан, не считаясь с затратами. Общество потребления переворачивает ролевой поведенческий таргетинг.' }]
-})
-const timeLine = reactive({ min: -5000, max: 5000 });
+const yearData: {
+    data:
+    Array<{ id: string, timeSlot: number, title: string, desc: string }>
+} = reactive({ data: [] });
+const timeLine = reactive({ tid: '', min: -5000, max: 5000, name: '默认线' });
 // 当前年份
-const currentYear = ref(2022);
+const currentYear = ref(new Date().getFullYear());
 // 当前年份占总时间轴的长度比例
 const percentYear = computed(() => {
     return (currentYear.value - timeLine.min) / (timeLine.max - timeLine.min);
@@ -434,10 +405,9 @@ theTimeLine:[{
 */
 
 const offsetTop_el: { data: Array<{ id: string, offsetTop: number }> } = reactive({ data: [] });
-const slider = ref(), sliderBox = ref(), spiralChart = ref();
+const slider = ref(), sliderBox = ref();
 onMounted(() => {
     calculateOffsetTop();
-    // setSpiralChart();
     setSliderState();
     // 左右滑动时间轴
     sliderBox.value.onmousedown = slidingTimeline;
@@ -534,19 +504,52 @@ const addHistoryEvent = () => {
     let targetData;
     switch (curTabType.value) {
         case 'y':
-            targetData = {
-                year: currentYear.value,
-                event: formData.event,
-                eventdesc: formData.eventdesc
-            }
-            console.log(targetData);
-            db.opus
-                .where(':id')
-                .equals(query_id)
-                .modify(item => {
-                    console.log(item);
-                    item.theTimeLine
-                })
+            // targetData = {
+            //     year: currentYear.value,
+            //     event: formData.event,
+            //     eventdesc: formData.eventdesc
+            // }
+            console.log(query_id);
+            console.log(timeLine.tid);
+            db.opus.where(':id').equals(query_id).modify(item => {
+                // console.log(item);
+                for (let i in item.theTimeLine) {
+                    if (item.theTimeLine[i].tid === timeLine.tid) {
+                        let tempData = {
+                            yid: v4(),
+                            timeSlot: currentYear.value,
+                            data: [{
+                                id: v4(),
+                                title: formData.event,
+                                desc: formData.eventdesc
+                            }],
+                            eveMonth: []
+                        }
+                        if (item.theTimeLine[i].eveYear.length === 0) {
+                            item.theTimeLine[i].eveYear.push(tempData)
+                        } else {
+                            for (let j in item.theTimeLine[i].eveYear) {
+                                // 该时间点已有年事件，向data中添加
+                                if (item.theTimeLine[i].eveYear[j].timeSlot === currentYear.value) {
+                                    item.theTimeLine[i].eveYear[j].data.push({
+                                        id: v4(),
+                                        title: formData.event,
+                                        desc: formData.eventdesc
+                                    })
+                                }
+                                // 该时间点还没有年事件
+                                else {
+                                    item.theTimeLine[i].eveYear.push(tempData)
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }).then(() => {
+                getTimeLineData();
+                console.log('ok');
+            })
             break;
         case 'm':
             targetData = {
@@ -569,9 +572,25 @@ const addHistoryEvent = () => {
             break;
     }
 }
-
 function getTimeLineData() {
-
+    db.opus.get(query_id)
+        .then(value => {
+            if (value) {
+                theTimeLineData.data = value.theTimeLine;
+                timeLine.tid = theTimeLineData.data[0].tid;
+                timeLine.max = theTimeLineData.data[0].max;
+                timeLine.min = theTimeLineData.data[0].min;
+                timeLine.name = theTimeLineData.data[0].name;
+                yearData.data = theTimeLineData.data[0].eveYear.map(item => {
+                    return {
+                        id: item.yid,
+                        timeSlot: item.timeSlot,
+                        title: item.data[0].title,
+                        desc: item.data[0].desc
+                    };
+                })
+            }
+        })
 }
 // 旋转图标
 const isRotate = ref(false);
@@ -599,7 +618,7 @@ function setSliderState() {
 // 计算每个元素距离父元素顶部的大小
 function calculateOffsetTop() {
     let targetElement: HTMLElement;
-    offsetTop_el.data = tempData.data.map(item => {
+    offsetTop_el.data = yearData.data.map(item => {
         targetElement = document.getElementById('con_' + item.id)!;
         return {
             id: 'con_' + item.id,
@@ -615,54 +634,6 @@ function toNavCenter() {
     if (currentElement) {
         timelineUl_tran.value = (274 - currentElement.offsetTop) + 'px';
     }
-}
-function setSpiralChart() {
-    let myChart = echarts.getInstanceByDom(spiralChart.value);
-    if (myChart == null) {
-        myChart = echarts.init(spiralChart.value);
-    }
-    const data = [];
-    for (let i = 0; i <= 10000; i++) {
-        let theta = (i / 10000) * 1440;
-        let r = i * theta;
-        data.push([r, theta]);
-    }
-    const option = {
-        title: {
-            text: '时间线总览'
-        },
-        legend: {
-            data: ['line']
-        },
-        polar: {},
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-                type: 'cross'
-            }
-        },
-        angleAxis: {
-            type: 'value',
-            startAngle: 0,
-            min: 0,
-            max: 360,
-        },
-        radiusAxis: {},
-        series: [
-            {
-                coordinateSystem: 'polar',
-                name: 'line',
-                type: 'line',
-                showSymbol: false,
-                data: data
-            }
-        ]
-    };
-    myChart.setOption(option);
-    window.onresize = function () {
-        //自适应大小
-        myChart!.resize();
-    };
 }
 // 滑动时间轴
 function slidingTimeline(e: MouseEvent) {
@@ -682,181 +653,5 @@ function slidingTimeline(e: MouseEvent) {
 }
 </script>
 
-<style lang="scss" scoped>
-/* 弹窗 */
-#modify-box {
-    @include popupBase;
-    .tab-content {
-        // box-sizing: border-box;
-        width: 100%;
-        height: 300px;
-        overflow: hidden;
-        overflow-y: scroll;
-    }
-}
-.timeline {
-    width: 100%;
-    height: calc(100vh - 90px);
-    padding: 0;
-    text-align: left;
-    overflow: hidden;
-    .timeline__block {
-        float: right;
-        width: calc(100% - 600px);
-        height: 100%;
-        .slider-box {
-            box-sizing: border-box;
-            position: relative;
-            width: 100%;
-            height: 150px;
-            overflow: hidden;
-            user-select: none;
-            cursor: move;
-            border-bottom: 2px dotted #f2f3f5;
-            .slider-lable {
-                position: absolute;
-                top: 5px;
-                right: 50%;
-                color: #165dff;
-                z-index: 99;
-            }
-            .slider-tools {
-                position: absolute;
-                top: 5px;
-                right: 10px;
-                cursor: pointer;
-                z-index: 99;
-            }
-            .slider {
-                position: absolute;
-                top: 0;
-                left: 0;
-                height: 100%;
-            }
-        }
-        .slider-setting {
-            float: right;
-            width: 100px;
-            height: 100%;
-            .setting-item {
-                width: 100%;
-                margin: 5px 0;
-            }
-        }
-    }
-    .timeline__section {
-        box-sizing: border-box;
-        position: relative;
-        float: left;
-        width: 500px;
-        height: 100%;
-        margin-left: 100px;
-        border-right: 2px solid #f2f3f5;
-        overflow: scroll;
-        &::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0);
-        }
-        .wrapper {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            h2 {
-                margin: 0;
-            }
-            p {
-                margin: 0;
-            }
-        }
-        .timeline__nav {
-            position: fixed;
-            left: 20px;
-            top: calc(50% + 20px);
-            width: 55px;
-            max-height: 600px;
-            padding: 0 10px;
-            transform: translateY(-50%);
-            user-select: none;
-            text-align: left;
-            overflow: hidden;
-            ul {
-                width: 100%;
-                padding: 0;
-                margin: 0;
-                list-style-type: none;
-                transform: translateY(v-bind(timelineUl_tran));
-                transition: all 0.4s ease-in;
-                li {
-                    margin: 15px 0;
-                    padding-left: 0;
-                    list-style-type: none;
-                    border-bottom: 1px dotted rgba(0, 0, 0, 0.3);
-                    cursor: pointer;
-                    &:first-child {
-                        margin-top: 0;
-                    }
-                    &:last-child {
-                        margin-bottom: 0;
-                    }
-                    a {
-                        text-decoration: none;
-                        font-size: 16px;
-                        color: #bfc1c3;
-                        font-style: italic;
-                        &.active {
-                            font-size: 18px;
-                            font-weight: bold;
-                            color: #165dff;
-                            border-bottom: 1px dotted transparent;
-                            transform: scale(1.2);
-                            transition: color 0.2s ease-out;
-                        }
-                    }
-                }
-            }
-
-            .active {
-                font-weight: bold;
-                color: #f94125;
-                border-bottom: 1px dotted transparent;
-                transform: scale(1.2);
-            }
-        }
-    }
-}
-.tag-close {
-    margin-left: 4px;
-    padding: 2px 3px;
-    border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0);
-    transition: border 0.2s;
-
-    &:hover {
-        border: 1px solid #fff;
-    }
-}
-.rotate {
-    transition-duration: 0.3s;
-    transform: rotateZ(180deg);
-}
-
-.-rotate {
-    transition-duration: 0.3s;
-    transform: rotateZ(0);
-}
-@keyframes spredModify {
-    0% {
-        width: 0;
-        opacity: 0;
-    }
-
-    30% {
-        opacity: 0;
-    }
-
-    100% {
-        width: 550px;
-        opacity: 1;
-    }
-}
+<style src="../style/timelineeditor.scss" lang="scss" scoped>
 </style>
