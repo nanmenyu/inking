@@ -8,7 +8,9 @@ import '@arco-design/web-vue/dist/arco.css';
 import './style/global.scss';
 
 // App.config.globalProperties.$USER_PATH = ''
-
+window.ondragstart = function () {
+    return false; // 全局禁用拖拽
+}
 createApp(App).use(ArcoVue, {
     // 用于改变使用组件时的前缀名称
     componentPrefix: 'a'

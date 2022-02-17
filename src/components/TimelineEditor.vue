@@ -186,7 +186,23 @@
                     />
                 </div>
             </div>
-            <div class="slider-detail"></div>
+            <div class="slider-detail">
+                <a-typography>
+                    <a-typography-title :heading="5">Default</a-typography-title>
+                    <a-typography-paragraph>A design is a plan or specification for the construction of an object or system or for the implementation of an activity or process, or the result of that plan or specification in the form of a prototype, product or process. The verb to design expresses the process of developing a design. In some cases, the direct construction of an object without an explicit prior plan (such as in craftwork, some engineering, coding, and graphic design) may also be considered to be a design activity.</a-typography-paragraph>
+                    <a-typography-title :heading="5">Secondary</a-typography-title>
+                    <a-typography-paragraph
+                        type="secondary"
+                    >A design is a plan or specification for the construction of an object or system or for the implementation of an activity or process, or the result of that plan or specification in the form of a prototype, product or process. The verb to design expresses the process of developing a design. In some cases, the direct construction of an object without an explicit prior plan (such as in craftwork, some engineering, coding, and graphic design) may also be considered to be a design activity.</a-typography-paragraph>
+                    <a-typography-title :heading="5">Spacing default</a-typography-title>
+                    <a-typography-paragraph>A design is a plan or specification for the construction of an object or system or for the implementation of an activity or process, or the result of that plan or specification in the form of a prototype, product or process. The verb to design expresses the process of developing a design. In some cases, the direct construction of an object without an explicit prior plan (such as in craftwork, some engineering, coding, and graphic design) may also be considered to be a design activity.</a-typography-paragraph>
+                    <a-typography-title :heading="5">Spacing close</a-typography-title>
+                    <a-typography-paragraph
+                        type="secondary"
+                        spacing="close"
+                    >A design is a plan or specification for the construction of an object or system or for the implementation of an activity or process, or the result of that plan or specification in the form of a prototype, product or process. The verb to design expresses the process of developing a design.</a-typography-paragraph>
+                </a-typography>
+            </div>
             <div class="slider-setting">
                 <div class="setting-item">
                     <a-result :status="null" title="添加时间线">
@@ -227,11 +243,11 @@
         <section @scroll="sectionScroll" ref="timelineSection" class="timeline__section">
             <div class="timeline__nav">
                 <ul :style="`transform: translateY(${timelineUl_tran})`" ref="timelineUl">
-                    <li v-for="item in yearData.data" :key="item.id" :id="'nav_' + item.id">
+                    <li v-for="(item, i) in yearData.data" :key="item.id" :id="'nav_' + i">
                         <a
-                            @click.prevent="toAnchor('con_' + item.id)"
-                            :class="checkedId === ('con_' + item.id) ? 'active' : ''"
-                            :href="'#' + item.id"
+                            @click.prevent="toAnchor('con_' + i)"
+                            :class="checkedId === ('con_' + i) ? 'active' : ''"
+                            :href="'#' + i"
                             :title="item.timeSlot.toString()"
                         >{{ timeSlot_format(item.timeSlot) }}</a>
                     </li>
@@ -241,14 +257,18 @@
                 <a-empty v-if="yearData.data.length === 0" style="margin-top: 100px;">点击时间轴右上角添加历史事件</a-empty>
                 <a-timeline v-else>
                     <a-timeline-item
-                        v-for="item in yearData.data"
+                        v-for="(item, i) in yearData.data"
                         :key="item.id"
-                        :id="'con_' + item.id"
-                        style="cursor: pointer;"
+                        :id="'con_' + i"
+                        class="timeline-item"
+                        title="点击查看详情"
                     >
                         <h2>
                             {{ item.timeSlot }}
                             <span style="font-size: 16px;">{{ item.title }}</span>
+                            <span
+                                style="float: right;margin: 9px 8px 0 0;font-size: 12px;color: #bfc1c3;"
+                            >总事件数:{{ item.totalNum }}</span>
                         </h2>
                         <p style="text-indent: 2em;">{{ item.desc }}</p>
                     </a-timeline-item>
@@ -285,11 +305,10 @@ const { proxy } = useCurrentInstance();
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
 const theTimeLineData: { data: Array<TimeLineGroup> } = reactive({ data: [] });
-getTimeLineData();
 
 const yearData: {
     data:
-    Array<{ id: string, timeSlot: number, title: string, desc: string }>
+    Array<{ id: string, timeSlot: number, title: string, desc: string, totalNum: number }>
 } = reactive({ data: [] });
 const timeLine = reactive({ tid: '', min: -5000, max: 5000, name: '默认线' });
 // 当前年份
@@ -343,75 +362,11 @@ const timeLineMarks = computed(() => {
     }
     return stepObj;
 })
-/*
-theTimeLine:[{
-    tid:xxxx,
-    name:'默认线',
-    max: 5000,
-    min: -5000,
-    remarks: { // 别名
-        year: [
-            {
-                name: '公元前',
-                range: [-999999, -1]
-            }, {
-                name: '公元',
-                range: [1, -999999]
-            }
-        ],
-        month: [],
-        day: []
-    },
-    eveYear: [{
-        id: 1,
-        timeSlot: -100, // 公元前100年
-        data:[{ 
-            title: '',
-        desc: '',
-        },{},{}],
-    }, {
-        id: 1,
-        timeSlot: 1999, // 公元1999年
-    }, {
-        id: 1,
-        timeSlot: 2000,
-    }],
-    eveMonth: [
-            {   yearSlot:-100
-                timeSlot: 7, // 7月
-                title: '',
-                desc: '',
-               ]
-            },
-            {
-                timeSlot: 12 // 12月
-            },
-            {
-                timeSlot: 19 // 19月
-            }
-    ],
-     eveDay: [{ yearSlot:-100,
-                monthSlot:7    
-                belong:-100,
-                    timeSlot: 3, // 3日
-                    title: '',
-                    desc: '',
-                }
-	
-},{
-    tid:xxxx
-}]
-跨度：(-999999<year<+999999) 默认：-5000<year<+5000
-时间格式：年-月-日 (剔除0值)
-    年份：(-999999<year<+999999) 自定义单位(默认: >=1公元 / <0公元前 )
-    月份：(-999<month<+999) 自定义单位(默认: >=1月 / <0未定义 )
-    日：(-999<day<999) 自定义单位(默认: >=1日 / <0 未定义)
-*/
 
 const offsetTop_el: { data: Array<{ id: string, offsetTop: number }> } = reactive({ data: [] });
 const slider = ref(), sliderBox = ref();
 onMounted(() => {
-    calculateOffsetTop();
+    getTimeLineData();
     setSliderState();
     // 左右滑动时间轴
     sliderBox.value.onmousedown = slidingTimeline;
@@ -440,7 +395,7 @@ const timeSlot_format = (timeSlot: number): number | string => {
 }
 
 // 锚点跳转
-const checkedId = ref('con_1'), wrapper: Ref<HTMLElement | undefined> = ref();
+const checkedId = ref('con_0'), wrapper: Ref<HTMLElement | undefined> = ref();
 const toAnchor = (id: string) => {
     if (wrapper.value!.clientHeight > timelineSection.value!.clientHeight) {
         checkedId.value = id;
@@ -454,9 +409,7 @@ const toAnchor = (id: string) => {
 const timelineSection: Ref<HTMLElement | undefined> = ref();
 const sectionScroll = throttle(() => {
     const curScrollTop: number | undefined = timelineSection.value?.scrollTop;
-    if (curScrollTop === 0) {
-        checkedId.value = 'con_1';
-    }
+    if (curScrollTop === 0) checkedId.value = 'con_0';
     if (curScrollTop) {
         for (let i in offsetTop_el.data) {
             if (offsetTop_el.data[i].offsetTop >= curScrollTop) {
@@ -550,28 +503,69 @@ const modify = () => {
 }
 
 // 获取数据
+const defaultPos = ref(0);
 function getTimeLineData() {
     db.opus.get(query_id)
         .then(value => {
             if (value) {
                 theTimeLineData.data = value.theTimeLine;
-                timeLine.tid = theTimeLineData.data[0].tid;
-                timeLine.max = theTimeLineData.data[0].max;
-                timeLine.min = theTimeLineData.data[0].min;
-                timeLine.name = theTimeLineData.data[0].name;
-                yearData.data = theTimeLineData.data[0].eveYear.map(item => {
-                    return {
+                // 设置基本数据
+                timeLine.tid = theTimeLineData.data[defaultPos.value].tid;
+                timeLine.max = theTimeLineData.data[defaultPos.value].max;
+                timeLine.min = theTimeLineData.data[defaultPos.value].min;
+                timeLine.name = theTimeLineData.data[defaultPos.value].name;
+                // 将每个年份的事件全部集合起来 key为年份
+                const summaryObj: {
+                    [key: number]: Array<{ id: string, month: number | null, day: number | null, title: string, desc: string }>
+                } = {};
+                theTimeLineData.data[defaultPos.value].eveYear.forEach(item => {
+                    if (summaryObj[item.timeSlot] === undefined) summaryObj[item.timeSlot] = [];
+                    summaryObj[item.timeSlot].push({
                         id: item.yid,
-                        timeSlot: item.timeSlot,
+                        month: null,
+                        day: null,
                         title: item.data.title,
                         desc: item.data.desc
-                    };
+                    })
                 })
+                theTimeLineData.data[defaultPos.value].eveMonth.forEach(item => {
+                    if (summaryObj[item.yearSlot] === undefined) summaryObj[item.yearSlot] = [];
+                    summaryObj[item.yearSlot].push({
+                        id: item.mid,
+                        month: item.timeSlot,
+                        day: null,
+                        title: item.data.title,
+                        desc: item.data.desc
+                    })
+                })
+                theTimeLineData.data[defaultPos.value].eveDay.forEach(item => {
+                    if (summaryObj[item.yearSlot] === undefined) summaryObj[item.yearSlot] = [];
+                    summaryObj[item.yearSlot].push({
+                        id: item.did,
+                        month: item.monthSlot,
+                        day: item.timeSlot,
+                        title: item.data.title,
+                        desc: item.data.desc
+                    })
+                })
+                yearData.data = []; // 先清空后push
+                for (let i in summaryObj) {
+                    yearData.data.push({
+                        id: summaryObj[i][0].id,
+                        timeSlot: parseInt(i),
+                        title: summaryObj[i][0].title,
+                        desc: summaryObj[i][0].desc,
+                        totalNum: summaryObj[i].length
+                    })
+                }
                 // 升序排序
                 yearData.data.sort((a, b) => {
                     return a.timeSlot - b.timeSlot;
                 })
-                console.log(theTimeLineData.data[0]);
+                console.log(yearData.data);
+                nextTick(() => {
+                    calculateOffsetTop();
+                })
             }
         })
 }
@@ -594,10 +588,11 @@ function setSliderState() {
 // 计算每个元素距离父元素顶部的大小
 function calculateOffsetTop() {
     let targetElement: HTMLElement;
-    offsetTop_el.data = yearData.data.map(item => {
-        targetElement = document.getElementById('con_' + item.id)!;
+    console.log('&&:', yearData.data);
+    offsetTop_el.data = yearData.data.map((_, index) => {
+        targetElement = document.getElementById('con_' + index)!;
         return {
-            id: 'con_' + item.id,
+            id: 'con_' + index,
             offsetTop: targetElement.offsetTop
         }
     })

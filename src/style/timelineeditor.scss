@@ -59,15 +59,21 @@
 
         .slider-detail {
             float: left;
+            box-sizing: border-box;
             width: calc(100% - 120px);
-            height: 100%;
+            height: calc(100% - 150px);
+            padding: 10px;
+            border: 1px solid red;
+            overflow-y: scroll;
         }
 
         .slider-setting {
             float: right;
+            box-sizing: border-box;
             width: 100px;
-            height: 100%;
+            height: calc(100% - 150px);
             user-select: none;
+            border: 1px solid red;
 
             .setting-item {
                 width: 100%;
@@ -86,9 +92,9 @@
         border-right: 2px solid #f2f3f5;
         overflow: scroll;
 
-        // &::-webkit-scrollbar-thumb {
-    //     background-color: rgba(0, 0, 0, 0);
-    // }
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0);
+        }
 
         .wrapper {
             position: absolute;
@@ -96,13 +102,23 @@
             top: 0;
             width: 100%;
 
-            h2 {
-                margin: 0;
+            .timeline-item {
+                cursor: pointer;
+                transition: background-color 0.3s;
+
+                &:hover {
+                    background-color: #f2f3f5;
+                }
+
+                h2 {
+                    margin: 0;
+                }
+
+                p {
+                    margin: 0;
+                }
             }
 
-            p {
-                margin: 0;
-            }
         }
 
         .timeline__nav {
@@ -122,7 +138,6 @@
                 padding: 0;
                 margin: 0;
                 list-style-type: none;
-                // transform: translateY(v-bind(timelineUl_tran));
                 transition: all 0.4s ease-in;
 
                 li {
