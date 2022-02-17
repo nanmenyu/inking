@@ -269,7 +269,9 @@ const addFile = () => {
                         month: [],
                         day: []
                     },
-                    eveYear: []
+                    eveYear: [],
+                    eveMonth: [],
+                    eveDay: []
                 }] // 时间线模块
             }).then(() => {
                 emit('refresh');

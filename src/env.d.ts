@@ -119,6 +119,7 @@ interface Template {
 }
 // 时间线组
 declare interface TimeLineGroup {
+  [key: string]: any,
   tid: string,
   name: string,
   max: number,
@@ -128,22 +129,25 @@ declare interface TimeLineGroup {
     month: Array<{ name: string, range: [number, number] }>,
     day: Array<{ name: string, range: [number, number] }>
   },
-  eveYear: Array<Eveyear>
+  eveYear: Array<Eveyear>,
+  eveMonth: Array<Evemonth>,
+  eveDay: Array<Eveday>
 }
 interface Eveyear {
   yid: string,
   timeSlot: number,
-  data: Array<{ id: number, title: string, desc: string }>,
-  eveMonth: Array<Evemonth>
+  data: { title: string, desc: string }
 }
 interface Evemonth {
   mid: string,
+  yearSlot: number,
   timeSlot: number,
-  data: Array<{ id: number, title: string, desc: string }>,
-  eveDay: Array<Eveday>
+  data: { title: string, desc: string }
 }
 interface Eveday {
   did: string,
+  yearSlot: number,
+  monthSlot: number,
   timeSlot: number,
-  data: Array<{ id: number, title: string, desc: string }>,
+  data: { title: string, desc: string }
 }

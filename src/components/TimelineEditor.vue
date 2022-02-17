@@ -9,10 +9,10 @@
                 </div>
             </div>
             <div class="box-body" style="padding: 0 0 0 20px;overflow: hidden;">
-                <a-tabs type="text" @change="chocieTab" default-active-key="y">
-                    <a-tab-pane key="y" title="年事件"></a-tab-pane>
-                    <a-tab-pane key="m" title="*月事件"></a-tab-pane>
-                    <a-tab-pane key="d" title="*日事件"></a-tab-pane>
+                <a-tabs type="text" @change="chocieTab" default-active-key="eveYear">
+                    <a-tab-pane key="eveYear" title="年事件"></a-tab-pane>
+                    <a-tab-pane key="eveMonth" title="*月事件"></a-tab-pane>
+                    <a-tab-pane key="eveDay" title="*日事件"></a-tab-pane>
                 </a-tabs>
                 <div class="tab-content">
                     <a-space style="width: 100%;margin: 0 0 0 15px;cursor: pointer;" wrap>
@@ -42,7 +42,7 @@
                         </a-tag>
                     </a-space>
                     <a-form :model="formData" layout="inline" style="margin: 10px 0 50px 0;">
-                        <a-form-item v-if="curTabType === 'y'" field="year" label="选择何年">
+                        <a-form-item v-if="curTabType === 'eveYear'" field="year" label="选择何年">
                             <a-input-number
                                 :default-value="currentYear"
                                 @change="confirmPosition"
@@ -53,7 +53,7 @@
                             />
                         </a-form-item>
                         <a-form-item
-                            v-if="curTabType === 'm' || curTabType === 'd'"
+                            v-if="curTabType === 'eveMonth' || curTabType === 'eveDay'"
                             field="month"
                             label="选择何月"
                         >
@@ -65,7 +65,7 @@
                                 style="width: 100px;"
                             />
                         </a-form-item>
-                        <a-form-item v-if="curTabType === 'd'" field="day" label="选择何日">
+                        <a-form-item v-if="curTabType === 'eveDay'" field="day" label="选择何日">
                             <a-input-number
                                 v-model="formData.day"
                                 :min="-999"
@@ -237,13 +237,14 @@
                     </li>
                 </ul>
             </div>
-            <div class="wrapper">
+            <div class="wrapper" ref="wrapper">
                 <a-empty v-if="yearData.data.length === 0" style="margin-top: 100px;">点击时间轴右上角添加历史事件</a-empty>
                 <a-timeline v-else>
                     <a-timeline-item
                         v-for="item in yearData.data"
                         :key="item.id"
                         :id="'con_' + item.id"
+                        style="cursor: pointer;"
                     >
                         <h2>
                             {{ item.timeSlot }}
@@ -271,7 +272,7 @@ import {
     IconClose
 } from '@arco-design/web-vue/es/icon';
 import { throttle } from '../utils/flowControl';
-import * as echarts from 'echarts';
+// import * as echarts from 'echarts';
 import '../style/fine-tune-timeLine.scss';// 局部组件库样式微调
 import { db } from '../db/db';
 import { v4 } from 'uuid';
@@ -368,16 +369,19 @@ theTimeLine:[{
             title: '',
         desc: '',
         },{},{}],
-        eveMonth: [
-            {
+    }, {
+        id: 1,
+        timeSlot: 1999, // 公元1999年
+    }, {
+        id: 1,
+        timeSlot: 2000,
+    }],
+    eveMonth: [
+            {   yearSlot:-100
                 timeSlot: 7, // 7月
                 title: '',
                 desc: '',
-                eveDay: [{
-                    timeSlot: 3, // 3日
-                    title: '',
-                    desc: '',
-                }]
+               ]
             },
             {
                 timeSlot: 12 // 12月
@@ -385,14 +389,14 @@ theTimeLine:[{
             {
                 timeSlot: 19 // 19月
             }
-        ]
-    }, {
-        id: 1,
-        timeSlot: 1999, // 公元1999年
-    }, {
-        id: 1,
-        timeSlot: 2000,
-    }]
+    ],
+     eveDay: [{ yearSlot:-100,
+                monthSlot:7    
+                belong:-100,
+                    timeSlot: 3, // 3日
+                    title: '',
+                    desc: '',
+                }
 	
 },{
     tid:xxxx
@@ -436,12 +440,14 @@ const timeSlot_format = (timeSlot: number): number | string => {
 }
 
 // 锚点跳转
-const checkedId = ref('con_1');
+const checkedId = ref('con_1'), wrapper: Ref<HTMLElement | undefined> = ref();
 const toAnchor = (id: string) => {
-    checkedId.value = id;
-    const targetAnchor = document.getElementById(id);
-    if (targetAnchor) targetAnchor.scrollIntoView({ behavior: "smooth" });
-    toNavCenter();
+    if (wrapper.value!.clientHeight > timelineSection.value!.clientHeight) {
+        checkedId.value = id;
+        const targetAnchor = document.getElementById(id);
+        if (targetAnchor) targetAnchor.scrollIntoView({ behavior: "smooth" });
+        toNavCenter();
+    }
 }
 
 // 内容滚动标记当前元素
@@ -490,88 +496,60 @@ const confirmPosition = (value: number) => {
 // 添加历史事件
 const isAddEvent = ref(false);
 // 选择标签页
-const curTabType = ref('y');
+const curTabType: Ref<'eveYear' | 'eveMonth' | 'eveDay'> = ref('eveYear');
 const formData = reactive({
     month: 1,
     day: 1,
     event: '',
     eventdesc: ''
 });
-const chocieTab = (type: string) => {
+const chocieTab = (type: 'eveYear' | 'eveMonth' | 'eveDay') => {
     curTabType.value = type;
 }
 const addHistoryEvent = () => {
-    let targetData;
-    switch (curTabType.value) {
-        case 'y':
-            // targetData = {
-            //     year: currentYear.value,
-            //     event: formData.event,
-            //     eventdesc: formData.eventdesc
-            // }
-            console.log(query_id);
-            console.log(timeLine.tid);
-            db.opus.where(':id').equals(query_id).modify(item => {
-                // console.log(item);
-                for (let i in item.theTimeLine) {
-                    if (item.theTimeLine[i].tid === timeLine.tid) {
-                        let tempData = {
-                            yid: v4(),
-                            timeSlot: currentYear.value,
-                            data: [{
-                                id: v4(),
-                                title: formData.event,
-                                desc: formData.eventdesc
-                            }],
-                            eveMonth: []
-                        }
-                        if (item.theTimeLine[i].eveYear.length === 0) {
-                            item.theTimeLine[i].eveYear.push(tempData)
-                        } else {
-                            for (let j in item.theTimeLine[i].eveYear) {
-                                // 该时间点已有年事件，向data中添加
-                                if (item.theTimeLine[i].eveYear[j].timeSlot === currentYear.value) {
-                                    item.theTimeLine[i].eveYear[j].data.push({
-                                        id: v4(),
-                                        title: formData.event,
-                                        desc: formData.eventdesc
-                                    })
-                                }
-                                // 该时间点还没有年事件
-                                else {
-                                    item.theTimeLine[i].eveYear.push(tempData)
-                                }
-                            }
-                        }
-                        break;
-                    }
+    db.opus.where(':id').equals(query_id).modify(item => {
+        for (let i in item.theTimeLine) {
+            if (item.theTimeLine[i].tid === timeLine.tid) {
+                if (curTabType.value === 'eveYear') {
+                    item.theTimeLine[i][curTabType.value].push({
+                        yid: v4(),
+                        timeSlot: currentYear.value,
+                        data: { title: formData.event, desc: formData.eventdesc }
+                    })
+                } else if (curTabType.value === 'eveMonth') {
+                    item.theTimeLine[i][curTabType.value].push({
+                        mid: v4(),
+                        yearSlot: currentYear.value,
+                        timeSlot: formData.month,
+                        data: { title: formData.event, desc: formData.eventdesc }
+                    })
+                } else if (curTabType.value === 'eveDay') {
+                    item.theTimeLine[i][curTabType.value].push({
+                        did: v4(),
+                        yearSlot: currentYear.value,
+                        monthSlot: formData.month,
+                        timeSlot: formData.day,
+                        data: { title: formData.event, desc: formData.eventdesc }
+                    })
                 }
-            }).then(() => {
-                getTimeLineData();
-                console.log('ok');
-            })
-            break;
-        case 'm':
-            targetData = {
-                year: currentYear.value,
-                month: formData.month,
-                event: formData.event,
-                eventdesc: formData.eventdesc
+                break;
             }
-            console.log(targetData);
-            break;
-        case 'd':
-            targetData = {
-                year: currentYear.value,
-                month: formData.month,
-                day: formData.day,
-                event: formData.event,
-                eventdesc: formData.eventdesc
-            }
-            console.log(targetData);
-            break;
-    }
+        }
+    }).then(() => {
+        isAddEvent.value = false;
+        getTimeLineData();
+    })
 }
+
+// 旋转图标
+const isRotate = ref(false);
+// 取消弹框
+const modify = () => {
+    isPosition.value = false;
+    isAddEvent.value = false;
+}
+
+// 获取数据
 function getTimeLineData() {
     db.opus.get(query_id)
         .then(value => {
@@ -585,19 +563,17 @@ function getTimeLineData() {
                     return {
                         id: item.yid,
                         timeSlot: item.timeSlot,
-                        title: item.data[0].title,
-                        desc: item.data[0].desc
+                        title: item.data.title,
+                        desc: item.data.desc
                     };
                 })
+                // 升序排序
+                yearData.data.sort((a, b) => {
+                    return a.timeSlot - b.timeSlot;
+                })
+                console.log(theTimeLineData.data[0]);
             }
         })
-}
-// 旋转图标
-const isRotate = ref(false);
-// 取消弹框
-const modify = () => {
-    isPosition.value = false;
-    isAddEvent.value = false;
 }
 // 时间轴状态设置
 function setSliderState() {

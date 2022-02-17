@@ -86,9 +86,9 @@
         border-right: 2px solid #f2f3f5;
         overflow: scroll;
 
-        &::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0);
-        }
+        // &::-webkit-scrollbar-thumb {
+    //     background-color: rgba(0, 0, 0, 0);
+    // }
 
         .wrapper {
             position: absolute;
