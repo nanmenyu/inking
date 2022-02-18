@@ -1,8 +1,3 @@
-// import fs from 'fs';
-// import {
-//     contextBridge,
-//     ipcRenderer
-// } from 'electron';
 const fs = require('fs');
 const { contextBridge, ipcRenderer } = require('electron')
 

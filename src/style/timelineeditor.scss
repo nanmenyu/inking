@@ -1,13 +1,9 @@
 /* 弹窗 */
 #modify-box {
-    @include popupBase;
-
     .tab-content {
-        // box-sizing: border-box;
         width: 100%;
-        height: 300px;
+        height: 200px;
         overflow: hidden;
-        overflow-y: scroll;
     }
 }
 
@@ -63,7 +59,6 @@
             width: calc(100% - 120px);
             height: calc(100% - 150px);
             padding: 10px;
-            border: 1px solid red;
             overflow-y: scroll;
         }
 
@@ -73,7 +68,6 @@
             width: 100px;
             height: calc(100% - 150px);
             user-select: none;
-            border: 1px solid red;
 
             .setting-item {
                 width: 100%;
@@ -104,7 +98,7 @@
 
             .timeline-item {
                 cursor: pointer;
-                transition: background-color 0.3s;
+                transition: background-color 0.2s;
 
                 &:hover {
                     background-color: #f2f3f5;

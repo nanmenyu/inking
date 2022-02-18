@@ -338,8 +338,6 @@
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
 
-    .box,
-    .box-replace,
     .wastepaperBasket {
         position: relative;
         top: 50%;
@@ -348,28 +346,17 @@
         background-color: #fff;
         border-radius: 4px;
         transform: translateY(-50%);
-    }
-
-    .box {
-        animation: spredModify 0.3s ease-out;
-    }
-
-    .wastepaperBasket {
         width: 400px;
     }
-}
 
-// #modify-box .box,
-// #modify-box .box-replace,
-// #modify-box .wastepaperBasket {
-//     position: relative;
-//     top: 50%;
-//     width: 550px;
-//     margin: 0 auto;
-//     background-color: #fff;
-//     border-radius: 4px;
-//     transform: translateY(-50%);
-// }
+    // .box {
+    //     animation: spredModify 0.3s ease-out;
+    // }
+
+    // .wastepaperBasket {
+    //     width: 400px;
+    // }
+}
 
 /* 裁剪图片框不能加动画 */
 .box-header {
@@ -460,12 +447,12 @@
     }
 }
 
-.box-body-replace {
-    img {
-        display: block;
-        max-width: 100%;
-    }
-}
+// .box-body-replace {
+//     img {
+//         display: block;
+//         max-width: 100%;
+//     }
+// }
 
 .box-footer {
     box-sizing: border-box;
@@ -515,12 +502,6 @@
     }
 }
 
-/* .fade-enter-active, .fade-leave-active {
-      transition: opacity 0.6s;
-  }
-  .fade-enter, .fade-leave-to {
-      opacity: 0;
-  } */
 /* ----------标签墙展开效果----------- */
 .expansion {
     transition-duration: .3s;

@@ -1,114 +1,78 @@
 <!-- 时间线编辑模块 -->
 <template>
-    <div v-if="isAddEvent" id="modify-box">
-        <div class="box">
-            <div class="box-header">
-                <div class="header-title">添加历史事件</div>
-                <div class="header-close" @click="modify">
-                    <icon-close />
-                </div>
-            </div>
-            <div class="box-body" style="padding: 0 0 0 20px;overflow: hidden;">
-                <a-tabs type="text" @change="chocieTab" default-active-key="eveYear">
-                    <a-tab-pane key="eveYear" title="年事件"></a-tab-pane>
-                    <a-tab-pane key="eveMonth" title="*月事件"></a-tab-pane>
-                    <a-tab-pane key="eveDay" title="*日事件"></a-tab-pane>
-                </a-tabs>
-                <div class="tab-content">
-                    <a-space style="width: 100%;margin: 0 0 0 15px;cursor: pointer;" wrap>
-                        <a-tag color="#7816ff">
-                            123
-                            <span class="tag-close" title="删除">
-                                <icon-close />
-                            </span>
-                        </a-tag>
-                        <a-tag color="#7816ff">
-                            123
-                            <span class="tag-close" title="删除">
-                                <icon-close />
-                            </span>
-                        </a-tag>
-                        <a-tag color="#7816ff">
-                            123
-                            <span class="tag-close" title="删除">
-                                <icon-close />
-                            </span>
-                        </a-tag>
-                        <a-tag color="#7816ff">
-                            123
-                            <span class="tag-close" title="删除">
-                                <icon-close />
-                            </span>
-                        </a-tag>
-                    </a-space>
-                    <a-form :model="formData" layout="inline" style="margin: 10px 0 50px 0;">
-                        <a-form-item v-if="curTabType === 'eveYear'" field="year" label="选择何年">
-                            <a-input-number
-                                :default-value="currentYear"
-                                @change="confirmPosition"
-                                :min="timeLine.min"
-                                :max="timeLine.max"
-                                size="samll"
-                                style="width: 100px;"
-                            />
-                        </a-form-item>
-                        <a-form-item
-                            v-if="curTabType === 'eveMonth' || curTabType === 'eveDay'"
-                            field="month"
-                            label="选择何月"
-                        >
-                            <a-input-number
-                                v-model="formData.month"
-                                :min="-999"
-                                :max="999"
-                                size="samll"
-                                style="width: 100px;"
-                            />
-                        </a-form-item>
-                        <a-form-item v-if="curTabType === 'eveDay'" field="day" label="选择何日">
-                            <a-input-number
-                                v-model="formData.day"
-                                :min="-999"
-                                :max="999"
-                                size="samll"
-                                style="width: 100px;"
-                            />
-                        </a-form-item>
-                        <a-form-item field="event" label="事件名称">
-                            <a-input
-                                v-model="formData.event"
-                                :max-length="15"
-                                placeholder="请填写事件名"
-                                size="samll"
-                                style="width: 200px;"
-                                allow-clear
-                            />
-                        </a-form-item>
-                        <a-form-item field="eventdesc" label="事件描述">
-                            <a-textarea
-                                v-model="formData.eventdesc"
-                                placeholder="填写事件的相关描述"
-                                :auto-size="{
-                                    minRows: 5,
-                                    maxRows: 5
-                                }"
-                                style="width: 420px;"
-                                :max-length="500"
-                                show-word-limit
-                                allow-clear
-                            />
-                        </a-form-item>
-                    </a-form>
-                </div>
-            </div>
-            <div class="box-footer">
-                <a-space size="large">
-                    <a-button @click="modify">取消</a-button>
-                    <a-button @click="addHistoryEvent" type="primary">添加</a-button>
-                </a-space>
-            </div>
+    <PopupMenu
+        v-if="isAddEvent"
+        title="添加历史事件"
+        determine="添加"
+        @toModify="modify"
+        @toDetermine="addHistoryEvent"
+    >
+        <a-tabs type="text" @change="chocieTab" :default-active-key="curTabType">
+            <a-tab-pane key="eveYear" title="年事件"></a-tab-pane>
+            <a-tab-pane key="eveMonth" title="*月事件"></a-tab-pane>
+            <a-tab-pane key="eveDay" title="*日事件"></a-tab-pane>
+        </a-tabs>
+        <div class="tab-content">
+            <a-form :model="formData" layout="inline">
+                <a-form-item v-if="curTabType === 'eveYear'" field="year" label="选择何年">
+                    <a-input-number
+                        :default-value="currentYear"
+                        @change="confirmPosition"
+                        :min="timeLine.min"
+                        :max="timeLine.max"
+                        size="samll"
+                        style="width: 100px;"
+                    />
+                </a-form-item>
+                <a-form-item
+                    v-if="curTabType === 'eveMonth' || curTabType === 'eveDay'"
+                    field="month"
+                    label="选择何月"
+                >
+                    <a-input-number
+                        v-model="formData.month"
+                        :min="-999"
+                        :max="999"
+                        size="samll"
+                        style="width: 100px;"
+                    />
+                </a-form-item>
+                <a-form-item v-if="curTabType === 'eveDay'" field="day" label="选择何日">
+                    <a-input-number
+                        v-model="formData.day"
+                        :min="-999"
+                        :max="999"
+                        size="samll"
+                        style="width: 100px;"
+                    />
+                </a-form-item>
+                <a-form-item field="event" label="事件名称">
+                    <a-input
+                        v-model="formData.event"
+                        :max-length="15"
+                        placeholder="请填写事件名"
+                        size="samll"
+                        style="width: 200px;"
+                        allow-clear
+                    />
+                </a-form-item>
+                <a-form-item field="eventdesc" label="事件描述">
+                    <a-textarea
+                        v-model="formData.eventdesc"
+                        placeholder="填写事件的相关描述"
+                        :auto-size="{
+                            minRows: 5,
+                            maxRows: 5
+                        }"
+                        style="width: 420px;"
+                        :max-length="500"
+                        show-word-limit
+                        allow-clear
+                    />
+                </a-form-item>
+            </a-form>
         </div>
-    </div>
+    </PopupMenu>
     <div class="timeline">
         <div class="timeline__block">
             <div class="slider-box" ref="sliderBox">
@@ -187,30 +151,19 @@
                 </div>
             </div>
             <div class="slider-detail">
-                <a-typography>
-                    <a-typography-title :heading="5">Default</a-typography-title>
-                    <a-typography-paragraph>A design is a plan or specification for the construction of an object or system or for the implementation of an activity or process, or the result of that plan or specification in the form of a prototype, product or process. The verb to design expresses the process of developing a design. In some cases, the direct construction of an object without an explicit prior plan (such as in craftwork, some engineering, coding, and graphic design) may also be considered to be a design activity.</a-typography-paragraph>
-                    <a-typography-title :heading="5">Secondary</a-typography-title>
-                    <a-typography-paragraph
-                        type="secondary"
-                    >A design is a plan or specification for the construction of an object or system or for the implementation of an activity or process, or the result of that plan or specification in the form of a prototype, product or process. The verb to design expresses the process of developing a design. In some cases, the direct construction of an object without an explicit prior plan (such as in craftwork, some engineering, coding, and graphic design) may also be considered to be a design activity.</a-typography-paragraph>
-                    <a-typography-title :heading="5">Spacing default</a-typography-title>
-                    <a-typography-paragraph>A design is a plan or specification for the construction of an object or system or for the implementation of an activity or process, or the result of that plan or specification in the form of a prototype, product or process. The verb to design expresses the process of developing a design. In some cases, the direct construction of an object without an explicit prior plan (such as in craftwork, some engineering, coding, and graphic design) may also be considered to be a design activity.</a-typography-paragraph>
-                    <a-typography-title :heading="5">Spacing close</a-typography-title>
-                    <a-typography-paragraph
-                        type="secondary"
-                        spacing="close"
-                    >A design is a plan or specification for the construction of an object or system or for the implementation of an activity or process, or the result of that plan or specification in the form of a prototype, product or process. The verb to design expresses the process of developing a design.</a-typography-paragraph>
+                <a-typography v-for="item  in currentDetail.data" :key="item.id">
+                    <a-typography-title :heading="5">{{ item.title }}</a-typography-title>
+                    <a-typography-title
+                        :heading="6"
+                    >{{ (item.month === null ? '' : item.month + '月') + ' ' + (item.day === null ? '' : item.day + '日') }}</a-typography-title>
+                    <a-typography-paragraph style="text-indent: 2em;">{{ item.desc }}</a-typography-paragraph>
                 </a-typography>
             </div>
             <div class="slider-setting">
                 <div class="setting-item">
                     <a-result :status="null" title="添加时间线">
-                        <template #icon>
-                            <img :src="timeline3" />
-                        </template>
                         <template #extra>
-                            <a-button type="primary" size="small">
+                            <a-button @click="addTimeLine" type="primary" size="small">
                                 <template #icon>
                                     <icon-plus />
                                 </template>添加
@@ -220,11 +173,11 @@
                 </div>
                 <div class="setting-item">
                     <a-result :status="null" title="切换时间线">
-                        <template #icon>
-                            <img :src="timeline4" />
-                        </template>
                         <template #extra>
-                            <a-dropdown @popup-visible-change="isRotate = !isRotate">
+                            <a-dropdown
+                                @popup-visible-change="isRotate = !isRotate"
+                                @select="changeTimeLine"
+                            >
                                 <a-button type="primary" size="small">
                                     <template #icon>
                                         <icon-down :class="isRotate ? 'rotate' : '_rotate'" />
@@ -260,6 +213,8 @@
                         v-for="(item, i) in yearData.data"
                         :key="item.id"
                         :id="'con_' + i"
+                        @click="choiceOneYear(item.timeSlot)"
+                        :style="currentDetail.curYear === item.timeSlot ? 'background-color: #f2f3f5;' : ''"
                         class="timeline-item"
                         title="点击查看详情"
                     >
@@ -281,25 +236,16 @@
 <script setup lang="ts">
 import { ref, reactive, Ref, onMounted, computed, nextTick } from 'vue';
 import {
-    IconPlus,
-    IconDown,
-    IconPlusCircle,
-    IconLocation,
-    IconZoomIn,
-    IconZoomOut,
-    IconToLeft,
-    IconToRight,
-    IconClose
+    IconPlus, IconDown, IconPlusCircle, IconLocation,
+    IconZoomIn, IconZoomOut, IconToLeft, IconToRight
 } from '@arco-design/web-vue/es/icon';
+import PopupMenu from './widget/PopupMenu.vue';
 import { throttle } from '../utils/flowControl';
-// import * as echarts from 'echarts';
 import '../style/fine-tune-timeLine.scss';// 局部组件库样式微调
 import { db } from '../db/db';
 import { v4 } from 'uuid';
 import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
-import timeline3 from '../assets/svg/timeline3.svg';
-import timeline4 from '../assets/svg/timeline4.svg';
 
 const { proxy } = useCurrentInstance();
 const route = useRoute();
@@ -493,7 +439,14 @@ const addHistoryEvent = () => {
         getTimeLineData();
     })
 }
-
+// 添加新时间线
+const addTimeLine = () => {
+    console.log('添加新时间线');
+}
+// 切换时间线
+const changeTimeLine = (value: string) => {
+    console.log('切换时间线:', value);
+}
 // 旋转图标
 const isRotate = ref(false);
 // 取消弹框
@@ -502,8 +455,31 @@ const modify = () => {
     isAddEvent.value = false;
 }
 
+// 选择某一年渲染详情页
+interface Detail {
+    id: string; month: number | null; day: number | null; title: string; desc: string
+}
+const currentDetail: {
+    curYear: number,
+    data: Array<Detail>
+} = reactive({ curYear: 2022, data: [] });
+const choiceOneYear = (year: number) => {
+    if (summaryObj.data[year] !== undefined) {
+        currentDetail.curYear = year;
+        // 排序月份后再排序日份
+        summaryObj.data[year].sort((a, b) => {
+            if (a.month !== b.month) return (a.month || 0) - (b.month || 0);
+            else if (a.day !== b.day) return (a.day || 0) - (b.day || 0);
+            return 0;
+        })
+        currentDetail.data = summaryObj.data[year];
+    }
+}
 // 获取数据
 const defaultPos = ref(0);
+let summaryObj: {
+    data: { [key: number]: Array<Detail> }
+} = reactive({ data: {} });
 function getTimeLineData() {
     db.opus.get(query_id)
         .then(value => {
@@ -515,12 +491,10 @@ function getTimeLineData() {
                 timeLine.min = theTimeLineData.data[defaultPos.value].min;
                 timeLine.name = theTimeLineData.data[defaultPos.value].name;
                 // 将每个年份的事件全部集合起来 key为年份
-                const summaryObj: {
-                    [key: number]: Array<{ id: string, month: number | null, day: number | null, title: string, desc: string }>
-                } = {};
+                summaryObj.data = {}; // 清空
                 theTimeLineData.data[defaultPos.value].eveYear.forEach(item => {
-                    if (summaryObj[item.timeSlot] === undefined) summaryObj[item.timeSlot] = [];
-                    summaryObj[item.timeSlot].push({
+                    if (summaryObj.data[item.timeSlot] === undefined) summaryObj.data[item.timeSlot] = [];
+                    summaryObj.data[item.timeSlot].push({
                         id: item.yid,
                         month: null,
                         day: null,
@@ -529,8 +503,8 @@ function getTimeLineData() {
                     })
                 })
                 theTimeLineData.data[defaultPos.value].eveMonth.forEach(item => {
-                    if (summaryObj[item.yearSlot] === undefined) summaryObj[item.yearSlot] = [];
-                    summaryObj[item.yearSlot].push({
+                    if (summaryObj.data[item.yearSlot] === undefined) summaryObj.data[item.yearSlot] = [];
+                    summaryObj.data[item.yearSlot].push({
                         id: item.mid,
                         month: item.timeSlot,
                         day: null,
@@ -539,8 +513,8 @@ function getTimeLineData() {
                     })
                 })
                 theTimeLineData.data[defaultPos.value].eveDay.forEach(item => {
-                    if (summaryObj[item.yearSlot] === undefined) summaryObj[item.yearSlot] = [];
-                    summaryObj[item.yearSlot].push({
+                    if (summaryObj.data[item.yearSlot] === undefined) summaryObj.data[item.yearSlot] = [];
+                    summaryObj.data[item.yearSlot].push({
                         id: item.did,
                         month: item.monthSlot,
                         day: item.timeSlot,
@@ -549,20 +523,18 @@ function getTimeLineData() {
                     })
                 })
                 yearData.data = []; // 先清空后push
-                for (let i in summaryObj) {
+                for (let i in summaryObj.data) {
                     yearData.data.push({
-                        id: summaryObj[i][0].id,
+                        id: summaryObj.data[i][0].id,
                         timeSlot: parseInt(i),
-                        title: summaryObj[i][0].title,
-                        desc: summaryObj[i][0].desc,
-                        totalNum: summaryObj[i].length
+                        title: summaryObj.data[i][0].title,
+                        desc: summaryObj.data[i][0].desc,
+                        totalNum: summaryObj.data[i].length
                     })
                 }
                 // 升序排序
-                yearData.data.sort((a, b) => {
-                    return a.timeSlot - b.timeSlot;
-                })
-                console.log(yearData.data);
+                yearData.data.sort((a, b) => a.timeSlot - b.timeSlot);
+                choiceOneYear(yearData.data[0].timeSlot);
                 nextTick(() => {
                     calculateOffsetTop();
                 })
@@ -588,7 +560,6 @@ function setSliderState() {
 // 计算每个元素距离父元素顶部的大小
 function calculateOffsetTop() {
     let targetElement: HTMLElement;
-    console.log('&&:', yearData.data);
     offsetTop_el.data = yearData.data.map((_, index) => {
         targetElement = document.getElementById('con_' + index)!;
         return {
@@ -621,7 +592,9 @@ function slidingTimeline(e: MouseEvent) {
         targetX < -1 * max ? targetX = -1 * max : null;
         slider.value.style.left = targetX + 'px';
     }
+
 }
+
 </script>
 
 <style src="../style/timelineeditor.scss" lang="scss" scoped>

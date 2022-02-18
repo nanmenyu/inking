@@ -1,42 +1,33 @@
 <template>
     <!-- 新建功能弹窗 -->
-    <div v-if="addnew" id="addnew-box">
-        <div class="box">
-            <div class="box-header">
-                <div class="header-title">新建选项</div>
-                <div class="header-close" @click="addto">
-                    <icon-close />
-                </div>
-            </div>
-            <div class="box-body">
-                <a-space size="large">
-                    <a-space direction="vertical">
-                        <a-typography-title :heading="6" type="primary">请选择根目录</a-typography-title>
-                        <a-typography-paragraph>{{ explain }}</a-typography-paragraph>
-                    </a-space>
-                    <a-space direction="vertical">
-                        <a-select v-model="optionValue">
-                            <a-option>作品集</a-option>
-                            <a-option>笔记本</a-option>
-                            <a-option>Markdown</a-option>
-                        </a-select>
-                        <a-input
-                            v-model="fileName"
-                            placeholder="请填写文档名称..."
-                            :max-length="25"
-                            show-word-limit
-                        />
-                    </a-space>
-                </a-space>
-            </div>
-            <div class="box-footer">
-                <a-space size="large">
-                    <a-button @click="addto">取消</a-button>
-                    <a-button type="primary" @click="addFile" :disabled="fileName.length === 0">确定</a-button>
-                </a-space>
-            </div>
-        </div>
-    </div>
+    <PopupMenu
+        v-if="addnew"
+        title="新建选项"
+        determine="确定"
+        @toModify="addto"
+        @toDetermine="addFile"
+        :determineDisabled="fileName.length === 0"
+    >
+        <a-space size="large">
+            <a-space direction="vertical">
+                <a-typography-title :heading="6" type="primary">请选择根目录</a-typography-title>
+                <a-typography-paragraph>{{ explain }}</a-typography-paragraph>
+            </a-space>
+            <a-space direction="vertical">
+                <a-select v-model="optionValue">
+                    <a-option>作品集</a-option>
+                    <a-option>笔记本</a-option>
+                    <a-option>Markdown</a-option>
+                </a-select>
+                <a-input
+                    v-model="fileName"
+                    placeholder="请填写文档名称..."
+                    :max-length="25"
+                    show-word-limit
+                />
+            </a-space>
+        </a-space>
+    </PopupMenu>
     <!-- 工具栏 -->
     <div class="toolbar">
         <div class="bar-left">
@@ -141,14 +132,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import {
-    IconClose,
-    IconPlus,
-    IconImport,
-    IconSwap,
-    IconApps,
-    IconUnorderedList,
-    IconDelete
+    IconClose, IconPlus, IconImport, IconSwap,
+    IconApps, IconUnorderedList, IconDelete
 } from '@arco-design/web-vue/es/icon';
+import PopupMenu from './PopupMenu.vue';
 import { useRoute } from 'vue-router';
 import { db } from '../../db/db';
 import useCurrentInstance from '../../utils/useCurrentInstance';

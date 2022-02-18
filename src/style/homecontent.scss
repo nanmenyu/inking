@@ -201,11 +201,6 @@
     }
 }
 
-/* 弹窗 */
-#modify-box {
-    @include popupBase;
-}
-
 @keyframes rotateBook {
     from {
         transform: perspective(900px) rotateY(0);

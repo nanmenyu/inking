@@ -1,63 +1,52 @@
 <!-- 关键字编辑模块 -->
 <template>
-    <div v-if="isCardEdit" id="modify-box">
-        <div class="box card-detail">
-            <div class="box-header">
-                <div class="header-title">关键词组编辑</div>
-                <div class="header-close" @click="modify">
-                    <icon-close />
-                </div>
-            </div>
-            <div class="box-body detail-body">
-                <div class="detail-left">
-                    <input
-                        type="file"
-                        accept="image/*"
-                        ref="fileInput"
-                        @change="_replaceCover(5 / 7)"
-                        style="display: none;"
-                    />
-                    <img
-                        @click="replaceCover(1)"
-                        :src="form.keyword.cardImg === '' ? defaultImg : form.keyword.cardImg"
-                    />
-                    <h3>点击更换主题图片</h3>
-                </div>
-                <div class="detail-right">
-                    <a-form :model="form.keyword" style="margin-top: 20px;">
-                        <a-form-item field="关键组" label="关键组">
-                            <a-input
-                                v-model.trim="form.keyword.title"
-                                :max-length="15"
-                                placeholder="请填写关键词组..."
-                            />
-                        </a-form-item>
-                        <a-form-item field="描述" label="描述">
-                            <a-textarea
-                                show-word-limit
-                                v-model.trim="form.keyword.desc"
-                                :max-length="25"
-                                :auto-size="{
-                                    minRows: 5
-                                }"
-                                placeholder="请填写关键词组描述..."
-                            />
-                        </a-form-item>
-                    </a-form>
-                </div>
-            </div>
-            <div class="box-footer">
-                <a-space size="large">
-                    <a-button @click="modify">取消</a-button>
-                    <a-button
-                        :disabled="!form.keyword.title || !form.keyword.desc"
-                        @click="confirmKeywordGroup"
-                        type="primary"
-                    >确定</a-button>
-                </a-space>
-            </div>
+    <PopupMenu
+        v-if="isCardEdit"
+        title="关键词组编辑"
+        determine="确定"
+        @toModify="modify"
+        @toDetermine="confirmKeywordGroup"
+        :boxClass="['box', 'card-detail']"
+        :bodyClass="['box-body', 'detail-body']"
+        :determineDisabled="!form.keyword.title || !form.keyword.desc"
+    >
+        <div class="detail-left">
+            <input
+                type="file"
+                accept="image/*"
+                ref="fileInput"
+                @change="_replaceCover(5 / 7)"
+                style="display: none;"
+            />
+            <img
+                @click="replaceCover(1)"
+                :src="form.keyword.cardImg === '' ? defaultImg : form.keyword.cardImg"
+            />
+            <h3>点击更换主题图片</h3>
         </div>
-    </div>
+        <div class="detail-right">
+            <a-form :model="form.keyword" style="margin-top: 20px;">
+                <a-form-item field="关键组" label="关键组">
+                    <a-input
+                        v-model.trim="form.keyword.title"
+                        :max-length="15"
+                        placeholder="请填写关键词组..."
+                    />
+                </a-form-item>
+                <a-form-item field="描述" label="描述">
+                    <a-textarea
+                        show-word-limit
+                        v-model.trim="form.keyword.desc"
+                        :max-length="25"
+                        :auto-size="{
+                            minRows: 5
+                        }"
+                        placeholder="请填写关键词组描述..."
+                    />
+                </a-form-item>
+            </a-form>
+        </div>
+    </PopupMenu>
     <div v-if="isCardContent" id="modify-box" @mousedown="modifyAllItem">
         <div class="box">
             <div class="box-header">
@@ -420,25 +409,16 @@
             </div>
         </div>
     </div>
-    <div v-if="isReplaceCover" id="modify-box">
-        <div class="box-replace">
-            <div class="box-header">
-                <div class="header-title">{{ replaceCoverTitle }}</div>
-                <div class="header-close" @click="cancelReplace">
-                    <icon-close />
-                </div>
-            </div>
-            <div class="box-replace-body" style="max-height: 400px;padding: 0;overflow: hidden;">
-                <img :src="imgUrl" ref="coverImg" />
-            </div>
-            <div class="box-footer">
-                <a-space size="large">
-                    <a-button @click="cancelReplace">取消</a-button>
-                    <a-button @click="saveImgData" type="primary">确定</a-button>
-                </a-space>
-            </div>
-        </div>
-    </div>
+    <PopupMenu
+        v-if="isReplaceCover"
+        :title="replaceCoverTitle"
+        determine="确定"
+        @toModify="cancelReplace"
+        @toDetermine="saveImgData"
+        bodyStyle="max-height: 400px;padding: 0;overflow: hidden;"
+    >
+        <img :src="imgUrl" ref="coverImg" />
+    </PopupMenu>
     <div v-if="isSetTemplate" id="modify-box">
         <div class="box card-detail">
             <div class="box-header">
@@ -533,18 +513,12 @@
 </template>
 
 <script setup lang="ts">
-import {
-    IconClose,
-    IconEdit,
-    IconCloseCircle,
-    IconPlus,
-    IconDelete,
-    IconPen,
-    IconCaretRight,
-    IconReply,
-    IconFire
-} from '@arco-design/web-vue/es/icon';
 import { ref, reactive, watch, nextTick } from 'vue';
+import {
+    IconClose, IconEdit, IconCloseCircle, IconPlus,
+    IconDelete, IconPen, IconCaretRight, IconReply, IconFire
+} from '@arco-design/web-vue/es/icon';
+import PopupMenu from './widget/PopupMenu.vue';
 import { useRoute } from 'vue-router';
 import { db } from '../db/db';
 import Cropper from 'cropperjs';
@@ -1768,4 +1742,6 @@ function setNumberChart(targetData: Array<{ key: string, value: number }>, unit:
 
 <style lang="scss" src="../style/KeywordEditor.scss" scoped>
 </style> 
+
+
 

@@ -1,237 +1,199 @@
 <!-- 右内容栏 -->
 <template>
-    <!-- 修改作品信息弹窗 -->
-    <div v-if="isModify" id="modify-box">
-        <div class="box">
-            <div class="box-header">
-                <div class="header-title">修改作品信息</div>
-                <div class="header-close" @click="modify">
-                    <icon-close />
-                </div>
-            </div>
-            <div class="box-body">
-                <a-form :model="form">
-                    <a-form-item field="name" label="作者名称">
-                        <a-input
-                            v-model.trim="form.name"
-                            style="width: 370px"
-                            :max-length="25"
-                            :error="form.name.length === 0"
-                            show-word-limit
-                            allow-clear
-                            placeholder="请输入作者名称..."
-                        />
-                    </a-form-item>
-                    <a-form-item field="opus" label="作品名称">
-                        <a-input
-                            v-model.trim="form.opus"
-                            style="width: 370px"
-                            :max-length="25"
-                            :error="form.opus.length === 0"
-                            show-word-limit
-                            allow-clear
-                            placeholder="请输入作品名称..."
-                        />
-                    </a-form-item>
-                    <a-divider style="border-bottom-style: dashed" />
-                    <a-form-item field="category" label="作品分类">
-                        <a-cascader
-                            path-mode
-                            :options="category"
-                            v-model="form.category"
-                            style="width: 370px"
-                            placeholder="请选择作品分类..."
-                        />
-                    </a-form-item>
-                    <a-form-item field="tag" label="作品标签">
-                        <a-space size="small">
-                            <a-input
-                                :style="{ 'width': '180px' }"
-                                :max-length="8"
-                                v-model.trim="inputTag"
-                                show-word-limit
-                                placeholder="添加自定义标签..."
-                            />
-                            <a-button
-                                type="outline"
-                                @click="addTag"
-                                :disabled="inputTag.length === 0 || selectedArr.length >= 4 || selectedArr.indexOf(inputTag) !== -1"
-                            >
-                                <icon-plus />添加
-                            </a-button>
-                            <a-button type="text" @click="rotateIcon('tag')">
-                                标签墙
-                                <icon-down :class="tagRotated ? 'rotate' : '-rotate'" />
-                            </a-button>
-                        </a-space>
-                    </a-form-item>
-                    <!-- 显示已经选择的标签 -->
-                    <a-form-item v-if="selectedArr.length > 0" field="selected" :label="promptText">
-                        <a-space>
+    <!-- 弹出框 -->
+    <PopupMenu
+        v-if="isModify"
+        title="修改作品信息"
+        determine="确定"
+        @toModify="modify"
+        @toDetermine="determine"
+        :determineDisabled="form.name.length === 0 || form.opus.length === 0"
+    >
+        <a-form :model="form">
+            <a-form-item field="name" label="作者名称">
+                <a-input
+                    v-model.trim="form.name"
+                    style="width: 370px"
+                    :max-length="25"
+                    :error="form.name.length === 0"
+                    show-word-limit
+                    allow-clear
+                    placeholder="请输入作者名称..."
+                />
+            </a-form-item>
+            <a-form-item field="opus" label="作品名称">
+                <a-input
+                    v-model.trim="form.opus"
+                    style="width: 370px"
+                    :max-length="25"
+                    :error="form.opus.length === 0"
+                    show-word-limit
+                    allow-clear
+                    placeholder="请输入作品名称..."
+                />
+            </a-form-item>
+            <a-divider style="border-bottom-style: dashed" />
+            <a-form-item field="category" label="作品分类">
+                <a-cascader
+                    path-mode
+                    :options="category"
+                    v-model="form.category"
+                    style="width: 370px"
+                    placeholder="请选择作品分类..."
+                />
+            </a-form-item>
+            <a-form-item field="tag" label="作品标签">
+                <a-space size="small">
+                    <a-input
+                        :style="{ 'width': '180px' }"
+                        :max-length="8"
+                        v-model.trim="inputTag"
+                        show-word-limit
+                        placeholder="添加自定义标签..."
+                    />
+                    <a-button
+                        type="outline"
+                        @click="addTag"
+                        :disabled="inputTag.length === 0 || selectedArr.length >= 4 || selectedArr.indexOf(inputTag) !== -1"
+                    >
+                        <icon-plus />添加
+                    </a-button>
+                    <a-button type="text" @click="rotateIcon('tag')">
+                        标签墙
+                        <icon-down :class="tagRotated ? 'rotate' : '-rotate'" />
+                    </a-button>
+                </a-space>
+            </a-form-item>
+            <!-- 显示已经选择的标签 -->
+            <a-form-item v-if="selectedArr.length > 0" field="selected" :label="promptText">
+                <a-space>
+                    <a-tag
+                        v-for="item in selectedArr"
+                        :key="item"
+                        color="#00b42a"
+                        closable
+                        @close="closeTag(item)"
+                    >
+                        <icon-check-circle-fill />
+                        {{ item }}
+                    </a-tag>
+                </a-space>
+            </a-form-item>
+            <!-- 标签墙 -->
+            <div id="tagWall" :class="tagRotated ? 'expansion' : '-expansion'">
+                <a-tabs default-active-key="1" :animation="true">
+                    <a-tab-pane key="1" title="起点">
+                        <h4>起点中文网热门标签</h4>
+                        <a-space wrap>
                             <a-tag
-                                v-for="item in selectedArr"
+                                v-for="(item, i) in tagData['qidian']"
                                 :key="item"
-                                color="#00b42a"
-                                closable
-                                @close="closeTag(item)"
-                            >
-                                <icon-check-circle-fill />
-                                {{ item }}
-                            </a-tag>
+                                @click="checkTag(item)"
+                                :color="deCheckedArr[i] === undefined ? tagColor[i] : deCheckedArr[i]"
+                            >{{ item }}</a-tag>
                         </a-space>
-                    </a-form-item>
-                    <!-- 标签墙 -->
-                    <div id="tagWall" :class="tagRotated ? 'expansion' : '-expansion'">
-                        <a-tabs default-active-key="1" :animation="true">
-                            <a-tab-pane key="1" title="起点">
-                                <h4>起点中文网热门标签</h4>
-                                <a-space wrap>
-                                    <a-tag
-                                        v-for="(item, i) in tagData['qidian']"
-                                        :key="item"
-                                        @click="checkTag(item)"
-                                        :color="deCheckedArr[i] === undefined ? tagColor[i] : deCheckedArr[i]"
-                                    >{{ item }}</a-tag>
-                                </a-space>
-                            </a-tab-pane>
-                            <a-tab-pane key="2" title="红袖">红袖添香网热门标签</a-tab-pane>
-                            <a-tab-pane key="3" title="晋江">晋江文学城热门标签</a-tab-pane>
-                            <a-tab-pane key="4" title="晋江">晋江文学城热门标签</a-tab-pane>
-                            <a-tab-pane key="5" title="晋江">晋江文学城热门标签</a-tab-pane>
-                            <a-tab-pane key="6" title="晋江">晋江文学城热门标签</a-tab-pane>
-                            <a-tab-pane key="7" title="晋江">晋江文学城热门标签</a-tab-pane>
-                        </a-tabs>
-                    </div>
-                    <!-- 标签墙 -->
-                    <a-divider style="border-bottom-style: dashed" />
-                    <a-form-item field="briefintro" label="作品简介">
-                        <a-textarea
-                            show-word-limit
-                            v-model="form.briefintro"
-                            :max-length="500"
-                            :auto-size="{
-                                minRows: 5,
-                                maxRows: 5
-                            }"
-                            style="width: 370px;overflow: hidden;"
-                            placeholder="来点简介..."
-                        />
-                    </a-form-item>
-                </a-form>
+                    </a-tab-pane>
+                    <a-tab-pane key="2" title="红袖">红袖添香网热门标签</a-tab-pane>
+                    <a-tab-pane key="3" title="晋江">晋江文学城热门标签</a-tab-pane>
+                    <a-tab-pane key="4" title="晋江">晋江文学城热门标签</a-tab-pane>
+                    <a-tab-pane key="5" title="晋江">晋江文学城热门标签</a-tab-pane>
+                    <a-tab-pane key="6" title="晋江">晋江文学城热门标签</a-tab-pane>
+                    <a-tab-pane key="7" title="晋江">晋江文学城热门标签</a-tab-pane>
+                </a-tabs>
             </div>
-            <div class="box-footer">
-                <a-space size="large">
-                    <a-button @click="modify">取消</a-button>
-                    <a-button
-                        type="primary"
-                        @click="determine"
-                        :disabled="form.name.length === 0 || form.opus.length === 0"
-                    >确定</a-button>
-                </a-space>
-            </div>
-        </div>
-    </div>
-    <div v-if="isNewVolume" id="modify-box">
-        <div class="box">
-            <div class="box-header">
-                <div class="header-title">新增卷</div>
-                <div class="header-close" @click="modify">
-                    <icon-close />
-                </div>
-            </div>
-            <div class="box-body">
-                <a-space>
-                    <a-form-item field="name" label="卷名">
-                        <a-input
-                            v-model.trim="volumeName"
-                            style="width: 370px"
-                            :max-length="25"
-                            :error="volumeName.length === 0"
-                            show-word-limit
-                            allow-clear
-                            placeholder="请输入卷名..."
-                        />
-                    </a-form-item>
-                </a-space>
-            </div>
-            <div class="box-footer">
-                <a-space size="large">
-                    <a-button @click="modify">取消</a-button>
-                    <a-button
-                        type="primary"
-                        @click="addNewVolume"
-                        :disabled="volumeName.length === 0"
-                    >确定</a-button>
-                </a-space>
-            </div>
-        </div>
-    </div>
-    <div v-if="isNewChapter" id="modify-box">
-        <div class="box">
-            <div class="box-header">
-                <div class="header-title">新增章</div>
-                <div class="header-close" @click="modify">
-                    <icon-close />
-                </div>
-            </div>
-            <div class="box-body">
-                <a-space>
-                    <a-form-item field="name" label="章名">
-                        <a-input
-                            v-model.trim="chapterName"
-                            style="width: 370px"
-                            :max-length="25"
-                            :error="chapterName.length === 0"
-                            show-word-limit
-                            allow-clear
-                            placeholder="请输入章名..."
-                        />
-                    </a-form-item>
-                </a-space>
-            </div>
-            <div class="box-footer">
-                <a-space size="large">
-                    <a-button @click="modify">取消</a-button>
-                    <a-button
-                        type="primary"
-                        @click="addNewChapter"
-                        :disabled="chapterName.length === 0"
-                    >确定</a-button>
-                </a-space>
-            </div>
-        </div>
-    </div>
-    <div v-if="isRename" id="modify-box">
-        <div class="box">
-            <div class="box-header">
-                <div class="header-title">重命名</div>
-                <div class="header-close" @click="modify">
-                    <icon-close />
-                </div>
-            </div>
-            <div class="box-body">
-                <a-space>
-                    <a-form-item field="name" label="名称">
-                        <a-input
-                            v-model.trim="showName"
-                            style="width: 370px"
-                            :max-length="25"
-                            :error="showName.length === 0"
-                            show-word-limit
-                            allow-clear
-                            placeholder="请输入章名..."
-                        />
-                    </a-form-item>
-                </a-space>
-            </div>
-            <div class="box-footer">
-                <a-space size="large">
-                    <a-button @click="modify">取消</a-button>
-                    <a-button type="primary" @click="reName" :disabled="showName.length === 0">确定</a-button>
-                </a-space>
-            </div>
-        </div>
-    </div>
+            <!-- 标签墙 -->
+            <a-divider style="border-bottom-style: dashed" />
+            <a-form-item field="briefintro" label="作品简介">
+                <a-textarea
+                    show-word-limit
+                    v-model="form.briefintro"
+                    :max-length="500"
+                    :auto-size="{
+                        minRows: 5,
+                        maxRows: 5
+                    }"
+                    style="width: 370px;overflow: hidden;"
+                    placeholder="来点简介..."
+                />
+            </a-form-item>
+        </a-form>
+    </PopupMenu>
+    <PopupMenu
+        v-if="isNewVolume"
+        title="新增卷"
+        determine="确定"
+        @toModify="modify"
+        @toDetermine="addNewVolume"
+        :determineDisabled="volumeName.length === 0"
+    >
+        <a-space>
+            <a-form-item field="name" label="卷名">
+                <a-input
+                    v-model.trim="volumeName"
+                    style="width: 370px"
+                    :max-length="25"
+                    :error="volumeName.length === 0"
+                    show-word-limit
+                    allow-clear
+                    placeholder="请输入卷名..."
+                />
+            </a-form-item>
+        </a-space>
+    </PopupMenu>
+    <PopupMenu
+        v-if="isNewChapter"
+        title="新增章"
+        determine="确定"
+        @toModify="modify"
+        @toDetermine="addNewChapter"
+        :determineDisabled="chapterName.length === 0"
+    >
+        <a-space>
+            <a-form-item field="name" label="章名">
+                <a-input
+                    v-model.trim="chapterName"
+                    style="width: 370px"
+                    :max-length="25"
+                    :error="chapterName.length === 0"
+                    show-word-limit
+                    allow-clear
+                    placeholder="请输入章名..."
+                />
+            </a-form-item>
+        </a-space>
+    </PopupMenu>
+    <PopupMenu
+        v-if="isRename"
+        title="重命名"
+        determine="确定"
+        @toModify="modify"
+        @toDetermine="reName"
+        :determineDisabled="showName.length === 0"
+    >
+        <a-space>
+            <a-form-item field="name" label="名称">
+                <a-input
+                    v-model.trim="showName"
+                    style="width: 370px"
+                    :max-length="25"
+                    :error="showName.length === 0"
+                    show-word-limit
+                    allow-clear
+                    placeholder="请输入新名称..."
+                />
+            </a-form-item>
+        </a-space>
+    </PopupMenu>
+    <PopupMenu
+        v-if="isReplaceCover"
+        title="更换封面(4:3)"
+        determine="确定"
+        @toModify="cancelReplace"
+        @toDetermine="saveImgData"
+        bodyStyle="max-height: 400px;padding: 0;overflow: hidden;"
+    >
+        <img :src="imgUrl" ref="coverImg" />
+    </PopupMenu>
     <div v-if="isWastepaperBasket" id="modify-box">
         <div class="wastepaperBasket">
             <div class="box-header">
@@ -267,25 +229,6 @@
                     <a-button @click="restoreSelect" status="success" type="outline">还原</a-button>
                     <a-button @click="selectAll" type="outline">全选</a-button>
                     <a-button @click="modify">取消</a-button>
-                </a-space>
-            </div>
-        </div>
-    </div>
-    <div v-if="isReplaceCover" id="modify-box">
-        <div class="box-replace">
-            <div class="box-header">
-                <div class="header-title">更换封面(4:3)</div>
-                <div class="header-close" @click="cancelReplace">
-                    <icon-close />
-                </div>
-            </div>
-            <div class="box-body" style="max-height: 400px;padding: 0;overflow: hidden;">
-                <img :src="imgUrl" ref="coverImg" />
-            </div>
-            <div class="box-footer">
-                <a-space size="large">
-                    <a-button @click="cancelReplace">取消</a-button>
-                    <a-button @click="saveImgData" type="primary">确定</a-button>
                 </a-space>
             </div>
         </div>
@@ -480,7 +423,7 @@
                             <p
                                 style="height: 18px;overflow: hidden; text-overflow: ellipsis;white-space: nowrap;"
                             >{{ chapter.chapterName }}</p>
-                            <p>{{ standTime(chapter.updateTime) + '\u3000' + chapter.chapterNum + '字' }}</p>
+                            <p>{{ standTime(chapter.updateTime) + '\u3000' + (chapter.chapterNum || 0) + '字' }}</p>
                             <button
                                 @click.stop="deleteChapter(volume.vid, chapter.cid, chapter.chapterName)"
                                 class="btn"
@@ -510,20 +453,12 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
 import {
-    IconClose,
-    IconPlus,
-    IconEdit,
-    IconTag,
-    IconCheckCircleFill,
-    IconStar,
-    IconDown,
-    IconCaretRight,
-    IconPlusCircle,
-    IconCloseCircle,
-    IconCheck,
-    IconMinusCircle
+    IconClose, IconPlus, IconEdit, IconTag, IconCheckCircleFill,
+    IconStar, IconDown, IconCaretRight, IconPlusCircle, IconCloseCircle,
+    IconCheck, IconMinusCircle
 } from '@arco-design/web-vue/es/icon';
 import Toolbar from './widget/Toolbar.vue';
+import PopupMenu from './widget/PopupMenu.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { db } from '../db/db';
 import timeFormat from '../utils/timeFormat';

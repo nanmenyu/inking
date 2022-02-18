@@ -15,41 +15,28 @@
             @toSelectAll="getSelectAll"
             ref="myRef"
         ></MultipleBar>
-        <div v-if="isRename" id="modify-box">
-            <div class="box">
-                <div class="box-header">
-                    <div class="header-title">重命名</div>
-                    <div class="header-close" @click="isRename = false">
-                        <icon-close />
-                    </div>
-                </div>
-                <div class="box-body">
-                    <a-space>
-                        <a-form-item field="name" label="名称">
-                            <a-input
-                                v-model.trim="showName"
-                                style="width: 370px"
-                                :max-length="25"
-                                :error="showName.length === 0"
-                                show-word-limit
-                                allow-clear
-                                placeholder="请输入章名..."
-                            />
-                        </a-form-item>
-                    </a-space>
-                </div>
-                <div class="box-footer">
-                    <a-space size="large">
-                        <a-button @click="isRename = false">取消</a-button>
-                        <a-button
-                            type="primary"
-                            @click="reName"
-                            :disabled="showName.length === 0"
-                        >确定</a-button>
-                    </a-space>
-                </div>
-            </div>
-        </div>
+        <PopupMenu
+            v-if="isRename"
+            title="重命名"
+            determine="确定"
+            @toModify="isRename = false"
+            @toDetermine="reName"
+            :determineDisabled="showName.length === 0"
+        >
+            <a-space>
+                <a-form-item field="name" label="名称">
+                    <a-input
+                        v-model.trim="showName"
+                        style="width: 370px"
+                        :max-length="25"
+                        :error="showName.length === 0"
+                        show-word-limit
+                        allow-clear
+                        placeholder="请输入章名..."
+                    />
+                </a-form-item>
+            </a-space>
+        </PopupMenu>
         <div v-if="displyBlock" class="content">
             <a-empty
                 v-if="!booksData.data.length"
@@ -146,14 +133,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, nextTick, onUnmounted, watch } from "vue";
-import {
-    IconSkin,
-    // IconMoreVertical,
-    IconCheck,
-    IconClose
-} from "@arco-design/web-vue/es/icon";
+import { IconSkin, IconCheck } from "@arco-design/web-vue/es/icon";
 import Toolbar from "./widget/Toolbar.vue";
 import MultipleBar from "./widget/MultipleBar.vue";
+import PopupMenu from './widget/PopupMenu.vue';
 import { db } from "../db/db";
 import { useRouter } from 'vue-router';
 import timeFormat from "../utils/timeFormat";
