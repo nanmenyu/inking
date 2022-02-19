@@ -73,6 +73,43 @@
             </a-form>
         </div>
     </PopupMenu>
+
+    <PopupMenu
+        v-if="isTimeLineSetting"
+        :title="isToAdd ? '添加时间线' : '时间线设置'"
+        :determine="isToAdd ? '添加' : '设置'"
+        @toModify="modify"
+        @toDetermine="TimeLineSetting"
+        :determineDisabled="(formLine.name.length === 0) || (formLine.min === formLine.max)"
+    >
+        <a-form :model="formLine" layout="inline">
+            <a-form-item field="name" label="名称">
+                <a-input
+                    v-model="formLine.name"
+                    :max-length="10"
+                    style=" width: 100px"
+                    placeholder="时间线名称"
+                    allow-clear
+                />
+            </a-form-item>
+            <a-form-item v-model="formLine.min" field="name" label="Min">
+                <a-input-number
+                    style=" width: 100px"
+                    placeholder="年份范围"
+                    :min="-99999"
+                    :max="formLine.max"
+                />
+            </a-form-item>
+            <a-form-item v-model="formLine.max" field="name" label="Max">
+                <a-input-number
+                    style=" width: 100px"
+                    placeholder="年份范围"
+                    :min="formLine.min"
+                    :max="99999"
+                />
+            </a-form-item>
+        </a-form>
+    </PopupMenu>
     <div class="timeline">
         <div class="timeline__block">
             <div class="slider-box" ref="sliderBox">
@@ -160,37 +197,47 @@
                 </a-typography>
             </div>
             <div class="slider-setting">
-                <div class="setting-item">
-                    <a-result :status="null" title="添加时间线">
-                        <template #extra>
-                            <a-button @click="addTimeLine" type="primary" size="small">
-                                <template #icon>
-                                    <icon-plus />
-                                </template>添加
-                            </a-button>
+                <a-space direction="vertical" size="large">
+                    <a-tooltip content="时间线设置" mini position="left" background-color="#3491FA">
+                        <a-button @click="showLineSetting('set')" type="primary" size="small">
+                            <template #icon>
+                                <icon-settings />
+                            </template>设置
+                        </a-button>
+                    </a-tooltip>
+                    <a-tooltip content="添加时间线" mini position="left" background-color="#3491FA">
+                        <a-button @click="showLineSetting('add')" type="primary" size="small">
+                            <template #icon>
+                                <icon-plus />
+                            </template>添加
+                        </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip content="删除时间线" mini position="left" background-color="#3491FA">
+                        <a-button @click="deleteTimeLine" type="primary" size="small">
+                            <template #icon>
+                                <icon-delete />
+                            </template>删除
+                        </a-button>
+                    </a-tooltip>
+                    <a-dropdown
+                        @popup-visible-change="isRotate = !isRotate"
+                        @select="changeTimeLine"
+                    >
+                        <a-button type="primary" size="small">
+                            <template #icon>
+                                <icon-down :class="isRotate ? 'rotate' : '_rotate'" />
+                            </template>切换
+                        </a-button>
+                        <template #content>
+                            <a-doption
+                                v-for="item in theTimeLineData.data"
+                                :key="item.tid"
+                                :style="item.tid === timeLine.tid ? 'background-color:#f2f3f5' : ''"
+                            >{{ item.name }}</a-doption>
                         </template>
-                    </a-result>
-                </div>
-                <div class="setting-item">
-                    <a-result :status="null" title="切换时间线">
-                        <template #extra>
-                            <a-dropdown
-                                @popup-visible-change="isRotate = !isRotate"
-                                @select="changeTimeLine"
-                            >
-                                <a-button type="primary" size="small">
-                                    <template #icon>
-                                        <icon-down :class="isRotate ? 'rotate' : '_rotate'" />
-                                    </template>切换
-                                </a-button>
-                                <template #content>
-                                    <a-doption>默认线</a-doption>
-                                    <a-doption>xxx线</a-doption>
-                                </template>
-                            </a-dropdown>
-                        </template>
-                    </a-result>
-                </div>
+                    </a-dropdown>
+                </a-space>
             </div>
         </div>
         <section @scroll="sectionScroll" ref="timelineSection" class="timeline__section">
@@ -236,8 +283,8 @@
 <script setup lang="ts">
 import { ref, reactive, Ref, onMounted, computed, nextTick } from 'vue';
 import {
-    IconPlus, IconDown, IconPlusCircle, IconLocation,
-    IconZoomIn, IconZoomOut, IconToLeft, IconToRight
+    IconPlus, IconDown, IconPlusCircle, IconLocation, IconSettings,
+    IconZoomIn, IconZoomOut, IconToLeft, IconToRight, IconDelete
 } from '@arco-design/web-vue/es/icon';
 import PopupMenu from './widget/PopupMenu.vue';
 import { throttle } from '../utils/flowControl';
@@ -246,6 +293,7 @@ import { db } from '../db/db';
 import { v4 } from 'uuid';
 import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
+import { time } from 'console';
 
 const { proxy } = useCurrentInstance();
 const route = useRoute();
@@ -440,8 +488,56 @@ const addHistoryEvent = () => {
     })
 }
 // 添加新时间线
-const addTimeLine = () => {
-    console.log('添加新时间线');
+const isTimeLineSetting = ref(false), isToAdd = ref(true);
+const formLine: {
+    name: string, min: number, max: number
+} = reactive({ name: '', min: 1, max: 2022 })
+// 呼出窗口
+const showLineSetting = (type: 'set' | 'add') => {
+    isTimeLineSetting.value = true;
+    isToAdd.value = type === 'add' ? true : false;
+    if (type === 'set') {
+        [formLine.name, formLine.min, formLine.max] = [timeLine.name, timeLine.min, timeLine.max];
+    } else {
+        [formLine.name, formLine.min, formLine.max] = ['', 1, 2022];
+    }
+}
+const TimeLineSetting = () => {
+    if (isToAdd.value) {
+        db.opus.where(':id').equals(query_id).modify(item => {
+            item.theTimeLine.push({
+                tid: v4(),
+                name: formLine.name,
+                max: formLine.max,
+                min: formLine.min,
+                eveYear: [],
+                eveMonth: [],
+                eveDay: []
+            })
+        }).then(() => {
+            isTimeLineSetting.value = false;
+            getTimeLineData();
+            proxy.$message.success('添加新时间线成功！');
+        })
+    } else {
+        db.opus.where(':id').equals(query_id).modify(item => {
+            for (let i in item.theTimeLine) {
+                if (item.theTimeLine[i].tid === timeLine.tid) {
+                    [item.theTimeLine[i].name, item.theTimeLine[i].min, item.theTimeLine[i].max]
+                        = [formLine.name, formLine.min, formLine.max];
+                    break;
+                }
+            }
+        }).then(() => {
+            isTimeLineSetting.value = false;
+            getTimeLineData();
+            proxy.$message.success('时间线设置成功！');
+        })
+    }
+}
+// 删除时间线
+const deleteTimeLine = () => {
+    console.log('删除新时间线');
 }
 // 切换时间线
 const changeTimeLine = (value: string) => {
@@ -453,6 +549,7 @@ const isRotate = ref(false);
 const modify = () => {
     isPosition.value = false;
     isAddEvent.value = false;
+    isTimeLineSetting.value = false;
 }
 
 // 选择某一年渲染详情页
@@ -485,6 +582,7 @@ function getTimeLineData() {
         .then(value => {
             if (value) {
                 theTimeLineData.data = value.theTimeLine;
+                console.log(theTimeLineData.data);
                 // 设置基本数据
                 timeLine.tid = theTimeLineData.data[defaultPos.value].tid;
                 timeLine.max = theTimeLineData.data[defaultPos.value].max;
@@ -535,6 +633,7 @@ function getTimeLineData() {
                 // 升序排序
                 yearData.data.sort((a, b) => a.timeSlot - b.timeSlot);
                 choiceOneYear(yearData.data[0].timeSlot);
+                setSliderState();
                 nextTick(() => {
                     calculateOffsetTop();
                 })
@@ -595,7 +694,12 @@ function slidingTimeline(e: MouseEvent) {
 
 }
 
+
 </script>
+
 
 <style src="../style/timelineeditor.scss" lang="scss" scoped>
 </style>
+
+
+

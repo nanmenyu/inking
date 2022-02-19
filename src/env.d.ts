@@ -124,11 +124,6 @@ declare interface TimeLineGroup {
   name: string,
   max: number,
   min: number,
-  remarks: {
-    year: Array<{ name: string, range: [number, number] }>,
-    month: Array<{ name: string, range: [number, number] }>,
-    day: Array<{ name: string, range: [number, number] }>
-  },
   eveYear: Array<Eveyear>,
   eveMonth: Array<Evemonth>,
   eveDay: Array<Eveday>

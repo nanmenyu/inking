@@ -132,7 +132,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import {
-    IconClose, IconPlus, IconImport, IconSwap,
+    IconPlus, IconImport, IconSwap,
     IconApps, IconUnorderedList, IconDelete
 } from '@arco-design/web-vue/es/icon';
 import PopupMenu from './PopupMenu.vue';
@@ -245,17 +245,6 @@ const addFile = () => {
                     name: '默认线',
                     max: 5000,
                     min: -5000,
-                    remarks: {
-                        year: [{
-                            name: '公元前',
-                            range: [-999999, -1]
-                        }, {
-                            name: '公元',
-                            range: [1, -999999]
-                        }],
-                        month: [],
-                        day: []
-                    },
                     eveYear: [],
                     eveMonth: [],
                     eveDay: []

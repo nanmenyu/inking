@@ -65,14 +65,10 @@
         .slider-setting {
             float: right;
             box-sizing: border-box;
-            width: 100px;
-            height: calc(100% - 150px);
+            margin: 20px 10px 0 0;
+            // width: 100px;
+            // height: calc(100% - 150px);
             user-select: none;
-
-            .setting-item {
-                width: 100%;
-                margin: 5px 0;
-            }
         }
     }
 
