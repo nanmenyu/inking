@@ -12,7 +12,6 @@ import { ref, onMounted } from 'vue';
 import getStyle from '../utils/getStyle';
 import { throttle } from '../utils/flowControl';
 import hexToRgba from '../utils/hexToRgba';
-// import pureTextEditor from '../common/pEditor/index.js';
 import pureTextEditor from '../common/editor';
 import { db } from '../db/db';
 import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
@@ -26,16 +25,6 @@ const $message = proxy.$message;
 // 修改键盘控制
 onMounted(() => {
     editor.value.addEventListener('keydown', insertSpace);
-    // editor.value.addEventListener('keyup', () => {
-    //     paraFocus.value === 'open' ?
-    //         ParagraphFocus() :
-    //         currentColor.value = focusColor;
-    // });
-    // editor.value.addEventListener('click', () => {
-    //     paraFocus.value === 'open' ?
-    //         ParagraphFocus() :
-    //         currentColor.value = focusColor;
-    // });
 })
 
 // 纸张的宽度 = 内容区 + 40px的左右边距
@@ -70,7 +59,7 @@ const editor = ref();
 let maxCount = 15000, data: Pagecount, chapterNumber = 0;
 // 监视输入框中的各项数值
 const getData = () => {
-    chapterNumber = editor.value.innerText.replaceAll('\n', '').replaceAll(' ', '').length; // 字数统计
+    chapterNumber = editor.value.innerText.replaceAll('\n', '').replaceAll('\u0020', '').replaceAll('\u3000', '').length; // 字数统计
     data = {
         paperHeight: getStyle(editor.value, 'height'), // 输入框的高度
         wordCount: chapterNumber,

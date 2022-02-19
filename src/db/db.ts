@@ -22,8 +22,8 @@ export interface Userdb {
 
 export class MySubClassedDexie extends Dexie {
     opus!: Table<Userdb>;
-    note!: Table<Userdb>;
-    markdown!: Table<Userdb>;
+    // note!: Table<Userdb>;
+    // markdown!: Table<Userdb>;
 
     constructor() {
         super('uDatabase');
@@ -31,9 +31,9 @@ export class MySubClassedDexie extends Dexie {
             // 作品集
             opus: '++id, author, title, discard',
             // 笔记集
-            note: '++id, author, title',
+            // note: '++id, author, title',
             // markdown
-            markdown: '++id, author, title'
+            // markdown: '++id, author, title'
         });
     }
 

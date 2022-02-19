@@ -6,6 +6,7 @@
         determine="添加"
         @toModify="modify"
         @toDetermine="addHistoryEvent"
+        :determineDisabled="addEventDisabled"
     >
         <a-tabs type="text" @change="chocieTab" :default-active-key="curTabType">
             <a-tab-pane key="eveYear" title="年事件"></a-tab-pane>
@@ -31,7 +32,7 @@
                 >
                     <a-input-number
                         v-model="formData.month"
-                        :min="-999"
+                        :min="1"
                         :max="999"
                         size="samll"
                         style="width: 100px;"
@@ -40,7 +41,7 @@
                 <a-form-item v-if="curTabType === 'eveDay'" field="day" label="选择何日">
                     <a-input-number
                         v-model="formData.day"
-                        :min="-999"
+                        :min="1"
                         :max="999"
                         size="samll"
                         style="width: 100px;"
@@ -80,7 +81,8 @@
         :determine="isToAdd ? '添加' : '设置'"
         @toModify="modify"
         @toDetermine="TimeLineSetting"
-        :determineDisabled="(formLine.name.length === 0) || (formLine.min === formLine.max)"
+        :determineDisabled="formLine.name.length === 0 ||
+        formLine.min === 0 || !formLine.min || formLine.max === 0 || !formLine.max"
     >
         <a-form :model="formLine" layout="inline">
             <a-form-item field="name" label="名称">
@@ -92,19 +94,21 @@
                     allow-clear
                 />
             </a-form-item>
-            <a-form-item v-model="formLine.min" field="name" label="Min">
+            <a-form-item field="name" label="Min">
                 <a-input-number
+                    v-model="formLine.min"
                     style=" width: 100px"
                     placeholder="年份范围"
                     :min="-99999"
-                    :max="formLine.max"
+                    :max="isToAdd ? formLine.max - 100 : Math.min.apply(Math, yearData.data.map(it => it.timeSlot))"
                 />
             </a-form-item>
-            <a-form-item v-model="formLine.max" field="name" label="Max">
+            <a-form-item field="name" label="Max">
                 <a-input-number
+                    v-model="formLine.max"
                     style=" width: 100px"
                     placeholder="年份范围"
-                    :min="formLine.min"
+                    :min="isToAdd ? formLine.min + 100 : Math.max.apply(Math, yearData.data.map(it => it.timeSlot))"
                     :max="99999"
                 />
             </a-form-item>
@@ -188,7 +192,8 @@
                 </div>
             </div>
             <div class="slider-detail">
-                <a-typography v-for="item  in currentDetail.data" :key="item.id">
+                <a-empty v-if="currentDetail.data.length === 0"></a-empty>
+                <a-typography v-else v-for="item  in currentDetail.data" :key="item.id">
                     <a-typography-title :heading="5">{{ item.title }}</a-typography-title>
                     <a-typography-title
                         :heading="6"
@@ -220,10 +225,7 @@
                             </template>删除
                         </a-button>
                     </a-tooltip>
-                    <a-dropdown
-                        @popup-visible-change="isRotate = !isRotate"
-                        @select="changeTimeLine"
-                    >
+                    <a-dropdown @popup-visible-change="isRotate = !isRotate">
                         <a-button type="primary" size="small">
                             <template #icon>
                                 <icon-down :class="isRotate ? 'rotate' : '_rotate'" />
@@ -231,9 +233,10 @@
                         </a-button>
                         <template #content>
                             <a-doption
-                                v-for="item in theTimeLineData.data"
+                                v-for="(item, i) in theTimeLineData.data"
                                 :key="item.tid"
-                                :style="item.tid === timeLine.tid ? 'background-color:#f2f3f5' : ''"
+                                :class="item.tid === timeLine.tid ? 'checked' : ''"
+                                @click="changeTimeLine(i)"
                             >{{ item.name }}</a-doption>
                         </template>
                     </a-dropdown>
@@ -256,23 +259,41 @@
             <div class="wrapper" ref="wrapper">
                 <a-empty v-if="yearData.data.length === 0" style="margin-top: 100px;">点击时间轴右上角添加历史事件</a-empty>
                 <a-timeline v-else>
+                    <!-- 这里必须用i做key，不然左边时间轴无法再切换时完全刷新 -->
                     <a-timeline-item
                         v-for="(item, i) in yearData.data"
-                        :key="item.id"
+                        :key="i"
                         :id="'con_' + i"
                         @click="choiceOneYear(item.timeSlot)"
-                        :style="currentDetail.curYear === item.timeSlot ? 'background-color: #f2f3f5;' : ''"
-                        class="timeline-item"
                         title="点击查看详情"
+                        dotColor="#F53F3F"
                     >
-                        <h2>
-                            {{ item.timeSlot }}
-                            <span style="font-size: 16px;">{{ item.title }}</span>
-                            <span
-                                style="float: right;margin: 9px 8px 0 0;font-size: 12px;color: #bfc1c3;"
-                            >总事件数:{{ item.totalNum }}</span>
-                        </h2>
-                        <p style="text-indent: 2em;">{{ item.desc }}</p>
+                        <template #dot>
+                            <IconClockCircle :style="{ fontSize: '12px', color: '#f53f3f' }" />
+                        </template>
+                        <div
+                            :class="currentDetail.curYear === item.timeSlot ? 'timeline-item checked' : 'timeline-item'"
+                        >
+                            <h2>
+                                {{ item.timeSlot + '年' }}&nbsp;&nbsp;
+                                <span
+                                    style="font-size: 16px;"
+                                >{{ item.title }}</span>
+                                <span
+                                    style="float: right;margin: 9px 8px 0 0;font-size: 12px;color: #bfc1c3;user-select: none;"
+                                >
+                                    <span
+                                        @click.stop="deleteOneYear(item.timeSlot)"
+                                        class="tag-close"
+                                        title="删除"
+                                    >
+                                        <icon-close />
+                                    </span>
+                                    总事件数:{{ item.totalNum }}
+                                </span>
+                            </h2>
+                            <p style="text-indent: 2em;">{{ item.desc }}</p>
+                        </div>
                     </a-timeline-item>
                 </a-timeline>
             </div>
@@ -283,8 +304,8 @@
 <script setup lang="ts">
 import { ref, reactive, Ref, onMounted, computed, nextTick } from 'vue';
 import {
-    IconPlus, IconDown, IconPlusCircle, IconLocation, IconSettings,
-    IconZoomIn, IconZoomOut, IconToLeft, IconToRight, IconDelete
+    IconPlus, IconDown, IconPlusCircle, IconLocation, IconSettings, IconClose,
+    IconZoomIn, IconZoomOut, IconToLeft, IconToRight, IconDelete, IconClockCircle
 } from '@arco-design/web-vue/es/icon';
 import PopupMenu from './widget/PopupMenu.vue';
 import { throttle } from '../utils/flowControl';
@@ -293,7 +314,6 @@ import { db } from '../db/db';
 import { v4 } from 'uuid';
 import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
-import { time } from 'console';
 
 const { proxy } = useCurrentInstance();
 const route = useRoute();
@@ -306,23 +326,13 @@ const yearData: {
 } = reactive({ data: [] });
 const timeLine = reactive({ tid: '', min: -5000, max: 5000, name: '默认线' });
 // 当前年份
-const currentYear = ref(new Date().getFullYear());
+const currentYear = ref(0);
 // 当前年份占总时间轴的长度比例
 const percentYear = computed(() => {
     return (currentYear.value - timeLine.min) / (timeLine.max - timeLine.min);
 })
-// 时间轴和步长的缩放比例
-const scaleFactor = ref(1);
-// 时间轴的长度'px'
-const sliderWidth = computed(() => {
-    return Math.round(scaleFactor.value * ((timeLine.max - timeLine.min) / 10));
-})
-// 时间轴刻度的步长
-// const stepValue = computed(() => {
-//     const timeLength = timeLine.max - timeLine.min;
-//     return Math.round(timeLength / 40);
-//     //5000->125 10000->250 20000->500...
-// })
+// 时间轴和步长的缩放比例 // 时间轴的长度'px'
+const scaleFactor = ref(1), sliderWidth = ref(0);
 // 等分时间轴添加标度
 const timeLineMarks = computed(() => {
     let division = 1;
@@ -339,7 +349,7 @@ const timeLineMarks = computed(() => {
     }
     const stepArr = [], stepObj = { [timeLine.min]: timeLine.min };
     const timeLength = timeLine.max - timeLine.min;
-    let stepOne = Math.round(timeLength / 20 / division), step = timeLine.min;
+    let stepOne = Math.round(timeLength / 10 / division), step = timeLine.min;
     while (1) {
         if (step <= timeLine.max) {
             stepArr.push(step);
@@ -356,7 +366,6 @@ const timeLineMarks = computed(() => {
     }
     return stepObj;
 })
-
 const offsetTop_el: { data: Array<{ id: string, offsetTop: number }> } = reactive({ data: [] });
 const slider = ref(), sliderBox = ref();
 onMounted(() => {
@@ -369,16 +378,9 @@ onMounted(() => {
         const evt = new Event('mouseup', { "bubbles": true, "cancelable": true });
         document.body.dispatchEvent(evt);
     })
+    sliderWidth.value = Math.round(sliderBox.value.clientWidth * 0.9);
     // 窗口大小改变时自动适应时间轴右侧
     window.addEventListener('resize', () => {
-        // const sliderLeft = parseInt(slider.value.style.left) || 0;
-        // const distance = sliderBox.value.clientWidth - (sliderWidth.value + sliderLeft);
-        // if (distance > 0) slider.value.style.left = sliderLeft + distance + 'px';
-        // if (slider.value.clientWidth < sliderBox.value.clientWidth) {
-        //     //     slider.value.style.left = '0px';
-        //     // } else {
-        //     slider.value.style.left = 0.5 * (sliderBox.value.clientWidth - slider.value.clientWidth) + 'px';
-        // }
         setSliderState();
     })
 })
@@ -387,7 +389,6 @@ onMounted(() => {
 const timeSlot_format = (timeSlot: number): number | string => {
     return timeSlot > 99999 ? timeSlot.toString().slice(0, 5) + '...' : timeSlot;
 }
-
 // 锚点跳转
 const checkedId = ref('con_0'), wrapper: Ref<HTMLElement | undefined> = ref();
 const toAnchor = (id: string) => {
@@ -398,7 +399,6 @@ const toAnchor = (id: string) => {
         toNavCenter();
     }
 }
-
 // 内容滚动标记当前元素
 const timelineSection: Ref<HTMLElement | undefined> = ref();
 const sectionScroll = throttle(() => {
@@ -414,7 +414,6 @@ const sectionScroll = throttle(() => {
     }
     toNavCenter();
 }, 30);
-
 // 控制时间轴长度缩放
 const controlScaling = (type: string) => {
     // 最大25倍
@@ -439,9 +438,20 @@ const confirmPosition = (value: number) => {
         setSliderState();
     }
 }
-
 // 添加历史事件
 const isAddEvent = ref(false);
+const addEventDisabled = computed(() => {
+    if (curTabType.value === 'eveYear'
+        && (currentYear.value === 0 || !currentYear.value))
+        return true;
+    if (curTabType.value === 'eveMonth'
+        && (currentYear.value === 0 || !currentYear.value || !formData.month))
+        return true;
+    if (curTabType.value === 'eveDay'
+        && (currentYear.value === 0 || !currentYear.value || !formData.month || !formData.day))
+        return true;
+    return false;
+})
 // 选择标签页
 const curTabType: Ref<'eveYear' | 'eveMonth' | 'eveDay'> = ref('eveYear');
 const formData = reactive({
@@ -491,7 +501,7 @@ const addHistoryEvent = () => {
 const isTimeLineSetting = ref(false), isToAdd = ref(true);
 const formLine: {
     name: string, min: number, max: number
-} = reactive({ name: '', min: 1, max: 2022 })
+} = reactive({ name: '', min: 1, max: 2022 });
 // 呼出窗口
 const showLineSetting = (type: 'set' | 'add') => {
     isTimeLineSetting.value = true;
@@ -537,11 +547,64 @@ const TimeLineSetting = () => {
 }
 // 删除时间线
 const deleteTimeLine = () => {
-    console.log('删除新时间线');
+    if (theTimeLineData.data.length > 1) {
+        proxy.$modal.warning({
+            title: "删除本条时间线",
+            content: '是否删除本条时间线? 该操作不可逆!',
+            simple: true,
+            onOk: () => {
+                db.opus.where(':id').equals(query_id).modify(item => {
+                    for (let i in item.theTimeLine) {
+                        if (item.theTimeLine[i].tid === timeLine.tid) {
+                            item.theTimeLine.splice(parseInt(i), 1);
+                            break;
+                        }
+                    }
+                }).then(() => {
+                    proxy.$message.success('删除成功！');
+                    getTimeLineData();
+                    changeTimeLine(0);
+                })
+            }
+        })
+    } else {
+        proxy.$message.error('最后一条线无法删除！');
+    }
 }
 // 切换时间线
-const changeTimeLine = (value: string) => {
-    console.log('切换时间线:', value);
+const changeTimeLine = (index: number) => {
+    defaultPos.value = index;
+    currentDetail.data = [];
+    getTimeLineData();
+}
+// 删除某一历史点(全年)
+const deleteOneYear = (year: number) => {
+    proxy.$modal.warning({
+        title: "删除历史事件",
+        content: `是否删除“${year}年”的所有历史事件? 该操作不可逆!`,
+        simple: true,
+        onOk: () => {
+            db.opus.where(':id').equals(query_id).modify(item => {
+                for (let i in item.theTimeLine) {
+                    if (item.theTimeLine[i].tid === timeLine.tid) {
+                        item.theTimeLine[i].eveYear = item.theTimeLine[i].eveYear.filter(it => {
+                            return it.timeSlot !== year;
+                        })
+                        item.theTimeLine[i].eveMonth = item.theTimeLine[i].eveMonth.filter(it => {
+                            return it.yearSlot !== year;
+                        })
+                        item.theTimeLine[i].eveDay = item.theTimeLine[i].eveDay.filter(it => {
+                            return it.yearSlot !== year;
+                        })
+                        break;
+                    }
+                }
+            }).then(() => {
+                proxy.$message.success('删除成功！');
+                getTimeLineData();
+            })
+        }
+    })
 }
 // 旋转图标
 const isRotate = ref(false);
@@ -559,7 +622,7 @@ interface Detail {
 const currentDetail: {
     curYear: number,
     data: Array<Detail>
-} = reactive({ curYear: 2022, data: [] });
+} = reactive({ curYear: timeLine.min, data: [] });
 const choiceOneYear = (year: number) => {
     if (summaryObj.data[year] !== undefined) {
         currentDetail.curYear = year;
@@ -582,12 +645,12 @@ function getTimeLineData() {
         .then(value => {
             if (value) {
                 theTimeLineData.data = value.theTimeLine;
-                console.log(theTimeLineData.data);
                 // 设置基本数据
                 timeLine.tid = theTimeLineData.data[defaultPos.value].tid;
                 timeLine.max = theTimeLineData.data[defaultPos.value].max;
                 timeLine.min = theTimeLineData.data[defaultPos.value].min;
                 timeLine.name = theTimeLineData.data[defaultPos.value].name;
+                currentYear.value = (timeLine.max - timeLine.min) / 2;
                 // 将每个年份的事件全部集合起来 key为年份
                 summaryObj.data = {}; // 清空
                 theTimeLineData.data[defaultPos.value].eveYear.forEach(item => {
@@ -632,7 +695,7 @@ function getTimeLineData() {
                 }
                 // 升序排序
                 yearData.data.sort((a, b) => a.timeSlot - b.timeSlot);
-                choiceOneYear(yearData.data[0].timeSlot);
+                if (yearData.data[0]) choiceOneYear(yearData.data[0].timeSlot);
                 setSliderState();
                 nextTick(() => {
                     calculateOffsetTop();
@@ -693,13 +756,12 @@ function slidingTimeline(e: MouseEvent) {
     }
 
 }
-
-
 </script>
 
 
 <style src="../style/timelineeditor.scss" lang="scss" scoped>
 </style>
+
 
 
 
