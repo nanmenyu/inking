@@ -74,7 +74,6 @@
             </a-form>
         </div>
     </PopupMenu>
-
     <PopupMenu
         v-if="isTimeLineSetting"
         :title="isToAdd ? '添加时间线' : '时间线设置'"
@@ -114,6 +113,37 @@
             </a-form-item>
         </a-form>
     </PopupMenu>
+    <PopupMenu
+        v-if="isEditDetail"
+        title="修改详情"
+        determine="修改"
+        @toModify="modify"
+        @toDetermine="deteEditDetail"
+    >
+        <a-form :model="formDetail" layout="vertical" style="overflow: hidden;">
+            <a-form-item field="event" label="事件名称">
+                <a-input
+                    v-model="formDetail.title"
+                    :max-length="15"
+                    allow-clear
+                    placeholder="请修改事件名"
+                />
+            </a-form-item>
+            <a-form-item field="eventdesc" label="事件描述">
+                <a-textarea
+                    v-model="formDetail.content"
+                    placeholder="修改事件的相关描述"
+                    :auto-size="{
+                        minRows: 5,
+                        maxRows: 5
+                    }"
+                    :max-length="500"
+                    show-word-limit
+                    allow-clear
+                />
+            </a-form-item>
+        </a-form>
+    </PopupMenu>
     <div class="timeline">
         <div class="timeline__block">
             <div class="slider-box" ref="sliderBox">
@@ -140,7 +170,7 @@
                             style="width: 100px;"
                             @change="confirmPosition"
                         />
-                        <a-button type="text" size="mini" title="前一个事件">
+                        <a-button @click="eventJump(-1)" type="text" size="mini" title="前一个事件">
                             <template #icon>
                                 <icon-to-left :style="{ fontSize: '18px' }" />
                             </template>
@@ -165,7 +195,7 @@
                                 <icon-zoom-out :style="{ fontSize: '18px' }" />
                             </template>
                         </a-button>
-                        <a-button type="text" size="mini" title="后一个事件">
+                        <a-button @click="eventJump(1)" type="text" size="mini" title="后一个事件">
                             <template #icon>
                                 <icon-to-right :style="{ fontSize: '18px' }" />
                             </template>
@@ -182,8 +212,14 @@
                         style="width: 100%;margin: 0 ;padding:0;margin-top: 100px;"
                         :marks="timeLineMarks"
                         :format-tooltip="(value: number) => {
+                            let eventNum = 0;
+                            yearData.data.forEach(item => {
+                                if (item.timeSlot === value) eventNum = item.totalNum;
+                            })
                             if (value === 0) {
                                 return '数学零点(无意义)';
+                            } else if (eventNum > 0) {
+                                return value + '年(' + eventNum + '个事件)';
                             } else {
                                 return value + '年';
                             }
@@ -193,13 +229,28 @@
             </div>
             <div class="slider-detail">
                 <a-empty v-if="currentDetail.data.length === 0"></a-empty>
-                <a-typography v-else v-for="item  in currentDetail.data" :key="item.id">
-                    <a-typography-title :heading="5">{{ item.title }}</a-typography-title>
-                    <a-typography-title
-                        :heading="6"
-                    >{{ (item.month === null ? '' : item.month + '月') + ' ' + (item.day === null ? '' : item.day + '日') }}</a-typography-title>
+                <a-card
+                    v-else
+                    v-for="item  in currentDetail.data"
+                    :key="item.id"
+                    hoverable
+                    style="width: 100%;margin-top: 5px;"
+                    :title="'✨' + item.title + '\u3000' + (item.month === null ? '' : item.month + '月') + '' + (item.day === null ? '' : item.day + '日')"
+                >
+                    <template #extra>
+                        <a-popconfirm
+                            @cancel="deleteDetail(item.id, item.month, item.day)"
+                            @ok="editDetail(item.id, item.month, item.day)"
+                            content="选择对应操作"
+                            okText="修改"
+                            cancelText="删除"
+                            position="lt"
+                        >
+                            <a-link>Edit</a-link>
+                        </a-popconfirm>
+                    </template>
                     <a-typography-paragraph style="text-indent: 2em;">{{ item.desc }}</a-typography-paragraph>
-                </a-typography>
+                </a-card>
             </div>
             <div class="slider-setting">
                 <a-space direction="vertical" size="large">
@@ -244,7 +295,7 @@
             </div>
         </div>
         <section @scroll="sectionScroll" ref="timelineSection" class="timeline__section">
-            <div class="timeline__nav">
+            <div class="timeline__nav" ref="timelineNav">
                 <ul :style="`transform: translateY(${timelineUl_tran})`" ref="timelineUl">
                     <li v-for="(item, i) in yearData.data" :key="item.id" :id="'nav_' + i">
                         <a
@@ -278,7 +329,7 @@
                                 {{ item.timeSlot + '年' }}&nbsp;&nbsp;
                                 <span
                                     style="font-size: 16px;"
-                                >{{ item.title }}</span>
+                                >{{ '🔖' + item.title }}</span>
                                 <span
                                     style="float: right;margin: 9px 8px 0 0;font-size: 12px;color: #bfc1c3;user-select: none;"
                                 >
@@ -302,7 +353,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, Ref, onMounted, computed, nextTick } from 'vue';
+import { ref, reactive, Ref, onMounted, computed, nextTick, watch } from 'vue';
 import {
     IconPlus, IconDown, IconPlusCircle, IconLocation, IconSettings, IconClose,
     IconZoomIn, IconZoomOut, IconToLeft, IconToRight, IconDelete, IconClockCircle
@@ -320,71 +371,64 @@ const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
 const theTimeLineData: { data: Array<TimeLineGroup> } = reactive({ data: [] });
 
+
 const yearData: {
     data:
     Array<{ id: string, timeSlot: number, title: string, desc: string, totalNum: number }>
 } = reactive({ data: [] });
-const timeLine = reactive({ tid: '', min: -5000, max: 5000, name: '默认线' });
-// 当前年份
-const currentYear = ref(0);
+const timeLine = reactive({ tid: '', min: -5000, max: 5000, name: '默认线' }),
+    currentYear = ref(0);// 当前年份
+
 // 当前年份占总时间轴的长度比例
 const percentYear = computed(() => {
     return (currentYear.value - timeLine.min) / (timeLine.max - timeLine.min);
 })
+
 // 时间轴和步长的缩放比例 // 时间轴的长度'px'
 const scaleFactor = ref(1), sliderWidth = ref(0);
 // 等分时间轴添加标度
 const timeLineMarks = computed(() => {
-    let division = 1;
-    if (scaleFactor.value < 4) {
-        division = 1;
-    } else if (scaleFactor.value < 6) {
-        division = 2;
-    } else if (scaleFactor.value < 8) {
-        division = 4;
-    } else if (scaleFactor.value < 10) {
-        division = 8;
-    } else {
-        division = 16;
-    }
-    const stepArr = [], stepObj = { [timeLine.min]: timeLine.min };
-    const timeLength = timeLine.max - timeLine.min;
-    let stepOne = Math.round(timeLength / 10 / division), step = timeLine.min;
-    while (1) {
-        if (step <= timeLine.max) {
-            stepArr.push(step);
-            step += stepOne;
-        } else {
-            break;
-        }
-    }
-    stepArr.forEach(item => {
-        stepObj[item] = item;
+    // let division = 1;
+    // if (scaleFactor.value < 4) {
+    //     division = 1;
+    // } else if (scaleFactor.value < 6) {
+    //     division = 2;
+    // } else if (scaleFactor.value < 8) {
+    //     division = 4;
+    // } else if (scaleFactor.value < 10) {
+    //     division = 8;
+    // } else {
+    //     division = 16;
+    // }
+    const stepObj: {
+        [key: string]: string | number
+    } = { [timeLine.min]: timeLine.min, [timeLine.max]: timeLine.max };
+    // const timeLength = timeLine.max - timeLine.min;
+    // let stepOne = Math.round(timeLength / 5 / division), step = timeLine.min;
+    // while (1) {
+    //     if (step <= timeLine.max) {
+    //         stepArr.push(step);
+    //         step += stepOne;
+    //     } else {
+    //         break;
+    //     }
+    // }
+    // stepArr.forEach(item => {
+    //     stepObj[item] = item;
+    // })
+    // stepObj[timeLine.min] = timeLine.min;
+    // stepObj[timeLine.max] = timeLine.max;
+    if (timeLine.min < 0) stepObj[0] = 0;
+    // console.log(yearData.data);
+    yearData.data.forEach(item => {
+        stepObj[item.timeSlot] = '🔺';
     })
-    if (timeLine.min < 0) {
-        stepObj[0] = 0;
-    }
+
     return stepObj;
 })
+
 const offsetTop_el: { data: Array<{ id: string, offsetTop: number }> } = reactive({ data: [] });
 const slider = ref(), sliderBox = ref();
-onMounted(() => {
-    getTimeLineData();
-    setSliderState();
-    // 左右滑动时间轴
-    sliderBox.value.onmousedown = slidingTimeline;
-    sliderBox.value.addEventListener('mouseleave', () => {
-        // 主动触发mouseup避免滑块越界
-        const evt = new Event('mouseup', { "bubbles": true, "cancelable": true });
-        document.body.dispatchEvent(evt);
-    })
-    sliderWidth.value = Math.round(sliderBox.value.clientWidth * 0.9);
-    // 窗口大小改变时自动适应时间轴右侧
-    window.addEventListener('resize', () => {
-        setSliderState();
-    })
-})
-
 // 裁切太长的数字以省略号表示
 const timeSlot_format = (timeSlot: number): number | string => {
     return timeSlot > 99999 ? timeSlot.toString().slice(0, 5) + '...' : timeSlot;
@@ -414,6 +458,34 @@ const sectionScroll = throttle(() => {
     }
     toNavCenter();
 }, 30);
+onMounted(() => {
+    getTimeLineData();
+    setSliderState();
+    // 左右滑动时间轴
+    sliderBox.value.onmousedown = slidingTimeline;
+    sliderBox.value.addEventListener('mouseleave', () => {
+        // 主动触发mouseup避免滑块越界
+        const evt = new Event('mouseup', { "bubbles": true, "cancelable": true });
+        document.body.dispatchEvent(evt);
+    })
+    sliderWidth.value = Math.round(sliderBox.value.clientWidth * scaleFactor.value * 0.9);
+    // 窗口大小改变时自动适应时间轴右侧
+    window.addEventListener('resize', () => {
+        setSliderState();
+    })
+})
+watch(currentYear, (value) => {
+    for (let i in yearData.data) {
+        if (yearData.data[i].timeSlot === value) {
+            choiceOneYear(value);
+            break;
+        }
+    }
+})
+
+
+/* ----------------------- 时间线工具栏-----------------------*/
+
 // 控制时间轴长度缩放
 const controlScaling = (type: string) => {
     // 最大25倍
@@ -422,6 +494,7 @@ const controlScaling = (type: string) => {
     } else if (scaleFactor.value > 0.5 && type === 'reduce') {
         scaleFactor.value -= 0.5;
     }
+    sliderWidth.value = Math.round(sliderBox.value.clientWidth * scaleFactor.value * 0.9);
     setSliderState();
 }
 // 定位时间点
@@ -436,6 +509,26 @@ const confirmPosition = (value: number) => {
     } else {
         currentYear.value = value;
         setSliderState();
+    }
+}
+// 前后事件跳转
+const eventJump = (direction: -1 | 1) => {
+    //  1:后一个事件  -1:前一个事件 
+    if (direction === 1) {
+        for (let i in yearData.data) {
+            if (yearData.data[i].timeSlot > currentYear.value) {
+                currentYear.value = yearData.data[i].timeSlot;
+                break;
+            }
+        }
+    } else if (direction === -1) {
+        let len = yearData.data.length;
+        for (let i = 0; i < len; i++) {
+            if (yearData.data[len - i - 1].timeSlot < currentYear.value) {
+                currentYear.value = yearData.data[len - i - 1].timeSlot;
+                break;
+            }
+        }
     }
 }
 // 添加历史事件
@@ -462,6 +555,8 @@ const formData = reactive({
 });
 const chocieTab = (type: 'eveYear' | 'eveMonth' | 'eveDay') => {
     curTabType.value = type;
+    if (type === 'eveYear') formData.month = formData.day = 1;
+    if (type === 'eveMonth') formData.day = 1;
 }
 const addHistoryEvent = () => {
     db.opus.where(':id').equals(query_id).modify(item => {
@@ -497,6 +592,9 @@ const addHistoryEvent = () => {
         getTimeLineData();
     })
 }
+
+
+/* ----------------------- 增删改时间线-----------------------*/
 // 添加新时间线
 const isTimeLineSetting = ref(false), isToAdd = ref(true);
 const formLine: {
@@ -576,6 +674,7 @@ const changeTimeLine = (index: number) => {
     defaultPos.value = index;
     currentDetail.data = [];
     getTimeLineData();
+    setLineStorage();
 }
 // 删除某一历史点(全年)
 const deleteOneYear = (year: number) => {
@@ -606,6 +705,85 @@ const deleteOneYear = (year: number) => {
         }
     })
 }
+
+
+/* ----------------------- 删改右侧详情页 -----------------------*/
+// 删除右侧详情项
+const deleteDetail = (id: string, month: number | null, day: number | null) => {
+    console.log(id, month, day);
+    proxy.$modal.warning({
+        title: "删除历史事件",
+        content: '是否删除所选历史事件? 该操作不可逆!',
+        simple: true,
+        onOk: () => {
+            db.opus.where(':id').equals(query_id).modify(item => {
+                for (let i in item.theTimeLine) {
+                    if (item.theTimeLine[i].tid === timeLine.tid) {
+                        if (month && day) {
+                            item.theTimeLine[i].eveDay = item.theTimeLine[i].eveDay.filter(it => {
+                                return it.did !== id;
+                            })
+                        } else if (month) {
+                            item.theTimeLine[i].eveMonth = item.theTimeLine[i].eveMonth.filter(it => {
+                                return it.mid !== id;
+                            })
+                        } else {
+                            item.theTimeLine[i].eveYear = item.theTimeLine[i].eveYear.filter(it => {
+                                return it.yid !== id;
+                            })
+                        }
+                        break;
+                    }
+                }
+            }).then(() => {
+                proxy.$message.success('删除成功！');
+                getTimeLineData();
+            })
+        }
+    })
+
+}
+// 修改右侧详情项
+const isEditDetail = ref(false);
+const formDetail = reactive({
+    id: '',
+    title: '',
+    content: ''
+})
+let currentType = '';
+const editDetail = (id: string, month: number | null, day: number | null) => {
+    isEditDetail.value = true;
+    currentDetail.data.forEach(item => {
+        if (item.id === id)
+            [formDetail.id, formDetail.title, formDetail.content] = [id, item.title, item.desc];
+    })
+    if (month && day) currentType = 'eveDay';
+    else if (month) currentType = 'eveMonth';
+    else currentType = 'eveYear';
+}
+//确认修改详情项
+const deteEditDetail = () => {
+    db.opus.where(':id').equals(query_id).modify(item => {
+        for (let i in item.theTimeLine) {
+            if (item.theTimeLine[i].tid === timeLine.tid) {
+                item.theTimeLine[i][currentType].forEach((it: {
+                    yid: string; mid: string; did: string; data: any;
+                }) => {
+                    if ((it.yid || it.mid || it.did) === formDetail.id) {
+                        [it.data.title, it.data.desc] = [formDetail.title, formDetail.content];
+                    }
+                })
+                break;
+            }
+        }
+    }).then(() => {
+        isEditDetail.value = false;
+        proxy.$message.success('修改成功！');
+        getTimeLineData();
+    })
+}
+
+/* ----------------------- 其它 -----------------------*/
 // 旋转图标
 const isRotate = ref(false);
 // 取消弹框
@@ -613,9 +791,11 @@ const modify = () => {
     isPosition.value = false;
     isAddEvent.value = false;
     isTimeLineSetting.value = false;
+    isEditDetail.value = false;
 }
 
-// 选择某一年渲染详情页
+
+/* ----------------------- 选择某一年并渲染详情页 -----------------------*/
 interface Detail {
     id: string; month: number | null; day: number | null; title: string; desc: string
 }
@@ -623,6 +803,7 @@ const currentDetail: {
     curYear: number,
     data: Array<Detail>
 } = reactive({ curYear: timeLine.min, data: [] });
+const currentChoice = ref(0);
 const choiceOneYear = (year: number) => {
     if (summaryObj.data[year] !== undefined) {
         currentDetail.curYear = year;
@@ -633,10 +814,22 @@ const choiceOneYear = (year: number) => {
             return 0;
         })
         currentDetail.data = summaryObj.data[year];
+        currentChoice.value = year;
+        setLineStorage();
     }
 }
-// 获取数据
+
+
+/* ----------------------- 非触发事件 -----------------------*/
+// 读取本地缓存
 const defaultPos = ref(0);
+const timeLineCache = localStorage.getItem('timeLineCache');
+if (timeLineCache) {
+    let temp = JSON.parse(timeLineCache);
+    currentChoice.value = temp.selectYear;
+    defaultPos.value = temp.selectLine;
+}
+// 获取数据
 let summaryObj: {
     data: { [key: number]: Array<Detail> }
 } = reactive({ data: {} });
@@ -650,7 +843,7 @@ function getTimeLineData() {
                 timeLine.max = theTimeLineData.data[defaultPos.value].max;
                 timeLine.min = theTimeLineData.data[defaultPos.value].min;
                 timeLine.name = theTimeLineData.data[defaultPos.value].name;
-                currentYear.value = (timeLine.max - timeLine.min) / 2;
+                currentYear.value = Math.round((timeLine.max + timeLine.min) / 2);
                 // 将每个年份的事件全部集合起来 key为年份
                 summaryObj.data = {}; // 清空
                 theTimeLineData.data[defaultPos.value].eveYear.forEach(item => {
@@ -695,7 +888,7 @@ function getTimeLineData() {
                 }
                 // 升序排序
                 yearData.data.sort((a, b) => a.timeSlot - b.timeSlot);
-                if (yearData.data[0]) choiceOneYear(yearData.data[0].timeSlot);
+                choiceOneYear(currentChoice.value);
                 setSliderState();
                 nextTick(() => {
                     calculateOffsetTop();
@@ -731,12 +924,13 @@ function calculateOffsetTop() {
     })
 }
 // 计算nav中已checked元素高度
-const timelineUl: Ref<HTMLElement | undefined> = ref();
+const timelineUl: Ref<HTMLElement | undefined> = ref(),
+    timelineNav: Ref<HTMLElement | undefined> = ref();
 const timelineUl_tran: Ref<string> = ref('0px');
 function toNavCenter() {
     const currentElement = document.getElementById(checkedId.value.replace('con_', 'nav_'));
-    if (currentElement) {
-        timelineUl_tran.value = (274 - currentElement.offsetTop) + 'px';
+    if (currentElement && (timelineUl.value?.clientHeight! > timelineNav.value?.clientHeight!)) {
+        timelineUl_tran.value = -1 * currentElement.offsetTop + 'px';
     }
 }
 // 滑动时间轴
@@ -755,9 +949,13 @@ function slidingTimeline(e: MouseEvent) {
         slider.value.style.left = targetX + 'px';
     }
 
+
+}
+// 缓存数据
+function setLineStorage() {
+    localStorage.setItem('timeLineCache', JSON.stringify({ selectYear: currentChoice.value, selectLine: defaultPos.value }));
 }
 </script>
-
 
 <style src="../style/timelineeditor.scss" lang="scss" scoped>
 </style>
