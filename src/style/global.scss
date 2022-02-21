@@ -16,6 +16,11 @@ body {
     border-radius: 5px;
 }
 
+::selection {
+    color: #fff;
+    background-color: #ef7a82;
+}
+
 /* 组件库微调 */
 .arco-modal {
     top: 50%;

@@ -1,0 +1,218 @@
+.plot {
+    width: 100%;
+    height: calc(100vh - 90px);
+    padding: 0;
+    text-align: left;
+    // overflow-y: scroll;
+    background: #fff;
+
+    .resize-box {
+        width: 500px;
+        min-width: 400px;
+        margin: 50px auto;
+        border-radius: 8px;
+        box-shadow: 0 20px 20px -5px rgba(0, 0, 0, 0.1),
+            0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        background-color: #f2f3f5;
+
+        container {
+            display: block;
+            position: relative;
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            font-size: 16px;
+            color: #4e5969;
+            // background: #edf2f7;
+
+            .head {
+                width: 100%;
+                height: 30px;
+                // background: #edf2f7;
+                background: #f2f3f5;
+                border-radius: 8px 8px 0 0;
+                user-select: none;
+            }
+
+            details {
+                width: 100%;
+                overflow: hidden;
+                border-bottom: 1px solid #e2e8f0;
+
+                &:last-of-type {
+                    border-bottom: none;
+                }
+
+                summary {
+                    padding: 1em;
+                    cursor: pointer;
+
+                    .summary-title {
+                        user-select: none;
+                    }
+
+                    &::marker {
+                        color: #4e5969;
+                    }
+
+                    &:hover .summary-chevron-up {
+                        opacity: 1;
+                    }
+                }
+
+                .summary-chevron-up {
+                    transition: opacity 0.2s;
+                    opacity: 0.5;
+                }
+
+                .summary-chevron-up,
+                .summary-chevron-down {
+                    pointer-events: none;
+                    position: absolute;
+                    top: 0.75em;
+                    right: 1em;
+                    background: #edf2f7;
+                }
+
+                ul {
+                    padding: 0;
+                    margin: 0;
+                    border-top: 1px solid #e2e8f0;
+                    transition: all 0.3s;
+
+                    li {
+                        list-style: none;
+                        padding: 10px 15px 10px 30px;
+                        position: relative;
+
+                        &:after {
+                            position: absolute;
+                            top: 10px;
+                            left: 1em;
+                            display: block;
+                            float: left;
+                            content: "";
+                            // width: 1em;
+                            height: calc(100% - 20px);
+                            width: 2px;
+                            background-color: #bdc5cc;
+                            border-radius: 50%;
+                            // border-left: 2px solid #bdc5cc;
+                        }
+
+                        .summary-content {
+                            font-weight: 300;
+                            line-height: 1.5;
+                            opacity: 0;
+
+                            .title {
+                                font-size: 18px;
+                                font-weight: normal;
+                            }
+
+                            &:before {
+                                font: normal normal normal 1em/1 FontAwesome;
+                                font-weight: 900;
+                                position: absolute;
+                                top: 1em;
+                                left: 1em;
+                                padding: 0 0.5em;
+                                display: block;
+                                float: left;
+                                content: "";
+                                width: 1em;
+                                height: 100%;
+                            }
+                        }
+
+                        span {
+                            display: block;
+
+                            &:before {
+                                opacity: 0.3;
+                                font-weight: bold;
+                            }
+
+                            &.status:before {
+                                content: "importance: ";
+                            }
+
+                            &.info:before {
+                                content: "content: ";
+                            }
+                        }
+                    }
+                }
+
+                &[open] {
+                    @for $i from 1 to 50 {
+
+                        summary~ul li:nth-child(#{$i}) div,
+                        summary~ul li:nth-child(#{$i}) div:before {
+                            animation: sweep 0.5s ease-in-out normal forwards;
+                            animation-delay: ($i - 1) * 0.1s;
+                        }
+
+                        summary~ul li:nth-child(#{$i}):before {
+                            animation: grow 0.5s ease-in-out normal forwards;
+                            animation-delay: $i * 0.1s;
+                        }
+                    }
+
+                    @keyframes sweep {
+                        0% {
+                            opacity: 0;
+                            margin-left: -1em;
+                            margin-right: 1em;
+                        }
+
+                        100% {
+                            opacity: 1;
+                            margin-left: 0;
+                            margin-right: 0;
+                        }
+                    }
+
+                    @keyframes grow {
+                        0% {
+                            width: 0;
+                        }
+
+                        100% {
+                            width: 1em;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.resizebox-demo {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-bg-2);
+}
+
+
+.resizebox-demo-line {
+    flex: 1;
+    background-color: #f2f3f5;
+
+    &:hover {
+        background-image: linear-gradient(rgba(78, 89, 105, 0), rgba(78, 89, 105, 0.3), rgba(78, 89, 105, 0));
+    }
+}
+
+.resizebox-demo-vertical {
+    flex-direction: column;
+
+    .resizebox-demo-line {
+        width: 2px;
+        height: 100%;
+    }
+}

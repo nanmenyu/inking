@@ -23,22 +23,22 @@
         </div>
         <div class="sidebar-model">
             <router-link to="/">
-                <a-button :type="choicedType === 't1' ? 'outline' : 'secondary'" class="btn">
+                <a-button :type="choicedType === 't1' ? 'text' : 'secondary'" class="btn">
                     <icon-edit />&nbsp;写作模式
                 </a-button>
             </router-link>
             <router-link to="reading">
-                <a-button :type="choicedType === 't2' ? 'outline' : 'secondary'" class="btn">
+                <a-button :type="choicedType === 't2' ? 'text' : 'secondary'" class="btn">
                     <icon-book />&nbsp;阅读模式
                 </a-button>
             </router-link>
             <router-link to="bigworld">
-                <a-button :type="choicedType === 't3' ? 'outline' : 'secondary'" class="btn">
+                <a-button :type="choicedType === 't3' ? 'text' : 'secondary'" class="btn">
                     <icon-sun />&nbsp;大世界
                 </a-button>
             </router-link>
             <router-link to="recycle">
-                <a-button :type="choicedType === 't4' ? 'outline' : 'secondary'" class="btn">
+                <a-button :type="choicedType === 't4' ? 'text' : 'secondary'" class="btn">
                     <icon-delete />&nbsp;回收站
                 </a-button>
             </router-link>
