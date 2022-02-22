@@ -248,7 +248,34 @@ const addFile = () => {
                     eveYear: [],
                     eveMonth: [],
                     eveDay: []
-                }] // 时间线模块
+                }],// 时间线模块
+                thePlot: [{
+                    id: v4(),
+                    name: '主线',
+                    summary: [{
+                        sid: v4(),
+                        itemsName: '自定义主线剧情待办组',
+                        items: [{
+                            title: '代办条目1',
+                            imp: 3,
+                            complete: false,
+                            con: '标题左侧的红点表示"待完成", 单击可变为"已完成"状态, importance表示该项的重要性(取值:1-5);'
+                        }]
+                    }]
+                }, {
+                    id: v4(),
+                    name: '支线1',
+                    summary: [{
+                        sid: v4(),
+                        itemsName: '自定义支线剧情待办组',
+                        items: [{
+                            title: '代办条目1',
+                            imp: 5,
+                            complete: false,
+                            con: '标题左侧的红点表示"待完成", 单击可变为"已完成"状态, importance表示该项的重要性(取值:1-5)'
+                        }]
+                    }]
+                }], // 剧情大纲模块
             }).then(() => {
                 emit('refresh');
             });

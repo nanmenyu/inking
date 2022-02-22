@@ -3,19 +3,19 @@
     height: calc(100vh - 90px);
     padding: 0;
     text-align: left;
-    // overflow-y: scroll;
-    background: #fff;
+    overflow-y: scroll;
 
     .resize-box {
         width: 500px;
         min-width: 400px;
-        margin: 50px auto;
+        margin: 0 auto;
+        margin-top: 50px;
         border-radius: 8px;
         box-shadow: 0 20px 20px -5px rgba(0, 0, 0, 0.1),
             0 10px 10px -5px rgba(0, 0, 0, 0.04);
         background-color: #f2f3f5;
 
-        container {
+        .container {
             display: block;
             position: relative;
             box-sizing: border-box;
@@ -46,6 +46,7 @@
                 summary {
                     padding: 1em;
                     cursor: pointer;
+                    line-height: 1.25em;
 
                     .summary-title {
                         user-select: none;
@@ -55,23 +56,7 @@
                         color: #4e5969;
                     }
 
-                    &:hover .summary-chevron-up {
-                        opacity: 1;
-                    }
-                }
 
-                .summary-chevron-up {
-                    transition: opacity 0.2s;
-                    opacity: 0.5;
-                }
-
-                .summary-chevron-up,
-                .summary-chevron-down {
-                    pointer-events: none;
-                    position: absolute;
-                    top: 0.75em;
-                    right: 1em;
-                    background: #edf2f7;
                 }
 
                 ul {
@@ -105,42 +90,30 @@
                             line-height: 1.5;
                             opacity: 0;
 
+                            span {
+                                display: block;
+
+                                &:before {
+                                    opacity: 0.3;
+                                    font-weight: bold;
+                                }
+
+                                &.status:before {
+                                    content: "importance: ";
+                                }
+
+                                &.info:before {
+                                    content: "content: ";
+                                }
+                            }
+
                             .title {
                                 font-size: 18px;
                                 font-weight: normal;
                             }
 
-                            &:before {
-                                font: normal normal normal 1em/1 FontAwesome;
-                                font-weight: 900;
-                                position: absolute;
-                                top: 1em;
-                                left: 1em;
-                                padding: 0 0.5em;
-                                display: block;
-                                float: left;
-                                content: "";
-                                width: 1em;
-                                height: 100%;
-                            }
                         }
 
-                        span {
-                            display: block;
-
-                            &:before {
-                                opacity: 0.3;
-                                font-weight: bold;
-                            }
-
-                            &.status:before {
-                                content: "importance: ";
-                            }
-
-                            &.info:before {
-                                content: "content: ";
-                            }
-                        }
                     }
                 }
 

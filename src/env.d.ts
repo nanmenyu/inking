@@ -119,30 +119,41 @@ interface Template {
 }
 // 时间线组
 declare interface TimeLineGroup {
-  [key: string]: any,
-  tid: string,
-  name: string,
-  max: number,
-  min: number,
-  eveYear: Array<Eveyear>,
-  eveMonth: Array<Evemonth>,
-  eveDay: Array<Eveday>
+  [key: string]: any;
+  tid: string;
+  name: string;
+  max: number;
+  min: number;
+  eveYear: Array<Eveyear>;
+  eveMonth: Array<Evemonth>;
+  eveDay: Array<Eveday>;
 }
 interface Eveyear {
-  yid: string,
-  timeSlot: number,
-  data: { title: string, desc: string }
+  yid: string;
+  timeSlot: number;
+  data: { title: string, desc: string };
 }
 interface Evemonth {
-  mid: string,
-  yearSlot: number,
-  timeSlot: number,
-  data: { title: string, desc: string }
+  mid: string;
+  yearSlot: number;
+  timeSlot: number;
+  data: { title: string, desc: string };
 }
 interface Eveday {
-  did: string,
-  yearSlot: number,
-  monthSlot: number,
-  timeSlot: number,
-  data: { title: string, desc: string }
+  did: string;
+  yearSlot: number;
+  monthSlot: number;
+  timeSlot: number;
+  data: { title: string, desc: string };
+}
+// 剧情大纲组
+declare interface PlotGroup {
+  id: string;
+  name: string;
+  summary: Array<Summary>
+}
+interface Summary {
+  sid: string;
+  itemsName: string;
+  items: Array<{ title: string, imp: number, complete: boolean, con: string }>
 }

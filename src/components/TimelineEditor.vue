@@ -55,6 +55,7 @@
                         size="samll"
                         style="width: 200px;"
                         allow-clear
+                        show-word-limit
                     />
                 </a-form-item>
                 <a-form-item field="eventdesc" label="事件描述">
@@ -371,13 +372,13 @@ const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
 const theTimeLineData: { data: Array<TimeLineGroup> } = reactive({ data: [] });
 
-
 const yearData: {
     data:
     Array<{ id: string, timeSlot: number, title: string, desc: string, totalNum: number }>
 } = reactive({ data: [] });
 const timeLine = reactive({ tid: '', min: -5000, max: 5000, name: '默认线' }),
-    currentYear = ref(0);// 当前年份
+    currentYear = ref(0); // 当前年份
+let flag = true; // 控制当前年份第一次初始化
 
 // 当前年份占总时间轴的长度比例
 const percentYear = computed(() => {
@@ -388,42 +389,13 @@ const percentYear = computed(() => {
 const scaleFactor = ref(1), sliderWidth = ref(0);
 // 等分时间轴添加标度
 const timeLineMarks = computed(() => {
-    // let division = 1;
-    // if (scaleFactor.value < 4) {
-    //     division = 1;
-    // } else if (scaleFactor.value < 6) {
-    //     division = 2;
-    // } else if (scaleFactor.value < 8) {
-    //     division = 4;
-    // } else if (scaleFactor.value < 10) {
-    //     division = 8;
-    // } else {
-    //     division = 16;
-    // }
     const stepObj: {
         [key: string]: string | number
     } = { [timeLine.min]: timeLine.min, [timeLine.max]: timeLine.max };
-    // const timeLength = timeLine.max - timeLine.min;
-    // let stepOne = Math.round(timeLength / 5 / division), step = timeLine.min;
-    // while (1) {
-    //     if (step <= timeLine.max) {
-    //         stepArr.push(step);
-    //         step += stepOne;
-    //     } else {
-    //         break;
-    //     }
-    // }
-    // stepArr.forEach(item => {
-    //     stepObj[item] = item;
-    // })
-    // stepObj[timeLine.min] = timeLine.min;
-    // stepObj[timeLine.max] = timeLine.max;
     if (timeLine.min < 0) stepObj[0] = 0;
-    // console.log(yearData.data);
     yearData.data.forEach(item => {
         stepObj[item.timeSlot] = '🔺';
     })
-
     return stepObj;
 })
 
@@ -834,67 +806,70 @@ let summaryObj: {
     data: { [key: number]: Array<Detail> }
 } = reactive({ data: {} });
 function getTimeLineData() {
-    db.opus.get(query_id)
-        .then(value => {
-            if (value) {
-                theTimeLineData.data = value.theTimeLine;
-                // 设置基本数据
-                timeLine.tid = theTimeLineData.data[defaultPos.value].tid;
-                timeLine.max = theTimeLineData.data[defaultPos.value].max;
-                timeLine.min = theTimeLineData.data[defaultPos.value].min;
-                timeLine.name = theTimeLineData.data[defaultPos.value].name;
+    db.opus.get(query_id).then(value => {
+        if (value) {
+            theTimeLineData.data = value.theTimeLine;
+            if (!theTimeLineData.data[defaultPos.value]) defaultPos.value = 0;
+            // 设置基本数据
+            timeLine.tid = theTimeLineData.data[defaultPos.value].tid;
+            timeLine.max = theTimeLineData.data[defaultPos.value].max;
+            timeLine.min = theTimeLineData.data[defaultPos.value].min;
+            timeLine.name = theTimeLineData.data[defaultPos.value].name;
+            if (flag) { // 只执行一次的初始化操作
                 currentYear.value = Math.round((timeLine.max + timeLine.min) / 2);
-                // 将每个年份的事件全部集合起来 key为年份
-                summaryObj.data = {}; // 清空
-                theTimeLineData.data[defaultPos.value].eveYear.forEach(item => {
-                    if (summaryObj.data[item.timeSlot] === undefined) summaryObj.data[item.timeSlot] = [];
-                    summaryObj.data[item.timeSlot].push({
-                        id: item.yid,
-                        month: null,
-                        day: null,
-                        title: item.data.title,
-                        desc: item.data.desc
-                    })
+                flag = false;
+            };
+            // 将每个年份的事件全部集合起来 key为年份
+            summaryObj.data = {}; // 清空
+            theTimeLineData.data[defaultPos.value].eveYear.forEach(item => {
+                if (summaryObj.data[item.timeSlot] === undefined) summaryObj.data[item.timeSlot] = [];
+                summaryObj.data[item.timeSlot].push({
+                    id: item.yid,
+                    month: null,
+                    day: null,
+                    title: item.data.title,
+                    desc: item.data.desc
                 })
-                theTimeLineData.data[defaultPos.value].eveMonth.forEach(item => {
-                    if (summaryObj.data[item.yearSlot] === undefined) summaryObj.data[item.yearSlot] = [];
-                    summaryObj.data[item.yearSlot].push({
-                        id: item.mid,
-                        month: item.timeSlot,
-                        day: null,
-                        title: item.data.title,
-                        desc: item.data.desc
-                    })
+            })
+            theTimeLineData.data[defaultPos.value].eveMonth.forEach(item => {
+                if (summaryObj.data[item.yearSlot] === undefined) summaryObj.data[item.yearSlot] = [];
+                summaryObj.data[item.yearSlot].push({
+                    id: item.mid,
+                    month: item.timeSlot,
+                    day: null,
+                    title: item.data.title,
+                    desc: item.data.desc
                 })
-                theTimeLineData.data[defaultPos.value].eveDay.forEach(item => {
-                    if (summaryObj.data[item.yearSlot] === undefined) summaryObj.data[item.yearSlot] = [];
-                    summaryObj.data[item.yearSlot].push({
-                        id: item.did,
-                        month: item.monthSlot,
-                        day: item.timeSlot,
-                        title: item.data.title,
-                        desc: item.data.desc
-                    })
+            })
+            theTimeLineData.data[defaultPos.value].eveDay.forEach(item => {
+                if (summaryObj.data[item.yearSlot] === undefined) summaryObj.data[item.yearSlot] = [];
+                summaryObj.data[item.yearSlot].push({
+                    id: item.did,
+                    month: item.monthSlot,
+                    day: item.timeSlot,
+                    title: item.data.title,
+                    desc: item.data.desc
                 })
-                yearData.data = []; // 先清空后push
-                for (let i in summaryObj.data) {
-                    yearData.data.push({
-                        id: summaryObj.data[i][0].id,
-                        timeSlot: parseInt(i),
-                        title: summaryObj.data[i][0].title,
-                        desc: summaryObj.data[i][0].desc,
-                        totalNum: summaryObj.data[i].length
-                    })
-                }
-                // 升序排序
-                yearData.data.sort((a, b) => a.timeSlot - b.timeSlot);
-                choiceOneYear(currentChoice.value);
-                setSliderState();
-                nextTick(() => {
-                    calculateOffsetTop();
+            })
+            yearData.data = []; // 先清空后push
+            for (let i in summaryObj.data) {
+                yearData.data.push({
+                    id: summaryObj.data[i][0].id,
+                    timeSlot: parseInt(i),
+                    title: summaryObj.data[i][0].title,
+                    desc: summaryObj.data[i][0].desc,
+                    totalNum: summaryObj.data[i].length
                 })
             }
-        })
+            // 升序排序
+            yearData.data.sort((a, b) => a.timeSlot - b.timeSlot);
+            choiceOneYear(currentChoice.value);
+            setSliderState();
+            nextTick(() => {
+                calculateOffsetTop();
+            })
+        }
+    })
 }
 // 时间轴状态设置
 function setSliderState() {
