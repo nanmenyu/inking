@@ -1,6 +1,6 @@
 const {
     app,
-    protocol,
+    // protocol,
     BrowserWindow,
     session,
     // Menu,
@@ -13,18 +13,18 @@ const fontList = require('./nodelib/getFontList');
 const b64toFile = require('./nodelib/b64toFile');
 const deleteFolder = require('./nodelib/deleteFolder');
 const HTMLtoDOCX = require('../node_modules/html-to-docx/dist/html-to-docx.umd');
-const createProtocol = require('./nodelib/createProtocol');
+// const createProtocol = require('./nodelib/createProtocol');
 
 const NODE_ENV = process.env.NODE_ENV
 
 // 自定义协议到系统协议中
-protocol.registerSchemesAsPrivileged([{
-    scheme: 'app',
-    privileges: {
-        secure: true,
-        standard: true
-    }
-}]);
+// protocol.registerSchemesAsPrivileged([{
+//     scheme: 'app',
+//     privileges: {
+//         secure: true,
+//         standard: true
+//     }
+// }]);
 
 let win;
 async function createWindow() {
@@ -36,7 +36,8 @@ async function createWindow() {
         minHeight: 700,
         frame: false, //实现头部的隐藏
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, 'preload.js'),
+            webviewTag: true,
         }
     })
     // win.loadURL(

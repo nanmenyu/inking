@@ -1,107 +1,72 @@
 <!-- 作品(纯文本)编写页 -->
 <template>
     <TitleBlock></TitleBlock>
-    <div v-if="isRename" id="modify-box">
-        <div class="box">
-            <div class="box-header">
-                <div class="header-title">重命名</div>
-                <div class="header-close" @click="modify">
-                    <icon-close />
-                </div>
-            </div>
-            <div class="box-body">
-                <a-space>
-                    <a-form-item field="name" label="名称">
-                        <a-input
-                            v-model.trim="showName"
-                            style="width: 370px"
-                            :max-length="25"
-                            :error="showName.length === 0"
-                            show-word-limit
-                            allow-clear
-                            placeholder="请输入章名..."
-                        />
-                    </a-form-item>
-                </a-space>
-            </div>
-            <div class="box-footer">
-                <a-space size="large">
-                    <a-button @click="modify">取消</a-button>
-                    <a-button type="primary" @click="reName" :disabled="showName.length === 0">确定</a-button>
-                </a-space>
-            </div>
-        </div>
-    </div>
-    <div v-if="isNewVolume" id="modify-box">
-        <div class="box">
-            <div class="box-header">
-                <div class="header-title">新增卷</div>
-                <div class="header-close" @click="modify">
-                    <icon-close />
-                </div>
-            </div>
-            <div class="box-body">
-                <a-space>
-                    <a-form-item field="name" label="卷名">
-                        <a-input
-                            v-model.trim="volumeName"
-                            style="width: 370px"
-                            :max-length="25"
-                            :error="volumeName.length === 0"
-                            show-word-limit
-                            allow-clear
-                            placeholder="请输入卷名..."
-                        />
-                    </a-form-item>
-                </a-space>
-            </div>
-            <div class="box-footer">
-                <a-space size="large">
-                    <a-button @click="modify">取消</a-button>
-                    <a-button
-                        type="primary"
-                        @click="addNewVolume"
-                        :disabled="volumeName.length === 0"
-                    >确定</a-button>
-                </a-space>
-            </div>
-        </div>
-    </div>
-    <div v-if="isNewChapter" id="modify-box">
-        <div class="box">
-            <div class="box-header">
-                <div class="header-title">新增章</div>
-                <div class="header-close" @click="modify">
-                    <icon-close />
-                </div>
-            </div>
-            <div class="box-body">
-                <a-space>
-                    <a-form-item field="name" label="章名">
-                        <a-input
-                            v-model.trim="chapterName"
-                            style="width: 370px"
-                            :max-length="25"
-                            :error="chapterName.length === 0"
-                            show-word-limit
-                            allow-clear
-                            placeholder="请输入章名..."
-                        />
-                    </a-form-item>
-                </a-space>
-            </div>
-            <div class="box-footer">
-                <a-space size="large">
-                    <a-button @click="modify">取消</a-button>
-                    <a-button
-                        type="primary"
-                        @click="addNewChapter"
-                        :disabled="chapterName.length === 0"
-                    >确定</a-button>
-                </a-space>
-            </div>
-        </div>
-    </div>
+    <PopupMenu
+        v-if="isRename"
+        title="重命名"
+        determine="确定"
+        @toModify="modify"
+        @toDetermine="reName"
+        :determineDisabled="showName.length === 0"
+    >
+        <a-space>
+            <a-form-item field="name" label="名称">
+                <a-input
+                    v-model.trim="showName"
+                    style="width: 370px"
+                    :max-length="25"
+                    :error="showName.length === 0"
+                    show-word-limit
+                    allow-clear
+                    placeholder="请输入章名..."
+                />
+            </a-form-item>
+        </a-space>
+    </PopupMenu>
+    <PopupMenu
+        v-if="isNewVolume"
+        title="新增卷"
+        determine="确定"
+        @toModify="modify"
+        @toDetermine="addNewVolume"
+        :determineDisabled="volumeName.length === 0"
+    >
+        <a-space>
+            <a-form-item field="name" label="卷名">
+                <a-input
+                    v-model.trim="volumeName"
+                    style="width: 370px"
+                    :max-length="25"
+                    :error="volumeName.length === 0"
+                    show-word-limit
+                    allow-clear
+                    placeholder="请输入卷名..."
+                />
+            </a-form-item>
+        </a-space>
+    </PopupMenu>
+    <PopupMenu
+        v-if="isNewChapter"
+        title="新增章"
+        determine="确定"
+        @toModify="modify"
+        @toDetermine="addNewChapter"
+        :determineDisabled="chapterName.length === 0"
+    >
+        <a-space>
+            <a-form-item field="name" label="章名">
+                <a-input
+                    v-model.trim="chapterName"
+                    style="width: 370px"
+                    :max-length="25"
+                    :error="chapterName.length === 0"
+                    show-word-limit
+                    allow-clear
+                    placeholder="请输入章名..."
+                />
+            </a-form-item>
+        </a-space>
+    </PopupMenu>
     <div class="layout-write">
         <a-layout>
             <a-layout-header>
@@ -527,7 +492,13 @@
                 >
                     <WritingPaper @todata="getData" ref="myRef"></WritingPaper>
                 </a-layout-content>
-                <a-resize-box :directions="['left']" class="sider-right" style="width: 100px;">
+                <a-resize-box
+                    @moving-start="showIframeWrap = true"
+                    @moving-end="showIframeWrap = false"
+                    :directions="['left']"
+                    class="sider-right"
+                    style="width: 100px;"
+                >
                     <template #resize-trigger="{ direction }">
                         <div
                             :class="[
@@ -538,6 +509,9 @@
                             <div class="resizebox-demo-line" />
                         </div>
                     </template>
+                    <WebView class="iframe" src="https://wantwords.thunlp.org/"></WebView>
+                    <!-- <iframe class="iframe" src="https://wantwords.thunlp.org/"></iframe> -->
+                    <div v-if="showIframeWrap" class="iframe-Wrap"></div>
                 </a-resize-box>
             </a-layout>
         </a-layout>
@@ -560,6 +534,7 @@ import {
 } from '@arco-design/web-vue/es/icon';
 import TitleBlock from '../components/TitleBlock.vue';
 import WritingPaper from '../components/WritingPaper.vue';
+import PopupMenu from '../components/widget/PopupMenu.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ColorPicker } from "vue3-colorpicker";
 import "vue3-colorpicker/style.css";
@@ -619,6 +594,7 @@ onUnmounted(() => {
     window.removeEventListener('keydown', shortcut);
     window.removeEventListener('click', leftMoreControl);
 })
+const showIframeWrap = ref(false);
 
 /*----数据统计与初始化----*/
 const wordCount = ref(0),
