@@ -21,12 +21,12 @@
 
     <PopupMenu
         v-if="isNewSummaryItem"
-        title="添加新剧情项"
+        :title="panelName_summary!"
         determine="确定"
         @toModify="modify"
-        @toDetermine="addNewSummaryItem"
+        @toDetermine="editSummaryItem"
     >
-        <a-form :model="summaryForm" layout="inline">
+        <a-form :model="summaryForm" style="overflow: hidden;" layout="inline">
             <a-form-item field="imp" label="重要性">
                 <a-rate v-model="summaryForm.imp" title="选择重要性(1-5)">
                     <template #character="index">
@@ -106,7 +106,7 @@
                             <span class="summary-title">{{ item.itemsName }}</span>
                         </summary>
                         <template #content>
-                            <a-doption @click="openNewSummaryItem(item.sid)">添加新条目</a-doption>
+                            <a-doption @click="openEditSummaryItem(item.sid, null)">添加新条目</a-doption>
                             <a-doption
                                 @click="openGroupReName(item.itemsName, item.sid, 'add')"
                             >添加新组</a-doption>
@@ -127,6 +127,18 @@
                                         :title="it.complete ? '已完成' : '待完成'"
                                     >{{ it.complete ? '✅' : '🔴' }}</span>
                                     {{ it.title }}
+                                    <span
+                                        @click="openEditSummaryItem(item.sid, i)"
+                                        class="edit-btn"
+                                    >
+                                        <icon-edit />
+                                    </span>
+                                    <span
+                                        @click="deleteSummaryItem(it.title, item.sid, i)"
+                                        class="edit-btn"
+                                    >
+                                        <icon-delete />
+                                    </span>
                                 </span>
                                 <span class="status">{{ statusGenerat(it.imp) }}</span>
                                 <span class="info">{{ it.con }}</span>
@@ -141,7 +153,7 @@
 
 <script setup lang="ts">
 import {
-    IconFire
+    IconFire, IconEdit, IconDelete
 } from '@arco-design/web-vue/es/icon';
 import { computed, nextTick, onMounted, reactive, ref, Ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -226,12 +238,15 @@ const deletePlotGroup = (key: string) => {
                             }
                         }).then(() => {
                             proxy.$message.success('删除成功！');
+                            if (key === thePlotData.data[nowPlotKey.value].id) nowPlotKey.value = 0;
                             loadPlotData();
                         })
                     }
                 })
             }
         }
+    } else {
+        proxy.$message.error('主线无法删除！');
     }
 }
 // 切换完成状态
@@ -306,36 +321,87 @@ const deleteGroup = (name: string, sid: string) => {
     })
 }
 
-/* ----------------------- 打开组内项目设置面板-----------------------*/
+/* ----------------------- 打开组内条目设置面板-----------------------*/
 const isNewSummaryItem = ref(false);
+const _mode: Ref<'add' | 'edit'> = ref('add'), summaryIndex: Ref<number | null> = ref(0);
 const summaryForm = reactive({
     title: '',
     imp: 1,
     con: ''
+});
+const panelName_summary = computed(() => {
+    if (_mode.value === 'add') return '添加新条目';
+    if (_mode.value === 'edit') return '编辑选择条目';
 })
-const openNewSummaryItem = (sid: string) => {
+// 打开条目面板
+const openEditSummaryItem = (sid: string, index: number | null) => {
+    if (index === null) {
+        _mode.value = 'add';
+    } else {
+        _mode.value = 'edit';
+        thePlotData.data[nowPlotKey.value].summary.forEach(item => {
+            if (item.sid === sid) {
+                summaryForm.title = item.items[index].title;
+                summaryForm.imp = item.items[index].imp;
+                summaryForm.con = item.items[index].con;
+            }
+        })
+    }
+    summaryIndex.value = index;
     isNewSummaryItem.value = true;
     curSid.value = sid;
 }
-const addNewSummaryItem = () => {
-    db.opus.where(':id').equals(query_id).modify(item => {
-        item.thePlot[nowPlotKey.value].summary.forEach(it => {
-            if (it.sid === curSid.value) {
-                it.items.push({
-                    title: summaryForm.title,
-                    imp: summaryForm.imp,
-                    con: summaryForm.con,
-                    complete: false
-                })
-            };
+const editSummaryItem = () => {
+    // 局部处理函数
+    function loadDB(msg: string, cb: Function) {
+        db.opus.where(':id').equals(query_id).modify(item => {
+            item.thePlot[nowPlotKey.value].summary.forEach(it => {
+                if (it.sid === curSid.value) {
+                    cb(it);
+                };
+            })
+        }).then(() => {
+            isNewSummaryItem.value = false;
+            proxy.$message.success(msg);
+            loadPlotData();
         })
-    }).then(() => {
-        isNewSummaryItem.value = false;
-        proxy.$message.success('添加成功！');
-        loadPlotData();
+    }
+
+    if (_mode.value === 'add') {
+        loadDB('添加成功！', (it: Summary) => {
+            it.items.push({
+                title: summaryForm.title,
+                imp: summaryForm.imp,
+                con: summaryForm.con,
+                complete: false
+            })
+        })
+    } else if (_mode.value === 'edit') {
+        loadDB('修改成功！', (it: Summary) => {
+            it.items[summaryIndex.value!].title = summaryForm.title;
+            it.items[summaryIndex.value!].imp = summaryForm.imp;
+            it.items[summaryIndex.value!].con = summaryForm.con;
+        })
+    }
+}
+// 删除目标条目
+const deleteSummaryItem = (name: string, sid: string, index: number) => {
+    proxy.$modal.warning({
+        title: '删除条目',
+        content: `是否删除目标条目"${name}"? 该操作不可逆!`,
+        simple: true,
+        onOk: () => {
+            db.opus.where(':id').equals(query_id).modify(item => {
+                item.thePlot[nowPlotKey.value].summary.forEach(it => {
+                    if (it.sid === sid) it.items.splice(index, 1);
+                })
+            }).then(() => {
+                proxy.$message.success('删除成功！');
+                loadPlotData();
+            })
+        }
     })
 }
-
 
 const modify = () => {
     isGroupReName.value = false;

@@ -153,7 +153,7 @@ declare interface PlotGroup {
   name: string;
   summary: Array<Summary>
 }
-interface Summary {
+declare interface Summary {
   sid: string;
   itemsName: string;
   items: Array<{ title: string, imp: number, complete: boolean, con: string }>

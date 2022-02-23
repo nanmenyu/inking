@@ -110,10 +110,29 @@
                             .title {
                                 font-size: 18px;
                                 font-weight: normal;
+
+                                .edit-btn {
+                                    float: right;
+                                    margin-left: 5px;
+                                    opacity: 0;
+                                    transition: opacity 0.2s;
+                                    cursor: pointer;
+
+                                    &:active {
+                                        color: #165dff;
+                                    }
+
+                                    &:hover {
+                                        color: #165dff;
+                                    }
+                                }
+                            }
+
+                            &:hover .title .edit-btn {
+                                opacity: 1;
                             }
 
                         }
-
                     }
                 }
 
