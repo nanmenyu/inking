@@ -306,32 +306,6 @@ function insertSpace(e: KeyboardEvent) {
     }
 }
 
-// 段落聚焦功能
-// let oldElement: HTMLElement;
-// function ParagraphFocus() {
-//     const selection = window.getSelection(),
-//         range = selection!.getRangeAt(0),
-//         start = range.startContainer;
-//     const targetElement = (<HTMLElement>start.parentElement).tagName === 'P' ?
-//         start.parentElement :
-//         (<HTMLElement>start.parentElement).parentElement;
-//     if (oldElement !== targetElement) {
-//         // 将当前选择的文字颜色变为透明的rgba
-//         currentColor.value = hexToRgba(focusColor, 0.3);
-//         // 创建迭代器
-//         let iterator = document.createNodeIterator(mEditor.value, NodeFilter.SHOW_ELEMENT, null);
-//         // 用循环反复调用节点迭代器对象的nextNode().跳向下一个节点
-//         let node;
-//         while ((node = iterator.nextNode()) != null) {
-//             (<HTMLElement>node).removeAttribute('style'); //清除其它元素的style
-//         }
-//         targetElement!.setAttribute('test', 'sb');
-//         // targetElement!.style.color = focusColor;
-//         oldElement = targetElement!;
-//         console.log(targetElement);
-//     }
-// }
-
 // 移动光标到指定位置
 function moveCursor(selection: Selection, range: Range, startNode: Node, startOffset: number) {
     range.setStart(startNode, startOffset);

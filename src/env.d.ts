@@ -58,6 +58,7 @@ interface Userdb {
   historRecord: { vid: string, cid: string };
   theKeyWord: Array<KeyWordGroup>;
   checked?: boolean;
+  thePlot: Array<PlotGroup>;
 }
 
 // 每卷
