@@ -313,7 +313,7 @@
                             <button>删除</button>
                         </a-popconfirm>
                         <button @click="showWastepaperBasket">废纸篓</button>
-                        <button @click="ContinueWriting">继续写作</button>
+                        <button @click="continueWriting">继续写作</button>
                     </div>
                 </div>
                 <div
@@ -525,7 +525,7 @@ const toSpecialEditor = (type: string) => {
 }
 
 // 继续写作按键
-const ContinueWriting = () => {
+const continueWriting = () => {
     const vid = booksData.data.historRecord.vid,
         cid = booksData.data.historRecord.cid;
     if (vid !== '' && cid !== '') {
@@ -558,7 +558,9 @@ const booksData: { data: Userdb } = reactive({
         discardTime: 0,
         historRecord: { vid: '', cid: '' },
         theKeyWord: [],
-        checked: false
+        checked: false,
+        thePlot: [],
+        theTimeLine: []
     }
 });
 const totalNumber = ref(0);

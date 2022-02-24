@@ -1,10 +1,53 @@
 import { Plugin } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
 
+// 设置要包裹的关键词
+export const setHighlightKeyword = (keyMarks: Array<{ match: RegExp, class: string }>) => {
+    marks = keyMarks;
+}
+
+export const ParagraphFocusPlugin = new Plugin({
+    state: {
+        init(_: any, editorState: any) {
+            return DecorationSet.create(
+                editorState.doc,
+                highlightDocument(editorState.doc)
+            );
+        },
+        apply(tr: any) {
+            return DecorationSet.create(tr.doc, highlightDocument(tr.doc));
+        },
+    },
+    props: {
+        decorations(state: any) {
+            return ParagraphFocusPlugin.getState(state);
+        },
+    },
+});
+
+export const highlightKeywordPlugin = new Plugin({
+    state: {
+        init(_: any, editorState: any) {
+            return DecorationSet.create(
+                editorState.doc,
+                highlightKeyword(editorState.doc)
+            );
+        },
+        apply(tr: any) {
+            return DecorationSet.create(tr.doc, highlightKeyword(tr.doc));
+        },
+    },
+    props: {
+        decorations(state: any) {
+            return highlightKeywordPlugin.getState(state);
+        },
+    },
+});
+
+
 // 段落聚焦功能
 function highlightDocument(doc: any) {
-    const content = doc.content;
-    const highlights: any = [];
+    const content = doc.content, highlights: any = [];
 
     // 获取光标所在字符串
     let targetString: string;
@@ -26,21 +69,23 @@ function highlightDocument(doc: any) {
     return highlights;
 }
 
-export const SyntaxHighlightPlugin = new Plugin({
-    state: {
-        init(_: any, editorState: any) {
-            return DecorationSet.create(
-                editorState.doc,
-                highlightDocument(editorState.doc)
-            );
-        },
-        apply(tr: any, highlights: any) {
-            return DecorationSet.create(tr.doc, highlightDocument(tr.doc));
-        },
-    },
-    props: {
-        decorations(state: any) {
-            return SyntaxHighlightPlugin.getState(state);
-        },
-    },
-});
+// 关键字高亮
+let marks: Array<{ match: RegExp, class: string }>;
+function highlightKeyword(doc: any) {
+    const content = doc.content, highlights: any = [];
+
+    content.forEach((para: any, offset: number) => {
+        const content = para.textContent;
+        for (const mark of marks) {
+            [...content.matchAll(mark.match)].map(match => {
+                const from = match.index + offset + 1;
+                const to = match[0].length + from;
+                highlights.push(
+                    Decoration.inline(from, to, { class: mark.class })
+                );
+            })
+        }
+    });
+    return highlights;
+}
+

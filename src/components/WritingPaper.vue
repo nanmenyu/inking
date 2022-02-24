@@ -13,6 +13,7 @@ import getStyle from '../utils/getStyle';
 import { throttle } from '../utils/flowControl';
 import hexToRgba from '../utils/hexToRgba';
 import pureTextEditor from '../common/editor';
+import { setHighlightKeyword } from '../common/editor/syntax';
 import { db } from '../db/db';
 import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
 import { useRoute } from 'vue-router';
@@ -50,8 +51,7 @@ const route = useRoute(),
 let vid = route.query.vid;
 let cid = route.query.cid;
 const setId = (newVid: string, newCid: string) => {
-    vid = newVid;
-    cid = newCid;
+    [vid, cid] = [newVid, newCid];
 }
 
 /*----监视纸张----*/
@@ -158,7 +158,6 @@ const expFile = (type: string) => {
 
 // 导出为PDF
 function exportPDF() {
-    console.log(html2pdf);
     // 单章17k字左右的极限~~~15K
     // 输出配置项 见：https://ekoopmans.github.io/html2pdf.js/
     html2pdf().set({
@@ -279,6 +278,7 @@ const setBooksData = (value: Userdb) => {
 const mEditor = ref();
 const refreshPaper = (toDisplay: Array<NodePara>) => {
     mEditor.value.innerHTML = '';
+    setHighlightKeyword([{ match: /男人/g, class: 'keyword1' }, { match: /奥兹/g, class: 'keyword2' }]);
     pureTextEditor({
         type: "doc",
         content: toDisplay
@@ -322,7 +322,7 @@ defineExpose({
 <!-- 文字：字号 字色 字体 粗细 行高-->
 <!-- 段落：段间距 每段首行缩进 段聚焦-->
 <!-- 其它：纸张颜色 软件主题 纸张大小-->
-<style>
+<style >
 #paper-box {
     width: v-bind(boxWidth + "px");
     height: v-bind(boxHeight + "px");
@@ -337,6 +337,10 @@ defineExpose({
 [contenteditable]:focus {
     /* outline: #ccc dashed thin; */
     outline: none;
+}
+
+#mainEditor {
+    position: relative;
 }
 
 #mainEditor .ProseMirror {
@@ -364,5 +368,48 @@ defineExpose({
 }
 #mainEditor .ProseMirror .onfocused {
     color: v-bind(focusColor);
+}
+#mainEditor .ProseMirror .keyword1 {
+    font-weight: bold;
+    color: crimson;
+}
+#mainEditor .ProseMirror .keyword2 {
+    font-style: italic;
+    color: skyblue;
+}
+#mainEditor .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 7px;
+    border: 1px solid #e5e6eb;
+    box-shadow: 0 2px 8px #00000026;
+    transform: translateX(-50%);
+}
+#mainEditor .tooltip::before {
+    content: "";
+    height: 0;
+    width: 0;
+    position: absolute;
+    left: 50%;
+    margin-left: -5px;
+    bottom: -6px;
+    border: 5px solid transparent;
+    border-bottom-width: 0;
+    border-top-color: silver;
+}
+#mainEditor .tooltip::after {
+    content: "";
+    height: 0;
+    width: 0;
+    position: absolute;
+    left: 50%;
+    margin-left: -5px;
+    bottom: -4.5px;
+    border: 5px solid transparent;
+    border-bottom-width: 0;
+    border-top-color: white;
 }
 </style>

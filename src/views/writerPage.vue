@@ -509,8 +509,8 @@
                             <div class="resizebox-demo-line" />
                         </div>
                     </template>
-                    <WebView class="iframe" src="https://wantwords.thunlp.org/"></WebView>
-                    <!-- <iframe class="iframe" src="https://wantwords.thunlp.org/"></iframe> -->
+                    <!-- <webview class="iframe" src="https://wantwords.net/"></webview> -->
+                    <!-- <iframe class="iframe" src="https://wantwords.net/"></iframe> -->
                     <div v-if="showIframeWrap" class="iframe-Wrap"></div>
                 </a-resize-box>
             </a-layout>
@@ -522,7 +522,6 @@
 import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount } from 'vue';
 import {
     IconDown,
-    IconClose,
     IconExport,
     IconCaretRight,
     IconCaretLeft,

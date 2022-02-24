@@ -69,9 +69,9 @@
                         </div>
                     </div>
                     <template #content>
+                        <a-doption @click="continueWriting(item.id as number)">继续写作</a-doption>
                         <a-doption @click="showReName(item.id as number, item.title)">重命名</a-doption>
                         <a-doption @click="putinRecycle(item.id as number, item.title)">置入回收站</a-doption>
-                        <a-doption>复制一份</a-doption>
                         <a-doption>导出</a-doption>
                     </template>
                 </a-dropdown>
@@ -166,6 +166,22 @@ const routerLink = (id: number) => {
             }
         })
     }
+}
+// 继续写作按键
+const continueWriting = (id: number) => {
+    booksData.data.forEach(item => {
+        if (item.id === id) {
+            router.push({
+                path: '/writer',
+                query: {
+                    type: 'opus',
+                    id: id,
+                    vid: item.historRecord.vid,
+                    cid: item.historRecord.cid
+                }
+            })
+        }
+    })
 }
 
 function loadData() {

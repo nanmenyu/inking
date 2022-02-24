@@ -308,7 +308,6 @@ const deleteGroup = (name: string, sid: string) => {
         content: `是否删除待办组"${name}"? 该操作不可逆!`,
         simple: true,
         onOk: () => {
-            console.log('删除');
             db.opus.where(':id').equals(query_id).modify(item => {
                 item.thePlot[nowPlotKey.value].summary.forEach((it, index) => {
                     if (it.sid === sid) item.thePlot[nowPlotKey.value].summary.splice(index, 1);

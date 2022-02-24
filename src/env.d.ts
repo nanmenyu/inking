@@ -58,6 +58,7 @@ interface Userdb {
   historRecord: { vid: string, cid: string };
   theKeyWord: Array<KeyWordGroup>;
   checked?: boolean;
+  theTimeLine: Array<TimeLineGroup>;
   thePlot: Array<PlotGroup>;
 }
 
