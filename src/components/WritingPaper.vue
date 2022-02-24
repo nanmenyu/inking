@@ -278,7 +278,7 @@ const setBooksData = (value: Userdb) => {
 const mEditor = ref();
 const refreshPaper = (toDisplay: Array<NodePara>) => {
     mEditor.value.innerHTML = '';
-    setHighlightKeyword([{ match: /男人/g, class: 'keyword1' }, { match: /奥兹/g, class: 'keyword2' }]);
+    setHighlightKeyword([{ match: /奥兹/g, class: 'keyword1' }, { match: /奥兹莫/g, class: 'keyword2' }]);
     pureTextEditor({
         type: "doc",
         content: toDisplay
@@ -374,7 +374,8 @@ defineExpose({
     color: crimson;
 }
 #mainEditor .ProseMirror .keyword2 {
-    font-style: italic;
+    text-decoration: underline;
+    font-weight: bold;
     color: skyblue;
 }
 #mainEditor .tooltip {

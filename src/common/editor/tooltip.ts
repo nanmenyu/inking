@@ -5,6 +5,7 @@ export const selectionSizePlugin = new Plugin({
 })
 
 class SelectionSizeTooltip {
+    tooltip: any
     constructor(view: any) {
         this.tooltip = document.createElement("div")
         this.tooltip.className = "tooltip"
@@ -13,7 +14,7 @@ class SelectionSizeTooltip {
         this.update(view, null)
     }
 
-    update(view, lastState) {
+    update(view: any, lastState: any) {
         let state = view.state
         // Don't do anything if the document/selection didn't change
         if (lastState && lastState.doc.eq(state.doc) &&

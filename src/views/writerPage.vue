@@ -393,7 +393,8 @@
                         :style="{ width: '100%', textAlign: 'left' }"
                     >
                         <button @click="isNewVolume = true" class="topBtn">
-                            <img :src="addVolumeIcon" style="transform: translateY(4px)" />
+                            <!-- <img :src="addVolumeIcon" style="transform: translateY(4px)" /> -->
+                            <span style="transform: translateY(4px)">📜</span>
                             <span>添加卷</span>
                         </button>
                         <a-sub-menu v-for="item in booksLists.data" :key="item.vid">
@@ -490,6 +491,55 @@
                     @mouseout="closeScroll"
                     @scroll="getScrollTop"
                 >
+                    <div v-if="showSearchBox" class="search-box">
+                        <a-space style="padding-bottom:5px;">
+                            <span class="mini-btn" title="切换替换">
+                                <icon-right />
+                            </span>
+                            <icon-search />
+                            <input type="text" placeholder="查找" />
+                            <span>0/0</span>
+                            <a-space size="mini">
+                                <span class="mini-btn" title="上一个">
+                                    <icon-arrow-up />
+                                </span>
+                                <span class="mini-btn" title="下一个">
+                                    <icon-arrow-down />
+                                </span>
+                                <span @click="showSearchBox = false" class="mini-btn" title="关闭">
+                                    <icon-close />
+                                </span>
+                            </a-space>
+                        </a-space>
+                        <a-space
+                            style="margin-left: -19px;padding-top: 5px;border-top: 1px solid #ccc;"
+                        >
+                            <icon-undo style="transform: rotateZ(180deg);" />
+                            <input type="text" placeholder="替换" />
+                            <span class="mini-btn" title="替换">
+                                <svg
+                                    viewBox="0 0 1024 1024"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="14"
+                                    height="14"
+                                    style="margin-bottom: -2px;"
+                                >
+                                    <path p-id="3277" />
+                                </svg>
+                            </span>
+                            <span class="mini-btn" title="全部替换">
+                                <svg
+                                    viewBox="0 0 1024 1024"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="14"
+                                    height="14"
+                                    style="margin-bottom: -2px;"
+                                >
+                                    <path p-id="9876" />
+                                </svg>
+                            </span>
+                        </a-space>
+                    </div>
                     <WritingPaper @todata="getData" ref="myRef"></WritingPaper>
                 </a-layout-content>
                 <a-resize-box
@@ -521,15 +571,10 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount } from 'vue';
 import {
-    IconDown,
-    IconExport,
-    IconCaretRight,
-    IconCaretLeft,
-    IconBook,
-    IconCaretDown,
-    IconCheckCircle,
-    IconFullscreen,
-    IconDoubleRight
+    IconDown, IconExport, IconCaretRight, IconCaretLeft,
+    IconBook, IconCaretDown, IconCheckCircle, IconFullscreen,
+    IconDoubleRight, IconRight, IconSearch, IconArrowUp,
+    IconArrowDown, IconClose, IconUndo
 } from '@arco-design/web-vue/es/icon';
 import TitleBlock from '../components/TitleBlock.vue';
 import WritingPaper from '../components/WritingPaper.vue';
@@ -558,7 +603,7 @@ import softThemeIcon from '../assets/svg/softThemeIcon.svg';
 import expTXTIcon from '../assets/svg/expTXTIcon.svg';
 import expDOCXIcon from '../assets/svg/expDOCXIcon.svg';
 import expPDFIcon from '../assets/svg/expPDFIcon.svg';
-import addVolumeIcon from '../assets/svg/addVolumeIcon.svg';
+// import addVolumeIcon from '../assets/svg/addVolumeIcon.svg';
 import '../style/writerPage.scss';
 
 const { proxy } = useCurrentInstance();
@@ -593,7 +638,7 @@ onUnmounted(() => {
     window.removeEventListener('keydown', shortcut);
     window.removeEventListener('click', leftMoreControl);
 })
-const showIframeWrap = ref(false);
+const showIframeWrap = ref(false), showSearchBox = ref(false);
 
 /*----数据统计与初始化----*/
 const wordCount = ref(0),
@@ -1069,6 +1114,7 @@ function shortcut(e: KeyboardEvent) {
     } else {
         // Ctrl+S
         if (e.ctrlKey === true && e.key === 's') myRef.value.saveDocData();
+        if (e.ctrlKey === true && e.key === 'f') showSearchBox.value = true;
     }
 }
 
