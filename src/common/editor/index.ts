@@ -7,6 +7,10 @@ import { EditorView } from 'prosemirror-view';
 import { Schema } from 'prosemirror-model';
 import { ParagraphFocusPlugin, highlightKeywordPlugin, setHighlightKeyword } from './syntax';
 import { selectionSizePlugin } from './tooltip';
+import { useMainStore } from '../../store/index';
+
+// 使用pinia 
+const mainStore = useMainStore();
 
 export default function (initData: NodeDOC, keyMarks?: Array<{ match: RegExp, class: string }>) {
     // 初始化
@@ -49,13 +53,15 @@ export default function (initData: NodeDOC, keyMarks?: Array<{ match: RegExp, cl
     });
     const view = new EditorView(main, {
         state,
-        dispatchTransaction(transaction: object) { // 每一个变化都会有一个 transaction 被创建,
-            // console.log(transaction);
+        dispatchTransaction(transaction: any) { // 每一个变化都会有一个 transaction 被创建,
             // console.log('Document size went from', transaction.before.content.size,
             //     'to', transaction.doc.content.size)
             //每次的 state 更新最终都需要执行 updateState 方法
-            const newState = view.state.apply(transaction)
-            view.updateState(newState)
+            // 控制保存页面内容
+            if (transaction.updated === 5) mainStore.needSaveDocData = true;
+
+            const newState = view.state.apply(transaction);
+            view.updateState(newState);
         }
     });
 };

@@ -89,6 +89,7 @@
     "vue-router": "^4.0.12",
     "vue-tsc": "^0.29.8",
     "vue3-colorpicker": "^2.0.4",
-    "wait-on": "^6.0.0"
+    "wait-on": "^6.0.0",
+    "pinia": "^2.0.11"
   }
 }

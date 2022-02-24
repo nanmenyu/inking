@@ -497,7 +497,12 @@
                                 <icon-right />
                             </span>
                             <icon-search />
-                            <input type="text" placeholder="查找" />
+                            <input
+                                v-model="searchData"
+                                @input="toSearchKeyword"
+                                type="text"
+                                placeholder="查找"
+                            />
                             <span>0/0</span>
                             <a-space size="mini">
                                 <span class="mini-btn" title="上一个">
@@ -506,7 +511,7 @@
                                 <span class="mini-btn" title="下一个">
                                     <icon-arrow-down />
                                 </span>
-                                <span @click="showSearchBox = false" class="mini-btn" title="关闭">
+                                <span @click="stopSearchKeyword" class="mini-btn" title="关闭">
                                     <icon-close />
                                 </span>
                             </a-space>
@@ -569,7 +574,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount } from 'vue';
+import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount, watch } from 'vue';
 import {
     IconDown, IconExport, IconCaretRight, IconCaretLeft,
     IconBook, IconCaretDown, IconCheckCircle, IconFullscreen,
@@ -586,6 +591,8 @@ import { throttle } from '../utils/flowControl';
 import { db } from '../db/db';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { v4 } from 'uuid';
+// import { setHighlightKeyword } from '../common/editor/syntax';
+import { useMainStore } from '../store/index';
 import writtenwords from '../assets/svg/writtenwords.svg';
 import fontSizeIcon from '../assets/svg/fontSizeIcon.svg';
 import lineHeighIcon from '../assets/svg/lineHeighIcon.svg';
@@ -613,6 +620,7 @@ const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
 const vid = ref(route.query.vid);
 const cid = ref(route.query.cid);
+const mainStore = useMainStore();
 loadListData();
 
 onMounted(() => {
@@ -639,6 +647,30 @@ onUnmounted(() => {
     window.removeEventListener('click', leftMoreControl);
 })
 const showIframeWrap = ref(false), showSearchBox = ref(false);
+// 关键词搜索、替换功能
+const searchData = ref('');
+watch(showSearchBox, value => {
+    if (value && searchData.value !== '') toSearchKeyword();
+})
+// 关键字统计
+let isHighlightCount = computed(() => mainStore.isHighlightCount);
+watch(isHighlightCount, () => {
+    if (showSearchBox.value && searchData.value !== '')
+        console.log(searchData.value, ':', mainStore.highlightCount);
+})
+const toSearchKeyword = () => {
+    db.opus.get(query_id).then(value => {
+        if (value) {
+            myRef.value.setBooksData(value, [{ match: new RegExp(searchData.value, 'g'), class: 'keyword_search' }]);
+        }
+    })
+}
+const stopSearchKeyword = () => {
+    showSearchBox.value = false;
+    db.opus.get(query_id).then(value => {
+        if (value) myRef.value.setBooksData(value, []);
+    })
+}
 
 /*----数据统计与初始化----*/
 const wordCount = ref(0),
@@ -863,7 +895,11 @@ const onClickMenuItem = (tvid: string, tcid: string) => {
                 }
             }
             loadListData();
-            myRef.value.refreshPaper(toDisplay);
+            if (showSearchBox.value) {
+                toSearchKeyword();
+            } else {
+                myRef.value.refreshPaper(toDisplay, []);
+            }
         })
     }
 }
@@ -1113,7 +1149,7 @@ function shortcut(e: KeyboardEvent) {
         if (e.ctrlKey === true && e.key === 's') $message.error('目标已被删除!');
     } else {
         // Ctrl+S
-        if (e.ctrlKey === true && e.key === 's') myRef.value.saveDocData();
+        if (e.ctrlKey === true && e.key === 's') myRef.value.saveDocData(true);
         if (e.ctrlKey === true && e.key === 'f') showSearchBox.value = true;
     }
 }

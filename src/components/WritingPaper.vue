@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import getStyle from '../utils/getStyle';
 import { throttle } from '../utils/flowControl';
 import hexToRgba from '../utils/hexToRgba';
@@ -18,11 +18,17 @@ import { db } from '../db/db';
 import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
 import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
+import { useMainStore } from '../store/index';
 
 const emit = defineEmits(['todata']), { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
-
+const mainStore = useMainStore();
+// 监视是否需要保存当前页面内容
+let needSaveDoc = computed(() => mainStore.needSaveDocData);
+watch(needSaveDoc, isNeed => {
+    if (isNeed) saveDocData(false);
+})
 // 修改键盘控制
 onMounted(() => {
     editor.value.addEventListener('keydown', insertSpace);
@@ -92,7 +98,7 @@ const emit_throttle = throttle(() => {
 }, 300);
 
 // 保存数据至数据库
-const saveDocData = () => {
+const saveDocData = throttle((showMsg: boolean) => {
     const editorData = editor.value.firstElementChild.firstElementChild.children, dataArr: Array<string> = [];
     for (let i = 0; i < editorData.length; i++) {
         dataArr.push(editorData[i].innerText);
@@ -114,9 +120,10 @@ const saveDocData = () => {
             }
         }
     }).then(() => {
-        $message.success('保存成功');
+        if (showMsg) $message.success('保存成功');
+        mainStore.needSaveDocData = false;
     })
-}
+}, 300)
 
 /*----另存为文件----*/
 let currentChapter = '未命名章', paperType;
@@ -245,7 +252,7 @@ const setParaFocus = (type: string, isInit: boolean) => {
     if (!isInit) getData();
 }
 
-const setBooksData = (value: Userdb) => {
+const setBooksData = (value: Userdb, keyMarks?: Array<{ match: RegExp, class: string }>) => {
     const toDisplay: Array<NodePara> = [];
     for (let i = 0; i < value.data.length; i++) {
         if (value.data[i].vid === vid) {
@@ -269,19 +276,19 @@ const setBooksData = (value: Userdb) => {
             break;
         }
     }
-    refreshPaper(toDisplay);
+    refreshPaper(toDisplay, keyMarks);
     getData();
 }
 
 // 刷新纸张内容
 // 读取数据并显示在当前页面
 const mEditor = ref();
-const refreshPaper = (toDisplay: Array<NodePara>) => {
+const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<{ match: RegExp, class: string }>) => {
     mEditor.value.innerHTML = '';
-    setHighlightKeyword([{ match: /奥兹/g, class: 'keyword1' }, { match: /奥兹莫/g, class: 'keyword2' }]);
+    if (keyMarks) setHighlightKeyword(keyMarks);
     pureTextEditor({
         type: "doc",
-        content: toDisplay
+        content: displayData
     });
     // 屏蔽自带的拼写检查
     mEditor.value.firstElementChild.setAttribute('spellcheck', 'false');
@@ -377,6 +384,9 @@ defineExpose({
     text-decoration: underline;
     font-weight: bold;
     color: skyblue;
+}
+#mainEditor .ProseMirror .keyword_search {
+    background-color: #3de1ad;
 }
 #mainEditor .tooltip {
     position: absolute;

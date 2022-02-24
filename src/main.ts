@@ -3,6 +3,7 @@ import App from './App.vue'
 import ArcoVue from '@arco-design/web-vue';
 import router from './router/index';
 import '@arco-design/web-vue/dist/arco.css';
+import { createPinia } from 'pinia';
 
 //引入全局用scss/js
 import './style/global.scss';
@@ -14,4 +15,4 @@ window.ondragstart = function () {
 createApp(App).use(ArcoVue, {
     // 用于改变使用组件时的前缀名称
     componentPrefix: 'a'
-}).use(router).mount('#app');
+}).use(router).use(createPinia()).mount('#app');

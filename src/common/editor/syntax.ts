@@ -1,5 +1,8 @@
 import { Plugin } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
+import { useMainStore } from '../../store/index';
+// 使用pinia 
+const mainStore = useMainStore();
 
 // 设置要包裹的关键词
 export const setHighlightKeyword = (keyMarks: Array<{ match: RegExp, class: string }>) => {
@@ -74,18 +77,24 @@ let marks: Array<{ match: RegExp, class: string }>;
 function highlightKeyword(doc: any) {
     const content = doc.content, highlights: any = [];
 
-    content.forEach((para: any, offset: number) => {
-        const content = para.textContent;
-        for (const mark of marks) {
-            [...content.matchAll(mark.match)].map(match => {
-                const from = match.index + offset + 1;
-                const to = match[0].length + from;
-                highlights.push(
-                    Decoration.inline(from, to, { class: mark.class })
-                );
-            })
-        }
-    });
+    if (marks) {
+        let count = 0;
+        content.forEach((para: any, offset: number) => {
+            const content = para.textContent;
+            for (const mark of marks) {
+                [...content.matchAll(mark.match)].map(match => {
+                    const from = match.index + offset + 1;
+                    const to = match[0].length + from;
+                    count++;
+                    highlights.push(
+                        Decoration.inline(from, to, { class: mark.class })
+                    );
+                })
+            }
+        });
+        mainStore.isHighlightCount = !mainStore.isHighlightCount;
+        mainStore.highlightCount = count;
+    }
     return highlights;
 }
 
