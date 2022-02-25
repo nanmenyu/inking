@@ -82,13 +82,20 @@ function highlightKeyword(doc: any) {
         content.forEach((para: any, offset: number) => {
             const content = para.textContent;
             for (const mark of marks) {
-                [...content.matchAll(mark.match)].map(match => {
+                [...content.matchAll(mark.match)].map((match, i) => {
                     const from = match.index + offset + 1;
                     const to = match[0].length + from;
                     count++;
-                    highlights.push(
-                        Decoration.inline(from, to, { class: mark.class })
-                    );
+                    if (count === mainStore.targetIndex) {
+                        // 将当前选中关键字更加高亮并添加自定义锚点属性'data-nowhere'
+                        highlights.push(
+                            Decoration.inline(from, to, { class: mark.class, style: 'background-color: #f93;', ['data-nowhere']: '' })
+                        );
+                    } else {
+                        highlights.push(
+                            Decoration.inline(from, to, { class: mark.class })
+                        );
+                    }
                 })
             }
         });

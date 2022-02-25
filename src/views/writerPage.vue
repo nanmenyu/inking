@@ -492,57 +492,69 @@
                     @scroll="getScrollTop"
                 >
                     <div v-if="showSearchBox" class="search-box">
-                        <a-space style="padding-bottom:5px;">
-                            <span class="mini-btn" title="切换替换">
-                                <icon-right />
-                            </span>
-                            <icon-search />
-                            <input
-                                v-model="searchData"
-                                @input="toSearchKeyword"
-                                type="text"
-                                placeholder="查找"
-                            />
-                            <span>0/0</span>
-                            <a-space size="mini">
-                                <span class="mini-btn" title="上一个">
-                                    <icon-arrow-up />
+                        <a-space
+                            direction="vertical"
+                            align="start"
+                            size="mini"
+                            style="padding:0 4px;"
+                        >
+                            <a-space style="padding-bottom: 4px;border-bottom:1px solid #ccc;">
+                                <icon-search />
+                                <input
+                                    v-model="searchData"
+                                    @input="toSearchKeyword"
+                                    type="text"
+                                    placeholder="查找"
+                                />
+                                <span
+                                    class="show-keywordCount"
+                                >{{ keyWordPos > 9999 ? '9999+' : keyWordPos }}/{{ totalKeyWord > 9999 ? '9999+' : totalKeyWord }}</span>
+                                <a-space size="mini">
+                                    <span
+                                        @click="mainStore.updateTargetIndex(-1), toSearchKeyword()"
+                                        class="mini-btn"
+                                        title="上一个"
+                                    >
+                                        <icon-arrow-up />
+                                    </span>
+                                    <span
+                                        @click="mainStore.updateTargetIndex(1), toSearchKeyword()"
+                                        class="mini-btn"
+                                        title="下一个"
+                                    >
+                                        <icon-arrow-down />
+                                    </span>
+                                    <span @click="stopSearchKeyword" class="mini-btn" title="关闭">
+                                        <icon-close />
+                                    </span>
+                                </a-space>
+                            </a-space>
+                            <a-space>
+                                <icon-undo style="transform: rotateZ(180deg);" />
+                                <input type="text" placeholder="替换" />
+                                <span class="mini-btn" title="替换">
+                                    <svg
+                                        viewBox="0 0 1024 1024"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="14"
+                                        height="14"
+                                        style="margin-bottom: -2px;"
+                                    >
+                                        <path p-id="3277" />
+                                    </svg>
                                 </span>
-                                <span class="mini-btn" title="下一个">
-                                    <icon-arrow-down />
-                                </span>
-                                <span @click="stopSearchKeyword" class="mini-btn" title="关闭">
-                                    <icon-close />
+                                <span class="mini-btn" title="全部替换">
+                                    <svg
+                                        viewBox="0 0 1024 1024"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="14"
+                                        height="14"
+                                        style="margin-bottom: -2px;"
+                                    >
+                                        <path p-id="9876" />
+                                    </svg>
                                 </span>
                             </a-space>
-                        </a-space>
-                        <a-space
-                            style="margin-left: -19px;padding-top: 5px;border-top: 1px solid #ccc;"
-                        >
-                            <icon-undo style="transform: rotateZ(180deg);" />
-                            <input type="text" placeholder="替换" />
-                            <span class="mini-btn" title="替换">
-                                <svg
-                                    viewBox="0 0 1024 1024"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="14"
-                                    height="14"
-                                    style="margin-bottom: -2px;"
-                                >
-                                    <path p-id="3277" />
-                                </svg>
-                            </span>
-                            <span class="mini-btn" title="全部替换">
-                                <svg
-                                    viewBox="0 0 1024 1024"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="14"
-                                    height="14"
-                                    style="margin-bottom: -2px;"
-                                >
-                                    <path p-id="9876" />
-                                </svg>
-                            </span>
                         </a-space>
                     </div>
                     <WritingPaper @todata="getData" ref="myRef"></WritingPaper>
@@ -648,21 +660,34 @@ onUnmounted(() => {
 })
 const showIframeWrap = ref(false), showSearchBox = ref(false);
 // 关键词搜索、替换功能
-const searchData = ref('');
+const searchData = ref(''), totalKeyWord = ref(0), keyWordPos = ref(0);
 watch(showSearchBox, value => {
     if (value && searchData.value !== '') toSearchKeyword();
 })
 // 关键字统计
 let isHighlightCount = computed(() => mainStore.isHighlightCount);
 watch(isHighlightCount, () => {
-    if (showSearchBox.value && searchData.value !== '')
-        console.log(searchData.value, ':', mainStore.highlightCount);
+    if (showSearchBox.value && searchData.value !== '') {
+        totalKeyWord.value = mainStore.highlightCount;
+        if (totalKeyWord.value === 0) {
+            keyWordPos.value = 0;
+        } else {
+            keyWordPos.value = mainStore.targetIndex;
+        }
+    } else {
+        keyWordPos.value = totalKeyWord.value = 0;
+    }
+})
+watch(searchData, () => {
+    mainStore.targetIndex = 1;
 })
 const toSearchKeyword = () => {
     db.opus.get(query_id).then(value => {
-        if (value) {
-            myRef.value.setBooksData(value, [{ match: new RegExp(searchData.value, 'g'), class: 'keyword_search' }]);
-        }
+        if (value) myRef.value.setBooksData(value, [{ match: new RegExp(searchData.value, 'g'), class: 'keyword_search' }]);
+    }).then(() => {
+        [...document.querySelectorAll('.keyword_search')].forEach(el => {
+            console.log(el.hasAttribute('data-nowhere'));
+        })
     })
 }
 const stopSearchKeyword = () => {

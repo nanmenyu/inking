@@ -273,7 +273,7 @@ path[p-id="1550"] {
     top: 90px;
     left: 50%;
     z-index: 9;
-    width: 320px;
+    // width: 320px;
     padding: 6px 0 6px 2px;
     transform: translateX(-50%);
     background-color: #fff;
@@ -286,6 +286,12 @@ path[p-id="1550"] {
         outline: none;
         border: none;
         border-right: 1px solid #ccc;
+    }
+
+    .show-keywordCount {
+        display: block;
+        max-width: 100px;
+        overflow: hidden;
     }
 
     .mini-btn {

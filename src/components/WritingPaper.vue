@@ -386,8 +386,10 @@ defineExpose({
     color: skyblue;
 }
 #mainEditor .ProseMirror .keyword_search {
-    background-color: #3de1ad;
+    border-radius: 25%;
+    background-color: #ff0;
 }
+
 #mainEditor .tooltip {
     position: absolute;
     pointer-events: none;

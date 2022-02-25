@@ -59,7 +59,6 @@ export default function (initData: NodeDOC, keyMarks?: Array<{ match: RegExp, cl
             //每次的 state 更新最终都需要执行 updateState 方法
             // 控制保存页面内容
             if (transaction.updated === 5) mainStore.needSaveDocData = true;
-
             const newState = view.state.apply(transaction);
             view.updateState(newState);
         }
