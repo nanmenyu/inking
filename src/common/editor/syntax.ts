@@ -5,7 +5,7 @@ import { useMainStore } from '../../store/index';
 const mainStore = useMainStore();
 
 // 设置要包裹的关键词
-export const setHighlightKeyword = (keyMarks: Array<{ match: RegExp, class: string }>) => {
+export const setHighlightKeyword = (keyMarks: Array<{ match: RegExp, class: string, style: string }>) => {
     marks = keyMarks;
 }
 
@@ -47,7 +47,6 @@ export const highlightKeywordPlugin = new Plugin({
     },
 });
 
-
 // 段落聚焦功能
 function highlightDocument(doc: any) {
     const content = doc.content, highlights: any = [];
@@ -86,7 +85,7 @@ function highlightDocument(doc: any) {
 }
 
 // 关键字高亮
-let marks: Array<{ match: RegExp, class: string }>;
+let marks: Array<{ match: RegExp, class: string, style: string }>;
 function highlightKeyword(doc: any) {
     const content = doc.content, highlights: any = [];
 
@@ -99,14 +98,14 @@ function highlightKeyword(doc: any) {
                     const from = match.index + offset + 1;
                     const to = match[0].length + from;
                     count++;
-                    if (count === mainStore.targetIndex) {
+                    if (mainStore.isInSearch && count === mainStore.targetIndex) {
                         // 将当前选中关键字更加高亮并添加自定义锚点属性'data-nowhere'
                         highlights.push(
                             Decoration.inline(from, to, { class: mark.class, style: 'background-color: #f93;', id: 'search-anchor' })
                         );
                     } else {
                         highlights.push(
-                            Decoration.inline(from, to, { class: mark.class })
+                            Decoration.inline(from, to, { class: mark.class, style: mark.style })
                         );
                     }
                 })

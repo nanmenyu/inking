@@ -532,8 +532,8 @@
                             </a-space>
                             <a-space>
                                 <icon-undo style="transform: rotateZ(180deg);" />
-                                <input type="text" placeholder="替换" />
-                                <span class="mini-btn" title="替换">
+                                <input v-model="replaceData" type="text" placeholder="替换" />
+                                <span @click="replaceKeyword('single')" class="mini-btn" title="替换">
                                     <svg
                                         viewBox="0 0 1024 1024"
                                         xmlns="http://www.w3.org/2000/svg"
@@ -544,7 +544,11 @@
                                         <path p-id="3277" />
                                     </svg>
                                 </span>
-                                <span class="mini-btn" title="全部替换">
+                                <span
+                                    @click="replaceKeyword('whole')"
+                                    class="mini-btn"
+                                    title="全部替换"
+                                >
                                     <svg
                                         viewBox="0 0 1024 1024"
                                         xmlns="http://www.w3.org/2000/svg"
@@ -604,6 +608,7 @@ import { throttle } from '../utils/flowControl';
 import { db } from '../db/db';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { v4 } from 'uuid';
+import genkeywordMarks from '../utils/genkeywordMarks';
 // import { setHighlightKeyword } from '../common/editor/syntax';
 import { useMainStore } from '../store/index';
 import writtenwords from '../assets/svg/writtenwords.svg';
@@ -654,15 +659,19 @@ onBeforeUnmount(() => {
     setScrollTop(<string>vid.value, <string>cid.value);
     db.opus.update(query_id, { historRecord: { vid: vid.value, cid: cid.value } });
 })
-
 onUnmounted(() => {
     window.removeEventListener('keydown', shortcut);
     window.removeEventListener('click', leftMoreControl);
 })
+
 const showIframeWrap = ref(false), showSearchBox = ref(false);
-// 关键词搜索、替换功能
-const searchData = ref(''), totalKeyWord = ref(0), keyWordPos = ref(0);
+const keywordMarks = genkeywordMarks(['奥兹/奥兹莫/Ozmo', '盖文/Gavin', '泽娜/Zena']);
+console.log(genkeywordMarks(['奥兹/奥兹莫/Ozmo', '盖文/Gavin', '泽娜/Zena']));
+/*------------关键词搜索、替换功能------------*/
+const searchData = ref(''), replaceData = ref(''),
+    totalKeyWord = ref(0), keyWordPos = ref(0);
 watch(showSearchBox, value => {
+    mainStore.isInSearch = value
     if (value && searchData.value !== '') toSearchKeyword();
 })
 // 关键字统计
@@ -697,14 +706,31 @@ const toSearchKeyword = () => {
         })
     })
 }
+// 替换关键字
+const replaceKeyword = (type: 'single' | 'whole') => {
+    if (type === 'single') {
+        [...document.querySelectorAll('.keyword_search')].forEach(el => {
+            if (el.id === 'search-anchor' && replaceData.value !== '') {
+                (<HTMLElement>el).innerText = replaceData.value;
+                myRef.value.saveDocData(false);
+            }
+        })
+    } else if (type === 'whole') {
+        [...document.querySelectorAll('.keyword_search')].forEach(el => {
+            (<HTMLElement>el).innerText = replaceData.value;
+            myRef.value.saveDocData(false);
+        })
+    }
+
+}
 const stopSearchKeyword = () => {
-    showSearchBox.value = false;
+    mainStore.isInSearch = showSearchBox.value = false;
     db.opus.get(query_id).then(value => {
-        if (value) myRef.value.setBooksData(value, []);
+        if (value) myRef.value.setBooksData(value, keywordMarks);
     })
 }
 
-/*----数据统计与初始化----*/
+/*-------------数据统计与初始化-------------*/
 const wordCount = ref(0),
     charCount = ref(0),
     paragraphs = ref(0),
@@ -1135,7 +1161,7 @@ const booksLists: { data: Array<Volume> } = reactive({ data: [] });
 function loadListData() {
     db.opus.get(query_id).then(value => {
         if (value) {
-            myRef.value.setBooksData(value);
+            myRef.value.setBooksData(value, keywordMarks);
             booksLists.data = value.data.filter((item: Volume) => {
                 // 判断目标卷是否有删除标记
                 return !item.discard;

@@ -252,7 +252,9 @@ const setParaFocus = (type: string, isInit: boolean) => {
     if (!isInit) getData();
 }
 
-const setBooksData = (value: Userdb, keyMarks?: Array<{ match: RegExp, class: string }>) => {
+const setBooksData = (value: Userdb, keyMarks?: Array<{
+    match: RegExp, class: string, style: string
+}>) => {
     const toDisplay: Array<NodePara> = [];
     for (let i = 0; i < value.data.length; i++) {
         if (value.data[i].vid === vid) {
@@ -283,7 +285,9 @@ const setBooksData = (value: Userdb, keyMarks?: Array<{ match: RegExp, class: st
 // 刷新纸张内容
 // 读取数据并显示在当前页面
 const mEditor = ref();
-const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<{ match: RegExp, class: string }>) => {
+const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<{
+    match: RegExp, class: string, style: string
+}>) => {
     mEditor.value.innerHTML = '';
     if (keyMarks) setHighlightKeyword(keyMarks);
     pureTextEditor({
@@ -376,15 +380,28 @@ defineExpose({
 #mainEditor .ProseMirror .onfocused {
     color: v-bind(focusColor);
 }
-#mainEditor .ProseMirror .keyword1 {
-    font-weight: bold;
-    color: crimson;
+#mainEditor .ProseMirror .keyWord {
+    position: relative;
+    border-radius: 4px;
+    cursor: pointer;
 }
-#mainEditor .ProseMirror .keyword2 {
-    text-decoration: underline;
-    font-weight: bold;
-    color: skyblue;
+#mainEditor .ProseMirror .keyWord::before {
+    content: "";
+    /* display: block; */
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background-color: #3491fa;
+    visibility: hidden;
+    transform: scaleX(0);
+    transition: all 0.3s ease-in-out 0s;
 }
+#mainEditor .ProseMirror .keyWord:hover::before {
+    visibility: visible;
+    transform: scaleX(1);
+}
+
 #mainEditor .ProseMirror .keyword_search {
     border-radius: 25%;
     background-color: #ff0;
@@ -392,7 +409,8 @@ defineExpose({
 
 #mainEditor .tooltip {
     position: absolute;
-    pointer-events: none;
+    /* pointer-events: none; */
+    user-select: none;
     background-color: #fff;
     border-radius: 4px;
     padding: 10px;
