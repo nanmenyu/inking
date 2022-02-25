@@ -3,6 +3,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.VSCodeCounter
 
 dist_electron
 workspace

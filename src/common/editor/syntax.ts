@@ -51,24 +51,37 @@ export const highlightKeywordPlugin = new Plugin({
 // 段落聚焦功能
 function highlightDocument(doc: any) {
     const content = doc.content, highlights: any = [];
+    const proseMirror = document.querySelector('.ProseMirror')!;
+    let targetNode2: any;
 
-    // 获取光标所在字符串
-    let targetString: string;
-    if (window.getSelection()!.anchorNode) {
-        const range = window.getSelection()!.getRangeAt(0),
-            start = range.startContainer;
-        if (typeof start.nodeValue === 'string') {
-            targetString = start.nodeValue;
+    if (proseMirror) {
+        // 获取光标所在字符串
+        let targetString: string;
+        if (window.getSelection()!.anchorNode) {
+            const range = window.getSelection()!.getRangeAt(0),
+                start = range.startContainer;
+            if (typeof start.nodeValue === 'string') {
+                let element = start.parentElement;
+                while (true) {
+                    if (element && (element.tagName !== 'P')) element = element.parentElement;
+                    else break;
+                }
+                for (let i = 0; i < proseMirror.children.length; i++) {
+                    if (element === proseMirror.children.item(i)) {
+                        targetNode2 = content.content[i];
+                        break;
+                    };
+                }
+            }
         }
+        // 从content中找到目标字符串
+        content.forEach((para: any, offset: number) => {
+            if (para === targetNode2) {
+                // 添加高亮class
+                highlights.push(Decoration.node(offset, offset + para.textContent.length + 2, { class: 'onfocused', }));
+            }
+        });
     }
-    // 从content中找到目标字符串
-    content.forEach((para: any, offset: number) => {
-        const content = para.textContent;
-        if (content === targetString) {
-            // 添加高亮class
-            highlights.push(Decoration.node(offset, offset + content.length + 2, { class: 'onfocused', }));
-        }
-    });
     return highlights;
 }
 
@@ -89,7 +102,7 @@ function highlightKeyword(doc: any) {
                     if (count === mainStore.targetIndex) {
                         // 将当前选中关键字更加高亮并添加自定义锚点属性'data-nowhere'
                         highlights.push(
-                            Decoration.inline(from, to, { class: mark.class, style: 'background-color: #f93;', ['data-nowhere']: '' })
+                            Decoration.inline(from, to, { class: mark.class, style: 'background-color: #f93;', id: 'search-anchor' })
                         );
                     } else {
                         highlights.push(

@@ -502,6 +502,7 @@
                                 <icon-search />
                                 <input
                                     v-model="searchData"
+                                    ref="searchInput"
                                     @input="toSearchKeyword"
                                     type="text"
                                     placeholder="查找"
@@ -684,9 +685,15 @@ watch(searchData, () => {
 const toSearchKeyword = () => {
     db.opus.get(query_id).then(value => {
         if (value) myRef.value.setBooksData(value, [{ match: new RegExp(searchData.value, 'g'), class: 'keyword_search' }]);
-    }).then(() => {
         [...document.querySelectorAll('.keyword_search')].forEach(el => {
-            console.log(el.hasAttribute('data-nowhere'));
+            if (el.id === 'search-anchor') {
+                const viewportHeight = document.querySelector('.arco-layout-content')?.clientHeight!;
+                // 锚点链接跳转到当前高亮关键字
+                const distanceFromViewport = el.getBoundingClientRect().top - 75;
+                if (distanceFromViewport > viewportHeight || distanceFromViewport < 0) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
         })
     })
 }
@@ -718,12 +725,6 @@ const getData = (data: Pagecount) => {
     wordCount.value = data.wordCount;
     charCount.value = data.charCount;
     paragraphs.value = data.paragraphs;
-}
-
-// 获取页面上下相对位置
-let temp_scrollTop = 0;
-const getScrollTop = (e: Event) => {
-    temp_scrollTop = (<HTMLElement>e.target).scrollTop;
 }
 
 // 读取本地用户缓存设置(localStorage缓存状态)
@@ -853,6 +854,8 @@ const fontColor = ref(uWritingOption.value.uColor), bgcColor = ref(uWritingOptio
 const gradientColor = ref("linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 100%)");
 const getColor = () => {
     myRef.value.setColor(fontColor.value);
+    // 聚焦模式下选择新颜色
+    if (paraFocus.value === 'open') myRef.value.setParaFocus(paraFocus.value);
     uWritingOption.value.uColor = fontColor.value;
     localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
 }
@@ -922,6 +925,7 @@ const onClickMenuItem = (tvid: string, tcid: string) => {
             loadListData();
             if (showSearchBox.value) {
                 toSearchKeyword();
+                mainStore.targetIndex = 1;
             } else {
                 myRef.value.refreshPaper(toDisplay, []);
             }
@@ -1104,6 +1108,27 @@ const modify = () => {
     isNewChapter.value = false;
 }
 
+// 获取页面上下相对位置
+let temp_scrollTop = 0;
+const getScrollTop = (e: Event) => {
+    temp_scrollTop = (<HTMLElement>e.target).scrollTop;
+}
+// 设置纸张距离顶部的高度（用户跳转至编辑位置
+function setScrollTop(tvid: string, tcid: string) {
+    db.opus.where(':id').equals(query_id).modify(item => {
+        for (let i = 0; i < item.data.length; i++) {
+            if (item.data[i].vid === tvid) {
+                for (let j = 0; j < item.data[i].volume.length; j++) {
+                    if (item.data[i].volume[j].cid === tcid) {
+                        item.data[i].volume[j].scrollTop = temp_scrollTop;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    })
+}
 // 获取列表数据
 const router = useRouter();
 const booksLists: { data: Array<Volume> } = reactive({ data: [] });
@@ -1146,25 +1171,9 @@ function loadListData() {
 
     })
 }
-
-// 设置纸张距离顶部的高度（用户跳转至编辑位置
-function setScrollTop(tvid: string, tcid: string) {
-    db.opus.where(':id').equals(query_id).modify(item => {
-        for (let i = 0; i < item.data.length; i++) {
-            if (item.data[i].vid === tvid) {
-                for (let j = 0; j < item.data[i].volume.length; j++) {
-                    if (item.data[i].volume[j].cid === tcid) {
-                        item.data[i].volume[j].scrollTop = temp_scrollTop;
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-    })
-}
 /*----自定义全局快捷键----*/
 //获取路由参数确定详情页显示的目标
+const searchInput = ref();
 window.addEventListener('keydown', shortcut);
 window.addEventListener('click', leftMoreControl);
 
@@ -1175,7 +1184,12 @@ function shortcut(e: KeyboardEvent) {
     } else {
         // Ctrl+S
         if (e.ctrlKey === true && e.key === 's') myRef.value.saveDocData(true);
-        if (e.ctrlKey === true && e.key === 'f') showSearchBox.value = true;
+        if (e.ctrlKey === true && e.key === 'f') {
+            showSearchBox.value = true;
+            nextTick(() => {
+                searchInput.value.focus();
+            })
+        }
     }
 }
 
