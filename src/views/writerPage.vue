@@ -665,8 +665,7 @@ onUnmounted(() => {
 })
 
 const showIframeWrap = ref(false), showSearchBox = ref(false);
-const keywordMarks = genkeywordMarks(['奥兹/奥兹莫/Ozmo', '盖文/Gavin', '泽娜/Zena']);
-console.log(genkeywordMarks(['奥兹/奥兹莫/Ozmo', '盖文/Gavin', '泽娜/Zena']));
+const keywordMarks = genkeywordMarks(['奥兹/奥兹莫/Ozmo', '盖文/Gavin', '泽娜/Zena', '天下王', '王中王']);
 /*------------关键词搜索、替换功能------------*/
 const searchData = ref(''), replaceData = ref(''),
     totalKeyWord = ref(0), keyWordPos = ref(0);

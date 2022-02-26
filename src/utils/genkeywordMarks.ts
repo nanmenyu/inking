@@ -1,6 +1,9 @@
 /**
  * 通过关键字生成对应的Marks数组
  */
+// import { useMainStore } from '../store/index';
+// const mainStore = useMainStore();
+
 export default function genkeywordMarks(keywordArr: Array<string>) {
     // [color,background-color]
     const result: Array<{
@@ -12,9 +15,11 @@ export default function genkeywordMarks(keywordArr: Array<string>) {
     ]
     // 关键字取最大集，例如：vue+vuex=vuex bc+abcd=abcd
     keywordArr.forEach((item, index) => {
-        let color = colorGroup[index % colorGroup.length][0];
-        let bgColor = colorGroup[index % colorGroup.length][1];
-        item.split('/').forEach(it => {
+        const color = colorGroup[index % colorGroup.length][0];
+        const bgColor = colorGroup[index % colorGroup.length][1];
+        const tempArr = item.split('/');
+        // (<Array<Array<string>>>mainStore.keywordArr).push(tempArr);
+        tempArr.forEach(it => {
             result.push({
                 match: new RegExp(it, 'g'),
                 class: 'keyWord',
@@ -22,5 +27,6 @@ export default function genkeywordMarks(keywordArr: Array<string>) {
             })
         })
     })
+    console.log(result);
     return result;
 }

@@ -382,12 +382,11 @@ defineExpose({
 }
 #mainEditor .ProseMirror .keyWord {
     position: relative;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
 }
 #mainEditor .ProseMirror .keyWord::before {
     content: "";
-    /* display: block; */
     position: absolute;
     bottom: 0;
     width: 100%;

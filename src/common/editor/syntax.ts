@@ -90,27 +90,48 @@ function highlightKeyword(doc: any) {
     const content = doc.content, highlights: any = [];
 
     if (marks) {
-        let count = 0;
+        let count = 0, matchArray: Array<Array<any>> = [];
         content.forEach((para: any, offset: number) => {
             const content = para.textContent;
             for (const mark of marks) {
-                [...content.matchAll(mark.match)].map((match, i) => {
-                    const from = match.index + offset + 1;
-                    const to = match[0].length + from;
-                    count++;
-                    if (mainStore.isInSearch && count === mainStore.targetIndex) {
-                        // 将当前选中关键字更加高亮并添加自定义锚点属性'data-nowhere'
-                        highlights.push(
-                            Decoration.inline(from, to, { class: mark.class, style: 'background-color: #f93;', id: 'search-anchor' })
-                        );
-                    } else {
-                        highlights.push(
-                            Decoration.inline(from, to, { class: mark.class, style: mark.style })
-                        );
-                    }
-                })
+                const matchItem = [...content.matchAll(mark.match)];
+                if (matchItem.length > 0) {
+                    matchItem.forEach(item => {
+                        item.mark = { class: mark.class, style: mark.style };
+                        item.offset = offset;
+                    })
+                    matchArray.push(matchItem);
+                }
             }
         });
+        // 数组降维
+        const newMatchArray = [].concat.apply([], <any>matchArray);
+        const len = newMatchArray.length;
+        newMatchArray.forEach((match: any, i) => {
+            const from = match.index + match.offset + 1;
+            let longer = 0, to;
+
+            // 前后匹配，匹配最长的关键词，例如AB+ABC=ABC
+            if (i < len - 1 && match.index === (<any>newMatchArray[i + 1]).index && match.input === (<any>newMatchArray[i + 1]).input) {
+                longer = match[0].length > (<any>newMatchArray[i + 1])[0].length ? match[0].length : (<any>newMatchArray[i + 1])[0].length;
+                to = longer + from;
+            } else {
+                to = match[0].length + from;
+            }
+
+            // 添加装饰器
+            count++;
+            if (mainStore.isInSearch && count === mainStore.targetIndex) {
+                // 将当前选中关键字更加高亮并添加自定义锚点属性'data-nowhere'
+                highlights.push(
+                    Decoration.inline(from, to, { class: match.mark.class, style: 'background-color: #f93;', id: 'search-anchor' })
+                );
+            } else {
+                highlights.push(
+                    Decoration.inline(from, to, { class: match.mark.class, style: match.mark.style })
+                );
+            }
+        })
         mainStore.isHighlightCount = !mainStore.isHighlightCount;
         mainStore.highlightCount = count;
     }
