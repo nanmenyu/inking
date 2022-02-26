@@ -20,13 +20,12 @@ export default function genkeywordMarks(keywordArr: Array<string>) {
         const tempArr = item.split('/');
         // (<Array<Array<string>>>mainStore.keywordArr).push(tempArr);
         tempArr.forEach(it => {
-            result.push({
+            if (it !== '') result.push({
                 match: new RegExp(it, 'g'),
                 class: 'keyWord',
                 style: `color: ${color};background-color:${bgColor};`
             })
         })
     })
-    console.log(result);
     return result;
 }

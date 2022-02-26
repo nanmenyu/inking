@@ -29,7 +29,7 @@ let needSaveDoc = computed(() => mainStore.needSaveDocData);
 watch(needSaveDoc, isNeed => {
     if (isNeed) saveDocData(false);
 })
-// 修改键盘控制
+
 onMounted(() => {
     editor.value.addEventListener('keydown', insertSpace);
 })
@@ -192,14 +192,9 @@ function exportPDF() {
 }
 
 /*----修改文字、段落相关----*/
-let currentFont = ref('KaiTi'),
-    currentFontSize = ref(22),
-    currentLineHeight = ref(1.5),
-    currentFontWeight = ref('normal'),
-    currentColor = ref('#333333'),
-    currentSpacing = ref(10),
-    currentTextIndent = ref(0),
-    currentBgcColor = ref('#ffffff');
+let currentFont = ref('KaiTi'), currentFontSize = ref(22), currentLineHeight = ref(1.5),
+    currentFontWeight = ref('normal'), currentColor = ref('#333333'), currentSpacing = ref(10),
+    currentTextIndent = ref(0), currentBgcColor = ref('#ffffff');
 
 const setFont = (font: string, isInit: boolean) => {
     currentFont.value = font;
@@ -333,20 +328,16 @@ defineExpose({
 <!-- 文字：字号 字色 字体 粗细 行高-->
 <!-- 段落：段间距 每段首行缩进 段聚焦-->
 <!-- 其它：纸张颜色 软件主题 纸张大小-->
-<style >
+<style>
 #paper-box {
     width: v-bind(boxWidth + "px");
     height: v-bind(boxHeight + "px");
     margin: 20px auto;
     background-color: v-bind(currentBgcColor);
     box-shadow: 1px 2px 4px rgb(0 0 0 / 20%);
-    /* background: url("/static/temp/bg_04.gif"); */
-    /* border-top: 1px solid #e0e0e0;
-    border-left: 1px solid #e0e0e0; */
 }
 
 [contenteditable]:focus {
-    /* outline: #ccc dashed thin; */
     outline: none;
 }
 
@@ -364,7 +355,6 @@ defineExpose({
     font-weight: v-bind(currentFontWeight);
     color: v-bind(currentColor);
     cursor: text;
-
     word-wrap: break-word;
     white-space: pre-wrap;
     white-space: break-spaces;

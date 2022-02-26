@@ -1,6 +1,7 @@
 <!-- 作品(纯文本)编写页 -->
 <template>
     <TitleBlock></TitleBlock>
+    <div v-if="showkeywordDetail" ref="keywordDetail" class="keyword-detail"></div>
     <PopupMenu
         v-if="isRename"
         title="重命名"
@@ -593,10 +594,9 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount, watch } from 'vue';
 import {
-    IconDown, IconExport, IconCaretRight, IconCaretLeft,
+    IconDown, IconExport, IconCaretRight, IconCaretLeft, IconClose, IconUndo,
     IconBook, IconCaretDown, IconCheckCircle, IconFullscreen,
-    IconDoubleRight, IconRight, IconSearch, IconArrowUp,
-    IconArrowDown, IconClose, IconUndo
+    IconDoubleRight, IconSearch, IconArrowUp, IconArrowDown,
 } from '@arco-design/web-vue/es/icon';
 import TitleBlock from '../components/TitleBlock.vue';
 import WritingPaper from '../components/WritingPaper.vue';
@@ -628,7 +628,6 @@ import softThemeIcon from '../assets/svg/softThemeIcon.svg';
 import expTXTIcon from '../assets/svg/expTXTIcon.svg';
 import expDOCXIcon from '../assets/svg/expDOCXIcon.svg';
 import expPDFIcon from '../assets/svg/expPDFIcon.svg';
-// import addVolumeIcon from '../assets/svg/addVolumeIcon.svg';
 import '../style/writerPage.scss';
 
 const { proxy } = useCurrentInstance();
@@ -641,31 +640,8 @@ const cid = ref(route.query.cid);
 const mainStore = useMainStore();
 loadListData();
 
-onMounted(() => {
-    nextTick(() => {
-        myRef.value.setFont(uWritingOption.value.uFont, true);
-        myRef.value.setFontSize(uWritingOption.value.uFontSize, true);
-        myRef.value.setLineHeight(uWritingOption.value.uLineHeight, true);
-        myRef.value.setFontWeight(uWritingOption.value.uFontWeight, true);
-        myRef.value.setSegSpacing(uWritingOption.value.uSpacing, true);
-        myRef.value.setTextIndent(uWritingOption.value.uTextIndent, true);
-        myRef.value.setColor(uWritingOption.value.uColor, true);
-        myRef.value.setBgcColor(uWritingOption.value.uBgcColor, true);
-        myRef.value.setPaperSize(uWritingOption.value.uPaperSize, true);
-        myRef.value.setParaFocus(uWritingOption.value.uParaFocus, true);
-    })
-})
-onBeforeUnmount(() => {
-    setScrollTop(<string>vid.value, <string>cid.value);
-    db.opus.update(query_id, { historRecord: { vid: vid.value, cid: cid.value } });
-})
-onUnmounted(() => {
-    window.removeEventListener('keydown', shortcut);
-    window.removeEventListener('click', leftMoreControl);
-})
-
 const showIframeWrap = ref(false), showSearchBox = ref(false);
-const keywordMarks = genkeywordMarks(['奥兹/奥兹莫/Ozmo', '盖文/Gavin', '泽娜/Zena', '天下王', '王中王']);
+const keywordMarks = genkeywordMarks(['奥兹/奥兹莫/Ozmo', '盖文/Gavin', '泽娜/Zena', '子画/', '白子画', '奥兹莫莫']);
 /*------------关键词搜索、替换功能------------*/
 const searchData = ref(''), replaceData = ref(''),
     totalKeyWord = ref(0), keyWordPos = ref(0);
@@ -1132,6 +1108,23 @@ const modify = () => {
     isNewVolume.value = false;
     isNewChapter.value = false;
 }
+// 掠过关键字所在的span
+const showkeywordDetail = ref(false), keywordDetail = ref();
+const showSpanDetail = throttle((e: MouseEvent) => {
+    if ((<HTMLElement>e.target).getAttribute('class') === 'keyWord') {
+        showkeywordDetail.value = true;
+        let posX: number, posY: number;
+        [posX, posY] = [e.clientX, e.clientY];
+        console.dir(e);
+        nextTick(() => {
+            console.dir(keywordDetail.value.style);
+            keywordDetail.value.style.top = posY + 'px';
+            keywordDetail.value.style.left = posX + 'px';
+        })
+    } else {
+        showkeywordDetail.value = false;
+    }
+}, 50)
 
 // 获取页面上下相对位置
 let temp_scrollTop = 0;
@@ -1196,12 +1189,12 @@ function loadListData() {
 
     })
 }
+
 /*----自定义全局快捷键----*/
 //获取路由参数确定详情页显示的目标
 const searchInput = ref();
 window.addEventListener('keydown', shortcut);
 window.addEventListener('click', leftMoreControl);
-
 function shortcut(e: KeyboardEvent) {
     if (deletedCid.value === cid.value) {
         // Ctrl+S
@@ -1217,10 +1210,35 @@ function shortcut(e: KeyboardEvent) {
         }
     }
 }
-
 function leftMoreControl() {
     showLeftMore.value = '';
 }
+
+/*---------------------生命周期---------------------*/
+onMounted(() => {
+    const mainEditor = document.getElementById('mainEditor');
+    mainEditor?.addEventListener('mousemove', showSpanDetail);
+    nextTick(() => {
+        myRef.value.setFont(uWritingOption.value.uFont, true);
+        myRef.value.setFontSize(uWritingOption.value.uFontSize, true);
+        myRef.value.setLineHeight(uWritingOption.value.uLineHeight, true);
+        myRef.value.setFontWeight(uWritingOption.value.uFontWeight, true);
+        myRef.value.setSegSpacing(uWritingOption.value.uSpacing, true);
+        myRef.value.setTextIndent(uWritingOption.value.uTextIndent, true);
+        myRef.value.setColor(uWritingOption.value.uColor, true);
+        myRef.value.setBgcColor(uWritingOption.value.uBgcColor, true);
+        myRef.value.setPaperSize(uWritingOption.value.uPaperSize, true);
+        myRef.value.setParaFocus(uWritingOption.value.uParaFocus, true);
+    })
+})
+onBeforeUnmount(() => {
+    setScrollTop(<string>vid.value, <string>cid.value);
+    db.opus.update(query_id, { historRecord: { vid: vid.value, cid: cid.value } });
+})
+onUnmounted(() => {
+    window.removeEventListener('keydown', shortcut);
+    window.removeEventListener('click', leftMoreControl);
+})
 
 </script>
 
