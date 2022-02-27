@@ -334,7 +334,7 @@ defineExpose({
     height: v-bind(boxHeight + "px");
     margin: 20px auto;
     background-color: v-bind(currentBgcColor);
-    box-shadow: 1px 2px 4px rgb(0 0 0 / 20%);
+    /* box-shadow: 1px 2px 4px rgb(0 0 0 / 20%); */
 }
 
 [contenteditable]:focus {

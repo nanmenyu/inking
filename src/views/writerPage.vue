@@ -1,7 +1,9 @@
 <!-- 作品(纯文本)编写页 -->
 <template>
     <TitleBlock></TitleBlock>
-    <div v-if="showkeywordDetail" ref="keywordDetail" class="keyword-detail"></div>
+    <div v-if="showkeywordDetail" ref="keywordDetail" class="keyword-detail">
+        <!-- <div class="keyword-arrow"></div> -->
+    </div>
     <PopupMenu
         v-if="isRename"
         title="重命名"
@@ -582,9 +584,47 @@
                             <div class="resizebox-demo-line" />
                         </div>
                     </template>
+                    <div class="sider-right-content">
+                        <!-- <div class="menu-demo"> -->
+                        <a-trigger
+                            :trigger="['click']"
+                            clickToClose
+                            position="top"
+                            v-model:popupVisible="popupVisible"
+                        >
+                            <div
+                                :class="`button-trigger ${popupVisible ? 'button-trigger-active' : ''}`"
+                            >
+                                <IconClose v-if="popupVisible" />
+                                <IconMessage v-else />
+                            </div>
+                            <template #content>
+                                <a-menu
+                                    mode="popButton"
+                                    :tooltipProps="{ position: 'left' }"
+                                    showCollapseButton
+                                >
+                                    <a-menu-item style="margin: 10px 0;" key="1">
+                                        <template #icon>
+                                            <IconBug></IconBug>
+                                        </template>
+                                        Bugs
+                                    </a-menu-item>
+                                    <a-menu-item style="margin: 10px 0;" key="2">
+                                        <template #icon>
+                                            <IconBulb></IconBulb>
+                                        </template>
+                                        Ideas
+                                    </a-menu-item>
+                                </a-menu>
+                            </template>
+                        </a-trigger>
+                        <!-- </div> -->
+                        <PlotEditor v-if="true"></PlotEditor>
+                        <div v-if="showIframeWrap" class="iframe-Wrap"></div>
+                    </div>
                     <!-- <webview class="iframe" src="https://wantwords.net/"></webview> -->
                     <!-- <iframe class="iframe" src="https://wantwords.net/"></iframe> -->
-                    <div v-if="showIframeWrap" class="iframe-Wrap"></div>
                 </a-resize-box>
             </a-layout>
         </a-layout>
@@ -597,10 +637,12 @@ import {
     IconDown, IconExport, IconCaretRight, IconCaretLeft, IconClose, IconUndo,
     IconBook, IconCaretDown, IconCheckCircle, IconFullscreen,
     IconDoubleRight, IconSearch, IconArrowUp, IconArrowDown,
+    IconBug, IconBulb, IconMessage,
 } from '@arco-design/web-vue/es/icon';
 import TitleBlock from '../components/TitleBlock.vue';
 import WritingPaper from '../components/WritingPaper.vue';
 import PopupMenu from '../components/widget/PopupMenu.vue';
+import PlotEditor from '../components/PlotEditor.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ColorPicker } from "vue3-colorpicker";
 import "vue3-colorpicker/style.css";
@@ -639,6 +681,8 @@ const vid = ref(route.query.vid);
 const cid = ref(route.query.cid);
 const mainStore = useMainStore();
 loadListData();
+
+const popupVisible = ref(false);
 
 const showIframeWrap = ref(false), showSearchBox = ref(false);
 const keywordMarks = genkeywordMarks(['奥兹/奥兹莫/Ozmo', '盖文/Gavin', '泽娜/Zena', '子画/', '白子画', '奥兹莫莫']);
@@ -1102,24 +1146,26 @@ const showScroll = () => {
 const closeScroll = () => {
     scrollbarColor.value = '#f5f5f5';
 }
-
 const modify = () => {
     isRename.value = false;
     isNewVolume.value = false;
     isNewChapter.value = false;
 }
+
 // 掠过关键字所在的span
 const showkeywordDetail = ref(false), keywordDetail = ref();
 const showSpanDetail = throttle((e: MouseEvent) => {
     if ((<HTMLElement>e.target).getAttribute('class') === 'keyWord') {
         showkeywordDetail.value = true;
-        let posX: number, posY: number;
-        [posX, posY] = [e.clientX, e.clientY];
-        console.dir(e);
+        let posX: number, posY: number, domRect = (<HTMLElement>e.target).getBoundingClientRect();
+        [posX, posY] = [domRect.x + domRect.width, domRect.y + domRect.height];
         nextTick(() => {
-            console.dir(keywordDetail.value.style);
-            keywordDetail.value.style.top = posY + 'px';
-            keywordDetail.value.style.left = posX + 'px';
+            keywordDetail.value.style.top = posY - keywordDetail.value.clientHeight / 2 - domRect.height / 2 + 'px';
+            keywordDetail.value.style.left = posX + 10 + 'px';
+            // keywordDetail.value.onMouseleave = function () {
+            //     showkeywordDetail.value = false;
+            //     console.log('-------');
+            // }
         })
     } else {
         showkeywordDetail.value = false;

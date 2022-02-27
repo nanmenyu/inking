@@ -25,6 +25,7 @@
         determine="确定"
         @toModify="modify"
         @toDetermine="editSummaryItem"
+        :determineDisabled="summaryForm.title.length === 0"
     >
         <a-form :model="summaryForm" style="overflow: hidden;" layout="inline">
             <a-form-item field="imp" label="重要性">
