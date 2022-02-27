@@ -43,70 +43,66 @@ const linksData: { value: Array<LinkData> } = reactive({ value: [] });
 const graph: { data: GraphData } = reactive({ data: { categories: [], nodes: [], links: [] } });
 let opusTitle = '';
 
-if (route.query.category === 'opus') {
-    db.opus.get(query_id)
-        .then(value => {
-            if (value) {
-                const categorieCount: { [key: string]: number } = {};
-                const categorieCoord: { [key: string]: Array<[number, number]> } = {};
-                opusTitle = value.title;
+db.opus.get(query_id).then(value => {
+    if (value) {
+        const categorieCount: { [key: string]: number } = {};
+        const categorieCoord: { [key: string]: Array<[number, number]> } = {};
+        opusTitle = value.title;
 
-                value.theKeyWord.forEach(item => {
-                    categorieData.value.push({ name: item.kGroupName });
-                    item.data.forEach(it => {
-                        categorieCount[item.kGroupName] = (categorieCount[item.kGroupName] || 0) + 1;
-                        nodesData.value.push({
-                            id: it.iid,
-                            name: it.itemName,
-                            value: it.associated.length,
-                            symbolSize: 15 + it.associated.length * 10,
-                            category: item.kGroupName,
-                            associated: it.associated
+        value.theKeyWord.forEach(item => {
+            categorieData.value.push({ name: item.kGroupName });
+            item.data.forEach(it => {
+                categorieCount[item.kGroupName] = (categorieCount[item.kGroupName] || 0) + 1;
+                nodesData.value.push({
+                    id: it.iid,
+                    name: it.itemName,
+                    value: it.associated.length,
+                    symbolSize: 15 + it.associated.length * 10,
+                    category: item.kGroupName,
+                    associated: it.associated
+                })
+                if (it.associated.length > 0) {
+                    it.associated.forEach(a => {
+                        linksData.value.push({
+                            source: it.iid,
+                            target: a.iid,
+                            value: a.value
                         })
-                        if (it.associated.length > 0) {
-                            it.associated.forEach(a => {
-                                linksData.value.push({
-                                    source: it.iid,
-                                    target: a.iid,
-                                    value: a.value
-                                })
-                            })
-                        }
                     })
-                })
-                // 生成对应数量的圆环坐标
-                let tempCount = 0;
-                for (let i in categorieCount) {
-                    // 坐标只是确定相对位置,并非屏幕上的准确位置
-                    // ( n%3,-1*paseInt(n/3)) 生成3*n网格偏移布局
-                    // console.log((tempCount % 3) * 100, parseInt(tempCount / 3) * 100);
-                    categorieCoord[i] = generateCirculCoord((tempCount % 3) * 120, Math.floor(tempCount / 3) * 120, 50, categorieCount[i]);
-                    tempCount++;
                 }
-                tempCount = 0;
-                // 添加坐标
-                nodesData.value.forEach(item => {
-                    item.x = categorieCoord[item.category][categorieCount[item.category] - 1][0];
-                    item.y = categorieCoord[item.category][categorieCount[item.category] - 1][1];
-                    categorieCount[item.category]--;
-                })
-                // 去除正反方向重复链接
-                linksData.value.forEach(item => {
-                    linksData.value.forEach((it, i) => {
-                        if (item.source === it.target && item.target === it.source) {
-                            linksData.value.splice(i, 1);
-                        }
-                    })
-                })
-                graph.data.nodes = nodesData.value;
-                graph.data.links = linksData.value;
-                graph.data.categories = categorieData.value;
-            }
+            })
         })
-        .then(() => {
-            setDiagramChart(graph.data);
+        // 生成对应数量的圆环坐标
+        let tempCount = 0;
+        for (let i in categorieCount) {
+            // 坐标只是确定相对位置,并非屏幕上的准确位置
+            // ( n%3,-1*paseInt(n/3)) 生成3*n网格偏移布局
+            // console.log((tempCount % 3) * 100, parseInt(tempCount / 3) * 100);
+            categorieCoord[i] = generateCirculCoord((tempCount % 3) * 120, Math.floor(tempCount / 3) * 120, 50, categorieCount[i]);
+            tempCount++;
+        }
+        tempCount = 0;
+        // 添加坐标
+        nodesData.value.forEach(item => {
+            item.x = categorieCoord[item.category][categorieCount[item.category] - 1][0];
+            item.y = categorieCoord[item.category][categorieCount[item.category] - 1][1];
+            categorieCount[item.category]--;
         })
-}
+        // 去除正反方向重复链接
+        linksData.value.forEach(item => {
+            linksData.value.forEach((it, i) => {
+                if (item.source === it.target && item.target === it.source) {
+                    linksData.value.splice(i, 1);
+                }
+            })
+        })
+        graph.data.nodes = nodesData.value;
+        graph.data.links = linksData.value;
+        graph.data.categories = categorieData.value;
+    }
+}).then(() => {
+    setDiagramChart(graph.data);
+})
 
 // 切换显示布局
 const layout = ref('none');

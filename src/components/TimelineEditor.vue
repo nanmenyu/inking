@@ -146,6 +146,60 @@
         </a-form>
     </PopupMenu>
     <div class="timeline">
+        <section @scroll="sectionScroll" ref="timelineSection" class="timeline__section">
+            <!-- <div class="timeline__nav" ref="timelineNav">
+                <ul :style="`transform: translateY(${timelineUl_tran})`" ref="timelineUl">
+                    <li v-for="(item, i) in yearData.data" :key="item.id" :id="'nav_' + i">
+                        <a
+                            @click.prevent="toAnchor('con_' + i)"
+                            :class="checkedId === ('con_' + i) ? 'active' : ''"
+                            :href="'#' + i"
+                            :title="item.timeSlot.toString()"
+                        >{{ timeSlot_format(item.timeSlot) }}</a>
+                    </li>
+                </ul>
+            </div>-->
+            <div class="wrapper" ref="wrapper">
+                <a-empty v-if="yearData.data.length === 0" style="margin-top: 100px;">点击时间轴右上角添加历史事件</a-empty>
+                <a-timeline v-else>
+                    <!-- 这里必须用i做key，不然左边时间轴无法再切换时完全刷新 -->
+                    <a-timeline-item
+                        v-for="(item, i) in yearData.data"
+                        :key="i"
+                        @click="choiceOneYear(item.timeSlot)"
+                        title="点击查看详情"
+                        dotColor="#F53F3F"
+                    >
+                        <template #dot>
+                            <IconClockCircle :style="{ fontSize: '12px', color: '#f53f3f' }" />
+                        </template>
+                        <div
+                            :class="currentDetail.curYear === item.timeSlot ? 'timeline-item checked' : 'timeline-item'"
+                        >
+                            <h2>
+                                {{ item.timeSlot + '年' }}&nbsp;&nbsp;
+                                <span
+                                    style="font-size: 16px;"
+                                >{{ '🔖' + item.title }}</span>
+                                <span
+                                    style="float: right;margin: 9px 8px 0 0;font-size: 12px;color: #bfc1c3;user-select: none;"
+                                >
+                                    <span
+                                        @click.stop="deleteOneYear(item.timeSlot)"
+                                        class="tag-close"
+                                        title="删除"
+                                    >
+                                        <icon-close />
+                                    </span>
+                                    总事件数:{{ item.totalNum }}
+                                </span>
+                            </h2>
+                            <p style="text-indent: 2em;">{{ item.desc }}</p>
+                        </div>
+                    </a-timeline-item>
+                </a-timeline>
+            </div>
+        </section>
         <div class="timeline__block">
             <div class="slider-box" ref="sliderBox">
                 <div class="slider-lable">
@@ -295,61 +349,6 @@
                 </a-space>
             </div>
         </div>
-        <section @scroll="sectionScroll" ref="timelineSection" class="timeline__section">
-            <div class="timeline__nav" ref="timelineNav">
-                <ul :style="`transform: translateY(${timelineUl_tran})`" ref="timelineUl">
-                    <li v-for="(item, i) in yearData.data" :key="item.id" :id="'nav_' + i">
-                        <a
-                            @click.prevent="toAnchor('con_' + i)"
-                            :class="checkedId === ('con_' + i) ? 'active' : ''"
-                            :href="'#' + i"
-                            :title="item.timeSlot.toString()"
-                        >{{ timeSlot_format(item.timeSlot) }}</a>
-                    </li>
-                </ul>
-            </div>
-            <div class="wrapper" ref="wrapper">
-                <a-empty v-if="yearData.data.length === 0" style="margin-top: 100px;">点击时间轴右上角添加历史事件</a-empty>
-                <a-timeline v-else>
-                    <!-- 这里必须用i做key，不然左边时间轴无法再切换时完全刷新 -->
-                    <a-timeline-item
-                        v-for="(item, i) in yearData.data"
-                        :key="i"
-                        :id="'con_' + i"
-                        @click="choiceOneYear(item.timeSlot)"
-                        title="点击查看详情"
-                        dotColor="#F53F3F"
-                    >
-                        <template #dot>
-                            <IconClockCircle :style="{ fontSize: '12px', color: '#f53f3f' }" />
-                        </template>
-                        <div
-                            :class="currentDetail.curYear === item.timeSlot ? 'timeline-item checked' : 'timeline-item'"
-                        >
-                            <h2>
-                                {{ item.timeSlot + '年' }}&nbsp;&nbsp;
-                                <span
-                                    style="font-size: 16px;"
-                                >{{ '🔖' + item.title }}</span>
-                                <span
-                                    style="float: right;margin: 9px 8px 0 0;font-size: 12px;color: #bfc1c3;user-select: none;"
-                                >
-                                    <span
-                                        @click.stop="deleteOneYear(item.timeSlot)"
-                                        class="tag-close"
-                                        title="删除"
-                                    >
-                                        <icon-close />
-                                    </span>
-                                    总事件数:{{ item.totalNum }}
-                                </span>
-                            </h2>
-                            <p style="text-indent: 2em;">{{ item.desc }}</p>
-                        </div>
-                    </a-timeline-item>
-                </a-timeline>
-            </div>
-        </section>
     </div>
 </template>
 
@@ -371,7 +370,7 @@ const { proxy } = useCurrentInstance();
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
 const theTimeLineData: { data: Array<TimeLineGroup> } = reactive({ data: [] });
-
+const timeline = ref();
 const yearData: {
     data:
     Array<{ id: string, timeSlot: number, title: string, desc: string, totalNum: number }>
@@ -412,7 +411,7 @@ const toAnchor = (id: string) => {
         checkedId.value = id;
         const targetAnchor = document.getElementById(id);
         if (targetAnchor) targetAnchor.scrollIntoView({ behavior: "smooth" });
-        toNavCenter();
+        // toNavCenter();
     }
 }
 // 内容滚动标记当前元素
@@ -428,7 +427,7 @@ const sectionScroll = throttle(() => {
             }
         }
     }
-    toNavCenter();
+    // toNavCenter();
 }, 30);
 onMounted(() => {
     getTimeLineData();
@@ -865,9 +864,9 @@ function getTimeLineData() {
             yearData.data.sort((a, b) => a.timeSlot - b.timeSlot);
             choiceOneYear(currentChoice.value);
             setSliderState();
-            nextTick(() => {
-                calculateOffsetTop();
-            })
+            // nextTick(() => {
+            //     calculateOffsetTop();
+            // })
         }
     })
 }
@@ -888,32 +887,32 @@ function setSliderState() {
     })
 }
 // 计算每个元素距离父元素顶部的大小
-function calculateOffsetTop() {
-    let targetElement: HTMLElement;
-    offsetTop_el.data = yearData.data.map((_, index) => {
-        targetElement = document.getElementById('con_' + index)!;
-        return {
-            id: 'con_' + index,
-            offsetTop: targetElement.offsetTop
-        }
-    })
-}
+// function calculateOffsetTop() {
+//     let targetElement: HTMLElement;
+//     offsetTop_el.data = yearData.data.map((_, index) => {
+//         targetElement = document.getElementById('con_' + index)!;
+//         return {
+//             id: 'con_' + index,
+//             offsetTop: targetElement.offsetTop
+//         }
+//     })
+// }
 // 计算nav中已checked元素高度
-const timelineUl: Ref<HTMLElement | undefined> = ref(),
-    timelineNav: Ref<HTMLElement | undefined> = ref();
-const timelineUl_tran: Ref<string> = ref('0px');
-function toNavCenter() {
-    const currentElement = document.getElementById(checkedId.value.replace('con_', 'nav_'));
-    if (currentElement && (timelineUl.value?.clientHeight! > timelineNav.value?.clientHeight!)) {
-        timelineUl_tran.value = -1 * currentElement.offsetTop + 'px';
-    }
-}
+// const timelineUl: Ref<HTMLElement | undefined> = ref(),
+//     timelineNav: Ref<HTMLElement | undefined> = ref();
+// const timelineUl_tran: Ref<string> = ref('0px');
+// function toNavCenter() {
+//     const currentElement = document.getElementById(checkedId.value.replace('con_', 'nav_'));
+//     if (currentElement && (timelineUl.value?.clientHeight! > timelineNav.value?.clientHeight!)) {
+//         timelineUl_tran.value = -1 * currentElement.offsetTop + 'px';
+//     }
+// }
 // 滑动时间轴
 function slidingTimeline(e: MouseEvent) {
     const x = e.pageX - slider.value.offsetLeft;
     sliderBox.value.onmousemove = fn;
     document.onmouseup = function () {
-        if (sliderBox.value.onmousemove) sliderBox.value.onmousemove = null;
+        if (sliderBox.value && sliderBox.value.onmousemove) sliderBox.value.onmousemove = null;
     }
     function fn(e: MouseEvent) {
         // 时间轴宽度  - 时间轴视口宽度
@@ -930,10 +929,12 @@ function slidingTimeline(e: MouseEvent) {
 function setLineStorage() {
     localStorage.setItem('timeLineCache', JSON.stringify({ selectYear: currentChoice.value, selectLine: defaultPos.value }));
 }
+defineExpose({ setSliderState });
 </script>
 
 <style src="../style/timelineeditor.scss" lang="scss" scoped>
 </style>
+
 
 
 

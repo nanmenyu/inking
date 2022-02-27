@@ -187,7 +187,7 @@
                         </a-space>
                         <a-space v-else>
                             <a-cascader
-                                :options="associatedOptions"
+                                :options="associatedOptions.value"
                                 style="width: 250px;margin: 4px 0 4px 15px"
                                 placeholder="选择关联目标(可直接搜索)"
                                 allow-search
@@ -1580,14 +1580,11 @@ watch(tempKid, () => {
 // 获取的全部数据
 const theKeyWord: { data: Array<KeyWordGroup> } = reactive({ data: [] })
 function loadKeyWodData(cb?: Function) {
-    if (route.query.category === 'opus') {
-        db.opus.get(query_id)
-            .then(value => {
-                theKeyWord.data = value!.theKeyWord;
-                getAssociatedOptions();
-                if (typeof cb === 'function') cb();
-            })
-    }
+    db.opus.get(query_id).then(value => {
+        theKeyWord.data = value!.theKeyWord;
+        getAssociatedOptions();
+        if (typeof cb === 'function') cb();
+    })
 }
 
 function getAssociatedOptions() {
@@ -1615,23 +1612,19 @@ function getAssociatedOptions() {
 
 // 修改特定组下特定关键字的数据
 function modifyDbforItem(t_kid: string, t_iid: string, hd: Function, cb: Function) {
-    db.opus
-        .where(':id')
-        .equals(query_id)
-        .modify(item => {
-            item.theKeyWord.forEach(item => {
-                if (item.kid === t_kid) {
-                    item.data.forEach(it => {
-                        if (it.iid === t_iid) {
-                            hd(it);
-                        }
-                    })
-                }
-            })
+    db.opus.where(':id').equals(query_id).modify(item => {
+        item.theKeyWord.forEach(item => {
+            if (item.kid === t_kid) {
+                item.data.forEach(it => {
+                    if (it.iid === t_iid) {
+                        hd(it);
+                    }
+                })
+            }
         })
-        .then(() => {
-            cb();
-        })
+    }).then(() => {
+        cb();
+    })
 }
 
 //  无法实现对象中方法的深拷贝
@@ -1737,11 +1730,7 @@ function setNumberChart(targetData: Array<{ key: string, value: number }>, unit:
         ]
     });
 }
-
 </script>
 
 <style lang="scss" src="../style/KeywordEditor.scss" scoped>
 </style> 
-
-
-

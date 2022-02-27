@@ -63,7 +63,7 @@ defineExpose({ switchModular });
 }
 
 .content-box :deep(.arco-layout-content) {
-    overflow-y: scroll;
+    /* overflow-y: scroll; */
 }
 
 .bar-left {

@@ -1,9 +1,7 @@
 <!-- 作品(纯文本)编写页 -->
 <template>
     <TitleBlock></TitleBlock>
-    <div v-if="showkeywordDetail" ref="keywordDetail" class="keyword-detail">
-        <!-- <div class="keyword-arrow"></div> -->
-    </div>
+    <div v-if="showkeywordDetail" ref="keywordDetail" class="keyword-detail"></div>
     <PopupMenu
         v-if="isRename"
         title="重命名"
@@ -570,10 +568,12 @@
                 <a-resize-box
                     @moving-start="showIframeWrap = true"
                     @moving-end="showIframeWrap = false"
+                    @moving="resizeBoxMoving"
                     :directions="['left']"
                     class="sider-right"
-                    style="width: 100px;"
+                    style="width: 600px;"
                 >
+                    <!-- 伸缩杆 -->
                     <template #resize-trigger="{ direction }">
                         <div
                             :class="[
@@ -584,12 +584,13 @@
                             <div class="resizebox-demo-line" />
                         </div>
                     </template>
+                    <!-- 内容区 -->
                     <div class="sider-right-content">
-                        <!-- <div class="menu-demo"> -->
+                        <!-- 漂浮工具栏 -->
                         <a-trigger
                             :trigger="['click']"
                             clickToClose
-                            position="top"
+                            position="bottom"
                             v-model:popupVisible="popupVisible"
                         >
                             <div
@@ -601,26 +602,48 @@
                             <template #content>
                                 <a-menu
                                     mode="popButton"
-                                    :tooltipProps="{ position: 'left' }"
+                                    :tooltipProps="{ position: 'left', backgroundColor: '#3491fa', mini: true }"
                                     showCollapseButton
+                                    @menu-item-click="choicePopButton"
                                 >
                                     <a-menu-item style="margin: 10px 0;" key="1">
                                         <template #icon>
-                                            <IconBug></IconBug>
+                                            <img :src="svg_plot" />
                                         </template>
-                                        Bugs
+                                        剧情
                                     </a-menu-item>
                                     <a-menu-item style="margin: 10px 0;" key="2">
                                         <template #icon>
-                                            <IconBulb></IconBulb>
+                                            <img :src="svg_keyword" />
                                         </template>
-                                        Ideas
+                                        关键字
+                                    </a-menu-item>
+                                    <a-menu-item style="margin: 10px 0;" key="3">
+                                        <template #icon>
+                                            <img :src="svg_diagram" />
+                                        </template>
+                                        关系图
+                                    </a-menu-item>
+                                    <a-menu-item style="margin: 10px 0;" key="4">
+                                        <template #icon>
+                                            <img :src="svg_timeline" />
+                                        </template>
+                                        时间线
+                                    </a-menu-item>
+                                    <a-menu-item style="margin: 10px 0;" key="5">
+                                        <template #icon>
+                                            <img :src="svg_map" />
+                                        </template>
+                                        地图
                                     </a-menu-item>
                                 </a-menu>
                             </template>
                         </a-trigger>
-                        <!-- </div> -->
-                        <PlotEditor v-if="true"></PlotEditor>
+                        <PlotEditor v-if="showModular === '1'"></PlotEditor>
+                        <KeywordEditor v-if="showModular === '2'"></KeywordEditor>
+                        <DiagramEditor v-if="showModular === '3'"></DiagramEditor>
+                        <TimelineEditor v-if="showModular === '4'" ref="ref_TimelineEditor"></TimelineEditor>
+                        <MapEditor v-if="showModular === '5'"></MapEditor>
                         <div v-if="showIframeWrap" class="iframe-Wrap"></div>
                     </div>
                     <!-- <webview class="iframe" src="https://wantwords.net/"></webview> -->
@@ -643,6 +666,10 @@ import TitleBlock from '../components/TitleBlock.vue';
 import WritingPaper from '../components/WritingPaper.vue';
 import PopupMenu from '../components/widget/PopupMenu.vue';
 import PlotEditor from '../components/PlotEditor.vue';
+import KeywordEditor from '../components/KeywordEditor.vue';
+import DiagramEditor from '../components/DiagramEditor.vue';
+import TimelineEditor from '../components/TimelineEditor.vue';
+import MapEditor from '../components/MapEditor.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ColorPicker } from "vue3-colorpicker";
 import "vue3-colorpicker/style.css";
@@ -670,6 +697,12 @@ import softThemeIcon from '../assets/svg/softThemeIcon.svg';
 import expTXTIcon from '../assets/svg/expTXTIcon.svg';
 import expDOCXIcon from '../assets/svg/expDOCXIcon.svg';
 import expPDFIcon from '../assets/svg/expPDFIcon.svg';
+import svg_plot from '../assets/svg/plot.svg';
+import svg_keyword from '../assets/svg/keyword.svg';
+import svg_diagram from '../assets/svg/diagram.svg';
+import svg_timeline from '../assets/svg/timeline.svg';
+import svg_map from '../assets/svg/map.svg';
+
 import '../style/writerPage.scss';
 
 const { proxy } = useCurrentInstance();
@@ -680,9 +713,8 @@ const query_id = parseInt(<string>route.query.id);
 const vid = ref(route.query.vid);
 const cid = ref(route.query.cid);
 const mainStore = useMainStore();
+const ref_TimelineEditor = ref();
 loadListData();
-
-const popupVisible = ref(false);
 
 const showIframeWrap = ref(false), showSearchBox = ref(false);
 const keywordMarks = genkeywordMarks(['奥兹/奥兹莫/Ozmo', '盖文/Gavin', '泽娜/Zena', '子画/', '白子画', '奥兹莫莫']);
@@ -1146,6 +1178,18 @@ const showScroll = () => {
 const closeScroll = () => {
     scrollbarColor.value = '#f5f5f5';
 }
+
+const resizeBoxMoving = () => {
+    if (ref_TimelineEditor.value) ref_TimelineEditor.value.setSliderState();
+}
+
+// 右侧PopButton选择并渲染对应组件
+const popupVisible = ref(false), showModular = ref('1');
+const choicePopButton = (key: string) => {
+    showModular.value = key;
+    console.log(key);
+}
+
 const modify = () => {
     isRename.value = false;
     isNewVolume.value = false;
