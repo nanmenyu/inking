@@ -1,7 +1,64 @@
 <!-- 作品(纯文本)编写页 -->
 <template>
     <TitleBlock></TitleBlock>
-    <div v-if="showkeywordDetail" ref="keywordDetail" class="keyword-detail"></div>
+    <div v-if="showkeywordDetail" ref="keywordDetail" class="keyword-detail">
+        <div class="keyword-head">
+            <div class="head-left">
+                <img src="http://v.bootstrapmb.com/2019/10/6bsjf6461/images/case-logo002.png" />
+            </div>
+            <div class="head-middle">
+                <ul>
+                    <li>🔸奥兹</li>
+                    <li>🔸奥兹莫奥兹莫奥兹莫奥兹莫</li>
+                    <li>🔸Ozmo</li>
+                </ul>
+            </div>
+            <div class="head-right">
+                <a-space size="mini" direction="vertical">
+                    <a-popover
+                        style="max-width: 300px;"
+                        trigger="click"
+                        position="rt"
+                        title="主名9999主名999主名9999主名9999主主名9999主名999主名9999主名9999主名9"
+                    >
+                        <span title="查看更多">
+                            <icon-apps />
+                        </span>
+                        <template #content>
+                            <div class="popover-content">
+                                <span>拜蒙(双性魔)的男性体。贝利尔令至上三柱秘密诛杀。拜蒙不敌，躯体消逝、魂魄碎裂。但就在千钧一发之际，死神阿努比斯将弥散的魂魄残片重新寻回，将拜蒙的男性面带入了冥界，而女性面则不知去向。如今寄宿在一个名叫奥兹莫(Ozmo)的年轻人(已死)身上。代号：sr-kn103拜蒙(双性魔)的男性体。贝利尔令至上三柱秘密诛杀。拜蒙不敌，躯体消逝、魂魄碎裂。但就在千钧一发之际，死神阿努比斯将弥散的魂魄残片重新寻回，将拜蒙的男性面带入了冥界，而女性面则不知去向。如今寄宿在一个名叫奥兹莫(Ozmo)的年轻人(已死)身上。代号：sr-kn103</span>
+                            </div>
+                        </template>
+                    </a-popover>
+                    <span title="下一页">
+                        <icon-caret-right />
+                    </span>
+                    <span title="上一页">
+                        <icon-caret-left />
+                    </span>
+                </a-space>
+            </div>
+        </div>
+        <div class="keyword-middle">
+            <a-space wrap size="mini">
+                <a-tag
+                    style="max-width: 200px;border-radius: 5px;"
+                    color="arcoblue"
+                >性别大师傅士大夫士大夫撒旦🔸男sdasdasd实打实大苏打发v大师史蒂芬</a-tag>
+                <a-tag style="max-width: 200px;border-radius: 5px;" color="arcoblue">性别🔸男</a-tag>
+                <a-tag style="max-width: 200px;border-radius: 5px;" color="arcoblue">性别🔸男</a-tag>
+                <a-tag
+                    style="max-width: 200px;border-radius: 5px;"
+                    color="arcoblue"
+                >性别🔸男性别🔸男性别🔸男性别🔸男性别🔸男性别🔸男性别🔸男性别🔸男</a-tag>
+                <a-tag style="max-width: 200px;border-radius: 5px;" color="arcoblue">性别🔸男</a-tag>
+                <a-tag style="max-width: 200px;border-radius: 5px;" color="arcoblue">性别🔸男</a-tag>
+                <a-tag style="max-width: 200px;border-radius: 5px;" color="arcoblue">性别🔸男</a-tag>
+            </a-space>
+        </div>
+        <div class="keyword-bottom"></div>
+        <div class="panel-btn" title="唤出关键字面板">🛩️</div>
+    </div>
     <PopupMenu
         v-if="isRename"
         title="重命名"
@@ -571,7 +628,7 @@
                     @moving="resizeBoxMoving"
                     :directions="['left']"
                     class="sider-right"
-                    style="width: 600px;"
+                    style="width: 200px;"
                 >
                     <!-- 伸缩杆 -->
                     <template #resize-trigger="{ direction }">
@@ -658,9 +715,8 @@
 import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount, watch, Ref } from 'vue';
 import {
     IconDown, IconExport, IconCaretRight, IconCaretLeft, IconClose, IconUndo,
-    IconBook, IconCaretDown, IconCheckCircle, IconFullscreen,
-    IconDoubleRight, IconSearch, IconArrowUp, IconArrowDown,
-    IconBug, IconBulb, IconMessage,
+    IconBook, IconCaretDown, IconCheckCircle, IconFullscreen, IconMessage,
+    IconDoubleRight, IconSearch, IconArrowUp, IconArrowDown, IconApps
 } from '@arco-design/web-vue/es/icon';
 import TitleBlock from '../components/TitleBlock.vue';
 import WritingPaper from '../components/WritingPaper.vue';
@@ -1183,9 +1239,14 @@ const resizeBoxMoving = () => {
 
 // 右侧PopButton选择并渲染对应组件
 const popupVisible = ref(false), showModular = ref('1');
+if (localStorage.getItem('showModular') === null) {
+    localStorage.setItem('showModular', '1');
+} else {
+    showModular.value = localStorage.getItem('showModular') ?? '1';
+}
 const choicePopButton = (key: string) => {
     showModular.value = key;
-    console.log(key);
+    localStorage.setItem('showModular', key);
 }
 
 const modify = () => {
@@ -1196,18 +1257,32 @@ const modify = () => {
 
 // 掠过关键字所在的span
 const showkeywordDetail = ref(false), keywordDetail = ref();
+let kid_iid_old = ''; // 用来防指多次触发多次访问数据库拿取同一段数据
 const showSpanDetail = throttle((e: MouseEvent) => {
     if ((<HTMLElement>e.target).getAttribute('class') === 'keyWord') {
         showkeywordDetail.value = true;
+        const targetText = (<HTMLElement>e.target).innerText;
         let posX: number, posY: number, domRect = (<HTMLElement>e.target).getBoundingClientRect();
         [posX, posY] = [domRect.x + domRect.width, domRect.y + domRect.height];
+        keyWordArr.forEach(item => {
+            for (let i = 2; i < item.length; i++) {
+                if (item[i] === targetText) {
+                    let kid_iid_new = item[0] + item[1];
+                    if (kid_iid_new !== kid_iid_old) {
+                        kid_iid_old = kid_iid_new;
+                        modifyDbforItem(item[0], item[1], (item: Userdb) => {
+                            // console.log(item);
+                        }, () => {
+
+                        })
+                    }
+                    break;
+                }
+            }
+        })
         nextTick(() => {
             keywordDetail.value.style.top = posY - keywordDetail.value.clientHeight / 2 - domRect.height / 2 + 'px';
             keywordDetail.value.style.left = posX + 10 + 'px';
-            // keywordDetail.value.onMouseleave = function () {
-            //     showkeywordDetail.value = false;
-            //     console.log('-------');
-            // }
         })
     } else {
         showkeywordDetail.value = false;
@@ -1238,16 +1313,17 @@ function setScrollTop(tvid: string, tcid: string) {
 // 获取列表数据
 const router = useRouter();
 const booksLists: { data: Array<Volume> } = reactive({ data: [] });
+let keyWordArr: Array<Array<string>> = [];
 function loadListData() {
     db.opus.get(query_id).then(value => {
         if (value) {
             // 加载关键词
-            const keyWordArr: Array<Array<string>> = [];
+            keyWordArr = [];
             value.theKeyWord.forEach(item => {
                 let tempArr: Array<string> = [];
                 item.data.forEach(it => {
                     tempArr = it.otherName;
-                    tempArr.unshift(it.itemName);
+                    tempArr.unshift(item.kid, it.iid, it.itemName);
                     // 去重
                     keyWordArr.push([...new Set(tempArr)]);
                 })
@@ -1315,12 +1391,29 @@ function shortcut(e: KeyboardEvent) {
 function leftMoreControl() {
     showLeftMore.value = '';
 }
+// 找到关键字数据
+function modifyDbforItem(t_kid: string, t_iid: string, hd: Function, cb?: Function) {
+    db.opus.where(':id').equals(query_id).modify(item => {
+        item.theKeyWord.forEach(item => {
+            if (item.kid === t_kid) {
+                item.data.forEach(it => {
+                    if (it.iid === t_iid) hd(it);
+                })
+            }
+        })
+    }).then(() => {
+        if (cb) cb();
+    })
+}
 
 /*---------------------生命周期---------------------*/
 onMounted(() => {
     const mainEditor = document.getElementById('mainEditor');
     mainEditor?.addEventListener('mousemove', showSpanDetail);
+
     nextTick(() => {
+        // console.log(document.getElementsByClassName('keyWord'));
+
         myRef.value.setFont(uWritingOption.value.uFont, true);
         myRef.value.setFontSize(uWritingOption.value.uFontSize, true);
         myRef.value.setLineHeight(uWritingOption.value.uLineHeight, true);

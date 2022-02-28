@@ -127,7 +127,7 @@
                                     @mousedown.stop
                                     v-model="itemNameFormat"
                                     :style="{ width: '300px' }"
-                                    :max-length="100"
+                                    :max-length="50"
                                     show-word-limit
                                     size="small"
                                     placeholder="修改关键词"
@@ -170,20 +170,28 @@
                             style="height:100%;margin: 0 15px;padding-top: 8px;"
                             wrap
                         >
-                            <a-tag
+                            <a-dropdown
                                 v-for="item in currentAssociated.data"
                                 :key="item.key"
-                                :color="getIntensityColor(item.value)"
+                                trigger="contextMenu"
                             >
-                                {{ item.key }}
-                                <span
-                                    @click="deleteTag(item)"
-                                    class="tag-close"
-                                    title="删除"
+                                <a-tag
+                                    :color="getIntensityColor(item.value)"
+                                    style="max-width: 500px;"
                                 >
-                                    <icon-close />
-                                </span>
-                            </a-tag>
+                                    {{ item.key }}
+                                    <span
+                                        @click="deleteTag(item)"
+                                        class="tag-close"
+                                        title="删除"
+                                    >
+                                        <icon-close />
+                                    </span>
+                                </a-tag>
+                                <template #content>
+                                    <a-doption @click="deleteTag(item)">删除</a-doption>
+                                </template>
+                            </a-dropdown>
                         </a-space>
                         <a-space v-else>
                             <a-cascader

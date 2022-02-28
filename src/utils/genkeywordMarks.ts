@@ -12,14 +12,13 @@ export default function genkeywordMarks(keywordArr: Array<Array<string>>) {
     const colorGroup = [
         ['#f53f3f', '#ffece8'], ['#d91ad9', '#ffe8fb'], ['#f77234', '#fff3e8'], ['#ff7d00', '#fff7e8'], ['#9fdb1d', '#fcffe8'], ['#f7ba1e', '#fffce8'], ['#00b42a', '#e8ffea'], ['#3491fa', '#e8f7ff'], ['#14c9c9', '#e8fffb'], ['#165dff', '#e8f3ff'], ['#722ed2', '#f5e8ff'], ['#f5319d', '#ffe8f1'],
         ['#86909c', '#f2f3f5']
-    ]
+    ];
     keywordArr.forEach((item, index) => {
         const color = colorGroup[index % colorGroup.length][0];
         const bgColor = colorGroup[index % colorGroup.length][1];
-        // const tempArr = item.split('/');
-        // (<Array<Array<string>>>mainStore.keywordArr).push(tempArr);
-        item.forEach(it => {
-            if (it !== '') result.push({
+        item.forEach((it, i) => {
+            // 跳过前两位的kid和iid
+            if (i > 1 && it !== '') result.push({
                 match: new RegExp(it, 'g'),
                 class: 'keyWord',
                 style: `color: ${color};background-color:${bgColor};`
