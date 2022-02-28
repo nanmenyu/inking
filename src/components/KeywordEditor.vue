@@ -122,7 +122,7 @@
                                     </template>
                                 </a-popover>
                             </h3>
-                            <h3 v-show="modifyItemName">
+                            <h3 v-show="modifyItemName" title="格式：主名/别名/别名...">
                                 <a-input
                                     @mousedown.stop
                                     v-model="itemNameFormat"
@@ -808,7 +808,15 @@ const choiceCardItem = (kid: string, iid: string) => {
     })[0];
     currentListData.data = deepClone_JSON(tempData);
     checkedItem.value = iid;
-    itemNameFormat.value = currentListData.data.itemName + '/' + currentListData.data.otherName.join('/');
+
+    // 只有一个主名没有别名时，删除主名后面添加的斜杠
+    let otherNameString = currentListData.data.otherName.join('/'),
+        otherNameLastChar = otherNameString.charAt(otherNameString.length - 1);
+    otherNameString = otherNameString === '' ? '' : '/' + otherNameString;
+    // 删除最后一个别名最后的斜杠
+    otherNameString = otherNameLastChar === '/' ? otherNameString.slice(0, otherNameString.length - 1) : otherNameString;
+    console.log();
+    itemNameFormat.value = currentListData.data.itemName + otherNameString;
     // 关联标签排序
     const tempArr: Array<Array<Associated>> = [[], [], [], [], []];
     currentListData.data.associated.forEach((item: { iid: string, key: string, kid: string, value: number }) => {
@@ -836,13 +844,19 @@ const choiceCardItem = (kid: string, iid: string) => {
     }
     // 去除已经关联的元素
     associatedOptions.value.forEach(item => {
+        const tempIndexArr: Array<number> = [];
         item.children.forEach((it, i) => {
             currentAssociated.data.forEach(associated => {
-                if (associated.iid === it.iid) {
-                    item.children.splice(i, 1);
-                }
+                if (associated.iid === it.iid) tempIndexArr.push(i); //此处不能item.children.splice(i, 1);
             })
         })
+        item.children = item.children.filter((_, i) => {
+            return tempIndexArr.indexOf(i) === -1;
+        })
+    })
+    // 清除空数组
+    associatedOptions.value = associatedOptions.value.filter(item => {
+        return item.children.length > 0;
     })
 }
 watch(itemNameFormat, value => {
@@ -868,30 +882,58 @@ const modifyAllItem = () => {
     modifyItemName.value = modifyItemDesc.value = false;
 }
 // 修改数据库中item的名称
+// let theNewNames_old
 watch(modifyItemName, value => {
     if (!value) {
-        // 避免名称重复
-        let flag = true;
-        currentListName.data.forEach((item) => {
-            if (item.itemName === currentListData.data.itemName && checkedItem.value !== item.iid) flag = false;
-        })
-        if (flag) {
-            modifyDbforItem(curKid, curIid,
-                (it: KeyWord) => {
-                    it.itemName = currentListData.data.itemName;
-                    const tempArr: Array<string> = [];
-                    currentListData.data.otherName.forEach((oName: string) => {
-                        tempArr.push(oName);
-                    })
-                    it.otherName = tempArr;
-                },
-                () => {
-                    loadKeyWodData(() => {
-                        choiceCard(curKid, curIid);
-                    })
-                })
+        if (itemNameFormat.value === '') {
+            $message.warning('名称不能为空');
         } else {
-            $message.warning('主名称不能相同')
+            modifyDbforItem(curKid, curIid, (it: KeyWord) => {
+                const theOldNames = [], theNewNames = itemNameFormat.value.split('/');
+                theOldNames.push(it.itemName);
+                it.otherName.forEach(name => {
+                    theOldNames.push(name);
+                })
+                // 获得新旧名称数组中的公有部分
+                const publicPart = [...new Set(theOldNames)].filter(x => new Set(theNewNames).has(x));
+                const diffPart = theNewNames.filter((x) => !publicPart.some((item) => x === item));
+
+                // 新旧数据不一致时才添加
+                if (theOldNames.join('') !== theNewNames.join('')) {
+                    let flag = true;
+                    // 避免全部关键字名重复
+                    let allNameArr: Array<string> = [];
+                    theKeyWord.data.forEach(item => {
+                        item.data.forEach(it => {
+                            if (it.itemName !== '') allNameArr.push(it.itemName);
+                            if (it.otherName.length > 0) allNameArr = allNameArr.concat(it.otherName);
+                        })
+                    })
+                    // 遍历多出来的部分名字，查看是否有重复
+                    for (let i in diffPart) {
+                        if (diffPart[i] !== '' && allNameArr.indexOf(diffPart[i]) !== -1) flag = false;
+                    }
+                    if (flag) {
+                        modifyDbforItem(curKid, curIid,
+                            (it: KeyWord) => {
+                                it.itemName = currentListData.data.itemName;
+                                const tempArr: Array<string> = [];
+                                currentListData.data.otherName.forEach((oName: string) => {
+                                    tempArr.push(oName);
+                                })
+                                it.otherName = tempArr;
+                            },
+                            () => {
+                                loadKeyWodData(() => {
+                                    choiceCard(curKid, curIid);
+                                })
+                            })
+                    } else {
+                        $message.warning('关键词名称均不能相同');
+                        itemNameFormat.value = theOldNames.join('/');
+                    }
+                }
+            })
         }
     }
 });
@@ -1119,7 +1161,7 @@ const addNewKeyWord = () => {
                     iid: v4(),
                     itemImg: '/static/img/default.png',
                     itemName: '主名' + item.maxNamLen,
-                    otherName: ['别名', '别名'],
+                    otherName: [],
                     itemDesc: '点击左侧修改介绍',
                     associated: [],
                     itemString: targetItemString,
@@ -1215,8 +1257,6 @@ const deleteTag = (associatedItem: { iid: string, key: string, kid: string, valu
                     it.associated.forEach((item, i) => {
                         if (item.iid === associatedItem.iid) {
                             [tempKid, tempIid] = [item.kid, item.iid]
-                            // tempKid = item.kid;
-                            // tempIid = item.iid;
                             it.associated.splice(i, 1);
                         }
                     })

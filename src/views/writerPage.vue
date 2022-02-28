@@ -655,7 +655,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount, watch } from 'vue';
+import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount, watch, Ref } from 'vue';
 import {
     IconDown, IconExport, IconCaretRight, IconCaretLeft, IconClose, IconUndo,
     IconBook, IconCaretDown, IconCheckCircle, IconFullscreen,
@@ -702,7 +702,6 @@ import svg_keyword from '../assets/svg/keyword.svg';
 import svg_diagram from '../assets/svg/diagram.svg';
 import svg_timeline from '../assets/svg/timeline.svg';
 import svg_map from '../assets/svg/map.svg';
-
 import '../style/writerPage.scss';
 
 const { proxy } = useCurrentInstance();
@@ -717,7 +716,9 @@ const ref_TimelineEditor = ref();
 loadListData();
 
 const showIframeWrap = ref(false), showSearchBox = ref(false);
-const keywordMarks = genkeywordMarks(['奥兹/奥兹莫/Ozmo', '盖文/Gavin', '泽娜/Zena', '子画/', '白子画', '奥兹莫莫']);
+const keywordMarks: Ref<Array<{
+    match: RegExp, class: string, style: string
+}>> = ref([]);
 /*------------关键词搜索、替换功能------------*/
 const searchData = ref(''), replaceData = ref(''),
     totalKeyWord = ref(0), keyWordPos = ref(0);
@@ -777,16 +778,13 @@ const replaceKeyword = (type: 'single' | 'whole') => {
 const stopSearchKeyword = () => {
     mainStore.isInSearch = showSearchBox.value = false;
     db.opus.get(query_id).then(value => {
-        if (value) myRef.value.setBooksData(value, keywordMarks);
+        if (value) myRef.value.setBooksData(value, keywordMarks.value);
     })
 }
 
 /*-------------数据统计与初始化-------------*/
-const wordCount = ref(0),
-    charCount = ref(0),
-    paragraphs = ref(0),
-    fontList = ref(),
-    paperSize = ref([
+const wordCount = ref(0), charCount = ref(0), paragraphs = ref(0),
+    fontList = ref(), paperSize = ref([
         { type: 'Max', size: 1280, now: false },
         { type: 'iPad Pro', size: 1024, now: false },
         { type: 'A4', size: 794, now: true },
@@ -1243,7 +1241,21 @@ const booksLists: { data: Array<Volume> } = reactive({ data: [] });
 function loadListData() {
     db.opus.get(query_id).then(value => {
         if (value) {
-            myRef.value.setBooksData(value, keywordMarks);
+            // 加载关键词
+            const keyWordArr: Array<Array<string>> = [];
+            value.theKeyWord.forEach(item => {
+                let tempArr: Array<string> = [];
+                item.data.forEach(it => {
+                    tempArr = it.otherName;
+                    tempArr.unshift(it.itemName);
+                    // 去重
+                    keyWordArr.push([...new Set(tempArr)]);
+                })
+            })
+            // 渲染关键词
+            keywordMarks.value = genkeywordMarks(keyWordArr);
+            myRef.value.setBooksData(value, keywordMarks.value);
+            // 加载卷章列表
             booksLists.data = value.data.filter((item: Volume) => {
                 // 判断目标卷是否有删除标记
                 return !item.discard;
@@ -1263,6 +1275,7 @@ function loadListData() {
                     }
                 })
             }
+            // 设置默认的scrollTop
             for (let i = 0; i < booksLists.data.length; i++) {
                 if (booksLists.data[i].vid === vid.value) {
                     for (let j = 0; j < booksLists.data[i].volume.length; j++) {
@@ -1276,7 +1289,6 @@ function loadListData() {
                 }
             }
         }
-
     })
 }
 
