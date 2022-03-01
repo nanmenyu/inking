@@ -1,7 +1,7 @@
 <!-- 作品(纯文本)编写页 -->
 <template>
     <TitleBlock></TitleBlock>
-    <div v-if="showkeywordDetail" ref="keywordDetail" class="keyword-detail">
+    <div @click.stop v-if="showkeywordDetail" ref="keywordDetail" class="keyword-detail">
         <div class="keyword-head">
             <div class="head-left">
                 <img :src="currentKeyword.data.itemImg" />
@@ -139,7 +139,12 @@
             <a-layout-header>
                 <div class="head-item">
                     <!-- 全屏洁净模式 -->
-                    <a-tooltip background-color="#3491FA" mini content="全屏洁净模式(F1)">
+                    <a-tooltip
+                        background-color="#3491FA"
+                        position="bottom"
+                        mini
+                        content="全屏洁净模式(F1)"
+                    >
                         <a-button class="headerBtn">
                             <icon-fullscreen />&nbsp;全屏
                         </a-button>
@@ -637,7 +642,7 @@
                     @moving="resizeBoxMoving"
                     :directions="['left']"
                     class="sider-right"
-                    style="width: 200px;"
+                    style="width: 600px;"
                 >
                     <!-- 伸缩杆 -->
                     <template #resize-trigger="{ direction }">
@@ -672,6 +677,12 @@
                                     showCollapseButton
                                     @menu-item-click="choicePopButton"
                                 >
+                                    <a-menu-item style="margin: 10px 0;" key="0">
+                                        <template #icon>
+                                            <icon-star />
+                                        </template>
+                                        首页
+                                    </a-menu-item>
                                     <a-menu-item style="margin: 10px 0;" key="1">
                                         <template #icon>
                                             <img :src="svg_plot" />
@@ -705,14 +716,14 @@
                                 </a-menu>
                             </template>
                         </a-trigger>
+                        <WebviewBlock v-if="showModular === '0'"></WebviewBlock>
                         <PlotEditor v-if="showModular === '1'"></PlotEditor>
                         <KeywordEditor v-if="showModular === '2'"></KeywordEditor>
                         <DiagramEditor v-if="showModular === '3'"></DiagramEditor>
                         <TimelineEditor v-if="showModular === '4'" ref="ref_TimelineEditor"></TimelineEditor>
                         <MapEditor v-if="showModular === '5'"></MapEditor>
-                        <div v-if="showIframeWrap" class="iframe-Wrap"></div>
+                        <div v-if="showIframeWrap" class="right-Wrap"></div>
                     </div>
-                    <!-- <webview class="iframe" src="https://wantwords.net/"></webview> -->
                     <!-- <iframe class="iframe" src="https://wantwords.net/"></iframe> -->
                 </a-resize-box>
             </a-layout>
@@ -725,11 +736,12 @@ import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmo
 import {
     IconDown, IconExport, IconCaretRight, IconCaretLeft, IconClose, IconUndo,
     IconBook, IconCaretDown, IconCheckCircle, IconFullscreen, IconMessage,
-    IconDoubleRight, IconSearch, IconArrowUp, IconArrowDown, IconApps
+    IconDoubleRight, IconSearch, IconArrowUp, IconArrowDown, IconApps, IconStar
 } from '@arco-design/web-vue/es/icon';
 import TitleBlock from '../components/TitleBlock.vue';
 import WritingPaper from '../components/WritingPaper.vue';
 import PopupMenu from '../components/widget/PopupMenu.vue';
+import WebviewBlock from '../components/WebviewBlock.vue';
 import PlotEditor from '../components/PlotEditor.vue';
 import KeywordEditor from '../components/KeywordEditor.vue';
 import DiagramEditor from '../components/DiagramEditor.vue';
@@ -1244,15 +1256,15 @@ const closeScroll = () => {
 
 const resizeBoxMoving = () => {
     if (ref_TimelineEditor.value) ref_TimelineEditor.value.setSliderState();
-    // if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
+    if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
 }
 
 // 右侧PopButton选择并渲染对应组件
-const popupVisible = ref(false), showModular = ref('1');
+const popupVisible = ref(false), showModular = ref('0');
 if (localStorage.getItem('showModular') === null) {
-    localStorage.setItem('showModular', '1');
+    localStorage.setItem('showModular', '0');
 } else {
-    showModular.value = localStorage.getItem('showModular') ?? '1';
+    showModular.value = localStorage.getItem('showModular') ?? '0';
 }
 const choicePopButton = (key: string) => {
     showModular.value = key;
@@ -1324,17 +1336,15 @@ const showSpanDetail = throttle((e: MouseEvent) => {
             keywordDetail.value.style.top = posY - keywordDetail.value.clientHeight / 2 - domRect.height / 2 + 'px';
             keywordDetail.value.style.left = posX + 10 + 'px';
             keywordDetail.value.onmouseleave = (e: MouseEvent) => {
+                showkeywordDetail.value = (<HTMLElement>e.relatedTarget).className === 'arco-trigger-content arco-popover-popup-content';
                 const arco_trigger_popup = document.querySelector('.arco-trigger-popup');
-                if (arco_trigger_popup === null) {
-                    showkeywordDetail.value = false;
-                } else {
-                    (<HTMLElement>arco_trigger_popup).onmouseenter = () => {
-                        console.log('进入');
-                        // showkeywordDetail.value = true;
+                if (arco_trigger_popup) {
+                    (<HTMLElement>arco_trigger_popup).onclick = (e: MouseEvent) => {
+                        e.stopPropagation();
                     }
-                    showkeywordDetail.value = false;
                 }
             }
+
         })
     } else {
         showkeywordDetail.value = false;
@@ -1345,6 +1355,7 @@ const showSpanDetail = throttle((e: MouseEvent) => {
 let temp_scrollTop = 0;
 const getScrollTop = (e: Event) => {
     temp_scrollTop = (<HTMLElement>e.target).scrollTop;
+    if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
 }
 // 设置纸张距离顶部的高度（用户跳转至编辑位置
 function setScrollTop(tvid: string, tcid: string) {
@@ -1462,21 +1473,15 @@ function modifyDbforItem(t_kid: string, t_iid: string, hd: Function, cb?: Functi
 onMounted(() => {
     const mainEditor = document.getElementById('mainEditor');
     window.addEventListener('keydown', (e: KeyboardEvent) => {
-        if (e.ctrlKey) {
-            console.log('1111111');
-            mainEditor?.addEventListener('mousemove', showSpanDetail);
-        }
+        if (e.ctrlKey) mainEditor?.addEventListener('mousemove', showSpanDetail);
     });
     window.addEventListener('keyup', (e: KeyboardEvent) => {
-        if (!e.ctrlKey) {
-            console.log('222');
-            mainEditor?.removeEventListener('mousemove', showSpanDetail);
-        }
+        if (!e.ctrlKey) mainEditor?.removeEventListener('mousemove', showSpanDetail);
     })
     // 屏幕大小改变时关闭悬浮卡片
-    // window.onresize = () => {
-    //     showkeywordDetail.value = false;
-    // }
+    window.onresize = () => { showkeywordDetail.value = false; }
+    // 点击任意地方关闭悬浮卡片（目标卡片禁用冒泡
+    window.addEventListener('click', () => { if (showkeywordDetail.value) showkeywordDetail.value = false; })
 
     nextTick(() => {
         // console.log(document.getElementsByClassName('keyWord'));
