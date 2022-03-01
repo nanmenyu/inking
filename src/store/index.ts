@@ -9,6 +9,7 @@ export const useMainStore = defineStore('mainStore', {
         highlightCount: 0, // 检索到的关键字总数
         targetIndex: 1, // 当前检索指向的关键字
         keywordArr: [], //当前的关键字数组
+        KeywordEditorChange: false // 关键字页数据是否发生更新
     }),
     getters: {
 

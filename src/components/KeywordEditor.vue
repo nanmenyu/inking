@@ -534,6 +534,7 @@ import 'cropperjs/dist/cropper.css';
 import * as echarts from 'echarts';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { v4 } from 'uuid';
+import { useMainStore } from '../store/index';
 import defaultImg from '../../public/static/img/default.png';
 import templateicon from '../assets/svg/templateicon.svg';
 import addKeyWord from '../assets/svg/addKeyWord.svg';
@@ -541,6 +542,7 @@ import addKeyWord from '../assets/svg/addKeyWord.svg';
 const { proxy } = useCurrentInstance();
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
+const mainStore = useMainStore();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
 interface AssociatedOption {
@@ -1579,6 +1581,7 @@ function loadKeyWodData(cb?: Function) {
     db.opus.get(query_id).then(value => {
         theKeyWord.data = value!.theKeyWord;
         getAssociatedOptions();
+        mainStore.KeywordEditorChange = true; // 修改是否改变了数据的状态
         if (typeof cb === 'function') cb();
     })
 }

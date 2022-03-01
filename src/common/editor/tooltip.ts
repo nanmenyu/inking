@@ -37,7 +37,16 @@ class SelectionSizeTooltip {
         let left = Math.max((start.left + end.left) / 2, start.left + 3);
         this.tooltip.style.left = (left - box.left) + "px";
         this.tooltip.style.bottom = (box.bottom - start.top) + "px";
-        this.tooltip.textContent = '🥵' + (to - from);
+        let count = to - from;
+        if (count < 5) {
+            this.tooltip.textContent = '😑' + count;
+        } else if (count < 10) {
+            this.tooltip.textContent = '😯' + count;
+        } else if (count < 20) {
+            this.tooltip.textContent = '😬' + count;
+        } else {
+            this.tooltip.textContent = '😱' + count;
+        }
     }
 
     destroy() { this.tooltip.remove() }

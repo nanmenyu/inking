@@ -4,13 +4,12 @@
     <div v-if="showkeywordDetail" ref="keywordDetail" class="keyword-detail">
         <div class="keyword-head">
             <div class="head-left">
-                <img src="http://v.bootstrapmb.com/2019/10/6bsjf6461/images/case-logo002.png" />
+                <img :src="currentKeyword.data.itemImg" />
             </div>
             <div class="head-middle">
                 <ul>
-                    <li>🔸奥兹</li>
-                    <li>🔸奥兹莫奥兹莫奥兹莫奥兹莫</li>
-                    <li>🔸Ozmo</li>
+                    <li>🔸{{ currentKeyword.data.itemName }}</li>
+                    <li v-for="item in currentKeyword.data.otherName.slice(0, 2)">🔸{{ item }}</li>
                 </ul>
             </div>
             <div class="head-right">
@@ -19,44 +18,54 @@
                         style="max-width: 300px;"
                         trigger="click"
                         position="rt"
-                        title="主名9999主名999主名9999主名9999主主名9999主名999主名9999主名9999主名9"
+                        :title="currentKeyword.data.itemName + '/' + currentKeyword.data.otherName.join('/')"
                     >
                         <span title="查看更多">
                             <icon-apps />
                         </span>
                         <template #content>
                             <div class="popover-content">
-                                <span>拜蒙(双性魔)的男性体。贝利尔令至上三柱秘密诛杀。拜蒙不敌，躯体消逝、魂魄碎裂。但就在千钧一发之际，死神阿努比斯将弥散的魂魄残片重新寻回，将拜蒙的男性面带入了冥界，而女性面则不知去向。如今寄宿在一个名叫奥兹莫(Ozmo)的年轻人(已死)身上。代号：sr-kn103拜蒙(双性魔)的男性体。贝利尔令至上三柱秘密诛杀。拜蒙不敌，躯体消逝、魂魄碎裂。但就在千钧一发之际，死神阿努比斯将弥散的魂魄残片重新寻回，将拜蒙的男性面带入了冥界，而女性面则不知去向。如今寄宿在一个名叫奥兹莫(Ozmo)的年轻人(已死)身上。代号：sr-kn103</span>
+                                <span>{{ currentKeyword.data.itemDesc }}</span>
                             </div>
                         </template>
                     </a-popover>
-                    <span title="下一页">
+                    <span @click="nextPage(1)" title="下一页">
                         <icon-caret-right />
                     </span>
-                    <span title="上一页">
+                    <span @click="nextPage(-1)" title="上一页">
                         <icon-caret-left />
                     </span>
                 </a-space>
             </div>
         </div>
         <div class="keyword-middle">
-            <a-space wrap size="mini">
+            <a-space v-if="currentPage === 1" wrap size="mini">
                 <a-tag
+                    v-for="item in currentKeyword.data.itemString"
                     style="max-width: 200px;border-radius: 5px;"
                     color="arcoblue"
-                >性别大师傅士大夫士大夫撒旦🔸男sdasdasd实打实大苏打发v大师史蒂芬</a-tag>
-                <a-tag style="max-width: 200px;border-radius: 5px;" color="arcoblue">性别🔸男</a-tag>
-                <a-tag style="max-width: 200px;border-radius: 5px;" color="arcoblue">性别🔸男</a-tag>
-                <a-tag
-                    style="max-width: 200px;border-radius: 5px;"
-                    color="arcoblue"
-                >性别🔸男性别🔸男性别🔸男性别🔸男性别🔸男性别🔸男性别🔸男性别🔸男</a-tag>
-                <a-tag style="max-width: 200px;border-radius: 5px;" color="arcoblue">性别🔸男</a-tag>
-                <a-tag style="max-width: 200px;border-radius: 5px;" color="arcoblue">性别🔸男</a-tag>
-                <a-tag style="max-width: 200px;border-radius: 5px;" color="arcoblue">性别🔸男</a-tag>
+                >{{ item.key }}🔸{{ item.value }}</a-tag>
             </a-space>
+            <a-space v-if="currentPage === 2" wrap size="mini">
+                <a-tag
+                    v-for="item in currentKeyword.data.itemNumber"
+                    style="max-width: 200px;border-radius: 5px;"
+                    color="green"
+                >{{ item.key }}🔸{{ item.value + item.unit }}</a-tag>
+            </a-space>
+            <ul v-if="currentPage === 3" class="middle-associated">
+                <li
+                    v-for="item in currentKeyword.data.associated.sort((a, b) => b.value - a.value)"
+                >
+                    <a-tag
+                        style="max-width: 100px;border-radius: 5px;"
+                        color="magenta"
+                    >{{ item.key }}</a-tag>
+                    <span class="degree">{{ getAssociatedmark(item.value) }}</span>
+                </li>
+            </ul>
         </div>
-        <div class="keyword-bottom"></div>
+        <!-- <div class="keyword-bottom"></div> -->
         <div class="panel-btn" title="唤出关键字面板">🛩️</div>
     </div>
     <PopupMenu
@@ -1235,6 +1244,7 @@ const closeScroll = () => {
 
 const resizeBoxMoving = () => {
     if (ref_TimelineEditor.value) ref_TimelineEditor.value.setSliderState();
+    // if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
 }
 
 // 右侧PopButton选择并渲染对应组件
@@ -1248,6 +1258,23 @@ const choicePopButton = (key: string) => {
     showModular.value = key;
     localStorage.setItem('showModular', key);
 }
+// 点击右侧快捷键进行关键字翻页
+const currentPage: Ref<number> = ref(1);// 1 2 3
+const nextPage = (offset: 1 | -1) => {
+    if (offset == 1) {
+        currentPage.value = currentPage.value === 3 ? 1 : currentPage.value + 1;
+    } else if (offset == -1) {
+        currentPage.value = currentPage.value === 1 ? 3 : currentPage.value - 1;
+    }
+}
+// 获得关联值标记
+const getAssociatedmark = (value: number) => {
+    let mark = '🔥';
+    for (let i = 1; i < value; i++) {
+        mark += '🔥';
+    }
+    return mark
+}
 
 const modify = () => {
     isRename.value = false;
@@ -1257,6 +1284,18 @@ const modify = () => {
 
 // 掠过关键字所在的span
 const showkeywordDetail = ref(false), keywordDetail = ref();
+const currentKeyword: { data: KeyWord } = reactive({
+    data: {
+        iid: '',
+        itemDesc: '',
+        itemImg: '',
+        itemName: '',
+        associated: [],
+        itemNumber: [],
+        itemString: [],
+        otherName: []
+    }
+}); // 当前的关键字数据
 let kid_iid_old = ''; // 用来防指多次触发多次访问数据库拿取同一段数据
 const showSpanDetail = throttle((e: MouseEvent) => {
     if ((<HTMLElement>e.target).getAttribute('class') === 'keyWord') {
@@ -1268,12 +1307,13 @@ const showSpanDetail = throttle((e: MouseEvent) => {
             for (let i = 2; i < item.length; i++) {
                 if (item[i] === targetText) {
                     let kid_iid_new = item[0] + item[1];
-                    if (kid_iid_new !== kid_iid_old) {
+                    // 关键字数据状态改变||新旧id不相等
+                    if (mainStore.KeywordEditorChange || kid_iid_new !== kid_iid_old) {
                         kid_iid_old = kid_iid_new;
-                        modifyDbforItem(item[0], item[1], (item: Userdb) => {
-                            // console.log(item);
+                        modifyDbforItem(item[0], item[1], (item: KeyWord) => {
+                            currentKeyword.data = item;
                         }, () => {
-
+                            mainStore.KeywordEditorChange = false;
                         })
                     }
                     break;
@@ -1283,6 +1323,18 @@ const showSpanDetail = throttle((e: MouseEvent) => {
         nextTick(() => {
             keywordDetail.value.style.top = posY - keywordDetail.value.clientHeight / 2 - domRect.height / 2 + 'px';
             keywordDetail.value.style.left = posX + 10 + 'px';
+            keywordDetail.value.onmouseleave = (e: MouseEvent) => {
+                const arco_trigger_popup = document.querySelector('.arco-trigger-popup');
+                if (arco_trigger_popup === null) {
+                    showkeywordDetail.value = false;
+                } else {
+                    (<HTMLElement>arco_trigger_popup).onmouseenter = () => {
+                        console.log('进入');
+                        // showkeywordDetail.value = true;
+                    }
+                    showkeywordDetail.value = false;
+                }
+            }
         })
     } else {
         showkeywordDetail.value = false;
@@ -1409,7 +1461,22 @@ function modifyDbforItem(t_kid: string, t_iid: string, hd: Function, cb?: Functi
 /*---------------------生命周期---------------------*/
 onMounted(() => {
     const mainEditor = document.getElementById('mainEditor');
-    mainEditor?.addEventListener('mousemove', showSpanDetail);
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.ctrlKey) {
+            console.log('1111111');
+            mainEditor?.addEventListener('mousemove', showSpanDetail);
+        }
+    });
+    window.addEventListener('keyup', (e: KeyboardEvent) => {
+        if (!e.ctrlKey) {
+            console.log('222');
+            mainEditor?.removeEventListener('mousemove', showSpanDetail);
+        }
+    })
+    // 屏幕大小改变时关闭悬浮卡片
+    // window.onresize = () => {
+    //     showkeywordDetail.value = false;
+    // }
 
     nextTick(() => {
         // console.log(document.getElementsByClassName('keyWord'));
