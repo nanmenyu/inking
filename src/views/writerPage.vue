@@ -679,9 +679,9 @@
                                 >
                                     <a-menu-item style="margin: 10px 0;" key="0">
                                         <template #icon>
-                                            <icon-star />
+                                            <icon-public />
                                         </template>
-                                        首页
+                                        WebView
                                     </a-menu-item>
                                     <a-menu-item style="margin: 10px 0;" key="1">
                                         <template #icon>
@@ -736,7 +736,7 @@ import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmo
 import {
     IconDown, IconExport, IconCaretRight, IconCaretLeft, IconClose, IconUndo,
     IconBook, IconCaretDown, IconCheckCircle, IconFullscreen, IconMessage,
-    IconDoubleRight, IconSearch, IconArrowUp, IconArrowDown, IconApps, IconStar
+    IconDoubleRight, IconSearch, IconArrowUp, IconArrowDown, IconApps, IconPublic
 } from '@arco-design/web-vue/es/icon';
 import TitleBlock from '../components/TitleBlock.vue';
 import WritingPaper from '../components/WritingPaper.vue';

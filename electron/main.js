@@ -61,6 +61,8 @@ async function createWindow() {
 
 }
 
+app.commandLine.appendSwitch('ignore-certificate-errors')    //忽略证书的检测
+
 app.whenReady().then(() => {
     createWindow();
     // if (NODE_ENV === 'development') {
