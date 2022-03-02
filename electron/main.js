@@ -2,7 +2,7 @@ const {
     app,
     // protocol,
     BrowserWindow,
-    session,
+    // session,
     // Menu,
     ipcMain,
     dialog

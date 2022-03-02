@@ -21,7 +21,7 @@
                     @search="toSearch"
                     @press-enter="toSearch_enter"
                     size="small"
-                    :style="{ width: '320px' }"
+                    :style="{ width: '300px' }"
                     placeholder="从百度上搜索"
                 >
                     <template #prefix>
@@ -43,7 +43,7 @@
             </div>
         </div>
         <!-- <a-spin v-if="showLoading" class="loadingSpin" style="margin-top: 200px;" :size="20" dot /> -->
-        <div v-if="errorMsg.isErr" class="errorPage">
+        <!-- <div v-if="errorMsg.isErr" class="errorPage">
             <a-result status="error" :title="errorMsg.errorCode">
                 <template #icon>
                     <IconFaceFrownFill />
@@ -58,8 +58,26 @@
                     >Refresh</a-button>
                 </template>
             </a-result>
+        </div>-->
+        <div v-show="!isShowWebview" class="favorites">
+            <div
+                v-for="item in [1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 1, 1, 1, 1, 1, 1, 1, 1,]"
+                class="tile"
+            >
+                <div class="tile-icon">
+                    <img />
+                </div>
+                <div class="tile-title">百度翻译百度翻译百度翻译百度翻译</div>
+            </div>
         </div>
-        <webview v-show="isShowWebview" class="webview" :src="webviewSrc" :useragent="defaultUA"></webview>
+        <webview
+            v-show="isShowWebview"
+            class="webview"
+            :src="webviewSrc"
+            :useragent="defaultUA"
+            nodeintegration
+            disablewebsecurity
+        ></webview>
         <!-- useragent="Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Mobile Safari/537.36" -->
         <!-- :style="showLoading ? 'opacity:0.5' : ''" -->
     </div>
@@ -71,24 +89,25 @@ import {
     IconLeft, IconRight, IconUser, IconFaceFrownFill, IconRefresh, IconDown,
     IconHome
 } from '@arco-design/web-vue/es/icon';
-const errorMsg = reactive({ isErr: false, errorCode: 0, errorDescription: '' });
+// const errorMsg = reactive({ isErr: false, errorCode: 0, errorDescription: '' });
 const needSpin = ref(false); // 是否需要旋转刷新图标
 const searchSite = {
     baidu: 'https://www.baidu.com/s?wd=',
+    baidu_hanyu: 'https://hanyu.baidu.com/s?wd=',
     bing: 'https://cn.bing.com/search?q=',
     google: 'https://www.google.com/search?q=',
     wikipedia_zh: 'https://zh.wikipedia.org/w/index.php?search=',
-    wikipedia_en: 'https://en.wikipedia.org/w/index.php?search='
+    wikipedia_en: 'https://en.wikipedia.org/w/index.php?search=',
 };
 
 // 使用搜索引擎搜索
 const isShowWebview = ref(false), webviewSrc = ref('');
 const searchData = ref('');
 const toSearch = () => {
-    toWebviewPage(searchSite.wikipedia_en + searchData.value);
+    toWebviewPage(searchSite.baidu + searchData.value);
 }
 const toSearch_enter = () => {
-    toWebviewPage(searchSite.wikipedia_en + searchData.value);
+    toWebviewPage(searchSite.baidu + searchData.value);
 }
 // 历史跳转
 let _webview: any;
@@ -109,10 +128,7 @@ const toRefresh = () => {
     // if (!showLoading.value)
     _webview.reload();
 }
-const goHome = () => {
-
-    isShowWebview.value = false;
-}
+const goHome = () => { isShowWebview.value = false; }
 
 // watch(showLoading, value => {
 //     // 加载时不允许出现错误信息
@@ -129,16 +145,14 @@ const selectUA = (value: string) => {
         if (_webview) {
             _webview.setUserAgent(phoneUA);
             toRefresh();
-        } else {
-            defaultUA.value = phoneUA;
         }
+        defaultUA.value = phoneUA;
     } else if (currentUaType.value !== '电脑' && value === '电脑') {
         if (_webview) {
             _webview.setUserAgent(pcUA);
             toRefresh();
-        } else {
-            defaultUA.value = pcUA;
         }
+        defaultUA.value = pcUA;
     }
     currentUaType.value = value;
 }
@@ -155,6 +169,13 @@ const CSSToInject = `
     }
 `;
 
+const JSToInject = `
+    const { ipcRenderer } = require('electron').remote
+        ipcRenderer.on('ping', () => {
+        ipcRenderer.sendToHost('pong')
+    })
+`;
+
 // 渲染webview
 function toWebviewPage(src: string) {
     webviewSrc.value = src;
@@ -168,6 +189,9 @@ function toWebviewPage(src: string) {
                 // console.dir(webview);
                 // console.log(webview.getWebContentsId());
                 webview.insertCSS(CSSToInject);
+                webview.executeJavaScript(JSToInject);
+                webview.openDevTools(); // 新窗口打开webview内的调试工具
+                webview.send('ping')
             })
             webview.addEventListener('did-start-loading', () => {
                 needSpin.value = true;
@@ -178,15 +202,27 @@ function toWebviewPage(src: string) {
             })
             webview.addEventListener('did-fail-load', (e: any) => {
                 console.log(e);
-                [errorMsg.isErr, errorMsg.errorCode, errorMsg.errorDescription] = [true, e.errorCode, e.errorDescription]
+                // [errorMsg.isErr, errorMsg.errorCode, errorMsg.errorDescription] = [true, e.errorCode, e.errorDescription]
             })
-            webview.addEventListener('console-message', () => {
-                // console.dir(e.message)
-            })
+            // webview.addEventListener('console-message', (e: any) => {
+            //     if (e.level === 0) { // level
+            //         // console.log(e.message, 'color:pink');
+            //     } else if (e.level === 1) { // info
+            //         console.log('webview:', e.message);
+            //     } else if (e.level === 2) { // warning 
+            //         // console.log(e.message, 'color:orange');
+            //     } else if (e.level == 3) { // error
+            //         // console.log(e.message, 'color:red');
+            //     }
+            // })
             // 新开窗口时原地打开链接
             webview.addEventListener('new-window', (e: any) => {
                 webview.loadURL(e.url);
             })
+            webview.addEventListener('ipc-message', (e: any) => {
+                console.log(e.channel);
+            })
+
         }
     })
 }
@@ -267,10 +303,53 @@ onBeforeUnmount(() => {
 .blockDown {
     animation: -upward 0.3s ease-in-out forwards;
 }
+.favorites {
+    width: 100%;
+    max-height: calc(100vh - 132px - 91px);
+    overflow-y: scroll;
+    padding: 2px;
+    .tile {
+        box-sizing: border-box;
+        float: left;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100px;
+        height: 100px;
+        border-radius: 4px;
+        transition: background-color 0.3s ease-in-out;
+        &:hover {
+            background-color: #f2f3f5;
+        }
+        .tile-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: red;
+
+            img {
+                height: 24px;
+                width: 24px;
+            }
+        }
+        .tile-title {
+            width: 80px;
+            margin-top: 4px;
+            overflow: hidden;
+            text-align: center;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+}
 .webview {
     position: relative;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 42px);
     border: none;
 }
 

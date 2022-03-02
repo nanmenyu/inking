@@ -458,17 +458,16 @@
                 </div>
             </a-layout-header>
             <a-layout>
-                <a-layout-sider collapsible class="siderLeft">
+                <a-layout-sider collapsible @collapse="onCollapse" class="siderLeft">
                     <a-menu
                         :default-open-keys="[vid]"
                         :default-selected-keys="[cid]"
                         :style="{ width: '100%', textAlign: 'left' }"
                     >
-                        <button @click="isNewVolume = true" class="topBtn">
-                            <!-- <img :src="addVolumeIcon" style="transform: translateY(4px)" /> -->
-                            <span style="transform: translateY(4px)">📜</span>
-                            <span>添加卷</span>
-                        </button>
+                        <button
+                            @click="isNewVolume = true"
+                            class="topBtn"
+                        >📜&nbsp;{{ isCollapse ? '' : '添加卷' }}</button>
                         <a-sub-menu v-for="item in booksLists.data" :key="item.vid">
                             <template #title>
                                 <icon-double-right
@@ -642,7 +641,7 @@
                     @moving="resizeBoxMoving"
                     :directions="['left']"
                     class="sider-right"
-                    style="width: 600px;"
+                    style="width: 700px;"
                 >
                     <!-- 伸缩杆 -->
                     <template #resize-trigger="{ direction }">
@@ -716,7 +715,7 @@
                                 </a-menu>
                             </template>
                         </a-trigger>
-                        <WebviewBlock v-if="showModular === '0'"></WebviewBlock>
+                        <WebviewBlock ref="browserViewBlock" v-if="showModular === '0'"></WebviewBlock>
                         <PlotEditor v-if="showModular === '1'"></PlotEditor>
                         <KeywordEditor v-if="showModular === '2'"></KeywordEditor>
                         <DiagramEditor v-if="showModular === '3'"></DiagramEditor>
@@ -952,6 +951,10 @@ const showChoice = computed(() => {
     if (choiceArr.value[2]) tempStr = paragraphs.value + ' 段';
     return tempStr;
 })
+
+// 左侧是否折叠
+const isCollapse = ref(false);
+const onCollapse = (val: boolean) => { isCollapse.value = val; }
 
 /*----父组件调用子组件的方法----*/
 // 导出文件
@@ -1253,8 +1256,10 @@ const showScroll = () => {
 const closeScroll = () => {
     scrollbarColor.value = '#f5f5f5';
 }
-
+// 跳转小窗口大小
+const browserViewBlock = ref();
 const resizeBoxMoving = () => {
+    browserViewBlock.value.resizeBrowserView();
     if (ref_TimelineEditor.value) ref_TimelineEditor.value.setSliderState();
     if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
 }
