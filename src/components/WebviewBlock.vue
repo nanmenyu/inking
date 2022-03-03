@@ -8,16 +8,16 @@
         :determineDisabled="quickSearchForm.title.length === 0 || quickSearchForm.url.length === 0 || urlDetection"
     >
         <a-form layout="vertical" :model="quickSearchForm">
-            <a-form-item field="title" label="快捷搜索网站名称">
+            <a-form-item field="title" label="自定义快捷搜索名称">
                 <a-input
                     v-model.trim="quickSearchForm.title"
                     :max-length="20"
                     show-word-limit
                     allow-clear
-                    placeholder="请输入网站名称..."
+                    placeholder="请输入快捷搜索名称..."
                 ></a-input>
             </a-form-item>
-            <a-form-item field="url" label="链接(搜索词会直接拼接在后面)">
+            <a-form-item field="url" label="链接请以https://或http://开头(搜索词会直接拼接在后面)">
                 <a-input
                     v-model.trim="quickSearchForm.url"
                     :max-length="999"
@@ -69,13 +69,38 @@
             </div>
         </div>
         <div class="topChoice">
-            <a-tabs position="bottom" default-active-key="1" @change="changeSearch">
+            <a-tabs
+                @change="changeSearch"
+                :default-active-key="defaultSiteKey"
+                size="small"
+                type="text"
+            >
                 <template #extra>
                     <a-button @click="custQuickSearch" type="text" shape="circle" title="自定义快捷搜索">
                         <icon-plus />
                     </a-button>
                 </template>
-                <a-tab-pane v-for="item in searchSiteList.data" :key="item.key" :title="item.title"></a-tab-pane>
+                <a-tab-pane v-for="item in searchSiteList.data" :key="item.key" :title="item.title">
+                    <div class="tab-content">
+                        <span @click="moveQuickSearch(item.key, -1)" class="btn" title="左移">
+                            <icon-caret-left />
+                        </span>
+                        <a-divider direction="vertical" />
+                        <span style="user-select: text;">🔗&nbsp;{{ item.url }}</span>
+                        <a-divider direction="vertical" />
+                        <span
+                            @click="deleteQuickSearch(item.title, item.key)"
+                            class="btn"
+                            title="删除"
+                        >
+                            <icon-delete />
+                        </span>
+                        <a-divider direction="vertical" />
+                        <span @click="moveQuickSearch(item.key, 1)" class="btn" title="右移">
+                            <icon-caret-right />
+                        </span>
+                    </div>
+                </a-tab-pane>
             </a-tabs>
         </div>
         <!-- <a-spin v-if="showLoading" class="loadingSpin" style="margin-top: 200px;" :size="20" dot /> -->
@@ -106,14 +131,14 @@
                 <div class="tile-title">百度翻译百度翻译百度翻译百度翻译</div>
             </div>
         </div>
-        <webview
+        <WebView
             v-show="isShowWebview"
             class="webview"
             :src="webviewSrc"
             :useragent="defaultUA"
             disablewebsecurity
             nodeintegration
-        ></webview>
+        ></WebView>
         <!-- useragent="Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Mobile Safari/537.36" -->
         <!-- :style="showLoading ? 'opacity:0.5' : ''" -->
     </div>
@@ -122,14 +147,20 @@
 <script setup lang='ts'>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import {
-    IconLeft, IconRight, IconRefresh, IconDown, IconHome, IconPlus
+    IconLeft, IconRight, IconRefresh, IconDown, IconHome, IconPlus, IconDelete,
+    IconCaretLeft, IconCaretRight
 } from '@arco-design/web-vue/es/icon';
 import PopupMenu from './widget/PopupMenu.vue';
+import useCurrentInstance from '../utils/useCurrentInstance';
+import '../style/fine-tune-webview.scss';
+
+const { proxy } = useCurrentInstance();
+const $modal = proxy.$modal;
+const $message = proxy.$message;
 
 const preloadFile = 'file://' + window.$API.__dirname + '/webview/preload.js';
 // const errorMsg = reactive({ isErr: false, errorCode: 0, errorDescription: '' });
 const needSpin = ref(false); // 是否需要旋转刷新图标
-
 const searchSiteList = reactive({
     data: [{
         key: 1,
@@ -156,7 +187,18 @@ const searchSiteList = reactive({
         title: '维基百科(英)',
         url: 'https://en.wikipedia.org/w/index.php?search='
     }]
-})
+});
+let defaultSiteKey = '1';
+
+// 将搜索网站列表与默认的key缓存在local
+const getSearchSiteList = localStorage.getItem('searchSiteList');
+if (getSearchSiteList === null) localStorage.setItem('searchSiteList', JSON.stringify(searchSiteList.data));
+else searchSiteList.data = JSON.parse(getSearchSiteList);
+
+const getSearchSiteKey = localStorage.getItem('searchSiteKey');
+if (getSearchSiteKey === null) localStorage.setItem('searchSiteKey', '1');
+else defaultSiteKey = getSearchSiteKey;
+
 // 修改搜索引擎项
 const searchSite = ref('https://www.baidu.com/s?wd='), searchSiteName = ref('百度搜索');
 const changeSearch = (key: string) => {
@@ -167,6 +209,7 @@ const changeSearch = (key: string) => {
         }
     })
     toSearch();
+    localStorage.setItem('searchSiteKey', key);
 }
 
 // 使用搜索引擎搜索
@@ -187,20 +230,69 @@ const quickSearchForm = reactive({
 })
 // 匹配url的格式是否正确（http://或https://开头
 const urlDetection = computed(() => {
-    const reg = /^https{0,1}:///;
+    const reg = new RegExp('^https{0,1}://');
     return !reg.test(quickSearchForm.url);
 })
+// 添加自定义搜索链接
 const custQuickSearch = () => {
     isCustQuickSearch.value = true;
 }
 const addQuickSearch = () => {
-    searchSiteList.data.push({
-        key: Math.max(...searchSiteList.data.map(item => item.key)),
-        title: quickSearchForm.title,
-        url: quickSearchForm.url
+    let flag = true;
+    // 查看是否重名
+    searchSiteList.data.forEach(item => {
+        if (item.title === quickSearchForm.title) flag = false;
+    })
+    if (flag) {
+        searchSiteList.data.push({
+            key: Math.max(...searchSiteList.data.map(item => item.key)) + 1,
+            title: quickSearchForm.title,
+            url: quickSearchForm.url
+        });
+        isCustQuickSearch.value = false;
+        localStorage.setItem('searchSiteList', JSON.stringify(searchSiteList.data));
+    } else {
+        $message.warning('名称不能重复！');
+    }
+
+}
+const deleteQuickSearch = (title: string, key: number) => {
+    $modal.warning({
+        title: "删除快捷搜索",
+        content: `是否删除"${title}"? `,
+        simple: true,
+        onOk: () => {
+            searchSiteList.data.forEach((item, index) => {
+                if (item.key === key) searchSiteList.data.splice(index, 1);
+            })
+            localStorage.setItem('searchSiteList', JSON.stringify(searchSiteList.data));
+        }
     })
 }
-
+const moveQuickSearch = (key: number, offset: 1 | -1) => {
+    let index;
+    searchSiteList.data.forEach((item, i) => {
+        if (item.key === key) {
+            if (offset === -1) {
+                if (i === 0) $message.warning('已经到头了！');
+                else index = i;
+            } else if (offset === 1) {
+                if (i === searchSiteList.data.length - 1) $message.warning('已经到头了！');
+                else index = i;
+            }
+        }
+    })
+    if (index !== undefined) {
+        elChangeExForArray(index, index + offset, searchSiteList.data);
+        localStorage.setItem('searchSiteList', JSON.stringify(searchSiteList.data));
+    };
+    // 数组交换
+    function elChangeExForArray(index1: number, index2: number, array: Array<any>) {
+        let temp = array[index1];
+        array[index1] = array[index2];
+        array[index2] = temp;
+    }
+}
 
 // 历史跳转
 let _webview: any;
@@ -316,151 +408,7 @@ function toWebviewPage(src: string) {
     })
 }
 
-onMounted(() => {
-
-})
-onBeforeUnmount(() => {
-
-})
 </script>
 
-<style lang="scss" scoped>
-.webviewBlock {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    padding-top: 100px;
-    .block-head {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        height: 32px;
-        margin-bottom: -16px;
-        // transform: translateY(16px);
-        .leftTool {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 32px;
-            span {
-                display: block;
-                width: 20px;
-                height: 20px;
-                margin: 0 5px;
-                border-radius: 50%;
-                cursor: pointer;
-                &:hover {
-                    color: #165dff;
-                }
-            }
-        }
-        .search-input {
-            height: 32px;
-        }
-        .rightTool {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 32px;
-            font-size: 12px;
-            user-select: none;
-            span {
-                margin: 0 5px;
-                cursor: pointer;
-                &:hover {
-                    color: #165dff;
-                }
-            }
-        }
-    }
-
-    .loadingSpin {
-        position: absolute;
-        top: 25%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-    .errorPage {
-        margin-top: 100px;
-        span {
-            margin: 0 4px;
-        }
-    }
-}
-.blockUpward {
-    animation: upward 0.3s ease-in-out forwards;
-}
-.blockDown {
-    animation: -upward 0.3s ease-in-out forwards;
-}
-.favorites {
-    width: 100%;
-    max-height: calc(100vh - 132px - 91px);
-    overflow-y: scroll;
-    padding: 2px;
-    .tile {
-        box-sizing: border-box;
-        float: left;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        width: 100px;
-        height: 100px;
-        border-radius: 4px;
-        transition: background-color 0.3s ease-in-out;
-        &:hover {
-            background-color: #f2f3f5;
-        }
-        .tile-icon {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-
-            img {
-                height: 24px;
-                width: 24px;
-            }
-        }
-        .tile-title {
-            width: 80px;
-            height: 35px;
-            margin-top: 4px;
-            font-weight: lighter;
-            line-height: 18px;
-            text-align: center;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2; /*显示的行数*/
-            overflow: hidden;
-        }
-    }
-}
-.webview {
-    position: relative;
-    width: 100%;
-    height: calc(100% - 42px);
-    border: none;
-}
-
-@keyframes upward {
-    from {
-        padding-top: 100px;
-    }
-    to {
-        padding-top: 10px;
-    }
-}
-@keyframes -upward {
-    from {
-        padding-top: 10px;
-    }
-    to {
-        padding-top: 100px;
-    }
-}
+<style src="../style/webviewblock.scss" lang="scss" scoped>
 </style>

@@ -715,7 +715,7 @@
                                 </a-menu>
                             </template>
                         </a-trigger>
-                        <WebviewBlock ref="browserViewBlock" v-if="showModular === '0'"></WebviewBlock>
+                        <WebviewBlock v-if="showModular === '0'"></WebviewBlock>
                         <PlotEditor v-if="showModular === '1'"></PlotEditor>
                         <KeywordEditor v-if="showModular === '2'"></KeywordEditor>
                         <DiagramEditor v-if="showModular === '3'"></DiagramEditor>
@@ -1257,7 +1257,6 @@ const closeScroll = () => {
     scrollbarColor.value = '#f5f5f5';
 }
 // 跳转小窗口大小
-const browserViewBlock = ref();
 const resizeBoxMoving = () => {
     if (ref_TimelineEditor.value) ref_TimelineEditor.value.setSliderState();
     if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
