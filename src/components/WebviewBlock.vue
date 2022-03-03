@@ -1,4 +1,34 @@
 <template>
+    <PopupMenu
+        v-if="isCustQuickSearch"
+        title="自定义快捷搜索"
+        determine="添加"
+        @toModify="modify"
+        @toDetermine="addQuickSearch"
+        :determineDisabled="quickSearchForm.title.length === 0 || quickSearchForm.url.length === 0 || urlDetection"
+    >
+        <a-form layout="vertical" :model="quickSearchForm">
+            <a-form-item field="title" label="快捷搜索网站名称">
+                <a-input
+                    v-model.trim="quickSearchForm.title"
+                    :max-length="20"
+                    show-word-limit
+                    allow-clear
+                    placeholder="请输入网站名称..."
+                ></a-input>
+            </a-form-item>
+            <a-form-item field="url" label="链接(搜索词会直接拼接在后面)">
+                <a-input
+                    v-model.trim="quickSearchForm.url"
+                    :max-length="999"
+                    :error="urlDetection"
+                    show-word-limit
+                    allow-clear
+                    placeholder="请输入网站的搜索链接..."
+                ></a-input>
+            </a-form-item>
+        </a-form>
+    </PopupMenu>
     <div :class="`webviewBlock ${isShowWebview ? 'blockUpward' : 'blockDown'}`">
         <div class="block-head">
             <div class="leftTool">
@@ -22,12 +52,8 @@
                     @press-enter="toSearch_enter"
                     size="small"
                     :style="{ width: '300px' }"
-                    placeholder="从百度上搜索"
-                >
-                    <template #prefix>
-                        <icon-user />
-                    </template>
-                </a-input-search>
+                    :placeholder="`从${searchSiteName}上搜索`"
+                ></a-input-search>
             </div>
             <div class="rightTool">
                 <a-dropdown @select="selectUA">
@@ -41,6 +67,16 @@
                     </template>
                 </a-dropdown>
             </div>
+        </div>
+        <div class="topChoice">
+            <a-tabs position="bottom" default-active-key="1" @change="changeSearch">
+                <template #extra>
+                    <a-button @click="custQuickSearch" type="text" shape="circle" title="自定义快捷搜索">
+                        <icon-plus />
+                    </a-button>
+                </template>
+                <a-tab-pane v-for="item in searchSiteList.data" :key="item.key" :title="item.title"></a-tab-pane>
+            </a-tabs>
         </div>
         <!-- <a-spin v-if="showLoading" class="loadingSpin" style="margin-top: 200px;" :size="20" dot /> -->
         <!-- <div v-if="errorMsg.isErr" class="errorPage">
@@ -84,32 +120,88 @@
 </template>
 
 <script setup lang='ts'>
-import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import {
-    IconLeft, IconRight, IconUser, IconRefresh, IconDown, IconHome
+    IconLeft, IconRight, IconRefresh, IconDown, IconHome, IconPlus
 } from '@arco-design/web-vue/es/icon';
+import PopupMenu from './widget/PopupMenu.vue';
 
 const preloadFile = 'file://' + window.$API.__dirname + '/webview/preload.js';
 // const errorMsg = reactive({ isErr: false, errorCode: 0, errorDescription: '' });
 const needSpin = ref(false); // 是否需要旋转刷新图标
-const searchSite = {
-    baidu: 'https://www.baidu.com/s?wd=',
-    baidu_hanyu: 'https://hanyu.baidu.com/s?wd=',
-    bing: 'https://cn.bing.com/search?q=',
-    google: 'https://www.google.com/search?q=',
-    wikipedia_zh: 'https://zh.wikipedia.org/w/index.php?search=',
-    wikipedia_en: 'https://en.wikipedia.org/w/index.php?search=',
-};
+
+const searchSiteList = reactive({
+    data: [{
+        key: 1,
+        title: '百度搜索',
+        url: 'https://www.baidu.com/s?wd='
+    }, {
+        key: 2,
+        title: '百度汉语',
+        url: 'https://hanyu.baidu.com/s?wd='
+    }, {
+        key: 3,
+        title: '必应搜索',
+        url: 'https://cn.bing.com/search?q='
+    }, {
+        key: 4,
+        title: '谷歌搜索',
+        url: 'https://www.google.com/search?q='
+    }, {
+        key: 5,
+        title: '维基百科(中)',
+        url: 'https://zh.wikipedia.org/w/index.php?search='
+    }, {
+        key: 6,
+        title: '维基百科(英)',
+        url: 'https://en.wikipedia.org/w/index.php?search='
+    }]
+})
+// 修改搜索引擎项
+const searchSite = ref('https://www.baidu.com/s?wd='), searchSiteName = ref('百度搜索');
+const changeSearch = (key: string) => {
+    searchSiteList.data.forEach(item => {
+        if (item.key === parseInt(key)) {
+            searchSiteName.value = item.title;
+            searchSite.value = item.url;
+        }
+    })
+    toSearch();
+}
 
 // 使用搜索引擎搜索
 const isShowWebview = ref(false), webviewSrc = ref('');
 const searchData = ref('');
 const toSearch = () => {
-    toWebviewPage(searchSite.baidu + searchData.value);
+    if (searchData.value !== '') toWebviewPage(searchSite.value + searchData.value);
 }
 const toSearch_enter = () => {
-    toWebviewPage(searchSite.baidu + searchData.value);
+    if (searchData.value !== '') toWebviewPage(searchSite.value + searchData.value);
 }
+
+// 自定义快捷搜索项目
+const isCustQuickSearch = ref(false);
+const quickSearchForm = reactive({
+    title: '',
+    url: ''
+})
+// 匹配url的格式是否正确（http://或https://开头
+const urlDetection = computed(() => {
+    const reg = /^https{0,1}:///;
+    return !reg.test(quickSearchForm.url);
+})
+const custQuickSearch = () => {
+    isCustQuickSearch.value = true;
+}
+const addQuickSearch = () => {
+    searchSiteList.data.push({
+        key: Math.max(...searchSiteList.data.map(item => item.key)),
+        title: quickSearchForm.title,
+        url: quickSearchForm.url
+    })
+}
+
+
 // 历史跳转
 let _webview: any;
 const toHistory = (offset: 1 | -1) => {
@@ -158,6 +250,10 @@ const selectUA = (value: string) => {
     currentUaType.value = value;
 }
 
+const modify = () => {
+    isCustQuickSearch.value = false;
+}
+
 // 需要注入的CSS代码
 const CSSToInject = `
     ::-webkit-scrollbar {
@@ -202,7 +298,7 @@ function toWebviewPage(src: string) {
                 webview.send('ping')
             })
             webview.addEventListener('did-fail-load', (e: any) => {
-                console.log(e);
+                // console.log(e);
                 // [errorMsg.isErr, errorMsg.errorCode, errorMsg.errorDescription] = [true, e.errorCode, e.errorDescription]
             })
             // 新开窗口时原地打开链接
@@ -240,7 +336,8 @@ onBeforeUnmount(() => {
         align-items: center;
         width: 100%;
         height: 32px;
-        border-bottom: 1px solid #ccc;
+        margin-bottom: -16px;
+        // transform: translateY(16px);
         .leftTool {
             display: flex;
             justify-content: center;
@@ -277,6 +374,7 @@ onBeforeUnmount(() => {
             }
         }
     }
+
     .loadingSpin {
         position: absolute;
         top: 25%;
