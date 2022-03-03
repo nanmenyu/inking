@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
-import { join, resolve } from 'path'
+// import { join, resolve } from 'path'
 import vue from '@vitejs/plugin-vue'
 // const root = join(__dirname, 'src/render')
 // import path from 'path'

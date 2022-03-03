@@ -75,8 +75,8 @@
             class="webview"
             :src="webviewSrc"
             :useragent="defaultUA"
-            nodeintegration
             disablewebsecurity
+            nodeintegration
         ></webview>
         <!-- useragent="Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Mobile Safari/537.36" -->
         <!-- :style="showLoading ? 'opacity:0.5' : ''" -->
@@ -86,9 +86,10 @@
 <script setup lang='ts'>
 import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import {
-    IconLeft, IconRight, IconUser, IconFaceFrownFill, IconRefresh, IconDown,
-    IconHome
+    IconLeft, IconRight, IconUser, IconRefresh, IconDown, IconHome
 } from '@arco-design/web-vue/es/icon';
+
+const preloadFile = 'file://' + window.$API.__dirname + '/webview/preload.js';
 // const errorMsg = reactive({ isErr: false, errorCode: 0, errorDescription: '' });
 const needSpin = ref(false); // 是否需要旋转刷新图标
 const searchSite = {
@@ -168,12 +169,12 @@ const CSSToInject = `
         border-radius: 5px;
     }
 `;
-
 const JSToInject = `
-    const { ipcRenderer } = require('electron').remote
-        ipcRenderer.on('ping', () => {
-        ipcRenderer.sendToHost('pong')
-    })
+    console.log('进入');
+    document.oncontextmenu = function () {
+    //点击右键后要执行的代码
+    window.$API.ipcSendToH('oncontextmenu')
+    } 
 `;
 
 // 渲染webview
@@ -182,16 +183,15 @@ function toWebviewPage(src: string) {
     isShowWebview.value = true;
     nextTick(() => {
         const webview: any = document.querySelector('webview');
+        // console.log(preloadFile);
+        webview.setAttribute('preload', preloadFile); // 设置注入用preload
         _webview = webview;
         if (webview) {
             webview.addEventListener('dom-ready', () => {
                 // 新窗体打开转换为当前页打开
-                // console.dir(webview);
-                // console.log(webview.getWebContentsId());
                 webview.insertCSS(CSSToInject);
                 webview.executeJavaScript(JSToInject);
                 webview.openDevTools(); // 新窗口打开webview内的调试工具
-                webview.send('ping')
             })
             webview.addEventListener('did-start-loading', () => {
                 needSpin.value = true;
@@ -199,28 +199,21 @@ function toWebviewPage(src: string) {
             webview.addEventListener('did-stop-loading', () => {
                 needSpin.value = false;
                 // webview.executeJavaScript(`console.log(document)`);
+                webview.send('ping')
             })
             webview.addEventListener('did-fail-load', (e: any) => {
                 console.log(e);
                 // [errorMsg.isErr, errorMsg.errorCode, errorMsg.errorDescription] = [true, e.errorCode, e.errorDescription]
             })
-            // webview.addEventListener('console-message', (e: any) => {
-            //     if (e.level === 0) { // level
-            //         // console.log(e.message, 'color:pink');
-            //     } else if (e.level === 1) { // info
-            //         console.log('webview:', e.message);
-            //     } else if (e.level === 2) { // warning 
-            //         // console.log(e.message, 'color:orange');
-            //     } else if (e.level == 3) { // error
-            //         // console.log(e.message, 'color:red');
-            //     }
-            // })
             // 新开窗口时原地打开链接
             webview.addEventListener('new-window', (e: any) => {
                 webview.loadURL(e.url);
             })
             webview.addEventListener('ipc-message', (e: any) => {
-                console.log(e.channel);
+                console.log(e);
+                if (e.channel === 'oncontextmenu') {
+                    alert('子页面点击了右键')
+                }
             })
 
         }
@@ -329,7 +322,6 @@ onBeforeUnmount(() => {
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background-color: red;
 
             img {
                 height: 24px;
@@ -338,11 +330,15 @@ onBeforeUnmount(() => {
         }
         .tile-title {
             width: 80px;
+            height: 35px;
             margin-top: 4px;
-            overflow: hidden;
+            font-weight: lighter;
+            line-height: 18px;
             text-align: center;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2; /*显示的行数*/
+            overflow: hidden;
         }
     }
 }

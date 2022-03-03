@@ -1259,7 +1259,6 @@ const closeScroll = () => {
 // 跳转小窗口大小
 const browserViewBlock = ref();
 const resizeBoxMoving = () => {
-    browserViewBlock.value.resizeBrowserView();
     if (ref_TimelineEditor.value) ref_TimelineEditor.value.setSliderState();
     if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
 }

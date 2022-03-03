@@ -12,7 +12,7 @@ const fs = require('fs');
 const fontList = require('./nodelib/getFontList');
 const b64toFile = require('./nodelib/b64toFile');
 const deleteFolder = require('./nodelib/deleteFolder');
-const HTMLtoDOCX = require('../node_modules/html-to-docx/dist/html-to-docx.umd');
+const HTMLtoDOCX = require('html-to-docx/dist/html-to-docx.umd');
 // const createProtocol = require('./nodelib/createProtocol');
 
 const NODE_ENV = process.env.NODE_ENV
@@ -38,6 +38,7 @@ async function createWindow() {
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             webviewTag: true,
+            nodeIntegration: true,
         }
     })
     // win.loadURL(
