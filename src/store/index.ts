@@ -12,7 +12,7 @@ export const useMainStore = defineStore('mainStore', {
         KeywordEditorChange: false, // 关键字页数据是否发生更新
         codewords_thisTime: 0, // 本次码字数量（从打开程序——>关闭软件）
         codewords: 0, // 临时码字记数
-        isCodewords: false // 是否需要显示本次码字数量
+        // isCodewords: false // 是否需要显示本次码字数量
     }),
     getters: {
     },
@@ -31,8 +31,12 @@ export const useMainStore = defineStore('mainStore', {
         },
         // 保存本次码字数
         updateCodewords_thisTime() {
-            this.codewords_thisTime += this.codewords;
-            if (this.codewords_thisTime < 0) this.codewords_thisTime = 0;
+            let temp = this.codewords_thisTime + this.codewords;
+            if (temp < 0) {
+                this.codewords_thisTime = 0;
+            } else {
+                this.codewords_thisTime = temp;
+            }
         }
     },
 })

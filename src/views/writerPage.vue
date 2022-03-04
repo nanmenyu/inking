@@ -1504,6 +1504,7 @@ onBeforeUnmount(() => {
     setScrollTop(<string>vid.value, <string>cid.value);
     db.opus.update(query_id, { historRecord: { vid: vid.value, cid: cid.value } });
     mainStore.updateCodewords_thisTime();
+    mainStore.codewords = 0;
 })
 onUnmounted(() => {
     window.removeEventListener('keydown', shortcut);

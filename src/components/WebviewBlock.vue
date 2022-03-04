@@ -137,14 +137,14 @@
                 <div class="tile-title">百度翻译百度翻译百度翻译百度翻译</div>
             </div>
         </div>
-        <WebView
+        <webview
             v-show="isShowWebview"
             class="webview"
             :src="webviewSrc"
             :useragent="defaultUA"
             disablewebsecurity
             nodeintegration
-        ></WebView>
+        ></webview>
         <!-- useragent="Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Mobile Safari/537.36" -->
         <!-- :style="showLoading ? 'opacity:0.5' : ''" -->
     </div>
@@ -166,17 +166,10 @@ const $modal = proxy.$modal;
 const $message = proxy.$message;
 const mainStore = useMainStore();
 
-// const isCodewords = computed(() => {
-//     // console.log(mainStore.isCodewords);
-//     return mainStore.isCodewords;
-// })
 const thisCodeword = computed(() => {
     const temp = mainStore.codewords + mainStore.codewords_thisTime;
     return temp > 0 ? temp : 0;
 })
-// watch(isCodewords, () => {
-//     console.log(mainStore.codewords + mainStore.codewords_thisTime);
-// })
 
 const preloadFile = 'file://' + window.$API.__dirname + '/webview/preload.js';
 // const errorMsg = reactive({ isErr: false, errorCode: 0, errorDescription: '' });

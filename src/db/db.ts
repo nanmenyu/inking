@@ -21,16 +21,27 @@ export interface Userdb {
     thePlot: Array<PlotGroup>
 }
 
+export interface User {
+    id?: number;
+    creationTime: number;
+    creationYear: number;
+    creationMonth: number;
+    creationDay: number;
+    codewords: number;
+}
+
 export class MySubClassedDexie extends Dexie {
     opus!: Table<Userdb>;
+    user!: Table<User>;
     // note!: Table<Userdb>;
     // markdown!: Table<Userdb>;
 
     constructor() {
         super('uDatabase');
-        this.version(1).stores({
+        this.version(2).stores({
             // 作品集
             opus: '++id, author, title, discard',
+            user: '++id'
             // 笔记集
             // note: '++id, author, title',
             // markdown

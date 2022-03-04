@@ -39,7 +39,7 @@ async function createWindow() {
             preload: path.join(__dirname, 'preload.js'),
             webviewTag: true,
             nodeIntegration: true,
-            webSecurity: false
+            // webSecurity: false
         }
     })
     // win.loadURL(

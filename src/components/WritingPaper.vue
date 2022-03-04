@@ -88,7 +88,7 @@ const adaHeight = () => {
 const emit_throttle = throttle(() => {
     emit('todata', data);
     mainStore.codewords = chapterNumber - baseChapterNumber;
-    mainStore.isCodewords = !mainStore.isCodewords;
+    // mainStore.isCodewords = !mainStore.isCodewords;
     // 字数提示
     if (data.charCount >= 15000) {
         $modal.warning({
