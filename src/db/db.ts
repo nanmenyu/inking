@@ -18,7 +18,8 @@ export interface Userdb {
     theKeyWord: Array<KeyWordGroup>;
     checked?: boolean;
     theTimeLine: Array<TimeLineGroup>,
-    thePlot: Array<PlotGroup>
+    thePlot: Array<PlotGroup>,
+    opusNumber: number
 }
 
 export interface User {

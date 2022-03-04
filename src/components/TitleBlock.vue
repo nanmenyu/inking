@@ -49,9 +49,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import {
-    IconLeft,
-    IconRight
+    IconLeft, IconRight
 } from '@arco-design/web-vue/es/icon';
+import { db } from '../db/db';
+import { useMainStore } from '../store/index';
 import router from '../router/index';
 import { useRoute } from 'vue-router';
 import minimizeIcon from '../assets/svg/minimizeIcon.svg';
@@ -59,9 +60,10 @@ import maximizeIcon from '../assets/svg/maximizeIcon.svg';
 import maximizeIcon2 from '../assets/svg/maximizeIcon2.svg';
 import closeWinIcon from '../assets/svg/closeWinIcon.svg';
 
+const mainStore = useMainStore();
+
 /*----控制页面的前进后退----*/
-const backDisable = ref(false),
-    forwardDisable = ref(false);
+const backDisable = ref(false), forwardDisable = ref(false);
 const back = () => {
     router.go(-1);
 }
@@ -83,6 +85,11 @@ function maximizeWin() {
     isMax.value = !isMax.value;
 }
 function closeWin() {
+    // 关闭之前做点善后工作
+    db.user.where(':id').equals(mainStore.currentUserId).modify(item => {
+        // 保存今日码字数
+        item.codewords = item.codewords + mainStore.TotalNumber_thisTime - mainStore.contrastTotalNumber_thisTime;
+    })
     window.$API.ipcSend("window-close");
 }
 

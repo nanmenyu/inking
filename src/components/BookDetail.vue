@@ -1019,6 +1019,7 @@ function loadData() {
             .then(value => {
                 if (value) {
                     booksData.data = value;
+                    totalWords.value = value.opusNumber;
                     // 表单值预先初始化
                     form.name = booksData.data.author;
                     form.opus = booksData.data.title;
@@ -1034,22 +1035,17 @@ function loadData() {
                         if (item.discard) wastepaperBasketData.push(item);
                         return !item.discard;
                     });
-                    let num = 0, wordNum = 0;
+                    let num = 0;
                     booksData.data.data.forEach(item => {
                         item.volume = item.volume.filter(it => {
                             // 判断目标章是否有删除标记
-                            if (it.discard) {
-                                wastepaperBasketData.push(it);
-                            } else {
-                                wordNum += it.chapterNum || 0;
-                                num++;
-                            }
+                            if (it.discard) wastepaperBasketData.push(it);
+                            else num++;
                             return !it.discard;
                         })
                     });
                     booksData.data.data.length > 0 ? isEmpty.value = false : isEmpty.value = true;
                     totalNumber.value = num; // 作品总章数
-                    totalWords.value = wordNum; // 作品总字数
                 }
             });
     }

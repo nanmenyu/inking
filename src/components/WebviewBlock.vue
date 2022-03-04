@@ -32,7 +32,7 @@
     <div :class="`webviewBlock ${isShowWebview ? 'blockUpward' : 'blockDown'}`">
         <div class="block-statistics">
             <a-space size="large">
-                <a-statistic title="本次码字" :value="thisCodeword" />
+                <a-statistic title="本次码字" :value="thisTimeCodeword" />
                 <a-statistic title="今日码字" :value="3232" />
             </a-space>
         </div>
@@ -166,9 +166,14 @@ const $modal = proxy.$modal;
 const $message = proxy.$message;
 const mainStore = useMainStore();
 
-const thisCodeword = computed(() => {
-    const temp = mainStore.codewords + mainStore.codewords_thisTime;
-    return temp > 0 ? temp : 0;
+// 本次码字数量
+const thisTimeCodeword = computed(() => {
+    if (mainStore.TotalNumber_thisTime > mainStore.contrastTotalNumber_thisTime) {
+        return mainStore.TotalNumber_thisTime - mainStore.contrastTotalNumber_thisTime;
+    } else {
+        mainStore.contrastTotalNumber_thisTime = mainStore.TotalNumber_thisTime;
+        return 0;
+    }
 })
 
 const preloadFile = 'file://' + window.$API.__dirname + '/webview/preload.js';

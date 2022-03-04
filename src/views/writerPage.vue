@@ -470,7 +470,7 @@
                         >📜&nbsp;{{ isCollapse ? '' : '添加卷' }}</button>
                         <a-sub-menu v-for="item in booksLists.data" :key="item.vid">
                             <template #title>
-                                <icon-double-right
+                                <icon-right-circle
                                     @click.stop="showLeftMore = showLeftMore === item.vid ? '' : item.vid"
                                     class="siderLeft-btn"
                                 />
@@ -641,7 +641,7 @@
                     @moving="resizeBoxMoving"
                     :directions="['left']"
                     class="sider-right"
-                    style="width: 700px;"
+                    style="width: 510px;"
                 >
                     <!-- 伸缩杆 -->
                     <template #resize-trigger="{ direction }">
@@ -735,7 +735,7 @@ import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmo
 import {
     IconDown, IconExport, IconCaretRight, IconCaretLeft, IconClose, IconUndo,
     IconBook, IconCaretDown, IconCheckCircle, IconFullscreen, IconMessage,
-    IconDoubleRight, IconSearch, IconArrowUp, IconArrowDown, IconApps, IconPublic
+    IconRightCircle, IconSearch, IconArrowUp, IconArrowDown, IconApps, IconPublic
 } from '@arco-design/web-vue/es/icon';
 import TitleBlock from '../components/TitleBlock.vue';
 import WritingPaper from '../components/WritingPaper.vue';
@@ -1396,7 +1396,7 @@ function loadListData() {
             })
             // 渲染关键词
             keywordMarks.value = genkeywordMarks(keyWordArr);
-            mainStore.updateCodewords_thisTime();
+            // mainStore.updateCodewords_thisTime();
             myRef.value.setBooksData(value, keywordMarks.value);
             // 加载卷章列表
             booksLists.data = value.data.filter((item: Volume) => {
@@ -1502,9 +1502,8 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
     setScrollTop(<string>vid.value, <string>cid.value);
+    // 更新继续写作对应的vid_cid
     db.opus.update(query_id, { historRecord: { vid: vid.value, cid: cid.value } });
-    mainStore.updateCodewords_thisTime();
-    mainStore.codewords = 0;
 })
 onUnmounted(() => {
     window.removeEventListener('keydown', shortcut);

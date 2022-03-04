@@ -276,6 +276,7 @@ const addFile = () => {
                         }]
                     }]
                 }], // 剧情大纲模块
+                opusNumber: 0 // 两个中文空格不算字
             }).then(() => {
                 emit('refresh');
             });

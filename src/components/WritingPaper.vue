@@ -1,7 +1,12 @@
  <!-- 写作纸张 -->
  <template>
     <div id="paper-box" ref="pBox">
-        <main @keydown="adaHeight" @keyup="getData" id="pEditor" ref="editor">
+        <main
+            @keydown="adaHeight"
+            @keyup="getData(), input_saveDocData($event);"
+            id="pEditor"
+            ref="editor"
+        >
             <div id="mainEditor" ref="mEditor"></div>
         </main>
     </div>
@@ -24,11 +29,6 @@ const emit = defineEmits(['todata']), { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
 const mainStore = useMainStore();
-// 监视是否需要保存当前页面内容
-// let needSaveDoc = computed(() => mainStore.needSaveDocData);
-// watch(needSaveDoc, isNeed => {
-//     if (isNeed) saveDocData(false);
-// })
 
 onMounted(() => {
     editor.value.addEventListener('keydown', insertSpace);
@@ -64,7 +64,7 @@ const setId = (newVid: string, newCid: string) => {
 
 /*----监视纸张和字数变化----*/
 const editor = ref();
-let data: Pagecount, baseChapterNumber = 0, chapterNumber = 0;
+let data: Pagecount, chapterNumber = 0;
 let timer: any = null; // 定时器用于测速
 // 监视输入框中的各项数值
 const getData = () => {
@@ -87,8 +87,6 @@ const adaHeight = () => {
 // 具体节流项目
 const emit_throttle = throttle(() => {
     emit('todata', data);
-    mainStore.codewords = chapterNumber - baseChapterNumber;
-    // mainStore.isCodewords = !mainStore.isCodewords;
     // 字数提示
     if (data.charCount >= 15000) {
         $modal.warning({
@@ -96,36 +94,59 @@ const emit_throttle = throttle(() => {
             content: '单章字符数不宜过多(>15000),因为可能会影响导出PDF的性能(不导出就随意)'
         })
     }
-    saveDocData(false);
+    // mainStore.codewords = chapterNumber - baseChapterNumber;
+    // mainStore.isCodewords = !mainStore.isCodewords;
 }, 300);
+
+// 键盘抬起时保存
+const input_saveDocData = (e: KeyboardEvent) => {
+    // 忽略一些键再保存
+    const keyToIgnore = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+        'Shift', 'Meta', 'Alt', 'Control', 'CapsLock', 'PageUp', 'PageDown', 'Escape',
+        'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'];
+    if (keyToIgnore.indexOf(e.key) === -1) saveDocData(false);
+}
 
 // 保存数据至数据库
 const saveDocData = throttle((showMsg: boolean) => {
+    console.log('save');
     const editorData = editor.value.firstElementChild.firstElementChild.children, dataArr: Array<string> = [];
     for (let i = 0; i < editorData.length; i++) {
         dataArr.push(editorData[i].innerText);
     }
     // 直接修改
+    let totalNumber = 0;
     db.opus.where(':id').equals(query_id).modify(value => {
-        for (let i = 0; i < value.data.length; i++) {
-            if (value.data[i].vid === vid) {
-                for (let j = 0; j < value.data[i].volume.length; j++) {
-                    if (value.data[i].volume[j].cid === cid) {
-                        value.data[i].volume[j].chapter = dataArr;
-                        value.data[i].volume[j].chapterNum = chapterNumber;
-                        value.data[i].volume[j].updateTime = new Date().getTime();
+        value.data.forEach(item => {
+            if (item.vid === vid) {
+                item.volume.forEach(it => {
+                    if (it.cid === cid) {
+                        it.chapter = dataArr;
+                        it.chapterNum = chapterNumber;
+                        it.updateTime = new Date().getTime();
                         value.updateTime = new Date().getTime();// 更新修改时间;
-                        break;
                     }
-                }
-                break;
+                    // 顺便更新作品的总字数
+                    if (!it.discard) totalNumber += it.chapterNum ?? 0;
+                })
             }
-        }
+        })
     }).then(() => {
         if (showMsg) $message.success('保存成功');
-        // mainStore.needSaveDocData = false;
+        // 更新总字数数据
+        db.opus.update(query_id, { opusNumber: totalNumber }).then(() => {
+            // 获取改变后的总字数
+            let cout_temp = 0;
+            db.opus.where(':id').between(1, Infinity).toArray().then(value => {
+                value.forEach(opus => {
+                    cout_temp += opus.opusNumber;
+                })
+            }).then(() => {
+                mainStore.TotalNumber_thisTime = cout_temp;
+            })
+        })
     })
-}, 300);
+}, 500);
 
 /*----另存为文件----*/
 let currentChapter = '未命名章', paperType;
@@ -253,30 +274,23 @@ const setBooksData = (value: Userdb, keyMarks?: Array<{
     match: RegExp, class: string, style: string
 }>) => {
     const toDisplay: Array<NodePara> = [];
-    for (let i = 0; i < value.data.length; i++) {
-        if (value.data[i].vid === vid) {
-            for (let j = 0; j < value.data[i].volume.length; j++) {
-                if (value.data[i].volume[j].cid === cid) {
-                    currentChapter = value.data[i].volume[j].chapterName;
-                    //初始化初始字数
-                    baseChapterNumber = chapterNumber = value.data[i].volume[j].chapterNum ?? 0;
-                    value.data[i].volume[j].chapter.forEach(item => {
+    value.data.forEach(item => {
+        //获取本章数据
+        if (item.vid === vid) {
+            item.volume.forEach(it => {
+                if (it.cid === cid) {
+                    currentChapter = it.chapterName;
+                    chapterNumber = it.chapterNum ?? 0;
+                    it.chapter.forEach(item => {
                         toDisplay.push({
                             type: "paragraph",
-                            content: [
-                                {
-                                    type: "text",
-                                    text: item
-                                }
-                            ]
+                            content: [{ type: "text", text: item }]
                         });
                     });
-                    break;
                 }
-            }
-            break;
+            })
         }
-    }
+    })
     refreshPaper(toDisplay, keyMarks);
     getData();
 }

@@ -60,6 +60,7 @@ interface Userdb {
   checked?: boolean;
   theTimeLine: Array<TimeLineGroup>;
   thePlot: Array<PlotGroup>;
+  opusNumber: number
 }
 
 // 每卷
