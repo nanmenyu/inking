@@ -30,6 +30,12 @@
         </a-form>
     </PopupMenu>
     <div :class="`webviewBlock ${isShowWebview ? 'blockUpward' : 'blockDown'}`">
+        <div class="block-statistics">
+            <a-space size="large">
+                <a-statistic title="本次码字" :value="thisCodeword" />
+                <a-statistic title="今日码字" :value="3232" />
+            </a-space>
+        </div>
         <div class="block-head">
             <div class="leftTool">
                 <span @click="toHistory(-1)" title="后退">
@@ -145,18 +151,32 @@
 </template>
 
 <script setup lang='ts'>
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import {
     IconLeft, IconRight, IconRefresh, IconDown, IconHome, IconPlus, IconDelete,
     IconCaretLeft, IconCaretRight
 } from '@arco-design/web-vue/es/icon';
 import PopupMenu from './widget/PopupMenu.vue';
 import useCurrentInstance from '../utils/useCurrentInstance';
+import { useMainStore } from '../store/index';
 import '../style/fine-tune-webview.scss';
 
 const { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
+const mainStore = useMainStore();
+
+// const isCodewords = computed(() => {
+//     // console.log(mainStore.isCodewords);
+//     return mainStore.isCodewords;
+// })
+const thisCodeword = computed(() => {
+    const temp = mainStore.codewords + mainStore.codewords_thisTime;
+    return temp > 0 ? temp : 0;
+})
+// watch(isCodewords, () => {
+//     console.log(mainStore.codewords + mainStore.codewords_thisTime);
+// })
 
 const preloadFile = 'file://' + window.$API.__dirname + '/webview/preload.js';
 // const errorMsg = reactive({ isErr: false, errorCode: 0, errorDescription: '' });

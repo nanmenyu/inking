@@ -1396,6 +1396,7 @@ function loadListData() {
             })
             // 渲染关键词
             keywordMarks.value = genkeywordMarks(keyWordArr);
+            mainStore.updateCodewords_thisTime();
             myRef.value.setBooksData(value, keywordMarks.value);
             // 加载卷章列表
             booksLists.data = value.data.filter((item: Volume) => {
@@ -1487,8 +1488,6 @@ onMounted(() => {
     window.addEventListener('click', () => { if (showkeywordDetail.value) showkeywordDetail.value = false; })
 
     nextTick(() => {
-        // console.log(document.getElementsByClassName('keyWord'));
-
         myRef.value.setFont(uWritingOption.value.uFont, true);
         myRef.value.setFontSize(uWritingOption.value.uFontSize, true);
         myRef.value.setLineHeight(uWritingOption.value.uLineHeight, true);
@@ -1504,6 +1503,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
     setScrollTop(<string>vid.value, <string>cid.value);
     db.opus.update(query_id, { historRecord: { vid: vid.value, cid: cid.value } });
+    mainStore.updateCodewords_thisTime();
 })
 onUnmounted(() => {
     window.removeEventListener('keydown', shortcut);

@@ -2,7 +2,7 @@ const {
     app,
     // protocol,
     BrowserWindow,
-    // session,
+    session,
     // Menu,
     ipcMain,
     dialog
@@ -39,6 +39,7 @@ async function createWindow() {
             preload: path.join(__dirname, 'preload.js'),
             webviewTag: true,
             nodeIntegration: true,
+            webSecurity: false
         }
     })
     // win.loadURL(
@@ -66,10 +67,10 @@ app.commandLine.appendSwitch('ignore-certificate-errors')    //忽略证书的�
 
 app.whenReady().then(() => {
     createWindow();
-    // if (NODE_ENV === 'development') {
-    //     // vue开发者工具扩展(插件)
-    //     session.defaultSession.loadExtension('C:/Users/Administrator/AppData/Local/Google/Chrome/User Data/Default/Extensions/ljjemllljcmogpfapbkkighbhhppjdbg/6.0.0.21_1');
-    // }
+    if (NODE_ENV === 'development') {
+        // vue开发者工具扩展(插件)
+        session.defaultSession.loadExtension('C:/Users/Administrator/AppData/Local/Google/Chrome/User Data/Default/Extensions/ljjemllljcmogpfapbkkighbhhppjdbg/6.0.0.21_1');
+    }
     app.on('activate', function () {
         // 通常在 macOS 上，当点击 dock 中的应用程序图标时，如果没有其他
         // 打开的窗口，那么程序会重新创建一个窗口。

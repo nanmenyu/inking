@@ -1,14 +1,14 @@
  <!-- 写作纸张 -->
  <template>
     <div id="paper-box" ref="pBox">
-        <main @keyup="getData" @keydown="adaHeight" id="pEditor" ref="editor">
+        <main @keydown="adaHeight" @keyup="getData" id="pEditor" ref="editor">
             <div id="mainEditor" ref="mEditor"></div>
         </main>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch, nextTick, onUnmounted, onBeforeUnmount } from 'vue';
 import getStyle from '../utils/getStyle';
 import { throttle } from '../utils/flowControl';
 import hexToRgba from '../utils/hexToRgba';
@@ -25,13 +25,16 @@ const $modal = proxy.$modal;
 const $message = proxy.$message;
 const mainStore = useMainStore();
 // 监视是否需要保存当前页面内容
-let needSaveDoc = computed(() => mainStore.needSaveDocData);
-watch(needSaveDoc, isNeed => {
-    if (isNeed) saveDocData(false);
-})
+// let needSaveDoc = computed(() => mainStore.needSaveDocData);
+// watch(needSaveDoc, isNeed => {
+//     if (isNeed) saveDocData(false);
+// })
 
 onMounted(() => {
     editor.value.addEventListener('keydown', insertSpace);
+})
+onBeforeUnmount(() => {
+    clearInterval(timer);
 })
 
 // 纸张的宽度 = 内容区 + 40px的左右边距
@@ -46,8 +49,7 @@ const paperSize: { [key: string]: number } = {
     'iPhone5/SE': 320,
     'Galaxy Fold': 280
 };
-const boxWidth = ref(paperSize['A4']), // 纸张宽度
-    boxHeight = ref(1000); // 纸张高度
+const boxWidth = ref(paperSize['A4']), boxHeight = ref(1000); // 纸张宽度，纸张高度
 
 // 数据库取值相关
 const route = useRoute(),
@@ -60,9 +62,10 @@ const setId = (newVid: string, newCid: string) => {
     [vid, cid] = [newVid, newCid];
 }
 
-/*----监视纸张----*/
+/*----监视纸张和字数变化----*/
 const editor = ref();
-let maxCount = 15000, data: Pagecount, chapterNumber = 0;
+let data: Pagecount, baseChapterNumber = 0, chapterNumber = 0;
+let timer: any = null; // 定时器用于测速
 // 监视输入框中的各项数值
 const getData = () => {
     chapterNumber = editor.value.innerText.replaceAll('\n', '').replaceAll('\u0020', '').replaceAll('\u3000', '').length; // 字数统计
@@ -84,17 +87,16 @@ const adaHeight = () => {
 // 具体节流项目
 const emit_throttle = throttle(() => {
     emit('todata', data);
+    mainStore.codewords = chapterNumber - baseChapterNumber;
+    mainStore.isCodewords = !mainStore.isCodewords;
     // 字数提示
-    if (data.charCount >= maxCount) {
+    if (data.charCount >= 15000) {
         $modal.warning({
             title: '单章字数过多',
-            content: '单章字符数不宜过多(不多于15000),因为也许会影响性能'
+            content: '单章字符数不宜过多(>15000),因为可能会影响导出PDF的性能(不导出就随意)'
         })
-        maxCount += 500;
     }
-    if (data.charCount >= 17000) {
-        console.log('禁止字数增加')
-    }
+    saveDocData(false);
 }, 300);
 
 // 保存数据至数据库
@@ -121,9 +123,9 @@ const saveDocData = throttle((showMsg: boolean) => {
         }
     }).then(() => {
         if (showMsg) $message.success('保存成功');
-        mainStore.needSaveDocData = false;
+        // mainStore.needSaveDocData = false;
     })
-}, 300)
+}, 300);
 
 /*----另存为文件----*/
 let currentChapter = '未命名章', paperType;
@@ -256,6 +258,8 @@ const setBooksData = (value: Userdb, keyMarks?: Array<{
             for (let j = 0; j < value.data[i].volume.length; j++) {
                 if (value.data[i].volume[j].cid === cid) {
                     currentChapter = value.data[i].volume[j].chapterName;
+                    //初始化初始字数
+                    baseChapterNumber = chapterNumber = value.data[i].volume[j].chapterNum ?? 0;
                     value.data[i].volume[j].chapter.forEach(item => {
                         toDisplay.push({
                             type: "paragraph",
