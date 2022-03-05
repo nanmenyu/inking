@@ -665,8 +665,27 @@
                         >
                             <div
                                 @contextmenu="showFloatToolMenu($event)"
+                                ref="buttonTrigger"
                                 :class="`button-trigger ${popupVisible ? 'button-trigger-active' : ''}`"
+                                :style="floatToolPosition[position]"
+                                title="右键更换位置"
                             >
+                                <!-- 漂浮工具栏的菜单 -->
+                                <div
+                                    @click.stop
+                                    v-if="isFloatToolMenu"
+                                    ref="floatToolMenu"
+                                    class="floatTool-menu"
+                                    :style="floatToolMenuPositon[position]"
+                                >
+                                    <ul>
+                                        <li
+                                            v-for="(item, i) in textPrompt[position]"
+                                            @click="moveFloatTool(item)"
+                                            :key="i"
+                                        >到{{ item }}角</li>
+                                    </ul>
+                                </div>
                                 <IconClose v-if="popupVisible" />
                                 <IconMessage v-else />
                             </div>
@@ -716,8 +735,6 @@
                                 </a-menu>
                             </template>
                         </a-trigger>
-                        <!-- 漂浮工具栏的菜单 -->
-                        <div v-if="isFloatToolMenu" ref="floatToolMenu" class="floatTool-menu"></div>
                         <!-- 各个需要显示的组件 -->
                         <WebviewBlock v-if="showModular === '0'"></WebviewBlock>
                         <PlotEditor v-if="showModular === '1'"></PlotEditor>
@@ -863,14 +880,29 @@ const stopSearchKeyword = () => {
 }
 
 // 显示漂浮工具栏的菜单修改位置
-const isFloatToolMenu = ref(false), floatToolMenu = ref();
+const isFloatToolMenu = ref(false), floatToolMenu = ref(), buttonTrigger = ref();
+//四个位置四种状态
+const floatToolPosition = ['top:0;left:0;', 'top:0;right:0;', 'bottom:10px;right:0;', 'bottom:10px;left:0;'];
+const floatToolMenuPositon = ['top:20px;left:20px', 'top:20px;right:20px', 'bottom:20px;right:20px', 'bottom:20px;left:20px'];
+const textPrompt = [['右上', '右下', '左下'], ['左上', '左下', '右下'], ['左下', '左上', '右上'], ['左上', '右上', '右下']];
+const position = ref(0); // 某个状态的索引
+// 读取缓存
+const getFloatToolPosition = localStorage.getItem('floatToolPosition');
+if (getFloatToolPosition === null) localStorage.setItem('floatToolPosition', '0');
+else position.value = parseInt(getFloatToolPosition);
+// 显示与切换
 const showFloatToolMenu = (e: MouseEvent) => {
     isFloatToolMenu.value = true;
-    const posX = e.clientX, posY = e.clientY;
-    nextTick(() => {
-        floatToolMenu.value.style.left = posX + 'px';
-        floatToolMenu.value.style.top = posY + 'px';
+    popupVisible.value = false;
+}
+const moveFloatTool = (type: string) => {
+    textPrompt.forEach((item, index) => {
+        if (item.indexOf(type) === -1) {
+            position.value = index;
+            localStorage.setItem('floatToolPosition', index.toString());
+        }
     })
+    isFloatToolMenu.value = false;
 }
 
 /*-------------数据统计与初始化-------------*/
@@ -1472,6 +1504,7 @@ function shortcut(e: KeyboardEvent) {
 }
 function leftMoreControl() {
     showLeftMore.value = '';
+    isFloatToolMenu.value = false;
 }
 // 找到关键字数据
 function modifyDbforItem(t_kid: string, t_iid: string, hd: Function, cb?: Function) {

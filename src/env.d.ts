@@ -160,3 +160,10 @@ declare interface Summary {
   itemsName: string;
   items: Array<{ title: string, imp: number, complete: boolean, con: string }>
 }
+
+declare interface Favorites {
+  id?: number;
+  title: string;
+  url: string;
+  favicon: string;
+}

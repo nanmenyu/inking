@@ -31,18 +31,27 @@ export interface User {
     codewords: number;
 }
 
+export interface Favorites {
+    id?: number;
+    title: string;
+    url: string;
+    favicon: string;
+}
+
 export class MySubClassedDexie extends Dexie {
     opus!: Table<Userdb>;
     user!: Table<User>;
+    favorites!: Table<Favorites>
     // note!: Table<Userdb>;
     // markdown!: Table<Userdb>;
 
     constructor() {
         super('uDatabase');
-        this.version(2).stores({
+        this.version(3.1).stores({
             // 作品集
             opus: '++id, author, title, discard',
-            user: '++id'
+            user: '++id',
+            favorites: '++id'
             // 笔记集
             // note: '++id, author, title',
             // markdown

@@ -57,17 +57,33 @@
             <div class="search-input">
                 <a-input-search
                     v-model="searchData"
+                    @input="showPrefix"
                     @search="toSearch"
-                    @press-enter="toSearch_enter"
+                    @press-enter="toSearch"
                     size="small"
                     :style="{ width: '300px' }"
                     :placeholder="`从${searchSiteName}上搜索`"
-                ></a-input-search>
+                >
+                    <template #prefix>
+                        <icon-public v-if="prefixType === 1" />
+                        <icon-link v-if="prefixType === 2" />
+                    </template>
+                </a-input-search>
             </div>
             <div class="rightTool">
-                <span @click="addToFavorites" class="favorites-btn" title="收藏该网页">
-                    <icon-star :style="{ fontSize: '14px' }" />
-                </span>
+                <template v-if="isShowWebview">
+                    <span
+                        v-if="!collected"
+                        @click="addToFavorites"
+                        class="favorites-btn"
+                        title="收藏该网页"
+                    >
+                        <icon-star :style="{ fontSize: '14px' }" />
+                    </span>
+                    <span v-else class="favorites-btn" title="取消收藏">
+                        <icon-star-fill :style="{ fontSize: '14px' }" />
+                    </span>
+                </template>
                 <a-dropdown @select="selectUA">
                     <span class="selectUA" title="选择UA">
                         {{ currentUaType }}
@@ -133,14 +149,27 @@
             </a-result>
         </div>-->
         <div v-show="!isShowWebview" class="favorites">
+            <a-empty v-if="favoritesData.length === 0" style="margin-top: 100px;" />
             <div
-                v-for="item in [1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 1, 1, 1, 1, 1, 1, 1, 1,]"
+                v-else
+                v-for="item in favoritesData"
+                @click="toLoadUrl(item.url)"
+                :key="item.id"
+                :title="item.title"
                 class="tile"
             >
-                <div class="tile-icon">
-                    <img />
+                <div @click.stop="deleteFavorite(item.id!, item.title)" class="delete-btn">
+                    <icon-close :style="{ fontSize: '18px' }" :stroke-width="2" />
                 </div>
-                <div class="tile-title">百度翻译百度翻译百度翻译百度翻译</div>
+                <div class="tile-icon">
+                    <img
+                        v-if="errorLoadImgId.indexOf(item.id!) === -1"
+                        :src="item.favicon"
+                        @error="imgLoadFailed(item.id!)"
+                    />
+                    <a-avatar v-else :style="{ backgroundColor: '#00d0b6' }">{{ item.title[0] }}</a-avatar>
+                </div>
+                <div class="tile-title">{{ item.title }}</div>
             </div>
         </div>
         <webview
@@ -156,21 +185,32 @@
 </template>
 
 <script setup lang='ts'>
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, Ref } from 'vue';
 import {
     IconLeft, IconRight, IconRefresh, IconDown, IconHome, IconPlus, IconDelete,
-    IconCaretLeft, IconCaretRight, IconStar
+    IconCaretLeft, IconCaretRight, IconStar, IconStarFill, IconPublic, IconLink,
+    IconClose
 } from '@arco-design/web-vue/es/icon';
 import PopupMenu from './widget/PopupMenu.vue';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { useMainStore } from '../store/index';
+import { db } from '../db/db';
 import '../style/fine-tune-webview.scss';
 
 const { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
 const mainStore = useMainStore();
-
+loadFavorites();
+const favoritesData: Ref<Array<Favorites>> = ref([]);
+const currentURL = ref('');
+const collected = computed(() => {
+    let result = false;
+    favoritesData.value.forEach(item => {
+        if (item.url === currentURL.value) result = true;
+    })
+    return result;
+})
 // 本次码字数量
 const thisTimeCodeword = computed(() => {
     if (mainStore.TotalNumber_thisTime > mainStore.contrastTotalNumber_thisTime) {
@@ -225,28 +265,46 @@ else searchSiteList.data = JSON.parse(getSearchSiteList);
 const getSearchSiteKey = localStorage.getItem('searchSiteKey');
 if (getSearchSiteKey === null) localStorage.setItem('searchSiteKey', '1');
 else defaultSiteKey = getSearchSiteKey;
-
 // 修改搜索引擎项
 const searchSite = ref('https://www.baidu.com/s?wd='), searchSiteName = ref('百度搜索');
+setSiteList(defaultSiteKey);
 const changeSearch = (key: string) => {
+    setSiteList(key)
+    toSearch();
+    localStorage.setItem('searchSiteKey', key);
+}
+function setSiteList(key: string) {
     searchSiteList.data.forEach(item => {
         if (item.key === parseInt(key)) {
             searchSiteName.value = item.title;
             searchSite.value = item.url;
         }
     })
-    toSearch();
-    localStorage.setItem('searchSiteKey', key);
 }
 
 // 使用搜索引擎搜索
 const isShowWebview = ref(false), webviewSrc = ref('');
-const searchData = ref('');
-const toSearch = () => {
-    if (searchData.value !== '') toWebviewPage(searchSite.value + searchData.value);
+const searchData = ref(''), prefixType = ref(1);
+const showPrefix = () => {
+    const reg = new RegExp('^https{0,1}://');
+    if (reg.test(searchData.value)) {
+        prefixType.value = 2;
+    } else {
+        prefixType.value = 1;
+    }
 }
-const toSearch_enter = () => {
-    if (searchData.value !== '') toWebviewPage(searchSite.value + searchData.value);
+const toSearch = () => {
+    if (searchData.value !== '') {
+        const reg = new RegExp('^https{0,1}://');
+        let targetUrl = '';
+        // 验证是否是网址
+        if (reg.test(searchData.value)) targetUrl = searchData.value;
+        else targetUrl = searchSite.value + searchData.value;
+        // 加载页面
+        if (_webview) _webview.loadURL(targetUrl);
+        else toWebviewPage(targetUrl);
+        isShowWebview.value = true;
+    }
 }
 
 // 自定义快捷搜索项目
@@ -337,7 +395,10 @@ const toHistory = (offset: 1 | -1) => {
 const toRefresh = () => {
     // 只有非加载时才能reload页面
     // if (!showLoading.value)
-    _webview.reload();
+    if (_webview) {
+        _webview.reload();
+        isShowWebview.value = true;
+    }
 }
 const goHome = () => { isShowWebview.value = false; }
 
@@ -371,6 +432,30 @@ const selectUA = (value: string) => {
 const addToFavorites = () => {
     if (_webview) _webview.send('getFavicon');
 }
+// 打开收藏网页
+const toLoadUrl = (url: string) => {
+    if (_webview) _webview.loadURL(url);
+    else toWebviewPage(url);
+    isShowWebview.value = true;
+}
+// 删除目标收藏
+const deleteFavorite = (id: number, title: string) => {
+    $modal.warning({
+        title: "删除快捷收藏",
+        content: `是否删除"${title}"? `,
+        simple: true,
+        onOk: () => {
+            db.favorites.delete(id).then(() => {
+                loadFavorites();
+            })
+        }
+    })
+}
+// 加载错误的图片所属数据id
+let errorLoadImgId: Ref<Array<number>> = ref([]);
+const imgLoadFailed = (id: number) => {
+    errorLoadImgId.value.push(id);
+}
 
 const modify = () => {
     isCustQuickSearch.value = false;
@@ -388,41 +473,27 @@ const CSSToInject = `
     }
 `;
 const JSToInject = `
-    console.log('进入');
-    var getFavicon = function () {
-    var faviconLink = undefined, nodeList = document.getElementsByTagName('link');
-    for (var i = 0; i < nodeList.length; i++) {
-        if ((nodeList[i].getAttribute("rel") == "icon") || (nodeList[i].getAttribute("rel") == "shortcut icon")) {
-            faviconLink = nodeList[i].getAttribute("href");
-        }
+    if(window.isInjected === undefined){
+        window.$API.ipcOn('getFavicon',()=>{
+            window.$API.ipcSendToH('getFavicon_suc',document.querySelector('link[rel*="icon"]').href);
+        })
+        window.isInjected=true;
     }
-    return faviconLink;
-    }
-    window.$API.ipcOn('getFavicon',()=>{
-        console.log('getFavicon');
-        window.$API.ipcSendToH('getFavicon_suc',getFavicon());
-    })
 `;
-
-
-// alert(getFavicon());
-
 
 // 渲染webview
 function toWebviewPage(src: string) {
     webviewSrc.value = src;
-    isShowWebview.value = true;
     nextTick(() => {
         const webview: any = document.querySelector('webview');
-        // console.log(preloadFile);
-        webview.setAttribute('preload', preloadFile); // 设置注入用preload
         _webview = webview;
         if (webview) {
+            webview.setAttribute('preload', preloadFile); // 设置注入用preload
             webview.addEventListener('dom-ready', () => {
-                // 新窗体打开转换为当前页打开
-                webview.insertCSS(CSSToInject);
-                webview.executeJavaScript(JSToInject);
-                webview.openDevTools(); // 新窗口打开webview内的调试工具
+                _webview.insertCSS(CSSToInject);
+                _webview.executeJavaScript(JSToInject);
+                // _webview.openDevTools(); // 新窗口打开webview内的调试工具
+                currentURL.value = _webview.getURL();
             })
             webview.addEventListener('did-start-loading', () => {
                 needSpin.value = true;
@@ -442,19 +513,42 @@ function toWebviewPage(src: string) {
             webview.addEventListener('ipc-message', (e: any) => {
                 // 获得favicon的链接
                 if (e.channel === 'getFavicon_suc') {
-                    const favoritesItem = {
-                        favicon_link: e.args[0],
-                        website_title: webview.getTitle(),
-                        website_url: webview.getURL()
+                    const favicon = e.args[0], title = webview.getTitle(), url = webview.getURL();
+                    if (!collected.value) {
+                        const reg = new RegExp('^https{0,1}://');
+                        // 匹配favicon是否是http或https开头
+                        if (reg.test(favicon)) {
+                            db.favorites.add({
+                                title, url, favicon
+                            }).then(() => {
+                                loadFavorites();
+                            })
+                        } else {
+                            // 如果不是，则将其拼接在url后
+                            const domain = url.split('/');
+                            db.favorites.add({
+                                title, url,
+                                favicon: domain[0] + '//' + domain[2] + favicon
+                            }).then(() => {
+                                loadFavorites();
+                            })
+                        }
+
                     }
-                    console.log(favoritesItem);
                 }
             })
 
         }
     })
 }
+// 获取收藏夹的数据
+function loadFavorites() {
+    db.favorites.where(':id').between(1, Infinity).toArray().then(value => {
+        console.log(value);
+        favoritesData.value = value;
+    })
 
+}
 </script>
 
 <style src="../style/webviewblock.scss" lang="scss" scoped>
