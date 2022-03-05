@@ -22,7 +22,7 @@ db.user.where(':id').between(1, Infinity).toArray().then(value => {
       currentMonth = new Date().getMonth() + 1,
       currentYear = new Date().getFullYear();
     if (currentDay !== targetDay || currentMonth !== targetMonth || currentYear !== targetYear) {
-      // 需要增添一条新数据
+      // 需要增添一条新数据 
       addOneData();
     }
   }
@@ -39,6 +39,16 @@ db.user.where(':id').between(1, Infinity).toArray().then(value => {
   // 获取最新（最末尾）的数据表ID
   db.user.where(':id').between(1, Infinity).toArray().then(value => {
     mainStore.currentUserId = value[value.length - 1].id ?? 0;
+    // 最多存储365天(条)的数据
+    if (value.length > 365) {
+      // 获取多出来那部分的主键id
+      const tempId_Arr: Array<any> = value.map(item => item.id).slice(0, value.length - 365);
+      db.user.bulkDelete(tempId_Arr);
+    }
+  }).then(() => {
+    db.user.get(mainStore.currentUserId).then(value => {
+      mainStore.baseTotalNumber_today = value?.codewords ?? 0;
+    })
   })
 })
 

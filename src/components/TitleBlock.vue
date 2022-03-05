@@ -89,8 +89,9 @@ function closeWin() {
     db.user.where(':id').equals(mainStore.currentUserId).modify(item => {
         // 保存今日码字数
         item.codewords = item.codewords + mainStore.TotalNumber_thisTime - mainStore.contrastTotalNumber_thisTime;
+    }).then(() => {
+        window.$API.ipcSend("window-close");
     })
-    window.$API.ipcSend("window-close");
 }
 
 // 通过route修改样式

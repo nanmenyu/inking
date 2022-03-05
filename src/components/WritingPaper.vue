@@ -109,7 +109,7 @@ const input_saveDocData = (e: KeyboardEvent) => {
 
 // 保存数据至数据库
 const saveDocData = throttle((showMsg: boolean) => {
-    console.log('save');
+    // console.log('save');
     const editorData = editor.value.firstElementChild.firstElementChild.children, dataArr: Array<string> = [];
     for (let i = 0; i < editorData.length; i++) {
         dataArr.push(editorData[i].innerText);

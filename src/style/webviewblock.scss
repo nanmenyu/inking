@@ -4,7 +4,8 @@
     height: 100%;
 
     .block-statistics {
-        margin: 10px 0;
+        height: 100px;
+        margin-top: 10px;
     }
 
     .block-head {
@@ -45,12 +46,27 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 32px;
+            height: 26px;
+            margin-bottom: 6px;
             font-size: 12px;
             user-select: none;
 
             span {
                 margin: 0 5px;
+                cursor: pointer;
+
+                &:hover {
+                    color: #165dff;
+                }
+            }
+
+            .selectUA {
+                display: inline-block;
+                min-width: 34px;
+                margin-left: 2px;
+            }
+
+            .favorites-btn {
                 cursor: pointer;
 
                 &:hover {
@@ -106,13 +122,9 @@
     animation: upward 0.3s ease-in-out forwards;
 }
 
-.blockDown {
-    animation: -upward 0.3s ease-in-out forwards;
-}
-
 .favorites {
     width: 100%;
-    max-height: calc(100vh - 132px - 141px);
+    max-height: calc(100vh - 285px);
     overflow-y: scroll;
     padding: 2px;
 
@@ -169,22 +181,12 @@
     border: none;
 }
 
-// @keyframes upward {
-//     from {
-//         padding-top: 100px;
-//     }
+@keyframes upward {
+    from {
+        padding-top: 100px;
+    }
 
-//     to {
-//         padding-top: 10px;
-//     }
-// }
-
-// @keyframes -upward {
-//     from {
-//         padding-top: 10px;
-//     }
-
-//     to {
-//         padding-top: 100px;
-//     }
-// }
+    to {
+        padding-top: 0;
+    }
+}

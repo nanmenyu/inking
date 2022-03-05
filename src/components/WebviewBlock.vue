@@ -29,11 +29,14 @@
             </a-form-item>
         </a-form>
     </PopupMenu>
-    <div :class="`webviewBlock ${isShowWebview ? 'blockUpward' : 'blockDown'}`">
-        <div class="block-statistics">
-            <a-space size="large">
+    <div :class="`webviewBlock ${isShowWebview ? 'blockUpward' : ''}`">
+        <div v-if="!isShowWebview" class="block-statistics">
+            <a-space size="mini">
                 <a-statistic title="本次码字" :value="thisTimeCodeword" />
-                <a-statistic title="今日码字" :value="3232" />
+                <a-divider direction="vertical" />
+                <a-statistic extra="今日码字" :value="toDayCodeword" />
+                <a-divider direction="vertical" />
+                <a-progress type="circle" title="今日计划完成度" :percent="0.4" />
             </a-space>
         </div>
         <div class="block-head">
@@ -62,8 +65,11 @@
                 ></a-input-search>
             </div>
             <div class="rightTool">
+                <span @click="addToFavorites" class="favorites-btn" title="收藏该网页">
+                    <icon-star :style="{ fontSize: '14px' }" />
+                </span>
                 <a-dropdown @select="selectUA">
-                    <span title="选择UA">
+                    <span class="selectUA" title="选择UA">
                         {{ currentUaType }}
                         <icon-down />
                     </span>
@@ -145,7 +151,6 @@
             disablewebsecurity
             nodeintegration
         ></webview>
-        <!-- useragent="Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Mobile Safari/537.36" -->
         <!-- :style="showLoading ? 'opacity:0.5' : ''" -->
     </div>
 </template>
@@ -154,7 +159,7 @@
 import { computed, nextTick, reactive, ref, watch } from 'vue';
 import {
     IconLeft, IconRight, IconRefresh, IconDown, IconHome, IconPlus, IconDelete,
-    IconCaretLeft, IconCaretRight
+    IconCaretLeft, IconCaretRight, IconStar
 } from '@arco-design/web-vue/es/icon';
 import PopupMenu from './widget/PopupMenu.vue';
 import useCurrentInstance from '../utils/useCurrentInstance';
@@ -174,6 +179,10 @@ const thisTimeCodeword = computed(() => {
         mainStore.contrastTotalNumber_thisTime = mainStore.TotalNumber_thisTime;
         return 0;
     }
+})
+// 今日码字数量
+const toDayCodeword = computed(() => {
+    return mainStore.baseTotalNumber_today + mainStore.TotalNumber_thisTime - mainStore.contrastTotalNumber_thisTime;
 })
 
 const preloadFile = 'file://' + window.$API.__dirname + '/webview/preload.js';
@@ -311,7 +320,6 @@ const moveQuickSearch = (key: number, offset: 1 | -1) => {
         array[index2] = temp;
     }
 }
-
 // 历史跳转
 let _webview: any;
 const toHistory = (offset: 1 | -1) => {
@@ -359,29 +367,46 @@ const selectUA = (value: string) => {
     }
     currentUaType.value = value;
 }
+// 添加当前网页至收藏夹
+const addToFavorites = () => {
+    if (_webview) _webview.send('getFavicon');
+}
 
 const modify = () => {
     isCustQuickSearch.value = false;
 }
 
-// 需要注入的CSS代码
+// 需要注入的CSS和JS代码
 const CSSToInject = `
     ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
     }
     ::-webkit-scrollbar-thumb {
-        background-color: #e5e6eb;
+        background-color: rgba(229,230,235,0.6);
         border-radius: 5px;
     }
 `;
 const JSToInject = `
     console.log('进入');
-    document.oncontextmenu = function () {
-    //点击右键后要执行的代码
-    window.$API.ipcSendToH('oncontextmenu')
-    } 
+    var getFavicon = function () {
+    var faviconLink = undefined, nodeList = document.getElementsByTagName('link');
+    for (var i = 0; i < nodeList.length; i++) {
+        if ((nodeList[i].getAttribute("rel") == "icon") || (nodeList[i].getAttribute("rel") == "shortcut icon")) {
+            faviconLink = nodeList[i].getAttribute("href");
+        }
+    }
+    return faviconLink;
+    }
+    window.$API.ipcOn('getFavicon',()=>{
+        console.log('getFavicon');
+        window.$API.ipcSendToH('getFavicon_suc',getFavicon());
+    })
 `;
+
+
+// alert(getFavicon());
+
 
 // 渲染webview
 function toWebviewPage(src: string) {
@@ -405,7 +430,6 @@ function toWebviewPage(src: string) {
             webview.addEventListener('did-stop-loading', () => {
                 needSpin.value = false;
                 // webview.executeJavaScript(`console.log(document)`);
-                webview.send('ping')
             })
             webview.addEventListener('did-fail-load', (e: any) => {
                 // console.log(e);
@@ -416,9 +440,14 @@ function toWebviewPage(src: string) {
                 webview.loadURL(e.url);
             })
             webview.addEventListener('ipc-message', (e: any) => {
-                console.log(e);
-                if (e.channel === 'oncontextmenu') {
-                    alert('子页面点击了右键')
+                // 获得favicon的链接
+                if (e.channel === 'getFavicon_suc') {
+                    const favoritesItem = {
+                        favicon_link: e.args[0],
+                        website_title: webview.getTitle(),
+                        website_url: webview.getURL()
+                    }
+                    console.log(favoritesItem);
                 }
             })
 

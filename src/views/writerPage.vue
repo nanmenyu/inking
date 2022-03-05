@@ -664,6 +664,7 @@
                             v-model:popupVisible="popupVisible"
                         >
                             <div
+                                @contextmenu="showFloatToolMenu($event)"
                                 :class="`button-trigger ${popupVisible ? 'button-trigger-active' : ''}`"
                             >
                                 <IconClose v-if="popupVisible" />
@@ -715,6 +716,9 @@
                                 </a-menu>
                             </template>
                         </a-trigger>
+                        <!-- 漂浮工具栏的菜单 -->
+                        <div v-if="isFloatToolMenu" ref="floatToolMenu" class="floatTool-menu"></div>
+                        <!-- 各个需要显示的组件 -->
                         <WebviewBlock v-if="showModular === '0'"></WebviewBlock>
                         <PlotEditor v-if="showModular === '1'"></PlotEditor>
                         <KeywordEditor v-if="showModular === '2'"></KeywordEditor>
@@ -855,6 +859,17 @@ const stopSearchKeyword = () => {
     mainStore.isInSearch = showSearchBox.value = false;
     db.opus.get(query_id).then(value => {
         if (value) myRef.value.setBooksData(value, keywordMarks.value);
+    })
+}
+
+// 显示漂浮工具栏的菜单修改位置
+const isFloatToolMenu = ref(false), floatToolMenu = ref();
+const showFloatToolMenu = (e: MouseEvent) => {
+    isFloatToolMenu.value = true;
+    const posX = e.clientX, posY = e.clientY;
+    nextTick(() => {
+        floatToolMenu.value.style.left = posX + 'px';
+        floatToolMenu.value.style.top = posY + 'px';
     })
 }
 
