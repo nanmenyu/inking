@@ -52,7 +52,7 @@
                         </template>
                         <template #default>&nbsp;新 建</template>
                     </a-doption>
-                    <a-doption>
+                    <a-doption @click="importFile">
                         <template #icon>
                             <icon-import />
                         </template>
@@ -161,21 +161,15 @@ if (route.path === '/') {
 } else {
     disableSwitch.value = true;
     disableSort.value = true;
-    if (route.path === '/recycle') {
-        showAllDelete.value = true;
-    } else {
-        showAllDelete.value = false;
-    }
+    if (route.path === '/recycle') showAllDelete.value = true;
+    else showAllDelete.value = false;
 }
 
 // 是否以作品封面的方式显示
 const displyBlock = ref(true);
 const getDisplyBlock = localStorage.getItem('displyBlock');
-if (getDisplyBlock === null) {
-    localStorage.setItem('displyBlock', 'true');
-} else {
-    displyBlock.value = getDisplyBlock === 'true' ? true : false;
-}
+if (getDisplyBlock === null) localStorage.setItem('displyBlock', 'true');
+else displyBlock.value = getDisplyBlock === 'true' ? true : false;
 
 //切换显示样式(封面/列表)
 const swDisplay = () => {
@@ -208,6 +202,28 @@ const explain = computed(() => {
     }
     return temp;
 });
+
+const importFile = () => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', '.txt');
+    input.click();
+    input.onchange = () => {
+        if (input.files) {
+            const fileName = input.files![0].name,
+                fileNames = fileName.split('.'),
+                fileType = fileNames[fileNames.length - 1];
+            db.ebooks.put({
+                data: input.files![0],
+                type: fileType,
+                title: fileName,
+                creationTime: new Date().getTime()
+            }).then(() => {
+                $message.success('导入txt成功,请到阅读模式查看');
+            })
+        }
+    }
+}
 
 /*----添加作品的item到数据库----*/
 const addFile = () => {

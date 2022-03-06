@@ -38,20 +38,30 @@ export interface Favorites {
     favicon: string;
 }
 
+export interface Ebooks {
+    id?: number;
+    data: File;
+    type: string;
+    title: string;
+    creationTime: number;
+}
+
 export class MySubClassedDexie extends Dexie {
-    opus!: Table<Userdb>;
-    user!: Table<User>;
-    favorites!: Table<Favorites>
+    opus!: Table<Userdb>; // 用户作品
+    user!: Table<User>; // 用户每日数据
+    favorites!: Table<Favorites>; // 用户收藏夹
+    ebooks!: Table<Ebooks>; // 用户电子书
     // note!: Table<Userdb>;
     // markdown!: Table<Userdb>;
 
     constructor() {
         super('uDatabase');
-        this.version(3.1).stores({
+        this.version(3.2).stores({
             // 作品集
             opus: '++id, author, title, discard',
             user: '++id',
-            favorites: '++id'
+            favorites: '++id',
+            ebooks: '++id'
             // 笔记集
             // note: '++id, author, title',
             // markdown

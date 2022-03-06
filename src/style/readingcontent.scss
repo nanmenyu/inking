@@ -8,3 +8,38 @@
      border-radius: 4px 0 0 0;
      background-color: #fff;
  }
+
+ .content {
+     position: relative;
+     width: 100%;
+     height: calc(100vh - 180px);
+     overflow-y: scroll;
+
+     .book-cover {
+         float: left;
+         width: 150px;
+         height: 170px;
+         margin: 20px 40px;
+         padding: 10px 0;
+         cursor: pointer;
+         border-radius: 8px;
+         transition: background-color 0.3s ease-in-out;
+
+         &:hover {
+             background-color: #f2f3f5;
+         }
+     }
+
+     .title {
+         box-sizing: border-box;
+         width: 150px;
+         height: 20px;
+         padding: 2px 15px;
+         font-size: 16px;
+         font-weight: lighter;
+         text-align: center;
+         overflow: hidden;
+         text-overflow: ellipsis;
+         white-space: nowrap;
+     }
+ }

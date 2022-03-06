@@ -9,6 +9,15 @@ import { db } from './db/db';
 
 const mainStore = useMainStore();
 
+// db.ebooks.get(3).then(value => {
+//   console.log(value);
+//   const reader = new FileReader();
+//   reader.readAsText(value!.data, 'GB2312');
+//   reader.onload = function () {
+//     console.log(reader.result);
+//   };
+// })
+
 // 初始化用户数据表
 db.user.where(':id').between(1, Infinity).toArray().then(value => {
   if (value.length === 0) {

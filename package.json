@@ -71,6 +71,7 @@
     "electron-builder": "^22.14.13",
     "electron-log": "^4.4.5",
     "html2pdf.js": "^0.10.1",
+    "jschardet": "^3.0.0",
     "pinia": "^2.0.11",
     "prosemirror-commands": "^1.2.1",
     "prosemirror-example-setup": "^1.1.2",
