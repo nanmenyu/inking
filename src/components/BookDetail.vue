@@ -505,7 +505,6 @@ const routerLink = (id: number, vid: string, cid: string) => {
     router.push({
         path: '/writer',
         query: {
-            type: 'opus',
             id: id,
             vid: vid,
             cid: cid
@@ -518,7 +517,6 @@ const toSpecialEditor = (type: string) => {
         path: '/specialEditor',
         query: {
             type: type,
-            category: 'opus',
             id: query_id
         }
     })
@@ -532,7 +530,6 @@ const continueWriting = () => {
         router.push({
             path: '/writer',
             query: {
-                type: 'opus',
                 id: query_id,
                 vid: vid,
                 cid: cid
@@ -560,7 +557,8 @@ const booksData: { data: Userdb } = reactive({
         theKeyWord: [],
         checked: false,
         thePlot: [],
-        theTimeLine: []
+        theTimeLine: [],
+        opusNumber: 0
     }
 });
 const totalNumber = ref(0);

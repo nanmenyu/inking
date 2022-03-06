@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 // import { setHighlightKeyword } from '../common/editor/syntax';
 
+// export const use
+
 export const useMainStore = defineStore('mainStore', {
     state: () => ({
         currentUserId: 0, //当前对应用户表的ID 

@@ -544,7 +544,7 @@ function toWebviewPage(src: string) {
 // 获取收藏夹的数据
 function loadFavorites() {
     db.favorites.where(':id').between(1, Infinity).toArray().then(value => {
-        console.log(value);
+        // console.log(value);
         favoritesData.value = value;
     })
 

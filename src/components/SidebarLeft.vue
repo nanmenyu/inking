@@ -27,7 +27,7 @@
                     <icon-edit />&nbsp;写作模式
                 </a-button>
             </router-link>
-            <router-link to="reading">
+            <router-link to="readingMode">
                 <a-button :type="choicedType === 't2' ? 'text' : 'secondary'" class="btn">
                     <icon-book />&nbsp;阅读模式
                 </a-button>

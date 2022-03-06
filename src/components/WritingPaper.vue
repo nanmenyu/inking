@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch, nextTick, onUnmounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import getStyle from '../utils/getStyle';
 import { throttle } from '../utils/flowControl';
 import hexToRgba from '../utils/hexToRgba';
@@ -217,7 +217,8 @@ function exportPDF() {
 /*----修改文字、段落相关----*/
 let currentFont = ref('KaiTi'), currentFontSize = ref(22), currentLineHeight = ref(1.5),
     currentFontWeight = ref('normal'), currentColor = ref('#333333'), currentSpacing = ref(10),
-    currentTextIndent = ref(0), currentBgcColor = ref('#ffffff');
+    currentTextIndent = ref(0), currentBgcColor = ref('#ffffff'),
+    currentBorderType = ref('1px 2px 4px rgb(0 0 0 / 20%)'), currentRadius = ref(0);
 
 const setFont = (font: string, isInit: boolean) => {
     currentFont.value = font;
@@ -253,6 +254,17 @@ const setTextIndent = (indent: number, isInit: boolean) => {
 }
 const setBgcColor = (color: string, isInit: boolean) => {
     currentBgcColor.value = color;
+    if (!isInit) getData();
+}
+const setShowborder = (type: string, isInit: boolean) => {
+    if (type === 'open') currentBorderType.value = '1px 2px 4px rgb(0 0 0 / 20%)';
+    else if (type === 'close') currentBorderType.value = '';
+    if (!isInit) getData();
+}
+const setRoundType = (type: string, isInit: boolean) => {
+    if (type === 'none') currentRadius.value = 0;
+    else if (type === 'have') currentRadius.value = 10;
+    else if (type === 'bigger') currentRadius.value = 20;
     if (!isInit) getData();
 }
 const setPaperSize = (type: string, isInit: boolean) => {
@@ -339,7 +351,9 @@ function moveCursor(selection: Selection, range: Range, startNode: Node, startOf
 }
 
 defineExpose({
-    saveDocData, expFile, setFont, setFontSize, setLineHeight, setFontWeight, setColor, setSegSpacing, setTextIndent, setBgcColor, setPaperSize, setParaFocus, setBooksData, refreshPaper, setId
+    saveDocData, expFile, setFont, setFontSize, setLineHeight, setFontWeight, setColor, setSegSpacing,
+    setTextIndent, setBgcColor, setShowborder, setRoundType, setPaperSize, setParaFocus, setBooksData,
+    refreshPaper, setId
 })
 </script>
 
@@ -352,7 +366,8 @@ defineExpose({
     height: v-bind(boxHeight + "px");
     margin: 20px auto;
     background-color: v-bind(currentBgcColor);
-    /* box-shadow: 1px 2px 4px rgb(0 0 0 / 20%); */
+    box-shadow: v-bind(currentBorderType);
+    border-radius: v-bind(currentRadius + "px");
 }
 
 [contenteditable]:focus {

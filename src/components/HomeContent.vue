@@ -161,7 +161,6 @@ const routerLink = (id: number) => {
         router.push({
             path: '/detail',
             query: {
-                type: 'opus',
                 id: id
             }
         })
@@ -174,7 +173,6 @@ const continueWriting = (id: number) => {
             router.push({
                 path: '/writer',
                 query: {
-                    type: 'opus',
                     id: id,
                     vid: item.historRecord.vid,
                     cid: item.historRecord.cid

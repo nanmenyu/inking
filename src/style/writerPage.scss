@@ -69,10 +69,6 @@
     }
 }
 
-.head-item {
-    float: right;
-    width: 100%;
-}
 
 .siderLeft {
     height: calc(100vh - 85px);
@@ -130,88 +126,6 @@
         &:hover {
             width: 6px;
             background-color: #ccc;
-        }
-    }
-}
-
-/* 触发弹出框基本样式  */
-.trigger {
-    background-color: #fff;
-    border-radius: 4px;
-    box-shadow: 2px 4px 10px #0000001a;
-}
-
-.typeface {
-    max-width: 180px;
-    max-height: 500px;
-    padding: 10px 0;
-    overflow: scroll;
-    transform: translateY(62px);
-
-    &::-webkit-scrollbar-thumb {
-        background-color: #e5e6eb;
-    }
-
-    &::-webkit-scrollbar-track {
-        border-left: none;
-    }
-
-    li {
-        list-style-type: none;
-        height: 30px;
-        line-height: 30px;
-        padding-left: 14px;
-        padding-right: 20px;
-        font-size: 16px;
-        cursor: pointer;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-
-        &:hover {
-            background-color: #f2f3f5;
-        }
-    }
-
-    .typeface-head {
-        margin-bottom: 5px;
-        border-bottom: 1px solid #e5e6eb;
-        color: #fff;
-        background-color: #3491fa;
-
-        &:hover {
-            background-color: #276dbc;
-        }
-
-        span {
-            margin-right: 40px;
-        }
-    }
-}
-
-.headerBtn {
-    background-color: #fff;
-
-    &:hover {
-        background-color: #f2f3f5;
-    }
-}
-
-.paper-size {
-    width: 210px;
-    max-width: 210px;
-
-    li {
-        font-size: 14px;
-
-        span {
-            &:nth-child(1) {
-                float: left;
-            }
-
-            &:nth-child(2) {
-                float: right;
-            }
         }
     }
 }

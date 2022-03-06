@@ -18,9 +18,9 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Writer',
         component: () => import('../views/writerPage.vue')
     }, {
-        path: '/reading',
-        name: 'Reading',
-        component: () => import('../views/readingPage.vue')
+        path: '/readingMode',
+        name: 'ReadingMode',
+        component: () => import('../views/readingModePage.vue')
     }, {
         path: '/bigworld',
         name: 'Bigworld',
@@ -33,6 +33,10 @@ const routes: Array<RouteRecordRaw> = [
         path: '/specialEditor',
         name: 'SpecialEditor',
         component: () => import('../views/specialeditorPage.vue')
+    }, {
+        path: '/reading',
+        name: 'Reading',
+        component: () => import('../views/readingPage.vue')
     }
 ]
 

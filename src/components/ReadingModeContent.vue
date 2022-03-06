@@ -13,7 +13,7 @@
                 v-for="item in filesList.list"
                 :key="item.id"
                 :title="item.title"
-                @click="choiceOneFile(item.id)"
+                @click="routerLink(item.id)"
                 class="book-cover"
             >
                 <img :src="txtFile" />
@@ -27,7 +27,8 @@
 import { reactive, ref } from 'vue';
 import Toolbar from "./widget/Toolbar.vue";
 import { db } from '../db/db';
-import jschardet from 'jschardet';
+import { useRouter } from 'vue-router';
+// import jschardet from 'jschardet/dist/jschardet.min.js';
 import txtFile from '../assets/svg_cover/txtFile.svg';
 
 const filesList: {
@@ -39,25 +40,34 @@ const filesList: {
 });
 loadFileLiset();
 
-const choiceOneFile = (id: number) => {
-    db.ebooks.get(id).then(value => {
-        const reader = new FileReader();
-        // reader.readAsText(value!.data, 'utf-8');
-        reader.readAsArrayBuffer(value!.data);
-        reader.onload = function () {
-            const ebookStr = reader.result;
-            // 要用二进制格式
-            let str = '';
-            const viewBuf = new Uint8Array(<ArrayBuffer>ebookStr);   //此时data为ArrayBuffer
-            for (let i = 0; i < 10; i++) {
-                str += String.fromCharCode(viewBuf[i]);
-            }
-            console.log(jschardet.detect(str));
-            // console.log(jschardet.detect('f撒旦士大夫'));
-            // console.log(jschardet.detect(str.substring(0, 1000)));
-        };
+const router = useRouter();
+const routerLink = (id: number) => {
+    router.push({
+        path: '/reading',
+        query: {
+            id: id
+        }
     })
 }
+
+// const choiceOneFile = (id: number) => {
+//     db.ebooks.get(id).then(value => {
+//         const reader = new FileReader();
+//         reader.readAsText(value!.data, 'utf-8');
+//         reader.readAsArrayBuffer(value!.data);
+//         // reader.readAsDataURL(value!.data);
+//         reader.onload = function () {
+//             const ebookStr = reader.result;
+//             // let str = '';
+//             // const viewBuf = new Uint8Array(<ArrayBuffer>ebookStr);   //此时data为ArrayBuffer
+//             // for (let i = 0; i < 10; i++) {
+//             //     str += String.fromCharCode(viewBuf[i]);
+//             // }
+//             // console.log(jschardet.detect(str));
+
+//         };
+//     })
+// }
 
 
 function loadFileLiset() {
