@@ -323,7 +323,7 @@
                     @moving="resizeBoxMoving"
                     :directions="['left']"
                     class="sider-right"
-                    style="width: 510px;"
+                    style="width: 450px;"
                 >
                     <!-- 伸缩杆 -->
                     <template #resize-trigger="{ direction }">

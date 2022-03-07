@@ -9,6 +9,7 @@ const {
 } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const jschardet = require("jschardet");
 const fontList = require('./nodelib/getFontList');
 const b64toFile = require('./nodelib/b64toFile');
 const deleteFolder = require('./nodelib/deleteFolder');
@@ -168,4 +169,9 @@ ipcMain.on('expFile', async (e, data) => {
         })
     }
 
+})
+
+// 利用node获取编码
+ipcMain.on('needChardet', (e, data) => {
+    e.sender.send('getChardetResult', jschardet.detect(data));
 })

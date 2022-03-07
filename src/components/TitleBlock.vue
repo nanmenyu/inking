@@ -95,9 +95,8 @@ function closeWin() {
 }
 
 // 通过route修改样式
-const route = useRoute(),
-    leftColor = ref('#f2f3f5');
-if (route.path === '/writer' || route.path === '/specialEditor') {
+const route = useRoute(), leftColor = ref('#f2f3f5');
+if (route.path === '/writer' || route.path === '/specialEditor' || route.path === '/reading' || route.path === '/pdfreading') {
     leftColor.value = '#fff';
 } else {
     leftColor.value = '#f2f3f5';

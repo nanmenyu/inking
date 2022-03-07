@@ -6,13 +6,16 @@
                 <TopToolbar ref="topToolRef"></TopToolbar>
             </a-layout-header>
             <a-layout>
-                <a-layout-content @mouseover="showScroll" @mouseout="closeScroll"></a-layout-content>
+                <a-layout-sider class="siderLeft"></a-layout-sider>
+                <a-layout-content @mouseover="showScroll" @mouseout="closeScroll">
+                    <ReadingPaper @todata="sendPaperData" ref="paperRef"></ReadingPaper>
+                </a-layout-content>
                 <a-resize-box
                     @moving-start="showIframeWrap = true"
                     @moving-end="showIframeWrap = false"
                     :directions="['left']"
                     class="sider-right"
-                    style="width: 510px;"
+                    style="width: 450px;"
                 >
                     <!-- 伸缩杆 -->
                     <template #resize-trigger="{ direction }">
@@ -38,12 +41,20 @@
 </template>
 
 <script setup lang='ts'>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import TitleBlock from '../components/TitleBlock.vue';
+import TopToolbar from '../components/TopToolbar.vue';
+import ReadingPaper from '../components/ReadingPaper.vue';
 import WebviewBlock from '../components/WebviewBlock.vue';
 import '../style/readingPage.scss';
 
+const topToolRef = ref(), paperRef = ref();
 const showIframeWrap = ref(false);
+
+// 转发纸张-->头部工具栏的数据
+const sendPaperData = (data: Pagecount) => {
+    topToolRef.value.getData(data);
+}
 
 /*----右侧滚动条的样式设置----*/
 const scrollbarColor = ref('#ccc');
@@ -53,6 +64,10 @@ const showScroll = () => {
 const closeScroll = () => {
     scrollbarColor.value = '#f5f5f5';
 }
+
+onMounted(() => {
+    topToolRef.value.getPaperRef(paperRef.value); // 将纸张的ref给头部
+})
 </script>
 
 <style scoped>

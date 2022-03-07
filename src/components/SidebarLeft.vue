@@ -87,7 +87,7 @@ switch (route.path) {
     case '/':
         choicedType.value = 't1';
         break;
-    case '/reading':
+    case '/readingMode':
         choicedType.value = 't2';
         break;
     case '/bigworld':

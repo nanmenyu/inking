@@ -96,7 +96,7 @@
                     </a-doption>
                     <template #content>
                         <ul class="trigger typeface" @scroll="fontlistScroll" ref="fontListNode">
-                            <li class="typeface-head" title="点击恢复默认">{{ uWritingOption.uFont }}</li>
+                            <li class="typeface-head" title="点击恢复默认">{{ uLocalOption.uFont }}</li>
                             <li
                                 v-for="(item, i) in fontList"
                                 :key="i"
@@ -180,7 +180,11 @@
                         </a-space>
                     </template>
                 </a-trigger>
-                <a-trigger position="right" :popup-translate="[5, 0]">
+                <a-trigger
+                    v-if="query_path === '/writer'"
+                    position="right"
+                    :popup-translate="[5, 0]"
+                >
                     <a-doption>
                         <img :src="paraFocusIcon" style="transform: translateY(2px)" />&nbsp;&nbsp;段落聚焦
                     </a-doption>
@@ -299,7 +303,10 @@
         </a-dropdown>
         <!-- 字数统计 -->
         <a-dropdown trigger="hover">
-            <a-button class="headerBtn" :style="wordCount >= 15000 ? 'color : #f53f3f' : ''">
+            <a-button
+                class="headerBtn"
+                :style="query_path === 'writer' && wordCount >= 15000 ? 'color : #f53f3f' : ''"
+            >
                 <icon-book />
                 &nbsp;&nbsp;{{ showChoice }}
                 <icon-caret-down />
@@ -330,6 +337,7 @@ import {
 } from '@arco-design/web-vue/es/icon';
 import { ColorPicker } from "vue3-colorpicker";
 import { throttle } from '../utils/flowControl';
+import { useRoute } from 'vue-router';
 import writtenwords from '../assets/svg/writtenwords.svg';
 import fontSizeIcon from '../assets/svg/fontSizeIcon.svg';
 import lineHeighIcon from '../assets/svg/lineHeighIcon.svg';
@@ -348,19 +356,21 @@ import softThemeIcon from '../assets/svg/softThemeIcon.svg';
 import expTXTIcon from '../assets/svg/expTXTIcon.svg';
 import expDOCXIcon from '../assets/svg/expDOCXIcon.svg';
 import expPDFIcon from '../assets/svg/expPDFIcon.svg';
+const route = useRoute(), query_path = route.path;
+console.log(query_path);
 
 /*-------------数据统计与初始化-------------*/
-const wordCount = ref(0), charCount = ref(0), paragraphs = ref(0),
-    fontList = ref(), paperSize = ref([
-        { type: 'Max', size: 1280, now: false },
-        { type: 'iPad Pro', size: 1024, now: false },
-        { type: 'A4', size: 794, now: true },
-        { type: 'iPad', size: 768, now: false },
-        { type: 'Surface Duo', size: 540, now: false },
-        { type: 'iPhone6/7/8 Plus', size: 414, now: false },
-        { type: 'iPhone6/7/8 X', size: 375, now: false },
-        { type: 'iPhone5/SE', size: 320, now: false },
-        { type: 'Galaxy Fold', size: 280, now: false }]);
+const wordCount = ref(0), charCount = ref(0), paragraphs = ref(0), fontList = ref(), paperSize = ref([
+    { type: 'Max', size: 1280, now: false },
+    { type: 'iPad Pro', size: 1024, now: false },
+    { type: 'A4', size: 794, now: true },
+    { type: 'iPad', size: 768, now: false },
+    { type: 'Surface Duo', size: 540, now: false },
+    { type: 'iPhone6/7/8 Plus', size: 414, now: false },
+    { type: 'iPhone6/7/8 X', size: 375, now: false },
+    { type: 'iPhone5/SE', size: 320, now: false },
+    { type: 'Galaxy Fold', size: 280, now: false }]
+);
 
 //获得子组件传递的记数
 const getData = (data: Pagecount) => {
@@ -375,7 +385,7 @@ const getPaperRef = (pRef: any) => {
 }
 
 // 读取本地用户缓存设置(localStorage缓存状态)
-const uWritingOption = ref({
+const uLocalOption = ref({
     uFontSize: 22,
     uLineHeight: 1.5,
     uFontWeight: 'normal',
@@ -389,11 +399,14 @@ const uWritingOption = ref({
     uRoundType: 'none',
     uPaperSize: 'A4'
 });
-const getuWritingOption = localStorage.getItem('uWritingOption');
-if (getuWritingOption === null) {
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
-} else {
-    uWritingOption.value = JSON.parse(getuWritingOption);
+if (query_path === '/writer') {
+    const getuWritingOption = localStorage.getItem('uWritingOption');
+    if (getuWritingOption === null) localStorage.setItem('uWritingOption', JSON.stringify(uLocalOption.value));
+    else uLocalOption.value = JSON.parse(getuWritingOption);
+} else if (query_path === '/reading') {
+    const getuReadingOption = localStorage.getItem('uReadingOption');
+    if (getuReadingOption === null) localStorage.setItem('uReadingOption', JSON.stringify(uLocalOption.value));
+    else uLocalOption.value = JSON.parse(getuReadingOption);
 }
 
 /*----获取系统字体列表备用----*/
@@ -458,86 +471,87 @@ const exp = (type: string) => {
 // 设置字体
 const selectFont = (i: number) => {
     paperRef.value.setFont(fontList.value[i]);
-    uWritingOption.value.uFont = fontList.value[i];
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
+    uLocalOption.value.uFont = fontList.value[i];
+    setLocalStorage();
 }
 // 修改字体大小
-const fontSize = ref(uWritingOption.value.uFontSize);
+const fontSize = ref(uLocalOption.value.uFontSize);
 const changeFontSize = () => {
     paperRef.value.setFontSize(fontSize.value);
-    uWritingOption.value.uFontSize = fontSize.value;
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
+    uLocalOption.value.uFontSize = fontSize.value;
+    setLocalStorage();
 }
 // 修改字体行高
-const lineHeight = ref(uWritingOption.value.uLineHeight);
+const lineHeight = ref(uLocalOption.value.uLineHeight);
 const changeLineHeight = () => {
     paperRef.value.setLineHeight(lineHeight.value);
-    uWritingOption.value.uLineHeight = lineHeight.value;
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
+    uLocalOption.value.uLineHeight = lineHeight.value;
+    setLocalStorage();
 }
 // 修改字体粗细
-const fontWeight = ref(uWritingOption.value.uFontWeight);
+const fontWeight = ref(uLocalOption.value.uFontWeight);
 const changeFontWeight = () => {
     paperRef.value.setFontWeight(fontWeight.value);
-    uWritingOption.value.uFontWeight = fontWeight.value;
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
+    uLocalOption.value.uFontWeight = fontWeight.value;
+    setLocalStorage();
 }
 // 修改段落间距
-const segSpacing = ref(uWritingOption.value.uSpacing);
+const segSpacing = ref(uLocalOption.value.uSpacing);
 const changeSegSpacing = () => {
     paperRef.value.setSegSpacing(segSpacing.value);
-    uWritingOption.value.uSpacing = segSpacing.value;
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
+    uLocalOption.value.uSpacing = segSpacing.value;
+    setLocalStorage();
 }
 // 修改段前缩进
-const textIndent = ref(uWritingOption.value.uTextIndent);
+const textIndent = ref(uLocalOption.value.uTextIndent);
 const changeTextIndent = () => {
     paperRef.value.setTextIndent(textIndent.value);
-    uWritingOption.value.uTextIndent = textIndent.value;
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
+    uLocalOption.value.uTextIndent = textIndent.value;
+    setLocalStorage();
 }
 
 // 获得子组件选择的color并修改字体颜色
-const fontColor = ref(uWritingOption.value.uColor), bgcColor = ref(uWritingOption.value.uBgcColor);
+const fontColor = ref(uLocalOption.value.uColor);
 const gradientColor = ref("linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 100%)");
 const getColor = () => {
     paperRef.value.setColor(fontColor.value);
+    uLocalOption.value.uColor = fontColor.value;
     // 聚焦模式下选择新颜色
-    if (paraFocus.value === 'open') paperRef.value.setParaFocus(paraFocus.value);
-    uWritingOption.value.uColor = fontColor.value;
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
+    if (query_path === '/writer' && paraFocus.value === 'open') paperRef.value.setParaFocus(paraFocus.value);
+    setLocalStorage();
 }
 // 获得子组件选择的color并修改纸张背景色
+const bgcColor = ref(uLocalOption.value.uBgcColor);
 const getBgcColor = () => {
     paperRef.value.setBgcColor(bgcColor.value);
-    uWritingOption.value.uBgcColor = bgcColor.value;
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
+    uLocalOption.value.uBgcColor = bgcColor.value;
+    setLocalStorage();
 }
 
 // 改变纸张边框
 const isShowBorder = ref(true);
-const showBorderType = ref(uWritingOption.value.uShowBorder);
+const showBorderType = ref(uLocalOption.value.uShowBorder);
 if (showBorderType.value === 'open') isShowBorder.value = true;
 else isShowBorder.value = false;
 const showBorder = (value: boolean) => {
     if (value) showBorderType.value = 'open';
     else showBorderType.value = 'close';
     paperRef.value.setShowborder(showBorderType.value);
-    uWritingOption.value.uShowBorder = showBorderType.value;
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
+    uLocalOption.value.uShowBorder = showBorderType.value;
+    setLocalStorage();
 }
 // 纸张边框圆角大小
-const roundType = ref(uWritingOption.value.uRoundType);
+const roundType = ref(uLocalOption.value.uRoundType);
 const changeBorderRadius = () => {
     paperRef.value.setRoundType(roundType.value);
-    uWritingOption.value.uRoundType = roundType.value;
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
+    uLocalOption.value.uRoundType = roundType.value;
+    setLocalStorage();
 }
 
 // 设置纸张类型
 for (let item in paperSize.value) {
     paperSize.value[item].now = false;
-    if (paperSize.value[item].type === uWritingOption.value.uPaperSize) {
+    if (paperSize.value[item].type === uLocalOption.value.uPaperSize) {
         paperSize.value[item].now = true;
     }
 }
@@ -547,35 +561,59 @@ const changePaperSize = (type: string) => {
         item.type === type ? item.now = true : null;
     });
     paperRef.value.setPaperSize(type);
-    uWritingOption.value.uPaperSize = type;
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
+    uLocalOption.value.uPaperSize = type;
+    setLocalStorage();
 }
 
 // 设置聚焦模式
-const paraFocus = ref(uWritingOption.value.uParaFocus);
+const paraFocus = ref(uLocalOption.value.uParaFocus);
 const changeParaFocus = () => {
-    paperRef.value.setParaFocus(paraFocus.value);
-    uWritingOption.value.uParaFocus = paraFocus.value;
-    localStorage.setItem('uWritingOption', JSON.stringify(uWritingOption.value));
+    if (query_path === '/writer') {
+        paperRef.value.setParaFocus(paraFocus.value);
+        uLocalOption.value.uParaFocus = paraFocus.value;
+        localStorage.setItem('uWritingOption', JSON.stringify(uLocalOption.value));
+    }
 }
 
 // 生命周期
 onMounted(() => {
     nextTick(() => {
-        paperRef.value.setFont(uWritingOption.value.uFont, true);
-        paperRef.value.setFontSize(uWritingOption.value.uFontSize, true);
-        paperRef.value.setLineHeight(uWritingOption.value.uLineHeight, true);
-        paperRef.value.setFontWeight(uWritingOption.value.uFontWeight, true);
-        paperRef.value.setSegSpacing(uWritingOption.value.uSpacing, true);
-        paperRef.value.setTextIndent(uWritingOption.value.uTextIndent, true);
-        paperRef.value.setColor(uWritingOption.value.uColor, true);
-        paperRef.value.setBgcColor(uWritingOption.value.uBgcColor, true);
-        paperRef.value.setShowborder(uWritingOption.value.uShowBorder, true);
-        paperRef.value.setRoundType(uWritingOption.value.uRoundType, true);
-        paperRef.value.setPaperSize(uWritingOption.value.uPaperSize, true);
-        paperRef.value.setParaFocus(uWritingOption.value.uParaFocus, true);
+        if (query_path === '/writer') {
+            paperRef.value.setFont(uLocalOption.value.uFont, true);
+            paperRef.value.setFontSize(uLocalOption.value.uFontSize, true);
+            paperRef.value.setLineHeight(uLocalOption.value.uLineHeight, true);
+            paperRef.value.setFontWeight(uLocalOption.value.uFontWeight, true);
+            paperRef.value.setSegSpacing(uLocalOption.value.uSpacing, true);
+            paperRef.value.setTextIndent(uLocalOption.value.uTextIndent, true);
+            paperRef.value.setColor(uLocalOption.value.uColor, true);
+            paperRef.value.setBgcColor(uLocalOption.value.uBgcColor, true);
+            paperRef.value.setShowborder(uLocalOption.value.uShowBorder, true);
+            paperRef.value.setRoundType(uLocalOption.value.uRoundType, true);
+            paperRef.value.setPaperSize(uLocalOption.value.uPaperSize, true);
+            paperRef.value.setParaFocus(uLocalOption.value.uParaFocus, true);
+        } else if (query_path === '/reading') {
+            paperRef.value.setFont(uLocalOption.value.uFont);
+            paperRef.value.setFontSize(uLocalOption.value.uFontSize);
+            paperRef.value.setLineHeight(uLocalOption.value.uLineHeight);
+            paperRef.value.setFontWeight(uLocalOption.value.uFontWeight);
+            paperRef.value.setSegSpacing(uLocalOption.value.uSpacing);
+            paperRef.value.setTextIndent(uLocalOption.value.uTextIndent);
+            paperRef.value.setColor(uLocalOption.value.uColor);
+            paperRef.value.setBgcColor(uLocalOption.value.uBgcColor);
+            paperRef.value.setShowborder(uLocalOption.value.uShowBorder);
+            paperRef.value.setRoundType(uLocalOption.value.uRoundType);
+            paperRef.value.setPaperSize(uLocalOption.value.uPaperSize);
+        }
     })
 })
+
+function setLocalStorage() {
+    if (query_path === '/writer') {
+        localStorage.setItem('uWritingOption', JSON.stringify(uLocalOption.value));
+    } else if (query_path === '/reading') {
+        localStorage.setItem('uReadingOption', JSON.stringify(uLocalOption.value));
+    }
+}
 
 defineExpose({
     getData, getPaperRef

@@ -143,7 +143,7 @@ import { v4 } from 'uuid';
 
 const { proxy } = useCurrentInstance();
 const $message = proxy.$message;
-const emit = defineEmits(['onBack', 'refresh', 'toDeleteAll', 'toReverse', 'toSort']);
+const emit = defineEmits(['onBack', 'refresh', 'toDeleteAll', 'toReverse', 'toSort', 'toImport']);
 
 /*----点击触发云同步动画----*/
 const iCloud = ref(false);
@@ -206,7 +206,7 @@ const explain = computed(() => {
 const importFile = () => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
-    input.setAttribute('accept', '.txt');
+    input.setAttribute('accept', '.txt,.pdf');
     input.click();
     input.onchange = () => {
         if (input.files) {
@@ -219,7 +219,8 @@ const importFile = () => {
                 title: fileName,
                 creationTime: new Date().getTime()
             }).then(() => {
-                $message.success('导入txt成功,请到阅读模式查看');
+                $message.success(`导入${fileType}成功,请到阅读模式下查看`);
+                emit('toImport');
             })
         }
     }

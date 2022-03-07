@@ -1012,41 +1012,39 @@ const saveImgData = () => {
 const isEmpty = ref(false);
 const totalWords = ref(0);
 function loadData() {
-    if (route.query.type === 'opus') {
-        db.opus.get(query_id)
-            .then(value => {
-                if (value) {
-                    booksData.data = value;
-                    totalWords.value = value.opusNumber;
-                    // 表单值预先初始化
-                    form.name = booksData.data.author;
-                    form.opus = booksData.data.title;
-                    form.category = booksData.data.categories;
-                    form.briefintro = booksData.data.desc.replaceAll('<br/>', '\n');
-                    booksData.data.tag.forEach(item => {
-                        selectedArr.push(item);
-                    });
-                    // 计算作品总章数
-                    wastepaperBasketData = [];// 清空临时废纸篓列表
-                    booksData.data.data = booksData.data.data.filter(item => {
-                        // 判断目标卷是否有删除标记
-                        if (item.discard) wastepaperBasketData.push(item);
-                        return !item.discard;
-                    });
-                    let num = 0;
-                    booksData.data.data.forEach(item => {
-                        item.volume = item.volume.filter(it => {
-                            // 判断目标章是否有删除标记
-                            if (it.discard) wastepaperBasketData.push(it);
-                            else num++;
-                            return !it.discard;
-                        })
-                    });
-                    booksData.data.data.length > 0 ? isEmpty.value = false : isEmpty.value = true;
-                    totalNumber.value = num; // 作品总章数
-                }
-            });
-    }
+    db.opus.get(query_id)
+        .then(value => {
+            if (value) {
+                booksData.data = value;
+                totalWords.value = value.opusNumber;
+                // 表单值预先初始化
+                form.name = booksData.data.author;
+                form.opus = booksData.data.title;
+                form.category = booksData.data.categories;
+                form.briefintro = booksData.data.desc.replaceAll('<br/>', '\n');
+                booksData.data.tag.forEach(item => {
+                    selectedArr.push(item);
+                });
+                // 计算作品总章数
+                wastepaperBasketData = [];// 清空临时废纸篓列表
+                booksData.data.data = booksData.data.data.filter(item => {
+                    // 判断目标卷是否有删除标记
+                    if (item.discard) wastepaperBasketData.push(item);
+                    return !item.discard;
+                });
+                let num = 0;
+                booksData.data.data.forEach(item => {
+                    item.volume = item.volume.filter(it => {
+                        // 判断目标章是否有删除标记
+                        if (it.discard) wastepaperBasketData.push(it);
+                        else num++;
+                        return !it.discard;
+                    })
+                });
+                booksData.data.data.length > 0 ? isEmpty.value = false : isEmpty.value = true;
+                totalNumber.value = num; // 作品总章数
+            }
+        });
 }
 
 </script>

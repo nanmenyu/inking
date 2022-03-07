@@ -1,23 +1,28 @@
 <!-- 右侧阅读页面 -->
 <template>
     <div class="reading-content">
-        <Toolbar></Toolbar>
+        <Toolbar @toImport="toImport"></Toolbar>
         <div class="content">
             <a-empty
                 v-if="filesList.list.length === 0"
                 style="margin-top: 100px;"
                 description="暂无数据,左上角导入"
             />
-            <div
-                v-else
-                v-for="item in filesList.list"
-                :key="item.id"
-                :title="item.title"
-                @click="routerLink(item.id)"
-                class="book-cover"
-            >
-                <img :src="txtFile" />
-                <div class="title">{{ item.title }}</div>
+            <div v-else v-for="item in filesList.list" :key="item.id">
+                <a-dropdown trigger="contextMenu" alignPoint :style="{ display: 'block' }">
+                    <div
+                        :title="item.title"
+                        @click="routerLink(item.id, item.type)"
+                        class="book-cover"
+                    >
+                        <img v-if="item.type === 'txt'" :src="txtFile" />
+                        <img v-else-if="item.type === 'pdf'" :src="pdfFile" />
+                        <div class="title">{{ item.title }}</div>
+                    </div>
+                    <template #content>
+                        <a-doption @click="deleteFile(item.id, item.title)">移除</a-doption>
+                    </template>
+                </a-dropdown>
             </div>
         </div>
     </div>
@@ -28,8 +33,13 @@ import { reactive, ref } from 'vue';
 import Toolbar from "./widget/Toolbar.vue";
 import { db } from '../db/db';
 import { useRouter } from 'vue-router';
-// import jschardet from 'jschardet/dist/jschardet.min.js';
+import useCurrentInstance from '../utils/useCurrentInstance';
 import txtFile from '../assets/svg_cover/txtFile.svg';
+import pdfFile from '../assets/svg_cover/pdfFile.svg';
+
+const { proxy } = useCurrentInstance();
+const $modal = proxy.$modal;
+const $message = proxy.$message;
 
 const filesList: {
     list: Array<{
@@ -41,34 +51,34 @@ const filesList: {
 loadFileLiset();
 
 const router = useRouter();
-const routerLink = (id: number) => {
+const routerLink = (id: number, type: string) => {
+    let tempPath = '';
+    if (type === 'txt') tempPath = '/reading';
+    else if (type === 'pdf') tempPath = '/pdfreading';
     router.push({
-        path: '/reading',
+        path: tempPath,
         query: {
             id: id
         }
     })
 }
+const toImport = () => {
+    loadFileLiset();
+}
 
-// const choiceOneFile = (id: number) => {
-//     db.ebooks.get(id).then(value => {
-//         const reader = new FileReader();
-//         reader.readAsText(value!.data, 'utf-8');
-//         reader.readAsArrayBuffer(value!.data);
-//         // reader.readAsDataURL(value!.data);
-//         reader.onload = function () {
-//             const ebookStr = reader.result;
-//             // let str = '';
-//             // const viewBuf = new Uint8Array(<ArrayBuffer>ebookStr);   //此时data为ArrayBuffer
-//             // for (let i = 0; i < 10; i++) {
-//             //     str += String.fromCharCode(viewBuf[i]);
-//             // }
-//             // console.log(jschardet.detect(str));
-
-//         };
-//     })
-// }
-
+const deleteFile = (id: number, title: string) => {
+    $modal.warning({
+        title: "删除导入的文件",
+        content: `目标文件【${title}】将从软件中移除, 该过程不可逆`,
+        simple: true,
+        onOk: () => {
+            db.ebooks.delete(id).then(() => {
+                loadFileLiset();
+                $message.success('删除成功!');
+            })
+        }
+    })
+}
 
 function loadFileLiset() {
     db.ebooks.where(':id').between(1, Infinity).toArray().then(value => {
@@ -80,7 +90,6 @@ function loadFileLiset() {
                 type: item.type
             }
         });
-        console.log(filesList.list);
     })
 }
 

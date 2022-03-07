@@ -1,13 +1,8 @@
  <!-- 写作纸张 -->
  <template>
-    <div id="paper-box" ref="pBox">
-        <main
-            @keydown="adaHeight"
-            @keyup="getData(), input_saveDocData($event);"
-            id="pEditor"
-            ref="editor"
-        >
-            <div id="mainEditor" ref="mEditor"></div>
+    <div id="paper-box-w" ref="pBox">
+        <main @keydown="adaHeight" @keyup="getData(), input_saveDocData($event);" ref="editor">
+            <div id="mainEditor-w" ref="mEditor"></div>
         </main>
     </div>
 </template>
@@ -24,6 +19,7 @@ import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
 import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { useMainStore } from '../store/index';
+import { paperSize } from '../hooks/paperSize';
 
 const emit = defineEmits(['todata']), { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
@@ -37,18 +33,6 @@ onBeforeUnmount(() => {
     clearInterval(timer);
 })
 
-// 纸张的宽度 = 内容区 + 40px的左右边距
-const paperSize: { [key: string]: number } = {
-    'Max': 1280,
-    'iPad Pro': 1024,
-    'A4': 794,
-    'iPad': 768,
-    'Surface Duo': 540,
-    'iPhone6/7/8 Plus': 414,
-    'iPhone6/7/8 X': 375,
-    'iPhone5/SE': 320,
-    'Galaxy Fold': 280
-};
 const boxWidth = ref(paperSize['A4']), boxHeight = ref(1000); // 纸张宽度，纸张高度
 
 // 数据库取值相关
@@ -361,7 +345,7 @@ defineExpose({
 <!-- 段落：段间距 每段首行缩进 段聚焦-->
 <!-- 其它：纸张颜色 软件主题 纸张大小-->
 <style>
-#paper-box {
+#paper-box-w {
     width: v-bind(boxWidth + "px");
     height: v-bind(boxHeight + "px");
     margin: 20px auto;
@@ -374,11 +358,11 @@ defineExpose({
     outline: none;
 }
 
-#mainEditor {
+#mainEditor-w {
     position: relative;
 }
 
-#mainEditor .ProseMirror {
+#mainEditor-w .ProseMirror {
     font-family: v-bind(currentFont);
     box-sizing: border-box;
     text-align: left;
@@ -395,20 +379,20 @@ defineExpose({
     font-variant-ligatures: none;
     font-feature-settings: "liga" 0;
 }
-#mainEditor .ProseMirror p {
+#mainEditor-w .ProseMirror p {
     margin: 0;
     margin-top: v-bind(currentSpacing + "px");
     text-indent: v-bind(currentTextIndent + "em");
 }
-#mainEditor .ProseMirror .onfocused {
+#mainEditor-w .ProseMirror .onfocused {
     color: v-bind(focusColor);
 }
-#mainEditor .ProseMirror .keyWord {
+#mainEditor-w .ProseMirror .keyWord {
     position: relative;
     border-radius: 6px;
     cursor: pointer;
 }
-#mainEditor .ProseMirror .keyWord::before {
+#mainEditor-w .ProseMirror .keyWord::before {
     content: "";
     position: absolute;
     bottom: 0;
@@ -419,17 +403,17 @@ defineExpose({
     transform: scaleX(0);
     transition: all 0.3s ease-in-out 0s;
 }
-#mainEditor .ProseMirror .keyWord:hover::before {
+#mainEditor-w .ProseMirror .keyWord:hover::before {
     visibility: visible;
     transform: scaleX(1);
 }
 
-#mainEditor .ProseMirror .keyword_search {
+#mainEditor-w .ProseMirror .keyword_search {
     border-radius: 25%;
     background-color: #ff0;
 }
 
-#mainEditor .tooltip {
+#mainEditor-w .tooltip {
     position: absolute;
     /* pointer-events: none; */
     user-select: none;
@@ -441,7 +425,7 @@ defineExpose({
     box-shadow: 0 2px 8px #00000026;
     transform: translateX(-50%);
 }
-#mainEditor .tooltip::before {
+#mainEditor-w .tooltip::before {
     content: "";
     height: 0;
     width: 0;
@@ -453,7 +437,7 @@ defineExpose({
     border-bottom-width: 0;
     border-top-color: silver;
 }
-#mainEditor .tooltip::after {
+#mainEditor-w .tooltip::after {
     content: "";
     height: 0;
     width: 0;

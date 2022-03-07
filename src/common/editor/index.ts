@@ -34,7 +34,7 @@ export default function (initData: NodeDOC, keyMarks?: Array<{ match: RegExp, cl
         },
     };
     const schema = new Schema({ nodes });
-    const main = document.querySelector('#mainEditor')!;
+    const main = document.querySelector('#mainEditor-w')!;
     if (keyMarks) setHighlightKeyword(keyMarks); // 设置要高亮的关键字 [{ match: /男人/g, class: 'keyword' }]
     const state = EditorState.create({
         doc: Node.fromJSON(schema, initData),

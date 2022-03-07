@@ -9,6 +9,7 @@ declare module '*.vue' {
 declare module '*.ts';
 declare module '*.js';
 declare module 'uuid';
+declare module 'vue-pdf';
 declare module 'prosemirror-schema-basic';
 declare module 'prosemirror-commands';
 declare module 'prosemirror-history';
@@ -16,6 +17,7 @@ declare module 'prosemirror-keymap';
 declare module 'prosemirror-model';
 declare module 'prosemirror-state';
 declare module 'prosemirror-view';
+declare module 'pdfjs-dist/build/pdf.worker.entry';
 
 declare interface Window {
   $API: any
