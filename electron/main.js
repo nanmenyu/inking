@@ -41,7 +41,7 @@ async function createWindow() {
             webviewTag: true,
             nodeIntegration: true,
             // webSecurity: false
-        }
+        },
     })
     // win.loadURL(
     //     NODE_ENV === 'development'

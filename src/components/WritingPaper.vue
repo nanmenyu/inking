@@ -78,8 +78,6 @@ const emit_throttle = throttle(() => {
             content: '单章字符数不宜过多(>15000),因为可能会影响导出PDF的性能(不导出就随意)'
         })
     }
-    // mainStore.codewords = chapterNumber - baseChapterNumber;
-    // mainStore.isCodewords = !mainStore.isCodewords;
 }, 300);
 
 // 键盘抬起时保存
