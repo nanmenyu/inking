@@ -1006,10 +1006,18 @@ function modifyDbforItem(t_kid: string, t_iid: string, hd: Function, cb?: Functi
     })
 }
 
+// 监视keyword模块状态是否改变
+const keyWordState = computed(() => {
+    return mainStore.KeywordEditorChange;
+})
+// 改变时重新载入页面数据
+watch(keyWordState, state => {
+    if (state) loadListData();
+})
 /*---------------------生命周期---------------------*/
 onMounted(() => {
     topToolRef.value.getPaperRef(paperRef.value); // 将纸张的ref给头部
-    const mainEditor = document.getElementById('mainEditor');
+    const mainEditor = document.getElementById('mainEditor-w');
     window.addEventListener('keydown', (e: KeyboardEvent) => {
         if (e.ctrlKey) mainEditor?.addEventListener('mousemove', showSpanDetail);
     });

@@ -56,7 +56,7 @@ const determine = () => { emit('toDetermine') }
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 24px 20px;
+        padding: 12px 10px;
     }
     .box-replace {
         width: 550px;

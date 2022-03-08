@@ -17,6 +17,8 @@ declare module 'prosemirror-keymap';
 declare module 'prosemirror-model';
 declare module 'prosemirror-state';
 declare module 'prosemirror-view';
+declare module 'prosemirror-schema-list';
+declare module 'prosemirror-example-setup';
 declare module 'pdfjs-dist/build/pdf.worker.entry';
 
 declare interface Window {

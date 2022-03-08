@@ -13,6 +13,7 @@ const jschardet = require("jschardet");
 const fontList = require('./nodelib/getFontList');
 const b64toFile = require('./nodelib/b64toFile');
 const deleteFolder = require('./nodelib/deleteFolder');
+const writeFileByUser = require('./nodelib/writeFileByUser');
 const HTMLtoDOCX = require('html-to-docx/dist/html-to-docx.umd');
 
 const NODE_ENV = process.env.NODE_ENV;
@@ -115,10 +116,8 @@ ipcMain.on('expFile', async (e, data) => {
     if (data.type === 'DOCX') {
         const fileBuffer = await HTMLtoDOCX(data.file, null, {
             table: { row: { cantSplit: true } },
-            footer: true,
-            pageNumber: true,
+            footer: true
         });
-
         dialog.showSaveDialog({
             title: '导出为DOCX',
             defaultPath: data.name + '.docx',
@@ -126,7 +125,8 @@ ipcMain.on('expFile', async (e, data) => {
         }).then(file => {
             if (file) {
                 fs.writeFile(file.filePath, fileBuffer, err => {
-                    if (err) console.log(err);
+                    if (err) e.sender.send('expFile-result', 'err');
+                    else e.sender.send('expFile-result', 'success');
                 });
             }
         })
@@ -138,12 +138,52 @@ ipcMain.on('expFile', async (e, data) => {
         }).then(file => {
             if (file) {
                 fs.writeFile(file.filePath, data.file, err => {
-                    if (err) console.log(err);
+                    if (err) e.sender.send('expFile-result', 'err');
+                    else e.sender.send('expFile-result', 'success');
+                });
+            }
+        })
+    } else if (data.type === 'TXT_mult') {
+        dialog.showOpenDialog({
+            title: '选择目标文件夹',
+            properties: ['openDirectory']
+        }).then(file => {
+            if (file) {
+                const basePath = file.filePaths[0] + '/' + data.name;
+                // 依次导出为TXT
+                data.file.forEach(v_item => {
+                    const volumePath = basePath + '/' + v_item.volumeName;
+                    v_item.volume.forEach(c_item => {
+                        const chapterPath = volumePath + '/' + c_item.chapterName + '.txt';
+                        if (writeFileByUser(chapterPath, c_item.chapter)) e.sender.send('expFile-result', 'err');
+                        else e.sender.send('expFile-result', 'success');
+                    })
+                });
+            }
+        })
+    } else if (data.type === 'DOCX_mult') {
+        dialog.showOpenDialog({
+            title: '选择目标文件夹',
+            properties: ['openDirectory']
+        }).then(file => {
+            if (file) {
+                const basePath = file.filePaths[0] + '/' + data.name;
+                // 依次导出为DOCX
+                data.file.forEach(v_item => {
+                    const volumePath = basePath + '/' + v_item.volumeName;
+                    v_item.volume.forEach(async c_item => {
+                        const chapterPath = volumePath + '/' + c_item.chapterName + '.docx';
+                        const fileBuffer = await HTMLtoDOCX(c_item.chapter, null, {
+                            table: { row: { cantSplit: true } },
+                            footer: true
+                        });
+                        if (writeFileByUser(chapterPath, fileBuffer)) e.sender.send('expFile-result', 'err');
+                        else e.sender.send('expFile-result', 'success');
+                    })
                 });
             }
         })
     }
-
 })
 
 // 利用node获取编码

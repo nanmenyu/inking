@@ -18,23 +18,26 @@
     overflow-y: scroll;
 }
 
-.cover-block {
+
+.book-cover {
+    position: relative;
     float: left;
     width: 162px;
-    height: 205px;
-    background-color: red;
+    height: 230px;
     margin: 30px 40px;
-    background: url('../../public//static//img/book-border.png') no-repeat;
-    background-size: 100% 100%;
-    cursor: pointer;
-}
+    text-align: left;
+    user-select: none;
 
-.cover {
-    position: relative;
-    width: 150px;
-    height: 200px;
+    .book-shadow {
+        position: absolute;
+        bottom: -20px;
+        width: 100%;
+        height: 16px;
+        background: url('../../public/static/img/book-shadow.png') no-repeat;
+        background-size: 100% 70%;
+    }
 
-    span {
+    .dete {
         position: absolute;
         top: 6px;
         left: 0;
@@ -43,77 +46,147 @@
         line-height: 20px;
         color: #fff;
         font-weight: bold;
-        border-radius: 0 4px 4px 4px;
+        border-radius: 0 4px 4px 0;
+        opacity: 1;
         background-color: rgba(10, 10, 10, .3);
+        transition: opacity 0.3s ease-in-out;
     }
 
-    &:hover {
-        animation: rotateBook 0.3s;
-        animation-fill-mode: forwards;
+    .date {
+        position: absolute;
+        bottom: -55px;
+        width: 100%;
+        font-size: 14px;
+        font-weight: lighter;
+        border-radius: 0 0 6px 0;
+        color: #4e5969;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
-}
 
-.checked-cover {
-    position: relative;
-    width: 150px;
-    height: 200px;
+    .title {
+        position: absolute;
+        bottom: -40px;
+        width: 100%;
+        height: 30px;
+        font-size: 18px;
+        font-weight: lighter;
+        line-height: 30px;
+        border-radius: 0 0 6px 0;
+        color: #333;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
-    .btn-unchecked {
+    .btn-unchecked,
+    .btn-checked {
         position: absolute;
         top: 6px;
-        left: 0;
+        left: 6px;
         width: 18px;
         height: 18px;
         border-radius: 50%;
+    }
+
+    .btn-unchecked {
         background-color: #f2f3f5;
         border: 2px solid #e5e6eb;
     }
 
     .btn-checked {
-        position: absolute;
-        top: 6px;
-        left: 0;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
         background-color: #f53f3f;
         border: 2px solid #f53f3f;
     }
 }
 
-.img {
-    width: 150px;
-    height: 200px;
-    border-radius: 4px;
-    margin-top: 4px;
-    margin-left: -2px;
-}
+.book {
+    position: relative;
+    width: 162px;
+    height: 230px;
+    background-color: rgb(62, 71, 152);
+    transition: all .3s ease-in-out;
+    transform-origin: left center 0px;
+    transform-style: preserve-3d;
+    border-radius: 6px;
+    box-shadow: 4px 4px 8px #ccc;
 
-.title {
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 148px;
-    padding: 4px 0;
-    font-size: 16px;
-    font-weight: lighter;
-    border-top: 1px dotted rgba(255, 255, 255, .5);
-    border-radius: 0 0 4px 4px;
-    color: #fff;
-    background-color: rgba(10, 10, 10, .3);
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+    img {
+        width: 162px;
+        height: 230px;
+        border-radius: 6px;
+    }
+
+    &::after {
+        content: " ";
+        display: block;
+        position: relative;
+        top: 0;
+        left: 8px;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: all .3s ease;
+    }
+
+    &::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: -12px;
+        right: 8px;
+        z-index: 999;
+        width: 20px;
+        height: 100px;
+        opacity: 0;
+        transition: all .25s;
+        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAD8AAABhCAYAAABh23lYAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAHCSURBVHgB7dxPTsJAHMXxN7Xu3UhigobxJHACvQFwAr2BcgO8AZxE7uGiDZiQyEIW7oSOUyKbKgLS8u+9b9JNF818fum0XdWUhy9VEDZBGIdBGD6DsFM3bQYgTnjWhGdNeNaEZ0141oRnTXjWhGdNeNaEZ0141oRnTXjWhGdNeNaEZ0141oRnTXjWhGdNeNaEZ0141oRnTXjWhGdNeNaEZ0141oRnTXjWhGdNeNaEZ0141oRnTXjWhGdNeNZ2hR/7o+UcmnCIsaNCbLcU/RR8oB1bO/4+17l8ixoGeIBBBVvMXI0ih+L7Df2j8iiqnvgh+AVVUXDOTZvF4tNb2qC7DJ1tNgSDO78tblFQxeE92l+0NSjZDjaoMowqyYl7hDF15JzL+x+YHtxLgFq/ZO2m8LT4wsb90nUjmMD61XaRc7ng5+jBua29ntsecq6oIWyELxqdLe8h/GvPp+h0T28D/FezZ8Ip7pHgZt3X5NoPvH1BZ5sNIUTDL7C+6hBWxxt0gk+00tsOe96qH0zL8GO4pBtMg/YhoLMtG8Ii/EpfY4fSoiFk8UeFzpYdwhz/jiNGZ0uHEBjUEzftohJFZyAsdX8BM0/amLC3spYAAAAASUVORK5CYII=');
+        background-size: 18px;
+        background-repeat: no-repeat;
+    }
+
+    &:hover {
+        cursor: pointer;
+        transform: rotateY(-28deg) rotateZ(-2deg) scale(1.02);
+        box-shadow: 1px 3px 2px #ccc, 20px 8px 0 #ddd;
+
+        .dete {
+            opacity: 0;
+        }
+
+        &::after {
+            content: " ";
+            display: block;
+            position: relative;
+            left: 8px;
+            width: 172px;
+            height: 255px;
+            opacity: 1;
+            background: linear-gradient(-180deg, rgba(255, 255, 255, .1) 0%, rgba(255, 255, 255, 0) 60%);
+        }
+
+        &::before {
+            opacity: 1;
+            transform: translateY(9px);
+        }
+    }
 }
 
-// .book-shadow {
-//     margin-left: 6px;
-//     margin-top: 14px;
-//     width: 150px;
-//     height: 16px;
-//     background: url('../../public//static//img/book-shadow.png') no-repeat;
-//     background-size: 100% 70%;
-// }
+.check-book {
+    position: relative;
+    width: 162px;
+    height: 230px;
+    cursor: pointer;
+
+    img {
+        width: 100%;
+        height: 100%;
+    }
+}
+
 .theme {
     position: fixed;
     bottom: 30px;
@@ -131,7 +204,6 @@
     margin: 0 28px;
     padding: 0;
     list-style-type: none;
-    border: 1px solid #e5e6eb;
     border-radius: 4px;
 
     .li {
@@ -139,9 +211,11 @@
         align-items: center;
         height: 60px;
         padding: 5px 10px;
-        border-bottom: 1px solid #e5e6eb;
-        cursor: pointer;
+        margin: 10px 0;
+        border-radius: 6px;
         text-decoration: none;
+        box-shadow: 0 4px 4px #0000001a;
+        cursor: pointer;
 
         &:nth-last-of-type(1) {
             border: none;
@@ -154,51 +228,51 @@
             object-fit: cover;
         }
 
-        &:hover {
-            .sub {
-                background-color: #f2f3f5;
-                transition: background-color .3s ease;
-            }
-        }
-    }
+        .sub {
+            width: 100%;
+            height: 60px;
 
-    .sub {
-        width: 100%;
-        height: 60px;
+            p {
+                margin: 0;
 
-        p {
-            margin: 0;
+                &:nth-of-type(1) {
+                    margin: 2px 0 4px 0;
+                    padding: 0 14px;
+                    font-weight: bold;
+                    text-align: left;
+                    color: #4e5969;
 
-            &:nth-of-type(1) {
-                margin: 2px 0 4px 0;
-                padding: 0 14px;
-                font-weight: bold;
-                text-align: left;
-                color: #4e5969;
-
-                span {
-                    &:nth-child(2) {
-                        display: block;
-                        padding-right: 10px;
-                        float: right;
-                        color: #aaa;
+                    span {
+                        &:nth-child(2) {
+                            display: block;
+                            padding-right: 10px;
+                            float: right;
+                            color: #aaa;
+                        }
                     }
                 }
-            }
 
-            &:nth-of-type(2) {
-                margin-top: 4px;
-                padding: 0 14px;
-                text-align: left;
-                line-height: 1.25em;
-                color: #4e5969;
-                display: -webkit-box;
-                -webkit-box-orient: vertical;
-                -webkit-line-clamp: 2;
-                overflow: hidden;
+                &:nth-of-type(2) {
+                    margin-top: 4px;
+                    padding: 0 14px;
+                    text-align: left;
+                    line-height: 1.25em;
+                    color: #4e5969;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
+                    overflow: hidden;
+                }
             }
         }
+
+        &:hover {
+            background: linear-gradient(to right, rgba(242, 243, 245, 1), transparent);
+        }
+
     }
+
+
 }
 
 @keyframes rotateBook {

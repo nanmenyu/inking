@@ -301,6 +301,7 @@ const addFile = () => {
             $message.success('创建成功');
             break;
         case '笔记本':
+            console.log('笔记本');
             // db.note
             break;
         case 'Markdown':
