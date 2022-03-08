@@ -77,6 +77,9 @@
                 </a-dropdown>
                 <div class="book-shadow"></div>
             </div>
+            <!-- 新封面 -->
+
+            <!-- 主题按钮 -->
             <a-button class="theme" type="primary" shape="circle">
                 <icon-skin />
             </a-button>

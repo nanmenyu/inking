@@ -14,18 +14,8 @@ const fontList = require('./nodelib/getFontList');
 const b64toFile = require('./nodelib/b64toFile');
 const deleteFolder = require('./nodelib/deleteFolder');
 const HTMLtoDOCX = require('html-to-docx/dist/html-to-docx.umd');
-// const createProtocol = require('./nodelib/createProtocol');
 
-const NODE_ENV = process.env.NODE_ENV
-
-// 自定义协议到系统协议中
-// protocol.registerSchemesAsPrivileged([{
-//     scheme: 'app',
-//     privileges: {
-//         secure: true,
-//         standard: true
-//     }
-// }]);
+const NODE_ENV = process.env.NODE_ENV;
 
 let win;
 async function createWindow() {
@@ -43,19 +33,15 @@ async function createWindow() {
             // webSecurity: false
         },
     })
-    // win.loadURL(
-    //     NODE_ENV === 'development'
-    //         ? 'http://localhost:3000'
-    //         : `file://${path.join(__dirname, '../dist/index.html')}`
-    // );
     if (NODE_ENV === 'development') {
         // 如果处于开发模式，则加载开发时服务的url
         await win.loadURL('http://localhost:3000');
         win.webContents.openDevTools();
     } else {
-        // createProtocol('app');
         // 不在开发模式时加载 index.html
         win.loadURL(`file://${path.join(__dirname, '../dist/index.html')}`);
+
+        win.webContents.openDevTools();
     }
     // // 打开开发工具
     // if (NODE_ENV === "development") {
@@ -64,7 +50,7 @@ async function createWindow() {
 
 }
 
-app.commandLine.appendSwitch('ignore-certificate-errors')    //忽略证书的检测
+app.commandLine.appendSwitch('ignore-certificate-errors');    //忽略ssl证书的检测
 
 app.whenReady().then(() => {
     createWindow();
@@ -84,17 +70,6 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') app.quit()
 })
-
-
-// 当Electron完成初始化并准备创建浏览器窗口时，将调用此方法
-// 某些API只能在此事件发生后使用
-// app.on('ready', () => {
-//     if (NODE_ENV === 'development') {
-//         // vue开发者工具扩展(插件)
-//         session.defaultSession.loadExtension('C:/Users/Administrator/AppData/Local/Google/Chrome/User Data/Default/Extensions/ljjemllljcmogpfapbkkighbhhppjdbg/6.0.0.21_0');
-//     }
-//     createWindow();
-// })
 
 ipcMain.on('count-fonts-item', function (e) {
     // 获取系统的字体列表

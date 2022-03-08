@@ -234,7 +234,7 @@
                             <a-space class="trigger" style="padding: 10px 20px;">
                                 <a-switch
                                     @change="showBorder"
-                                    :default-checked="isShowBorder"
+                                    :model-value="isShowBorder"
                                     style="transform: rotateZ(90deg);"
                                 >
                                     <template #checked-icon>
@@ -357,7 +357,6 @@ import expTXTIcon from '../assets/svg/expTXTIcon.svg';
 import expDOCXIcon from '../assets/svg/expDOCXIcon.svg';
 import expPDFIcon from '../assets/svg/expPDFIcon.svg';
 const route = useRoute(), query_path = route.path;
-console.log(query_path);
 
 /*-------------数据统计与初始化-------------*/
 const wordCount = ref(0), charCount = ref(0), paragraphs = ref(0), fontList = ref(), paperSize = ref([
@@ -530,12 +529,16 @@ const getBgcColor = () => {
 
 // 改变纸张边框
 const isShowBorder = ref(true);
+
 const showBorderType = ref(uLocalOption.value.uShowBorder);
 if (showBorderType.value === 'open') isShowBorder.value = true;
 else isShowBorder.value = false;
+
 const showBorder = (value: boolean) => {
+    isShowBorder.value = value;
     if (value) showBorderType.value = 'open';
     else showBorderType.value = 'close';
+
     paperRef.value.setShowborder(showBorderType.value);
     uLocalOption.value.uShowBorder = showBorderType.value;
     setLocalStorage();

@@ -1,6 +1,6 @@
 <!-- 地图编辑模块 -->
 <template>
-    <div style="margin-top: 50px;">
+    <div style="transform: translateY(50px);">
         <svg
             t="1645668603370"
             class="icon"

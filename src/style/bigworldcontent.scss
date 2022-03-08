@@ -8,3 +8,102 @@
      border-radius: 4px 0 0 0;
      background-color: #fff;
  }
+
+ .content {
+     width: 100%;
+     height: calc(100vh - 180px);
+     overflow-y: scroll;
+
+ }
+
+ .book-cover {
+     position: relative;
+     float: left;
+     width: 162px;
+     height: 230px;
+     margin: 30px 40px;
+     background-color: rgb(62, 71, 152);
+     transition: all .3s ease-in-out;
+     transform-origin: left center 0px;
+     transform-style: preserve-3d;
+     border-top-right-radius: 5px;
+     border-bottom-right-radius: 5px;
+     //  overflow: hidden;
+
+     img {
+         width: 100%;
+         height: 100%;
+     }
+
+     &::after {
+         content: " ";
+         display: block;
+         opacity: 0;
+         width: 100%;
+         height: 100%;
+         position: relative;
+         left: 8px;
+         transition: all .3s ease;
+     }
+
+     &::before {
+         content: " ";
+         z-index: 999;
+         display: block;
+         width: 20px;
+         height: 100px;
+         opacity: 0;
+         position: absolute;
+         top: -12px;
+         right: 8px;
+         transition: all .25s;
+         background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAD8AAABhCAYAAABh23lYAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAHCSURBVHgB7dxPTsJAHMXxN7Xu3UhigobxJHACvQFwAr2BcgO8AZxE7uGiDZiQyEIW7oSOUyKbKgLS8u+9b9JNF818fum0XdWUhy9VEDZBGIdBGD6DsFM3bQYgTnjWhGdNeNaEZ0141oRnTXjWhGdNeNaEZ0141oRnTXjWhGdNeNaEZ0141oRnTXjWhGdNeNaEZ0141oRnTXjWhGdNeNaEZ0141oRnTXjWhGdNeNaEZ0141oRnTXjWhGdNeNZ2hR/7o+UcmnCIsaNCbLcU/RR8oB1bO/4+17l8ixoGeIBBBVvMXI0ih+L7Df2j8iiqnvgh+AVVUXDOTZvF4tNb2qC7DJ1tNgSDO78tblFQxeE92l+0NSjZDjaoMowqyYl7hDF15JzL+x+YHtxLgFq/ZO2m8LT4wsb90nUjmMD61XaRc7ng5+jBua29ntsecq6oIWyELxqdLe8h/GvPp+h0T28D/FezZ8Ip7pHgZt3X5NoPvH1BZ5sNIUTDL7C+6hBWxxt0gk+00tsOe96qH0zL8GO4pBtMg/YhoLMtG8Ii/EpfY4fSoiFk8UeFzpYdwhz/jiNGZ0uHEBjUEzftohJFZyAsdX8BM0/amLC3spYAAAAASUVORK5CYII=');
+         background-size: 16px;
+         background-repeat: no-repeat;
+     }
+ }
+
+ .book {
+     position: relative;
+
+     .title {
+         position: absolute;
+         bottom: 2px;
+         width: 100%;
+         height: 30px;
+         font-size: 18px;
+         //  font-weight: lighter;
+         line-height: 30px;
+         border-radius: 0 0 6px 0;
+         color: #fff;
+         //  background-color: rgba(30, 235, 223, 0.5);
+         overflow: hidden;
+         text-overflow: ellipsis;
+         white-space: nowrap;
+     }
+ }
+
+ /* ----- hover ----- */
+
+ .book-cover:hover {
+     cursor: pointer;
+     transform: rotateY(-28deg) rotateZ(-2deg) scale(1.02);
+     box-shadow: 1px 3px 2px #353d85, 20px 8px 0 #525dc4;
+
+     &::after {
+         content: " ";
+         display: block;
+         opacity: 1;
+         width: 172px;
+         height: 255px;
+         position: relative;
+         left: 8px;
+         background: linear-gradient(-180deg, rgba(255, 255, 255, .1) 0%, rgba(255, 255, 255, 0) 60%);
+     }
+
+     &::before {
+         transform: translateY(9px);
+         opacity: 1;
+
+     }
+ }

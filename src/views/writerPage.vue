@@ -140,7 +140,7 @@
                 <TopToolbar ref="topToolRef"></TopToolbar>
             </a-layout-header>
             <a-layout>
-                <a-layout-sider collapsible @collapse="onCollapse" class="siderLeft">
+                <a-layout-sider collapsible @collapse="onCollapse" class="siderLeft-w">
                     <a-menu
                         :default-open-keys="[vid]"
                         :default-selected-keys="[cid]"

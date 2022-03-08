@@ -6,7 +6,7 @@
                 <TopToolbar ref="topToolRef"></TopToolbar>
             </a-layout-header>
             <a-layout>
-                <a-layout-sider class="siderLeft"></a-layout-sider>
+                <a-layout-sider class="siderLeft-r"></a-layout-sider>
                 <a-layout-content @mouseover="showScroll" @mouseout="closeScroll">
                     <ReadingPaper @todata="sendPaperData" ref="paperRef"></ReadingPaper>
                 </a-layout-content>

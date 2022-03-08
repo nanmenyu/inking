@@ -970,7 +970,7 @@ html {
 body {
   height: 100%;
   width: 100%;
-  background-color: #fff;
+  background-color: var(--body-bg-color);
 }
 
 body,
@@ -988,21 +988,6 @@ select {
 
 [hidden] {
   display: none !important;
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: #e5e6eb;
-  border-radius: 5px;
-}
-
-::selection {
-  color: #fff;
-  background-color: #ef7a82;
 }
 
 #viewerContainer.pdfPresentationMode:-webkit-full-screen {
@@ -1117,17 +1102,17 @@ html[dir="rtl"] #outerContainer.sidebarOpen #sidebarContainer {
   -webkit-overflow-scrolling: touch;
   position: absolute;
   width: 100%;
-  background-color: #fff;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 html[dir="ltr"] #sidebarContent {
   left: 0;
-  box-shadow: 0 2px 5px 0 rgb(0 0 0 / 8%);
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.25);
 }
 
 html[dir="rtl"] #sidebarContent {
   right: 0;
-  box-shadow: 0 2px 5px 0 rgb(0 0 0 / 8%);
+  box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.25);
 }
 
 #viewerContainer {
@@ -1176,15 +1161,17 @@ html[dir="rtl"] #outerContainer.sidebarOpen #viewerContainer:not(.pdfPresentatio
 #toolbarSidebar {
   width: 100%;
   height: 32px;
-  background-color: #fff;
+  background-color: var(--sidebar-toolbar-bg-color);
 }
 
 html[dir="ltr"] #toolbarSidebar {
-  box-shadow: 0 2px 5px 0 rgb(0 0 0 / 8%);
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.25), 0 1px 0 rgba(0, 0, 0, 0.15),
+    0 0 1px rgba(0, 0, 0, 0.1);
 }
 
 html[dir="rtl"] #toolbarSidebar {
-  box-shadow: 0 2px 5px 0 rgb(0 0 0 / 8%);
+  box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.25), 0 1px 0 rgba(0, 0, 0, 0.15),
+    0 0 1px rgba(0, 0, 0, 0.1);
 }
 
 html[dir="ltr"] #toolbarSidebar .toolbarButton {
@@ -1225,10 +1212,8 @@ html[dir="rtl"] #sidebarResizer {
 .secondaryToolbar {
   position: relative;
   height: 32px;
-  /* background-color: var(--toolbar-bg-color); */
-  /* box-shadow: 0 1px 0 var(--toolbar-border-color); */
-  background-color: #fff;
-  border-bottom: 2px dashed #e5e6eb;
+  background-color: var(--toolbar-bg-color);
+  box-shadow: 0 1px 0 var(--toolbar-border-color);
 }
 
 #toolbarViewer {
