@@ -534,7 +534,6 @@ import 'cropperjs/dist/cropper.css';
 import * as echarts from 'echarts';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { v4 } from 'uuid';
-import { useMainStore } from '../store/index';
 import defaultImg from '../../public/static/img/default.png';
 import templateicon from '../assets/svg/templateicon.svg';
 import addKeyWord from '../assets/svg/addKeyWord.svg';
@@ -542,9 +541,10 @@ import addKeyWord from '../assets/svg/addKeyWord.svg';
 const { proxy } = useCurrentInstance();
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
-const mainStore = useMainStore();
+const emit = defineEmits(['kChange']);
 const $modal = proxy.$modal;
 const $message = proxy.$message;
+
 interface AssociatedOption {
     kid: string,
     value: string,
@@ -556,14 +556,14 @@ interface AssociatedChildren {
     value: string,
     label: string
 };
-
 interface ListName {
     kid?: string;
     iid?: string;
     itemName?: string;
 };
 
-loadKeyWodData();
+let needDefaultLoad = true;
+if (needDefaultLoad) loadKeyWodData();
 
 // 表单数据
 const form = reactive({
@@ -1575,13 +1575,22 @@ watch(tempKid, () => {
     maxValue.value = Math.max(...(maxValueObj[nowUnit.value] || [1]));
 })
 
+// 是否默认唤起特定目标面板
+function needShowDetailPanel(kid: string, iid: string) {
+    needDefaultLoad = false;
+    loadKeyWodData(() => {
+        choiceCard(kid, iid);
+    })
+}
+
 // 获取的全部数据
 const theKeyWord: { data: Array<KeyWordGroup> } = reactive({ data: [] })
 function loadKeyWodData(cb?: Function) {
     db.opus.get(query_id).then(value => {
         theKeyWord.data = value!.theKeyWord;
         getAssociatedOptions();
-        mainStore.KeywordEditorChange = true; // 修改是否改变了数据的状态
+        // 修改是否改变了数据的状态
+        emit('kChange');
         if (typeof cb === 'function') cb();
     })
 }
@@ -1727,6 +1736,10 @@ function setNumberChart(targetData: Array<{ key: string, value: number }>, unit:
         ]
     });
 }
+
+defineExpose({
+    needShowDetailPanel
+})
 </script>
 
 <style lang="scss" src="../style/KeywordEditor.scss" scoped>

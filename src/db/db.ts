@@ -44,6 +44,7 @@ export interface Ebooks {
     type: string;
     title: string;
     creationTime: number;
+    scrollTop?: number;
 }
 
 export class MySubClassedDexie extends Dexie {

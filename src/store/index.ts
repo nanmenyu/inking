@@ -11,7 +11,7 @@ export const useMainStore = defineStore('mainStore', {
         highlightCount: 0, // 检索到的关键字总数
         targetIndex: 1, // 当前检索指向的关键字
         keywordArr: [], //当前的关键字数组
-        KeywordEditorChange: false, // 关键字页数据是否发生更新
+        // KeywordEditorChange: false, // 关键字页数据是否发生更新
         baseTotalNumber_thisTime: 0, // 打开软件时的基准总字数（从打开程序——>关闭软件）
         contrastTotalNumber_thisTime: 0, // 计算净增长值的中间值
         TotalNumber_thisTime: 0, // 改变后的总字数

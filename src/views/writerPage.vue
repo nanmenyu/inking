@@ -66,7 +66,7 @@
             </ul>
         </div>
         <!-- <div class="keyword-bottom"></div> -->
-        <div class="panel-btn" title="唤出关键字面板">🛩️</div>
+        <div @click="displayKeyPanel" class="panel-btn" title="唤出关键字面板">🛩️</div>
     </div>
     <PopupMenu
         v-if="isRename"
@@ -420,7 +420,11 @@
                         <!-- 各个需要显示的组件 -->
                         <WebviewBlock v-if="showModular === '0'"></WebviewBlock>
                         <PlotEditor v-if="showModular === '1'"></PlotEditor>
-                        <KeywordEditor v-if="showModular === '2'"></KeywordEditor>
+                        <KeywordEditor
+                            v-if="showModular === '2'"
+                            @kChange="changeKeyWordState"
+                            ref="keyWordRef"
+                        ></KeywordEditor>
                         <DiagramEditor v-if="showModular === '3'"></DiagramEditor>
                         <TimelineEditor v-if="showModular === '4'" ref="ref_TimelineEditor"></TimelineEditor>
                         <MapEditor v-if="showModular === '5'"></MapEditor>
@@ -581,7 +585,7 @@ const onCollapse = (val: boolean) => { isCollapse.value = val; }
 /*----左侧栏功能----*/
 const onClickMenuItem = (tvid: string, tcid: string) => {
     if (tcid !== cid.value) {
-        setScrollTop(<string>vid.value, <string>cid.value);
+        // setScrollTop(<string>vid.value, <string>cid.value);
         vid.value = tvid;
         cid.value = tcid;
         paperRef.value.setId(tvid, tcid);
@@ -830,6 +834,13 @@ const modify = () => {
     isNewChapter.value = false;
 }
 
+// 关键字面板状态改变
+const KeywordEditorChange = ref(false);
+const changeKeyWordState = () => {
+    KeywordEditorChange.value = true;
+    loadListData();
+}
+
 // 掠过关键字所在的span
 const showkeywordDetail = ref(false), keywordDetail = ref();
 const currentKeyword: { data: KeyWord } = reactive({
@@ -844,7 +855,8 @@ const currentKeyword: { data: KeyWord } = reactive({
         otherName: []
     }
 }); // 当前的关键字数据
-let kid_iid_old = ''; // 用来防指多次触发多次访问数据库拿取同一段数据
+// kid_iid_old用来防指多次触发多次访问数据库拿取同一段数据
+let kid_iid_old = '', currentKid = '', currentIid = '';
 const showSpanDetail = throttle((e: MouseEvent) => {
     if ((<HTMLElement>e.target).getAttribute('class') === 'keyWord') {
         showkeywordDetail.value = true;
@@ -854,14 +866,15 @@ const showSpanDetail = throttle((e: MouseEvent) => {
         keyWordArr.forEach(item => {
             for (let i = 2; i < item.length; i++) {
                 if (item[i] === targetText) {
+                    [currentKid, currentIid] = [item[0], item[1]];
                     let kid_iid_new = item[0] + item[1];
                     // 关键字数据状态改变||新旧id不相等
-                    if (mainStore.KeywordEditorChange || kid_iid_new !== kid_iid_old) {
+                    if (KeywordEditorChange.value || kid_iid_new !== kid_iid_old) {
                         kid_iid_old = kid_iid_new;
                         modifyDbforItem(item[0], item[1], (item: KeyWord) => {
                             currentKeyword.data = item;
                         }, () => {
-                            mainStore.KeywordEditorChange = false;
+                            KeywordEditorChange.value = false;
                         })
                     }
                     break;
@@ -887,28 +900,32 @@ const showSpanDetail = throttle((e: MouseEvent) => {
     }
 }, 50)
 
-// 获取页面上下相对位置
-let temp_scrollTop = 0;
-const getScrollTop = (e: Event) => {
-    temp_scrollTop = (<HTMLElement>e.target).scrollTop;
-    if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
-}
-// 设置纸张距离顶部的高度（用户跳转至编辑位置
-function setScrollTop(tvid: string, tcid: string) {
-    db.opus.where(':id').equals(query_id).modify(item => {
-        for (let i = 0; i < item.data.length; i++) {
-            if (item.data[i].vid === tvid) {
-                for (let j = 0; j < item.data[i].volume.length; j++) {
-                    if (item.data[i].volume[j].cid === tcid) {
-                        item.data[i].volume[j].scrollTop = temp_scrollTop;
-                        break;
-                    }
-                }
-                break;
-            }
-        }
+// 小飞机快速转到关键字面板
+const keyWordRef = ref();
+const displayKeyPanel = () => {
+    showModular.value = '2';
+    nextTick(() => {
+        keyWordRef.value.needShowDetailPanel(currentKid, currentIid);
     })
 }
+
+// 获取页面上下相对位置并保存
+const getScrollTop = (e: Event) => {
+    if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
+    setScrollTop((<HTMLElement>e.target).scrollTop ?? 0);
+}
+const setScrollTop = throttle((scrollTop: number) => {
+    db.opus.where(':id').equals(query_id).modify(item => {
+        item.data.forEach(item => {
+            if (item.vid === vid.value) {
+                item.volume.forEach(it => {
+                    if (it.cid === cid.value) it.scrollTop = scrollTop;
+                })
+            }
+        })
+    })
+}, 500)
+
 // 获取列表数据
 const router = useRouter();
 const booksLists: { data: Array<Volume> } = reactive({ data: [] });
@@ -1006,14 +1023,6 @@ function modifyDbforItem(t_kid: string, t_iid: string, hd: Function, cb?: Functi
     })
 }
 
-// 监视keyword模块状态是否改变
-const keyWordState = computed(() => {
-    return mainStore.KeywordEditorChange;
-})
-// 改变时重新载入页面数据
-watch(keyWordState, state => {
-    if (state) loadListData();
-})
 /*---------------------生命周期---------------------*/
 onMounted(() => {
     topToolRef.value.getPaperRef(paperRef.value); // 将纸张的ref给头部
@@ -1030,7 +1039,7 @@ onMounted(() => {
     window.addEventListener('click', () => { if (showkeywordDetail.value) showkeywordDetail.value = false; });
 })
 onBeforeUnmount(() => {
-    setScrollTop(<string>vid.value, <string>cid.value);
+    // setScrollTop(<string>vid.value, <string>cid.value);
     // 更新继续写作对应的vid_cid
     db.opus.update(query_id, { historRecord: { vid: vid.value, cid: cid.value } });
 })

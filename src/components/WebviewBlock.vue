@@ -30,7 +30,7 @@
         </a-form>
     </PopupMenu>
     <div :class="`webviewBlock ${isShowWebview ? 'blockUpward' : ''}`">
-        <div v-if="!isShowWebview" class="block-statistics">
+        <div v-if="!isShowWebview && route.path !== '/reading'" class="block-statistics">
             <a-space size="mini">
                 <a-statistic title="本次码字" :value="thisTimeCodeword" />
                 <a-divider direction="vertical" />
@@ -195,13 +195,17 @@ import PopupMenu from './widget/PopupMenu.vue';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { useMainStore } from '../store/index';
 import { db } from '../db/db';
+import { useRoute } from 'vue-router';
 import '../style/fine-tune-webview.scss';
 
 const { proxy } = useCurrentInstance();
+const route = useRoute();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
 const mainStore = useMainStore();
 loadFavorites();
+console.log(route.path);
+
 const favoritesData: Ref<Array<Favorites>> = ref([]);
 const currentURL = ref('');
 const collected = computed(() => {

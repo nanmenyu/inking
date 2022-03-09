@@ -7,7 +7,11 @@
             </a-layout-header>
             <a-layout>
                 <a-layout-sider class="siderLeft-r"></a-layout-sider>
-                <a-layout-content @mouseover="showScroll" @mouseout="closeScroll">
+                <a-layout-content
+                    @mouseover="showScroll"
+                    @mouseout="closeScroll"
+                    @scroll="setScrollTop"
+                >
                     <ReadingPaper @todata="sendPaperData" ref="paperRef"></ReadingPaper>
                 </a-layout-content>
                 <a-resize-box
@@ -41,13 +45,18 @@
 </template>
 
 <script setup lang='ts'>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import TitleBlock from '../components/TitleBlock.vue';
 import TopToolbar from '../components/TopToolbar.vue';
 import ReadingPaper from '../components/ReadingPaper.vue';
 import WebviewBlock from '../components/WebviewBlock.vue';
+import { throttle } from '../utils/flowControl';
+import { db } from '../db/db';
+import { useRoute } from 'vue-router';
 import '../style/readingPage.scss';
 
+const route = useRoute();
+const query_id = parseInt(<string>route.query.id);
 const topToolRef = ref(), paperRef = ref();
 const showIframeWrap = ref(false);
 
@@ -64,6 +73,13 @@ const showScroll = () => {
 const closeScroll = () => {
     scrollbarColor.value = '#f5f5f5';
 }
+
+// 获取页面上下相对位置并保存
+const setScrollTop = throttle((e: Event) => {
+    db.ebooks.where(':id').equals(query_id).modify(item => {
+        item.scrollTop = (<HTMLElement>e.target).scrollTop;
+    })
+}, 300)
 
 onMounted(() => {
     topToolRef.value.getPaperRef(paperRef.value); // 将纸张的ref给头部

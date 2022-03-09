@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang='ts'>
-import { ref, Ref } from 'vue';
+import { nextTick, ref, Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { db } from '../db/db';
 import { paperSize } from '../hooks/paperSize';
@@ -105,6 +105,11 @@ function loadFileData() {
                         charCount: totalCharCount,
                         paragraphs: totalParagraphs
                     });
+
+                    // 回到上次的位置
+                    nextTick(() => {
+                        if (value) (<HTMLElement>document.querySelector('.arco-layout-content')).scrollTop = value.scrollTop ?? 0;
+                    })
                 }
             })
         };
