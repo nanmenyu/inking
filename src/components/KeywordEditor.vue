@@ -1738,7 +1738,7 @@ function setNumberChart(targetData: Array<{ key: string, value: number }>, unit:
 }
 
 defineExpose({
-    needShowDetailPanel
+    needShowDetailPanel, loadKeyWodData
 })
 </script>
 

@@ -1,5 +1,6 @@
  <!-- 写作纸张 -->
  <template>
+    <div id="content-contextmenu" ref="contextmenu">ssa属实</div>
     <div id="paper-box-w" ref="pBox">
         <main @keydown="adaHeight" @keyup="getData(), input_saveDocData($event);" ref="editor">
             <div id="mainEditor-w" ref="mEditor"></div>
@@ -8,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, watch, reactive, Ref } from 'vue';
 import getStyle from '../utils/getStyle';
 import { throttle } from '../utils/flowControl';
 import hexToRgba from '../utils/hexToRgba';
@@ -19,9 +20,10 @@ import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
 import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { useMainStore } from '../store/index';
+import { v4 } from 'uuid';
 import { paperSize } from '../hooks/paperSize';
 
-const emit = defineEmits(['todata']), { proxy } = useCurrentInstance();
+const emit = defineEmits(['todata', 'addKeyWord']), { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
 const mainStore = useMainStore();
@@ -264,9 +266,12 @@ const setParaFocus = (type: string, isInit: boolean) => {
     if (!isInit) getData();
 }
 
+const theKeyWordData: { data: Array<KeyWordGroup> } = reactive({ data: [] });
+const allNameArr: Ref<Array<string>> = ref([]); // 全部关键词名称数组
 const setBooksData = (value: Userdb, keyMarks?: Array<{
     match: RegExp, class: string, style: string
 }>) => {
+    theKeyWordData.data = value.theKeyWord;
     const toDisplay: Array<NodePara> = [];
     value.data.forEach(item => {
         //获取本章数据
@@ -287,6 +292,18 @@ const setBooksData = (value: Userdb, keyMarks?: Array<{
     })
     refreshPaper(toDisplay, keyMarks);
     getData();
+    // 读取关键字全部名称
+    db.opus.get(query_id).then(value => {
+        if (value) {
+            allNameArr.value = [];
+            value.theKeyWord.forEach(item => {
+                item.data.forEach(it => {
+                    if (it.itemName !== '') allNameArr.value.push(it.itemName);
+                    if (it.otherName.length > 0) allNameArr.value = allNameArr.value.concat(it.otherName);
+                })
+            })
+        }
+    })
 }
 
 // 刷新纸张内容
@@ -304,6 +321,78 @@ const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<{
     // 屏蔽自带的拼写检查
     mEditor.value.firstElementChild.setAttribute('spellcheck', 'false');
 }
+
+// 监视选中文字的变化
+const currentText = ref('');
+let btn1: HTMLElement | null;
+watch(computed(() => {
+    return mainStore.curSelectedText;
+}), text => {
+    currentText.value = text.trim();
+    // 添加选中文字到关键字
+    const contentTip = (<HTMLElement>document.querySelector('.contentTip'));
+    contentTip.style.display = 'none';
+    if (!btn1) {
+        btn1 = document.querySelector('.btn1')!;
+        btn1.addEventListener('click', (e: MouseEvent) => {
+            // 字数检测
+            if (currentText.value.length > 10) {
+                $message.warning('字数太多了(>10)');
+            } else {
+                const fragment = document.createDocumentFragment();
+                let keyWordGroupArr = [];
+                // 点击按钮显示/关闭
+                if (contentTip.style.display === 'block') contentTip.style.display = 'none';
+                else contentTip.style.display = 'block';
+                // 整理关键字组
+                keyWordGroupArr = theKeyWordData.data.map(item => item.kGroupName);
+                keyWordGroupArr.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'group-name';
+                    div.innerText = item;
+                    fragment.append(div);
+                })
+                // 清空容器并append新元素
+                contentTip.innerHTML = '';
+                contentTip.append(fragment);
+                // 当点击某一组时
+                contentTip.onclick = function (e: MouseEvent) {
+                    const target = <HTMLElement>e.target;
+                    // 查看事件委托下触发的元素是否是目标元素
+                    if (target.className === 'group-name') {
+                        const groupName = target.innerText;
+                        // 避免全部关键字名重复
+                        if (allNameArr.value.indexOf(currentText.value) === -1) {
+                            db.opus.where(':id').equals(query_id).modify(item => {
+                                item.theKeyWord.forEach(item => {
+                                    // 通过组名匹配
+                                    if (item.kGroupName === groupName) {
+                                        item.data.push({
+                                            iid: v4(),
+                                            itemImg: '/static/img/default.png',
+                                            itemName: currentText.value,
+                                            otherName: [],
+                                            itemDesc: '点击左侧修改介绍',
+                                            associated: [],
+                                            itemString: [],
+                                            itemNumber: []
+                                        });
+                                    }
+                                })
+                            }).then(() => {
+                                emit('addKeyWord');
+                                $message.success('添加关键词成功！');
+                            })
+                        } else {
+                            $message.warning('关键词不能重复！');
+                        }
+                        btn1 = null;
+                    }
+                }
+            }
+        })
+    }
+})
 
 // TAB键插入两个中文空格
 function insertSpace(e: KeyboardEvent) {
@@ -331,6 +420,13 @@ function moveCursor(selection: Selection, range: Range, startNode: Node, startOf
     selection.removeAllRanges();
     selection.addRange(range);
 }
+
+const contextmenu = ref();
+onMounted(() => {
+    editor.value.addEventListener('contextmenu', (e: MouseEvent) => {
+
+    })
+})
 
 defineExpose({
     saveDocData, expFile, setFont, setFontSize, setLineHeight, setFontWeight, setColor, setSegSpacing,
@@ -411,19 +507,22 @@ defineExpose({
     background-color: #ff0;
 }
 
-#mainEditor-w .tooltip {
+#mainEditor-w .toolTip {
     position: absolute;
-    /* pointer-events: none; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     user-select: none;
+    font-size: 15px;
     background-color: #fff;
     border-radius: 4px;
-    padding: 10px;
+    padding: 8px 6px 6px 6px;
     margin-bottom: 7px;
     border: 1px solid #e5e6eb;
     box-shadow: 0 2px 8px #00000026;
     transform: translateX(-50%);
 }
-#mainEditor-w .tooltip::before {
+#mainEditor-w .toolTip::before {
     content: "";
     height: 0;
     width: 0;
@@ -435,7 +534,7 @@ defineExpose({
     border-bottom-width: 0;
     border-top-color: silver;
 }
-#mainEditor-w .tooltip::after {
+#mainEditor-w .toolTip::after {
     content: "";
     height: 0;
     width: 0;
@@ -446,5 +545,64 @@ defineExpose({
     border: 5px solid transparent;
     border-bottom-width: 0;
     border-top-color: white;
+}
+#mainEditor-w .toolTip .rightTip span {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin: 0 3px;
+    font-weight: bold;
+    color: #333;
+    border-radius: 100%;
+    background-size: 100% 100%;
+    cursor: pointer;
+    transition: color 0.3 ease-in-out;
+}
+#mainEditor-w .toolTip .rightTip span:nth-child(1) {
+    margin-left: 10px;
+}
+#mainEditor-w .toolTip .rightTip span:nth-child(1):hover {
+    color: #165dff;
+}
+#mainEditor-w .toolTip .rightTip span:nth-child(1):active {
+    color: #333;
+}
+#mainEditor-w .contentTip,
+#content-contextmenu {
+    box-sizing: border-box;
+    width: 80px;
+    padding: 4px 0;
+    border: 1px solid #e5e6eb;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: 0 4px 10px #0000001a;
+}
+#mainEditor-w .contentTip {
+    display: none;
+    position: absolute;
+    right: -84px;
+    top: 0;
+}
+#mainEditor-w .contentTip .group-name {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0 12px;
+    color: #1d2129;
+    font-size: 14px;
+    line-height: 36px;
+    text-align: center;
+    background-color: transparent;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+#mainEditor-w .contentTip .group-name:hover {
+    background-color: #f2f3f5;
+}
+#content-contextmenu {
+    position: fixed;
+    top: 0;
+    right: 0;
 }
 </style>

@@ -7,6 +7,7 @@ import { createPinia } from 'pinia';
 
 //引入全局用scss/js
 import './style/global.scss';
+import './assets/iconfont/iconfont.css';
 
 // App.config.globalProperties.$USER_PATH = ''
 window.ondragstart = function () {

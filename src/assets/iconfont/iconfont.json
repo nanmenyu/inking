@@ -1,0 +1,16 @@
+{
+  "id": "3233072",
+  "name": "inking",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "7419",
+      "name": "关键词",
+      "font_class": "guanjianci",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    }
+  ]
+}

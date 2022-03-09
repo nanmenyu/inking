@@ -80,7 +80,12 @@
                     >
                         <icon-star :style="{ fontSize: '14px' }" />
                     </span>
-                    <span v-else class="favorites-btn" title="取消收藏">
+                    <span
+                        v-else
+                        @click="deleteFavorite(currentSiteId, currentSiteTitle)"
+                        class="favorites-btn"
+                        title="取消收藏"
+                    >
                         <icon-star-fill :style="{ fontSize: '14px' }" />
                     </span>
                 </template>
@@ -207,11 +212,15 @@ loadFavorites();
 console.log(route.path);
 
 const favoritesData: Ref<Array<Favorites>> = ref([]);
-const currentURL = ref('');
+const currentURL = ref(''), currentSiteId = ref(0), currentSiteTitle = ref('');
 const collected = computed(() => {
     let result = false;
     favoritesData.value.forEach(item => {
-        if (item.url === currentURL.value) result = true;
+        if (item.url === currentURL.value) {
+            currentSiteId.value = item.id!;
+            currentSiteTitle.value = item.title;
+            result = true;
+        }
     })
     return result;
 })

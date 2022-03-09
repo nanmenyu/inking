@@ -315,7 +315,7 @@
                             </a-space>
                         </a-space>
                     </div>
-                    <WritingPaper @todata="sendPaperData" ref="paperRef"></WritingPaper>
+                    <WritingPaper @todata="sendPaperData" @addKeyWord="addKeyWord" ref="paperRef"></WritingPaper>
                 </a-layout-content>
                 <a-resize-box
                     @moving-start="showIframeWrap = true"
@@ -909,17 +909,26 @@ const displayKeyPanel = () => {
     })
 }
 
-// 获取页面上下相对位置并保存
-const getScrollTop = (e: Event) => {
-    if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
-    setScrollTop((<HTMLElement>e.target).scrollTop ?? 0);
+// 纸张组件快捷添加关键词时触发
+const addKeyWord = () => {
+    // 如果当前侧面是关键字面板，则通知其刷新数据
+    if (showModular.value === '2') keyWordRef.value.loadKeyWodData();
+    else loadListData();
 }
-const setScrollTop = throttle((scrollTop: number) => {
+
+// 获取页面上下相对位置并保存
+let tempScrollTop = 0; // 放在外面才能保证目前保存的是最新的
+const getScrollTop = (e: Event) => {
+    tempScrollTop = (<HTMLElement>e.target).scrollTop ?? 0;
+    if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
+    setScrollTop();
+}
+const setScrollTop = throttle(() => {
     db.opus.where(':id').equals(query_id).modify(item => {
         item.data.forEach(item => {
             if (item.vid === vid.value) {
                 item.volume.forEach(it => {
-                    if (it.cid === cid.value) it.scrollTop = scrollTop;
+                    if (it.cid === cid.value) it.scrollTop = tempScrollTop;
                 })
             }
         })
