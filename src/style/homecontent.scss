@@ -105,18 +105,23 @@
     position: relative;
     width: 162px;
     height: 230px;
-    background-color: rgb(62, 71, 152);
+    // background-color: rgb(62, 71, 152);
     transition: all .3s ease-in-out;
     transform-origin: left center 0px;
     transform-style: preserve-3d;
     border-radius: 6px;
     box-shadow: 4px 4px 8px #ccc;
+    // background-color: #ccc;
+    // background-color: red;
 
     overflow: hidden;
 
     img {
-        width: 162px;
-        height: 230px;
+        // width: 162px;
+        // height: 230px;
+        width: 158px;
+        height: 226px;
+        margin: 2px 0 0 2px;
         border-radius: 6px;
     }
 

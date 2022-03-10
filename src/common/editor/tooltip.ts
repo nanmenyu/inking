@@ -36,10 +36,17 @@ class SelectionSizetoolTip {
                 btn.setAttribute('title', '快速查词');
                 btn.innerHTML = '&#xe61a;';
             }
+            if (i === 2) {
+                btn.setAttribute('title', '右侧搜索');
+                btn.innerHTML = '&#xe915;';
+            }
             this.rightTip.append(btn);
         }
         view.dom.parentNode.appendChild(this.toolTip);
-
+        this.toolTip.addEventListener('contextmenu', (e: MouseEvent) => {
+            // 阻止纸张上的右键菜单事件
+            e.stopPropagation();
+        })
         this.update(view, null);
     }
 
@@ -70,13 +77,13 @@ class SelectionSizetoolTip {
         this.toolTip.style.bottom = (box.bottom - start.top) + 'px';
         let count = to - from;
         if (count < 5) {
-            this.leftTip.textContent = '😑' + count + '字符';
+            this.leftTip.textContent = count + '字符😑';
         } else if (count < 10) {
-            this.leftTip.textContent = '😯' + count + '字符';
+            this.leftTip.textContent = count + '字符😯';
         } else if (count < 20) {
-            this.leftTip.textContent = '😬' + count + '字符';
+            this.leftTip.textContent = count + '字符😬';
         } else {
-            this.leftTip.textContent = '😱' + count + '字符';
+            this.leftTip.textContent = count + '字符😱';
         }
     }
 

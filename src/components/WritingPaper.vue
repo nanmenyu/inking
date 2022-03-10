@@ -25,6 +25,7 @@ import useCurrentInstance from '../utils/useCurrentInstance';
 import { useMainStore } from '../store/index';
 import { v4 } from 'uuid';
 import { paperSize } from '../hooks/paperSize';
+import '../style/toolTip.scss';
 
 const emit = defineEmits(['todata', 'addKeyWord']), { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
@@ -333,7 +334,9 @@ watch(computed(() => {
     return mainStore.curSelectedText;
 }), text => {
     currentText.value = text.trim();
-    const contentTip = (<HTMLElement>document.querySelector('.contentTip'));
+    const contentTip = <HTMLElement>document.querySelector('.contentTip');
+    const toolTip = <HTMLElement>contentTip.parentElement;
+    const mainEditor_w = <HTMLElement>toolTip.parentElement;
     contentTip.style.display = 'none';
     // 添加选中文字到关键字
     if (!btn1) {
@@ -406,39 +409,65 @@ watch(computed(() => {
                 displayContentTip('btn2');
                 // 配置搜索项
                 const config = {
-                    type: 'wordSearch',
-                    url: 'https://hanyu.baidu.com/s',
-                    params: {
-                        wd: currentText.value
-                    }
+                    type: 'wordSearch_baidu',
+                    word: currentText.value
                 }
                 contentTip.innerHTML = '<div class="word-loading"><div class="word-loading-img"></div></div>';
                 window.$API.ipcSend('reptile', config);
                 window.$API.ipcOnce('getReptileData', (data: any) => {
-                    console.log(data);
                     if (data.basicmean === '' && data.detailmean === '' && data.source === '' && data.liju === '' && data.synonym === '' && data.antonym === '') {
                         contentTip.innerHTML = '<div class="word-notfound"><div class="word-notfound-img"></div></div>';
                     } else {
-                        let temp = '<div class="basicmean">' + data.basicmean + '</div>'
-                            + '<div class="detailmean">' + data.detailmean + '</div>'
-                            + '<div class="source">' + data.source + '</div>'
-                            + '<div class="liju">' + data.liju + '</div>'
-                            + '<div class="synonym">' + data.synonym + '</div>'
-                            + '<div class="antonym">' + data.antonym + '</div>';
+                        const basicmeanHTML = data.basicmean === '' ? '' : '<div class="basicmean"><h3>基本释义</h3>' + data.basicmean + '</div>';
+                        const detailmeanHTML = data.detailmean === '' ? '' : '<div class="detailmean"><h3>详细释义</h3>' + data.detailmean + '</div>';
+                        const sourceHTML = data.source === '' ? '' : '<div class="source"><h3>出处</h3>' + data.source + '</div>';
+                        const dataHTML = data.liju === '' ? '' : '<div class="liju"><h3>例句</h3>' + data.liju + '</div>';
+                        const synonymHTML = data.synonym === '' ? '' : '<div class="synonym">' + data.synonym + '</div>';
+                        const antonymHTML = data.antonym === '' ? '' : '<div class="antonym">' + data.antonym + '</div>';
+                        const temp = basicmeanHTML + detailmeanHTML + sourceHTML + dataHTML + synonymHTML + antonymHTML;
                         contentTip.innerHTML = '<div class="word-search">' + temp + '</div>';
+                        // 高度要是太高就适当扩展宽度
+                        if (contentTip.clientHeight > 500) {
+                            (<HTMLElement>contentTip.firstElementChild).style.width = '500px';
+                        } else {
+                            (<HTMLElement>contentTip.firstElementChild).style.width = '300px';
+                        }
                     }
+                    btn2 = null;
                 })
             }
         })
     }
 
     function displayContentTip(tar: string) {
+        // 是否需要调换搜索栏方向
+        if (parseInt(toolTip.style.left.replace('px', '')) > mainEditor_w.clientWidth / 2) {
+            contentTip.removeAttribute('style');
+            contentTip.style.right = '174px';
+        } else {
+            contentTip.removeAttribute('style');
+            contentTip.style.left = '174px';
+        }
+        // 设置显示状态
         if (contentTip.getAttribute('data-belong') === tar) {
             if (contentTip.style.display === 'block') contentTip.style.display = 'none';
             else contentTip.style.display = 'block';
         } else {
             contentTip.setAttribute('data-belong', tar);
             contentTip.style.display = 'block';
+        }
+    }
+    function setReverse(needReverse: boolean) {
+        if (needReverse) {
+            contentTip.style.left = 'none';
+            contentTip.style.right = '174px'
+            //     contentTip.style.transform = `translateX(-${contentTip.clientWidth + toolTip.clientWidth + 8}px)`;
+        } else {
+            // left: 174px;
+            // right: none;
+            contentTip.style.right = 'none';
+            contentTip.style.left = '174px'
+            //     contentTip.style.transform = 'translateX(0)';
         }
     }
 })
@@ -576,192 +605,5 @@ defineExpose({
 #mainEditor-w .ProseMirror .keyword_search {
     border-radius: 25%;
     background-color: #ff0;
-}
-
-#mainEditor-w .toolTip {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    user-select: none;
-    font-size: 15px;
-    background-color: #fff;
-    border-radius: 4px;
-    padding: 8px 6px 6px 6px;
-    margin-bottom: 7px;
-    border: 1px solid #e5e6eb;
-    box-shadow: 0 2px 8px #00000026;
-    transform: translateX(-50%);
-}
-#mainEditor-w .toolTip::before {
-    content: "";
-    height: 0;
-    width: 0;
-    position: absolute;
-    left: 50%;
-    margin-left: -5px;
-    bottom: -6px;
-    border: 5px solid transparent;
-    border-bottom-width: 0;
-    border-top-color: silver;
-}
-#mainEditor-w .toolTip::after {
-    content: "";
-    height: 0;
-    width: 0;
-    position: absolute;
-    left: 50%;
-    margin-left: -5px;
-    bottom: -4.5px;
-    border: 5px solid transparent;
-    border-bottom-width: 0;
-    border-top-color: white;
-}
-#mainEditor-w .toolTip .rightTip span {
-    display: inline-block;
-    width: 15px;
-    height: 15px;
-    margin: 0 4px;
-    font-weight: bold;
-    color: #333;
-    border-radius: 100%;
-    background-size: 100% 100%;
-    cursor: pointer;
-    transition: color 0.3 ease-in-out;
-}
-#mainEditor-w .toolTip .rightTip span:nth-child(1) {
-    margin-left: 10px;
-}
-#mainEditor-w .toolTip .rightTip span:hover {
-    color: #165dff;
-}
-#mainEditor-w .toolTip .rightTip span:active {
-    color: #333;
-}
-
-#mainEditor-w .contentTip,
-#content-contextmenu {
-    box-sizing: border-box;
-    /* width: 80px; */
-    padding: 4px 0;
-    border: 1px solid #e5e6eb;
-    border-radius: 4px;
-    background-color: #fff;
-    box-shadow: 0 4px 10px #0000001a;
-}
-#mainEditor-w .contentTip {
-    display: none;
-    position: absolute;
-    left: 174px;
-    top: -5px;
-}
-#mainEditor-w .contentTip .group-name,
-#content-contextmenu #contextmenu-item {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 0 12px;
-    color: #1d2129;
-    font-size: 14px;
-    line-height: 36px;
-    text-align: center;
-    background-color: transparent;
-    cursor: pointer;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-#mainEditor-w .contentTip .word-search {
-    width: 200px;
-    /* height: 250px; */
-    font-size: 14px;
-    text-align: left;
-}
-#mainEditor-w .contentTip .group-name:hover,
-#content-contextmenu #contextmenu-item:hover {
-    background-color: #f2f3f5;
-}
-#content-contextmenu {
-    z-index: 9;
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 90px;
-}
-.word-loading,
-.word-notfound {
-    position: relative;
-    width: 100px;
-    height: 100px;
-}
-.word-notfound::after {
-    content: "数据不存在";
-    display: block;
-    width: 100%;
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 14px;
-}
-.word-loading .word-loading-img,
-.word-notfound .word-notfound-img {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    margin: 0 auto;
-    top: calc(50% - 25px);
-    left: calc(50% - 25px);
-}
-.word-loading .word-loading-img {
-    background: url(../assets/svg/loading.svg) no-repeat;
-    animation: loading 1s linear infinite;
-}
-.word-notfound .word-notfound-img {
-    top: calc(50% - 40px);
-    background: url(../assets/svg/wordnotfound.svg) no-repeat;
-}
-.word-search .basicmean {
-    border-bottom: 1px solid #e5e6eb;
-    margin-bottom: 2px;
-}
-.word-search .detailmean {
-    border-bottom: 1px solid #e5e6eb;
-    margin-top: 2px;
-}
-.word-search .basicmean dl,
-.word-search .detailmean dl {
-    margin: 4px;
-}
-.word-search .basicmean dl dd,
-.word-search .detailmean dl dd {
-    margin: 0;
-}
-.word-search .basicmean dl dd p {
-    margin: 0;
-}
-.word-search .detailmean dl dd ol {
-    margin: 0;
-    padding-left: 14px;
-}
-.word-search .detailmean dl dd ol li p {
-    margin: 0;
-}
-
-@keyframes loading {
-    0% {
-        transform: rotate(0deg);
-    }
-    25% {
-        transform: rotate(90deg);
-    }
-    50% {
-        transform: rotate(180deg);
-    }
-    75% {
-        transform: rotate(270deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
 }
 </style>

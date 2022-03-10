@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "8985090",
+      "name": "webx Web应用托管服务器",
+      "font_class": "webx",
+      "unicode": "e915",
+      "unicode_decimal": 59669
+    },
+    {
       "icon_id": "8027293",
       "name": "信息查询",
       "font_class": "xinxichaxun",
