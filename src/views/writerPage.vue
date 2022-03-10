@@ -317,13 +317,14 @@
                     </div>
                     <WritingPaper @todata="sendPaperData" @addKeyWord="addKeyWord" ref="paperRef"></WritingPaper>
                 </a-layout-content>
+                <!-- style="width: 450px;" -->
                 <a-resize-box
                     @moving-start="showIframeWrap = true"
                     @moving-end="showIframeWrap = false"
                     @moving="resizeBoxMoving"
                     :directions="['left']"
                     class="sider-right"
-                    style="width: 450px;"
+                    style="width: 100px;"
                 >
                     <!-- 伸缩杆 -->
                     <template #resize-trigger="{ direction }">

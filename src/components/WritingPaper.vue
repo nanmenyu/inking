@@ -1,6 +1,9 @@
  <!-- 写作纸张 -->
  <template>
-    <div id="content-contextmenu" ref="contextmenu">ssa属实</div>
+    <div v-if="showContextmenu" id="content-contextmenu" ref="contextmenu">
+        <div id="contextmenu-item">随机取名</div>
+        <div id="contextmenu-item">文章续写</div>
+    </div>
     <div id="paper-box-w" ref="pBox">
         <main @keydown="adaHeight" @keyup="getData(), input_saveDocData($event);" ref="editor">
             <div id="mainEditor-w" ref="mEditor"></div>
@@ -9,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed, watch, reactive, Ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, watch, reactive, Ref, nextTick } from 'vue';
 import getStyle from '../utils/getStyle';
 import { throttle } from '../utils/flowControl';
 import hexToRgba from '../utils/hexToRgba';
@@ -38,8 +41,7 @@ onBeforeUnmount(() => {
 const boxWidth = ref(paperSize['A4']), boxHeight = ref(1000); // 纸张宽度，纸张高度
 
 // 数据库取值相关
-const route = useRoute(),
-    query_id = parseInt(route.query.id as string);
+const route = useRoute(), query_id = parseInt(route.query.id as string);
 
 // 刷新当前所在章id
 let vid = route.query.vid;
@@ -325,13 +327,15 @@ const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<{
 // 监视选中文字的变化
 const currentText = ref('');
 let btn1: HTMLElement | null;
+let btn2: HTMLElement | null;
+// let btnList: NodeList;
 watch(computed(() => {
     return mainStore.curSelectedText;
 }), text => {
     currentText.value = text.trim();
-    // 添加选中文字到关键字
     const contentTip = (<HTMLElement>document.querySelector('.contentTip'));
     contentTip.style.display = 'none';
+    // 添加选中文字到关键字
     if (!btn1) {
         btn1 = document.querySelector('.btn1')!;
         btn1.addEventListener('click', (e: MouseEvent) => {
@@ -342,8 +346,7 @@ watch(computed(() => {
                 const fragment = document.createDocumentFragment();
                 let keyWordGroupArr = [];
                 // 点击按钮显示/关闭
-                if (contentTip.style.display === 'block') contentTip.style.display = 'none';
-                else contentTip.style.display = 'block';
+                displayContentTip('btn1');
                 // 整理关键字组
                 keyWordGroupArr = theKeyWordData.data.map(item => item.kGroupName);
                 keyWordGroupArr.forEach(item => {
@@ -392,6 +395,52 @@ watch(computed(() => {
             }
         })
     }
+    // 快速查词
+    if (!btn2) {
+        btn2 = document.querySelector('.btn2')!;
+        btn2.addEventListener('click', (e: MouseEvent) => {
+            if (currentText.value.length > 10) {
+                $message.warning('字数太多了(>10)');
+            } else {
+                // 点击按钮显示/关闭
+                displayContentTip('btn2');
+                // 配置搜索项
+                const config = {
+                    type: 'wordSearch',
+                    url: 'https://hanyu.baidu.com/s',
+                    params: {
+                        wd: currentText.value
+                    }
+                }
+                contentTip.innerHTML = '<div class="word-loading"><div class="word-loading-img"></div></div>';
+                window.$API.ipcSend('reptile', config);
+                window.$API.ipcOnce('getReptileData', (data: any) => {
+                    console.log(data);
+                    if (data.basicmean === '' && data.detailmean === '' && data.source === '' && data.liju === '' && data.synonym === '' && data.antonym === '') {
+                        contentTip.innerHTML = '<div class="word-notfound"><div class="word-notfound-img"></div></div>';
+                    } else {
+                        let temp = '<div class="basicmean">' + data.basicmean + '</div>'
+                            + '<div class="detailmean">' + data.detailmean + '</div>'
+                            + '<div class="source">' + data.source + '</div>'
+                            + '<div class="liju">' + data.liju + '</div>'
+                            + '<div class="synonym">' + data.synonym + '</div>'
+                            + '<div class="antonym">' + data.antonym + '</div>';
+                        contentTip.innerHTML = '<div class="word-search">' + temp + '</div>';
+                    }
+                })
+            }
+        })
+    }
+
+    function displayContentTip(tar: string) {
+        if (contentTip.getAttribute('data-belong') === tar) {
+            if (contentTip.style.display === 'block') contentTip.style.display = 'none';
+            else contentTip.style.display = 'block';
+        } else {
+            contentTip.setAttribute('data-belong', tar);
+            contentTip.style.display = 'block';
+        }
+    }
 })
 
 // TAB键插入两个中文空格
@@ -421,10 +470,32 @@ function moveCursor(selection: Selection, range: Range, startNode: Node, startOf
     selection.addRange(range);
 }
 
-const contextmenu = ref();
+// 右键菜单栏相关
+const contextmenu = ref(), showContextmenu = ref(false);
 onMounted(() => {
+    // 右键呼出菜单
     editor.value.addEventListener('contextmenu', (e: MouseEvent) => {
-
+        showContextmenu.value = true;
+        const posX = e.screenX, posY = e.screenY;
+        nextTick(() => {
+            contextmenu.value.style.left = posX + 8 + 'px';
+            contextmenu.value.style.top = posY + 4 + 'px';
+            // 选则具体项目
+            contextmenu.value.onclick = function (e: MouseEvent) {
+                console.log((<HTMLElement>e.target).id);
+                if ((<HTMLElement>e.target).innerText === '随机取名') {
+                    console.log('随机取名');
+                } else if ((<HTMLElement>e.target).innerText === '文章续写') {
+                    console.log('文章续写');
+                }
+            }
+        })
+    })
+    window.addEventListener('click', (e: MouseEvent) => {
+        // 点击屏幕中除了菜单意外的地方时关闭菜单
+        if ((<HTMLElement>e.target).id !== 'content-contextmenu' || (<HTMLElement>e.target).id !== 'contextmenu-item') {
+            showContextmenu.value = false;
+        }
     })
 })
 
@@ -550,7 +621,7 @@ defineExpose({
     display: inline-block;
     width: 15px;
     height: 15px;
-    margin: 0 3px;
+    margin: 0 4px;
     font-weight: bold;
     color: #333;
     border-radius: 100%;
@@ -561,16 +632,17 @@ defineExpose({
 #mainEditor-w .toolTip .rightTip span:nth-child(1) {
     margin-left: 10px;
 }
-#mainEditor-w .toolTip .rightTip span:nth-child(1):hover {
+#mainEditor-w .toolTip .rightTip span:hover {
     color: #165dff;
 }
-#mainEditor-w .toolTip .rightTip span:nth-child(1):active {
+#mainEditor-w .toolTip .rightTip span:active {
     color: #333;
 }
+
 #mainEditor-w .contentTip,
 #content-contextmenu {
     box-sizing: border-box;
-    width: 80px;
+    /* width: 80px; */
     padding: 4px 0;
     border: 1px solid #e5e6eb;
     border-radius: 4px;
@@ -580,10 +652,11 @@ defineExpose({
 #mainEditor-w .contentTip {
     display: none;
     position: absolute;
-    right: -84px;
-    top: 0;
+    left: 174px;
+    top: -5px;
 }
-#mainEditor-w .contentTip .group-name {
+#mainEditor-w .contentTip .group-name,
+#content-contextmenu #contextmenu-item {
     box-sizing: border-box;
     width: 100%;
     padding: 0 12px;
@@ -597,12 +670,98 @@ defineExpose({
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-#mainEditor-w .contentTip .group-name:hover {
+#mainEditor-w .contentTip .word-search {
+    width: 200px;
+    /* height: 250px; */
+    font-size: 14px;
+    text-align: left;
+}
+#mainEditor-w .contentTip .group-name:hover,
+#content-contextmenu #contextmenu-item:hover {
     background-color: #f2f3f5;
 }
 #content-contextmenu {
+    z-index: 9;
     position: fixed;
     top: 0;
     right: 0;
+    width: 90px;
+}
+.word-loading,
+.word-notfound {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+.word-notfound::after {
+    content: "数据不存在";
+    display: block;
+    width: 100%;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+}
+.word-loading .word-loading-img,
+.word-notfound .word-notfound-img {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    top: calc(50% - 25px);
+    left: calc(50% - 25px);
+}
+.word-loading .word-loading-img {
+    background: url(../assets/svg/loading.svg) no-repeat;
+    animation: loading 1s linear infinite;
+}
+.word-notfound .word-notfound-img {
+    top: calc(50% - 40px);
+    background: url(../assets/svg/wordnotfound.svg) no-repeat;
+}
+.word-search .basicmean {
+    border-bottom: 1px solid #e5e6eb;
+    margin-bottom: 2px;
+}
+.word-search .detailmean {
+    border-bottom: 1px solid #e5e6eb;
+    margin-top: 2px;
+}
+.word-search .basicmean dl,
+.word-search .detailmean dl {
+    margin: 4px;
+}
+.word-search .basicmean dl dd,
+.word-search .detailmean dl dd {
+    margin: 0;
+}
+.word-search .basicmean dl dd p {
+    margin: 0;
+}
+.word-search .detailmean dl dd ol {
+    margin: 0;
+    padding-left: 14px;
+}
+.word-search .detailmean dl dd ol li p {
+    margin: 0;
+}
+
+@keyframes loading {
+    0% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(90deg);
+    }
+    50% {
+        transform: rotate(180deg);
+    }
+    75% {
+        transform: rotate(270deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 </style>

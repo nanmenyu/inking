@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "8027293",
+      "name": "信息查询",
+      "font_class": "xinxichaxun",
+      "unicode": "e61a",
+      "unicode_decimal": 58906
+    },
+    {
       "icon_id": "7419",
       "name": "关键词",
       "font_class": "guanjianci",

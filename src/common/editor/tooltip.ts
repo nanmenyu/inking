@@ -32,6 +32,10 @@ class SelectionSizetoolTip {
                 btn.setAttribute('title', '添加为关键词');
                 btn.innerHTML = '&#xe600;';
             }
+            if (i === 1) {
+                btn.setAttribute('title', '快速查词');
+                btn.innerHTML = '&#xe61a;';
+            }
             this.rightTip.append(btn);
         }
         view.dom.parentNode.appendChild(this.toolTip);

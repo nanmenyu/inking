@@ -419,6 +419,7 @@
     </div>
     <PopupMenu
         v-if="isReplaceCover"
+        v-show="isShowReplaceCover"
         :title="replaceCoverTitle"
         determine="确定"
         @toModify="cancelReplace"
@@ -604,7 +605,7 @@ const choiceEdit = (id?: string, isnew?: boolean) => {
 
 }
 // 更换封面图片
-const isReplaceCover = ref(false), imgUrl = ref(),
+const isReplaceCover = ref(false), isShowReplaceCover = ref(false), imgUrl = ref(),
     coverImg = ref(), fileInput = ref(),
     replaceCoverTitle = ref('');
 const replaceCover = (type: number) => {
@@ -617,6 +618,7 @@ let cropper: Cropper;
 const _replaceCover = (ratio: number) => {
     if (fileInput.value.value !== '') {
         isReplaceCover.value = true;
+        isShowReplaceCover.value = false;
         //使用 FileReader() 构造器获得图片的base64
         const reader = new FileReader();
         reader.readAsDataURL(fileInput.value.files[0]);
@@ -624,16 +626,25 @@ const _replaceCover = (ratio: number) => {
             imgUrl.value = evt.target!.result;
             // 等待目标图片加载完成调用cropper按要求裁剪封面
             coverImg.value.onload = function () {
-                cropper = new Cropper(coverImg.value, {
-                    aspectRatio: ratio,
-                    viewMode: 1,
-                    dragMode: 'move',// 设置图片是否可以拖拽功能
-                    background: true,// 是否显示图片后面的网格背景,一般默认为true
-                    preview: '.before',// 进行图片预览的效果
-                    autoCropArea: 1,// 设置裁剪区域占图片的大小 值为 0-1 默认 0.8 表示 80%的区域
-                    zoomOnWheel: true,// 设置图片是否可以进行收缩功能
-                    center: true // 是否显示 + 箭头
-                })
+                if (imgUrl.value.length > 20000000) { //20MB
+                    isReplaceCover.value = false; //删除dom
+                    $modal.warning({
+                        title: '图片太大',
+                        content: '图片太大,请适度压缩'
+                    });
+                } else {
+                    isShowReplaceCover.value = true; // 显示
+                    cropper = new Cropper(coverImg.value, {
+                        aspectRatio: ratio,
+                        viewMode: 1,
+                        dragMode: 'move',// 设置图片是否可以拖拽功能
+                        background: true,// 是否显示图片后面的网格背景,一般默认为true
+                        preview: '.before',// 进行图片预览的效果
+                        autoCropArea: 1,// 设置裁剪区域占图片的大小 值为 0-1 默认 0.8 表示 80%的区域
+                        zoomOnWheel: true,// 设置图片是否可以进行收缩功能
+                        center: true // 是否显示 + 箭头
+                    })
+                }
             }
         }
     }
@@ -649,9 +660,20 @@ let base64Img: string, replaceType: number;
 const saveImgData = () => {
     cancelReplace();
     // 拿到裁剪后的图片
-    base64Img = cropper.getCroppedCanvas({
-        imageSmoothingQuality: 'high'
-    }).toDataURL('image/jpeg'); // 设置图片格式
+    const cropperData = cropper.getCroppedCanvas({ imageSmoothingQuality: 'high' })
+    // 如果图片大小大于100kb
+    let quality = 0.92;
+    base64Img = cropperData.toDataURL('image/jpeg', quality); // 设置图片格式
+    if (base64Img.length > 100000) {
+        let i = 50; //最多执行50次以免死循环
+        while (i > 0) {
+            quality = quality / 2;
+            base64Img = cropperData.toDataURL('image/jpeg', quality);
+            if (base64Img.length < 100000) break;
+            i--;
+        }
+    }
+
     if (replaceType === 1) {
         // 5/7的关键组封面
         form.keyword.cardImg = base64Img;

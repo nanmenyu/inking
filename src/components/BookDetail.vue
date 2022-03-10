@@ -186,6 +186,7 @@
     </PopupMenu>
     <PopupMenu
         v-if="isReplaceCover"
+        v-show="isShowReplaceCover"
         title="更换封面(4:3)"
         determine="确定"
         @toModify="cancelReplace"
@@ -572,20 +573,16 @@ const rightExpansion = (spread: boolean) => {
 const rotated = ref([false, false, false, false]);
 const tagRotated = ref(false);
 const rotateIcon = (i: number | string) => {
-    i === 'tag' ?
-        tagRotated.value = !tagRotated.value :
-        rotated.value[<number>i] = !rotated.value[<number>i];
+    if (i === 'tag') tagRotated.value = !tagRotated.value
+    else rotated.value[<number>i] = !rotated.value[<number>i];
 }
 
 /*----时间格式化计算属性----*/
 const standTime = computed(() => (ts: number, mode?: boolean) => {
     // 选择格式,是否裁切后半部分的准确时间
     mode = mode || false;
-    if (mode) {
-        return timeFormat(ts).split(' ')[0];
-    } else {
-        return timeFormat(ts);
-    }
+    if (mode) return timeFormat(ts).split(' ')[0];
+    else return timeFormat(ts);
 });
 
 /*----修改作品信息的弹窗----*/
@@ -601,12 +598,8 @@ const form: Form = reactive({
 // 随机生成tag的颜色
 const tagColor = computed(() => {
     const color = [
-        'red', 'orangered',
-        'orange', 'gold',
-        'lime', 'green',
-        'cyan', 'blue',
-        'arcoblue', 'purple',
-        'pinkpurple', 'magenta'];
+        'red', 'orangered', 'orange', 'gold', 'lime', 'green',
+        'cyan', 'blue', 'arcoblue', 'purple', 'pinkpurple', 'magenta'];
     const temp = [];
     for (let i = 0; i < tagData['qidian'].length; i++) {
         temp.push(color[randomNum(0, 11)]);
@@ -619,14 +612,11 @@ const promptText = computed(() => {
 })
 // 标签墙控制
 // 用户选择的标签保存在数组中
-const selectedArr: Array<string> = reactive([]);
-const deCheckedArr: Array<string> = reactive([]);
+const selectedArr: Array<string> = reactive([]), deCheckedArr: Array<string> = reactive([]);
 // 点击添加
 const addTag = () => {
     let i = tagData['qidian'].indexOf(inputTag.value);
-    if (i !== -1) {
-        deCheckedArr[i] = '#165dff';
-    }
+    if (i !== -1) deCheckedArr[i] = '#165dff';
     selectedArr.push(inputTag.value);
     inputTag.value = '';
 }
@@ -645,8 +635,8 @@ const modify = () => {
 }
 const checkTag = (tname: string) => {
     const i = selectedArr.indexOf(tname);
+    // 判断tempArr是否有tname, 没有就push, 有就删除
     if (selectedArr.length < 4) {
-        // 判断tempArr是否有tname, 没有就push, 有就删除
         i === -1 ? selectedArr.push(tname) : selectedArr.splice(i, 1);
     } else {
         if (i !== -1) selectedArr.splice(i, 1);
@@ -945,7 +935,7 @@ const deleteSelect = () => {
 }
 
 // 更换封面图片
-const isReplaceCover = ref(false), imgUrl = ref(''),
+const isReplaceCover = ref(false), isShowReplaceCover = ref(false), imgUrl = ref(''),
     coverImg = ref(), fileInput = ref();
 const replaceCover = () => {
     fileInput.value.click();
@@ -953,7 +943,9 @@ const replaceCover = () => {
 let cropper: Cropper;
 const _replaceCover = () => {
     if (fileInput.value.value !== '') {
+        // 渲染DOM但不显示
         isReplaceCover.value = true;
+        isShowReplaceCover.value = false;
         //使用 FileReader() 构造器获得图片的base64
         const reader = new FileReader();
         reader.readAsDataURL(fileInput.value.files[0]);
@@ -961,22 +953,31 @@ const _replaceCover = () => {
             imgUrl.value = <string>evt.target!.result;
             // 等待目标图片加载完成调用cropper按要求裁剪封面
             coverImg.value.onload = function () {
-                cropper = new Cropper(coverImg.value, {
-                    aspectRatio: 3 / 4, // 封面这里采用宽3高四的固定比例
-                    viewMode: 1,
-                    // 设置图片是否可以拖拽功能
-                    dragMode: 'move',
-                    // 是否显示图片后面的网格背景,一般默认为true
-                    background: true,
-                    // 进行图片预览的效果
-                    preview: '.before',
-                    // 设置裁剪区域占图片的大小 值为 0-1 默认 0.8 表示 80%的区域
-                    autoCropArea: 1,
-                    // 设置图片是否可以进行收缩功能
-                    zoomOnWheel: true,
-                    // 是否显示 + 箭头
-                    center: true
-                })
+                if (imgUrl.value.length > 20000000) { //20MB
+                    isReplaceCover.value = false; //删除dom
+                    $modal.warning({
+                        title: '图片太大',
+                        content: '图片太大,请适度压缩'
+                    });
+                } else {
+                    isShowReplaceCover.value = true; // 显示
+                    cropper = new Cropper(coverImg.value, {
+                        aspectRatio: 3 / 4, // 封面这里采用宽3高四的固定比例
+                        viewMode: 1,
+                        // 设置图片是否可以拖拽功能
+                        dragMode: 'move',
+                        // 是否显示图片后面的网格背景,一般默认为true
+                        background: true,
+                        // 进行图片预览的效果
+                        preview: '.before',
+                        // 设置裁剪区域占图片的大小 值为 0-1 默认 0.8 表示 80%的区域
+                        autoCropArea: 1,
+                        // 设置图片是否可以进行收缩功能
+                        zoomOnWheel: true,
+                        // 是否显示 + 箭头
+                        center: true
+                    })
+                }
             }
         }
     }
@@ -993,9 +994,20 @@ let base64Img: string;
 const saveImgData = () => {
     cancelReplace();
     // 拿到裁剪后的图片
-    base64Img = cropper.getCroppedCanvas({
-        imageSmoothingQuality: 'high'
-    }).toDataURL('image/jpeg'); // 设置图片格式
+    const cropperData = cropper.getCroppedCanvas({ imageSmoothingQuality: 'high' })
+    // 如果图片大小大于100kb
+    let quality = 0.92;
+    base64Img = cropperData.toDataURL('image/jpeg', quality); // 设置图片格式
+    if (base64Img.length > 100000) {
+        let i = 50; //最多执行50次以免死循环
+        while (i > 0) {
+            quality = quality / 2;
+            base64Img = cropperData.toDataURL('image/jpeg', quality);
+            if (base64Img.length < 100000) break;
+            i--;
+        }
+    }
+
     // 设置图片本地保存的路径
     const path = 'workspace/opus/' + booksData.data.id;
     window.$API.ipcSend('saveBase64-toImg', { b64: base64Img, path: path, fname: 'cover.jpeg' });

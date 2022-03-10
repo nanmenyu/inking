@@ -14,6 +14,7 @@ const fontList = require('./nodelib/getFontList');
 const b64toFile = require('./nodelib/b64toFile');
 const deleteFolder = require('./nodelib/deleteFolder');
 const writeFileByUser = require('./nodelib/writeFileByUser');
+const reptile = require('./nodelib/reptile');
 const HTMLtoDOCX = require('html-to-docx/dist/html-to-docx.umd');
 
 const NODE_ENV = process.env.NODE_ENV;
@@ -189,4 +190,10 @@ ipcMain.on('expFile', async (e, data) => {
 // 利用node获取编码
 ipcMain.on('needChardet', (e, data) => {
     e.sender.send('getChardetResult', jschardet.detect(data));
+})
+
+ipcMain.on('reptile', (e, config) => {
+    reptile(config, (data => {
+        e.sender.send('getReptileData', data);
+    }));
 })
