@@ -327,8 +327,11 @@ const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<{
 
 // 监视选中文字的变化
 const currentText = ref('');
-let btn1: HTMLElement | null;
-let btn2: HTMLElement | null;
+// const getRightTopBtn = ref(false); // 是否可以获取右上角的点击按钮
+let rightTopBtn: HTMLElement | null;
+let btn1: HTMLElement | null = null;
+let btn2: HTMLElement | null = null;
+let searchType = 'wordSearch_baidu';// 默认搜索类型
 // let btnList: NodeList;
 watch(computed(() => {
     return mainStore.curSelectedText;
@@ -339,7 +342,7 @@ watch(computed(() => {
     const mainEditor_w = <HTMLElement>toolTip.parentElement;
     contentTip.style.display = 'none';
     // 添加选中文字到关键字
-    if (!btn1) {
+    if (btn1 === null) { // btn1值为null时获取元素并添加事件
         btn1 = document.querySelector('.btn1')!;
         btn1.addEventListener('click', (e: MouseEvent) => {
             // 字数检测
@@ -407,38 +410,62 @@ watch(computed(() => {
             } else {
                 // 点击按钮显示/关闭
                 displayContentTip('btn2');
-                // 配置搜索项
-                const config = {
-                    type: 'wordSearch_baidu',
+                // 配置并搜索项
+                getHTMLdata({
+                    type: searchType,
                     word: currentText.value
-                }
-                contentTip.innerHTML = '<div class="word-loading"><div class="word-loading-img"></div></div>';
-                window.$API.ipcSend('reptile', config);
-                window.$API.ipcOnce('getReptileData', (data: any) => {
-                    if (data.basicmean === '' && data.detailmean === '' && data.source === '' && data.liju === '' && data.synonym === '' && data.antonym === '') {
-                        contentTip.innerHTML = '<div class="word-notfound"><div class="word-notfound-img"></div></div>';
-                    } else {
-                        const basicmeanHTML = data.basicmean === '' ? '' : '<div class="basicmean"><h3>基本释义</h3>' + data.basicmean + '</div>';
-                        const detailmeanHTML = data.detailmean === '' ? '' : '<div class="detailmean"><h3>详细释义</h3>' + data.detailmean + '</div>';
-                        const sourceHTML = data.source === '' ? '' : '<div class="source"><h3>出处</h3>' + data.source + '</div>';
-                        const dataHTML = data.liju === '' ? '' : '<div class="liju"><h3>例句</h3>' + data.liju + '</div>';
-                        const synonymHTML = data.synonym === '' ? '' : '<div class="synonym">' + data.synonym + '</div>';
-                        const antonymHTML = data.antonym === '' ? '' : '<div class="antonym">' + data.antonym + '</div>';
-                        const temp = basicmeanHTML + detailmeanHTML + sourceHTML + dataHTML + synonymHTML + antonymHTML;
-                        contentTip.innerHTML = '<div class="word-search">' + temp + '</div>';
-                        // 高度要是太高就适当扩展宽度
-                        if (contentTip.clientHeight > 500) {
-                            (<HTMLElement>contentTip.firstElementChild).style.width = '500px';
-                        } else {
-                            (<HTMLElement>contentTip.firstElementChild).style.width = '300px';
-                        }
-                    }
-                    btn2 = null;
-                })
+                });
             }
         })
     }
-
+    function getHTMLdata(config: { type: string, word: string }) {
+        contentTip.innerHTML = '<div class="word-loading"><div class="word-loading-img"></div></div>';
+        window.$API.ipcSend('reptile', config);
+        window.$API.ipcOnce('getReptileData', (data: any) => {
+            let isFounded = false;
+            if (data.site === 'baidu') {
+                // 百度汉语数据
+                if (data.basicmean === '' && data.detailmean === '' && data.source === '' && data.liju === '' && data.synonym === '' && data.antonym === '') {
+                    contentTip.innerHTML = '<div class="word-notfound"><div class="word-notfound-img"></div></div>';
+                    isFounded = false;
+                } else {
+                    const basicmeanHTML = data.basicmean === '' ? '' : '<div class="basicmean"><h3>基本释义</h3>' + data.basicmean + '</div>';
+                    const detailmeanHTML = data.detailmean === '' ? '' : '<div class="detailmean"><h3>详细释义</h3>' + data.detailmean + '</div>';
+                    const sourceHTML = data.source === '' ? '' : '<div class="source"><h3>出处</h3>' + data.source + '</div>';
+                    const dataHTML = data.liju === '' ? '' : '<div class="liju"><h3>例句</h3>' + data.liju + '</div>';
+                    const synonymHTML = data.synonym === '' ? '' : '<div class="synonym">' + data.synonym + '</div>';
+                    const antonymHTML = data.antonym === '' ? '' : '<div class="antonym">' + data.antonym + '</div>';
+                    const temp = basicmeanHTML + detailmeanHTML + sourceHTML + dataHTML + synonymHTML + antonymHTML;
+                    contentTip.innerHTML = '<div class="word-search"><div id="source-website" title="点击切换">来源:百度汉语</div>' + temp + '</div>';
+                    adjustHeight();
+                    isFounded = true;
+                }
+            } else if (data.site === 'zdic') {
+                // 汉典数据
+                if (data.jnr === '' && data.gnr === '' && data.cyjs === '') {
+                    contentTip.innerHTML = '<div class="word-notfound"><div class="word-notfound-img"></div></div>';
+                    isFounded = false;
+                } else {
+                    const jnrHTML = data.jnr === '' ? '' : '<div class="jnr"><h3>词语解释</h3>' + data.jnr + '</div>';
+                    const gnrHTML = data.gnr === '' ? '' : '<div class="gnr"><h3>国语辞典</h3>' + data.gnr + '</div>';
+                    const cyjsHTML = data.cyjs === '' ? '' : '<div class="cyjs"><h3>成语解释</h3>' + data.cyjs + '</div>';
+                    contentTip.innerHTML = '<div class="word-search"><div id="source-website" title="点击切换">来源:汉典</div>' + jnrHTML + gnrHTML + cyjsHTML + '</div>';
+                    adjustHeight();
+                    isFounded = true;
+                }
+            }
+            if (isFounded) {
+                rightTopBtn = <HTMLElement>document.getElementById('source-website');
+                // 点击更换搜索网站
+                rightTopBtn.onclick = () => {
+                    if (searchType === 'wordSearch_baidu') searchType = 'wordSearch_zdic';
+                    else if (searchType === 'wordSearch_zdic') searchType = 'wordSearch_baidu';
+                    getHTMLdata({ type: searchType, word: currentText.value });
+                }
+            }
+            btn2 = null;
+        })
+    }
     function displayContentTip(tar: string) {
         // 是否需要调换搜索栏方向
         if (parseInt(toolTip.style.left.replace('px', '')) > mainEditor_w.clientWidth / 2) {
@@ -457,17 +484,12 @@ watch(computed(() => {
             contentTip.style.display = 'block';
         }
     }
-    function setReverse(needReverse: boolean) {
-        if (needReverse) {
-            contentTip.style.left = 'none';
-            contentTip.style.right = '174px'
-            //     contentTip.style.transform = `translateX(-${contentTip.clientWidth + toolTip.clientWidth + 8}px)`;
+    function adjustHeight() {
+        // 高度要是太高就适当扩展宽度
+        if (contentTip.clientHeight > 500) {
+            (<HTMLElement>contentTip.firstElementChild).style.width = '500px';
         } else {
-            // left: 174px;
-            // right: none;
-            contentTip.style.right = 'none';
-            contentTip.style.left = '174px'
-            //     contentTip.style.transform = 'translateX(0)';
+            (<HTMLElement>contentTip.firstElementChild).style.width = '300px';
         }
     }
 })

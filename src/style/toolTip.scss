@@ -169,15 +169,19 @@
 .word-search {
     position: relative;
 
-    &::after {
-        content: '来源:百度汉语';
-        // display: block;
+    #source-website {
         position: absolute;
         top: 4px;
         right: 4px;
         font-size: 12px;
-        // width: 20px;
-        // height: 20px;
+        cursor: pointer;
+        border: none;
+        transition: color 0.3s ease-in-out;
+        user-select: none;
+
+        &:hover {
+            color: #165dff;
+        }
     }
 
     h3 {
@@ -250,6 +254,54 @@
     margin: 8px 0;
     font-weight: lighter;
     font-size: 16px;
+}
+
+.word-search {
+    .jnr {
+        p {
+            margin: 0;
+            margin-bottom: 4px;
+        }
+
+        .dicpy {
+            color: #165dff;
+        }
+
+        .diczx1 {
+            margin-left: 20px;
+        }
+    }
+
+    .cyjs {
+        p {
+            margin: 0;
+            margin-bottom: 4px;
+        }
+    }
+
+    .encs {
+        color: #165dff;
+    }
+
+    .gnr .gycd-item {
+        position: relative;
+        list-style-type: none;
+        padding-left: 14px;
+        border-left: 1px dashed #ccc;
+
+        .def {
+            margin: 10px 0;
+
+            span {
+                display: block;
+                margin: 2px 0;
+            }
+
+            .gc_sy {
+                font-weight: normal;
+            }
+        }
+    }
 }
 
 
