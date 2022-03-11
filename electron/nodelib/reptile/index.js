@@ -74,7 +74,7 @@ module.exports = (config, cb) => {
                 zdic.gnr = $('.homograph-entry .dictionaries .gnr .gycd ol').html() ?? '';
                 zdic.cyjs = $('.homograph-entry .dictionaries #cyjs .content').html() ?? '';
                 // 去除多余标签
-                zdic.gnr = zdic.gnr.replaceAll('<span class="gc_jfy_i">反</span>', '反:').replaceAll('<span class="gc_jfy_i">近</span>', '近:')
+                zdic.gnr = zdic.gnr.replaceAll('<span class="gc_jfy_i">反</span>', '反:').replaceAll('<span class="gc_jfy_i">近</span>', '近:').replaceAll('<div class="div copyright"> 【漢典】 </div>', '');
                 zdic.cyjs = zdic.cyjs.replaceAll(/<div.*div>/g, '').replaceAll(/<h3.*h3>/g, '');
                 return zdic;
             }

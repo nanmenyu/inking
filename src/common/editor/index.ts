@@ -12,7 +12,7 @@ import { useMainStore } from '../../store/index';
 // 使用pinia 
 const mainStore = useMainStore();
 
-export default function (initData: NodeDOC, keyMarks?: Array<{ match: RegExp, class: string, style: string }>) {
+export default function (initData: NodeDOC, keyMarks?: Array<{ match: RegExp, class: string, style: string }>, disabled?: boolean) {
     // 初始化
     const nodes = {
         doc: {
@@ -34,7 +34,7 @@ export default function (initData: NodeDOC, keyMarks?: Array<{ match: RegExp, cl
         },
     };
     const schema = new Schema({ nodes });
-    const main = document.querySelector('#mainEditor-w')!;
+    const main = document.querySelector('#mainEditor-w') ?? document.querySelector('#mainEditor-r');
     if (keyMarks) setHighlightKeyword(keyMarks); // 设置要高亮的关键字 [{ match: /男人/g, class: 'keyword' }]
     const state = EditorState.create({
         doc: Node.fromJSON(schema, initData),
@@ -61,6 +61,10 @@ export default function (initData: NodeDOC, keyMarks?: Array<{ match: RegExp, cl
             // if (transaction.updated === 5) mainStore.needSaveDocData = true;
             const newState = view.state.apply(transaction);
             view.updateState(newState);
-        }
+        },
+        // 是否禁用编辑
+        editable() {
+            return disabled ?? true;
+        },
     });
 };

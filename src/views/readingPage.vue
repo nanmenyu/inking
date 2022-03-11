@@ -12,14 +12,14 @@
                     @mouseout="closeScroll"
                     @scroll="setScrollTop"
                 >
-                    <ReadingPaper @todata="sendPaperData" ref="paperRef"></ReadingPaper>
+                    <ReadingPaper @todata="sendPaperData" @toWebView="toWebView" ref="paperRef"></ReadingPaper>
                 </a-layout-content>
                 <a-resize-box
                     @moving-start="showIframeWrap = true"
                     @moving-end="showIframeWrap = false"
                     :directions="['left']"
                     class="sider-right"
-                    style="width: 450px;"
+                    style="width: 150px;"
                 >
                     <!-- 伸缩杆 -->
                     <template #resize-trigger="{ direction }">
@@ -35,7 +35,7 @@
                     <!-- 内容区 -->
                     <div class="sider-right-content">
                         <!-- 各个需要显示的组件 -->
-                        <WebviewBlock></WebviewBlock>
+                        <WebviewBlock ref="ref_WebviewBlock"></WebviewBlock>
                         <div v-if="showIframeWrap" class="right-Wrap"></div>
                     </div>
                 </a-resize-box>
@@ -57,7 +57,7 @@ import '../style/readingPage.scss';
 
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
-const topToolRef = ref(), paperRef = ref();
+const topToolRef = ref(), paperRef = ref(), ref_WebviewBlock = ref();
 const showIframeWrap = ref(false);
 
 // 转发纸张-->头部工具栏的数据
@@ -72,6 +72,11 @@ const showScroll = () => {
 }
 const closeScroll = () => {
     scrollbarColor.value = '#f5f5f5';
+}
+
+// 使用webview快捷搜索关键词
+const toWebView = (str: string) => {
+    ref_WebviewBlock.value.toSearch(str);
 }
 
 // 获取页面上下相对位置并保存

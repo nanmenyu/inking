@@ -1,9 +1,11 @@
  <!-- 写作纸张 -->
  <template>
-    <div v-if="showContextmenu" id="content-contextmenu" ref="contextmenu">
-        <div id="contextmenu-item">随机取名</div>
-        <div id="contextmenu-item">文章续写</div>
-    </div>
+    <ContextMenu
+        mode="writing"
+        :menuItem="['随机取名', '文章续写']"
+        @choice="choiceContextMenuItem"
+        ref="contextMenu_ref"
+    ></ContextMenu>
     <div id="paper-box-w" ref="pBox">
         <main @keydown="adaHeight" @keyup="getData(), input_saveDocData($event);" ref="editor">
             <div id="mainEditor-w" ref="mEditor"></div>
@@ -13,6 +15,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed, watch, reactive, Ref, nextTick } from 'vue';
+import ContextMenu from './widget/ContextMenu.vue'
 import getStyle from '../utils/getStyle';
 import { throttle } from '../utils/flowControl';
 import hexToRgba from '../utils/hexToRgba';
@@ -23,8 +26,9 @@ import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
 import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { useMainStore } from '../store/index';
+import { setContentTipPos, setHTMLdata, setTranslationContent } from '../hooks/contentTip';
 import { v4 } from 'uuid';
-import axios from 'axios';
+// import axios from 'axios';
 import { paperSize } from '../hooks/paperSize';
 import '../style/toolTip.scss';
 
@@ -32,9 +36,11 @@ const emit = defineEmits(['todata', 'addKeyWord', 'toWebView']), { proxy } = use
 const $modal = proxy.$modal;
 const $message = proxy.$message;
 const mainStore = useMainStore();
+const contextMenu_ref = ref();
 
 onMounted(() => {
     editor.value.addEventListener('keydown', insertSpace);
+    contextMenu_ref.value.setContainer(editor.value);
 })
 onBeforeUnmount(() => {
     clearInterval(timer);
@@ -328,25 +334,20 @@ const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<{
 
 // 监视选中文字的变化 设置选中文字时的工具栏
 const currentText = ref('');
-let contentTip1: HTMLElement, contentTip2: HTMLElement, contentTip3: HTMLElement,
-    toolTip: HTMLElement, mainEditor_w: HTMLElement;
-let btn1: HTMLElement | null = null, btn2: HTMLElement | null = null,
-    btn3: HTMLElement | null = null, btn4: HTMLElement | null = null;
-let rightTopBtn: HTMLElement | null;
 let searchType = 'wordSearch_baidu';// 默认搜索类型
 watch(computed(() => {
     return mainStore.curSelectedText;
 }), text => {
-    contentTip1 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn1]');
-    contentTip2 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn2]');
-    contentTip3 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn3]');
-    toolTip = <HTMLElement>document.querySelector('#mainEditor-w .toolTip');
-    mainEditor_w = <HTMLElement>document.querySelector('#mainEditor-w');
+    const contentTip1 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn1]');
+    const contentTip2 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn2]');
+    const contentTip3 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn3]');
+    const toolTip = <HTMLElement>document.querySelector('#mainEditor-w .toolTip');
+    const mainEditor_w = <HTMLElement>document.querySelector('#mainEditor-w');
     contentTip1.style.display = contentTip2.style.display = contentTip3.style.display = 'none';
     currentText.value = text.trim();
 
     // 添加选中文字到关键字
-    btn1 = document.querySelector('.btn1')!;
+    const btn1 = <HTMLElement>document.querySelector('.btn1');
     btn1.onclick = function () {
         // 字数检测
         if (currentText.value.length > 10) {
@@ -364,7 +365,7 @@ watch(computed(() => {
             contentTip1.innerHTML = '';
             contentTip1.append(fragment);
             contentTip2.style.display = contentTip3.style.display = 'none';
-            setContentTipPos(contentTip1);
+            setContentTipPos(toolTip, contentTip1, mainEditor_w);
             // 当点击某一组时
             contentTip1.onclick = function (e: MouseEvent) {
                 const target = <HTMLElement>e.target;
@@ -401,14 +402,14 @@ watch(computed(() => {
         }
     }
     // 选中文字快速查词
-    btn2 = document.querySelector('.btn2')!;
+    const btn2 = <HTMLElement>document.querySelector('.btn2')!;
     btn2.onclick = function () {
         if (currentText.value.length > 10) {
             $message.warning('字数太多了(>10)');
         } else {
             // 点击按钮显示/关闭
             contentTip1.style.display = contentTip3.style.display = 'none';
-            setContentTipPos(contentTip2);
+            setContentTipPos(toolTip, contentTip2, mainEditor_w);
             // 配置并搜索项
             getHTMLdata({
                 type: searchType,
@@ -417,29 +418,14 @@ watch(computed(() => {
         }
     }
     // 选中文字快速翻译
-    btn3 = document.querySelector('.btn3')!;
+    const btn3 = <HTMLElement>document.querySelector('.btn3')!;
     btn3.onclick = function () {
         contentTip1.style.display = contentTip2.style.display = 'none';
-        setContentTipPos(contentTip3);
-        window.$API.ipcSend('api', {
-            type: 'youdao',
-            word: currentText.value
-        });
-        window.$API.ipcOnce('apiData', (data: any) => {
-            let transContent = '';
-            data.translateResult.forEach((para: Array<{ src: string, tgt: string }>) => {
-                let paragraph = '';
-                para.forEach(sent => {
-                    paragraph += sent.tgt;
-                })
-                if (paragraph !== '') transContent += '<p>' + paragraph + '</p>';
-            })
-            contentTip3.innerHTML = '<div class="translation">' + transContent + '</div>';
-            adjustHeight();
-        })
+        setContentTipPos(toolTip, contentTip3, mainEditor_w);
+        setTranslationContent(contentTip3, currentText.value); // 设置翻译内容
     }
     // 右侧使用webview打开
-    btn4 = document.querySelector('.btn4')!;
+    const btn4 = <HTMLElement>document.querySelector('.btn4')!;
     btn4.onclick = function () {
         emit('toWebView', currentText.value);
     }
@@ -448,40 +434,8 @@ watch(computed(() => {
         contentTip2.innerHTML = '<div class="word-loading"><div class="word-loading-img"></div></div>';
         window.$API.ipcSend('reptile', config);
         window.$API.ipcOnce('getReptileData', (data: any) => {
-            let isFounded = false;
-            if (data.site === 'baidu') {
-                // 百度汉语数据
-                if (data.basicmean === '' && data.detailmean === '' && data.source === '' && data.liju === '' && data.synonym === '' && data.antonym === '') {
-                    contentTip2.innerHTML = '<div class="word-notfound"><div class="word-notfound-img"></div></div>';
-                    isFounded = false;
-                } else {
-                    const basicmeanHTML = data.basicmean === '' ? '' : '<div class="basicmean"><h3>基本释义</h3>' + data.basicmean + '</div>';
-                    const detailmeanHTML = data.detailmean === '' ? '' : '<div class="detailmean"><h3>详细释义</h3>' + data.detailmean + '</div>';
-                    const sourceHTML = data.source === '' ? '' : '<div class="source"><h3>出处</h3>' + data.source + '</div>';
-                    const dataHTML = data.liju === '' ? '' : '<div class="liju"><h3>例句</h3>' + data.liju + '</div>';
-                    const synonymHTML = data.synonym === '' ? '' : '<div class="synonym">' + data.synonym + '</div>';
-                    const antonymHTML = data.antonym === '' ? '' : '<div class="antonym">' + data.antonym + '</div>';
-                    const temp = basicmeanHTML + detailmeanHTML + sourceHTML + dataHTML + synonymHTML + antonymHTML;
-                    contentTip2.innerHTML = '<div class="word-search"><div id="source-website" title="点击切换">来源:百度汉语</div>' + temp + '</div>';
-                    adjustHeight();
-                    isFounded = true;
-                }
-            } else if (data.site === 'zdic') {
-                // 汉典数据
-                if (data.jnr === '' && data.gnr === '' && data.cyjs === '') {
-                    contentTip2.innerHTML = '<div class="word-notfound"><div class="word-notfound-img"></div></div>';
-                    isFounded = false;
-                } else {
-                    const jnrHTML = data.jnr === '' ? '' : '<div class="jnr"><h3>词语解释</h3>' + data.jnr + '</div>';
-                    const gnrHTML = data.gnr === '' ? '' : '<div class="gnr"><h3>国语辞典</h3>' + data.gnr + '</div>';
-                    const cyjsHTML = data.cyjs === '' ? '' : '<div class="cyjs"><h3>成语解释</h3>' + data.cyjs + '</div>';
-                    contentTip2.innerHTML = '<div class="word-search"><div id="source-website" title="点击切换">来源:汉典</div>' + jnrHTML + gnrHTML + cyjsHTML + '</div>';
-                    adjustHeight();
-                    isFounded = true;
-                }
-            }
-            if (isFounded) {
-                rightTopBtn = <HTMLElement>document.getElementById('source-website');
+            if (setHTMLdata(contentTip2, data)) {
+                const rightTopBtn = <HTMLElement>document.getElementById('source-website');
                 // 点击更换搜索网站
                 rightTopBtn.onclick = () => {
                     if (searchType === 'wordSearch_baidu') searchType = 'wordSearch_zdic';
@@ -491,27 +445,12 @@ watch(computed(() => {
             }
         })
     }
-    function setContentTipPos(contentTip: HTMLElement) {
-        // 是否需要调换搜索栏方向
-        if (parseInt(toolTip.style.left.replace('px', '')) > mainEditor_w.clientWidth / 2) {
-            contentTip.style.left = '';
-            contentTip.style.right = toolTip.clientWidth + 4 + 'px';
-        } else {
-            contentTip.style.right = '';
-            contentTip.style.left = toolTip.clientWidth + 4 + 'px';
-        }
-        if (contentTip.style.display === 'none') contentTip.style.display = 'block';
-        else if (contentTip.style.display === 'block') contentTip.style.display = 'none';
-    }
-    function adjustHeight() {
-        // 高度要是太高就适当扩展宽度
-        if (contentTip2.clientHeight > 500) {
-            (<HTMLElement>contentTip2.firstElementChild).style.width = '500px';
-        } else {
-            (<HTMLElement>contentTip2.firstElementChild).style.width = '300px';
-        }
-    }
 })
+
+// 右侧菜单栏触发
+const choiceContextMenuItem = (data: { item: string, select?: string }) => {
+    console.log('&', data.item);
+}
 
 // TAB键插入两个中文空格
 function insertSpace(e: KeyboardEvent) {
@@ -540,34 +479,7 @@ function moveCursor(selection: Selection, range: Range, startNode: Node, startOf
     selection.addRange(range);
 }
 
-// 右键菜单栏相关
-const contextmenu = ref(), showContextmenu = ref(false);
-onMounted(() => {
-    // 右键呼出菜单
-    editor.value.addEventListener('contextmenu', (e: MouseEvent) => {
-        showContextmenu.value = true;
-        const posX = e.screenX, posY = e.screenY;
-        nextTick(() => {
-            contextmenu.value.style.left = posX + 8 + 'px';
-            contextmenu.value.style.top = posY + 4 + 'px';
-            // 选则具体项目
-            contextmenu.value.onclick = function (e: MouseEvent) {
-                console.log((<HTMLElement>e.target).id);
-                if ((<HTMLElement>e.target).innerText === '随机取名') {
-                    console.log('随机取名');
-                } else if ((<HTMLElement>e.target).innerText === '文章续写') {
-                    console.log('文章续写');
-                }
-            }
-        })
-    })
-    window.addEventListener('click', (e: MouseEvent) => {
-        // 点击屏幕中除了菜单意外的地方时关闭菜单
-        if ((<HTMLElement>e.target).id !== 'content-contextmenu' || (<HTMLElement>e.target).id !== 'contextmenu-item') {
-            showContextmenu.value = false;
-        }
-    })
-})
+
 
 defineExpose({
     saveDocData, expFile, setFont, setFontSize, setLineHeight, setFontWeight, setColor, setSegSpacing,

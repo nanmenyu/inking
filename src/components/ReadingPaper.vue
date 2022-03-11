@@ -1,22 +1,46 @@
 <template>
+    <!-- <ContextMenu
+        mode="reading"
+        @choice="choiceContextMenuItem"
+        :menuItem="['快速查词', '快速翻译', '右侧搜索']"
+        ref="contextMenu_ref"
+    ></ContextMenu>-->
     <div id="paper-box-r">
         <main id="pEditor">
-            <div id="mainEditor-r">
-                <p v-for="item in fileData">{{ item }}</p>
+            <div id="mainEditor-r" ref="mainEditor">
+                <!-- <div class="contentTip contentTip-r" ref="contentTip1" style="display: none;"></div>
+                <div class="contentTip contentTip-r" ref="contentTip2" style="display: none;"></div>
+                <p v-for="item in fileData">{{ item }}</p>-->
             </div>
         </main>
     </div>
 </template>
 
 <script setup lang='ts'>
-import { nextTick, ref, Ref } from 'vue';
+import { nextTick, onMounted, ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
+// import ContextMenu from './widget/ContextMenu.vue'
 import { db } from '../db/db';
 import { paperSize } from '../hooks/paperSize';
-const route = useRoute(), query_id = parseInt(route.query.id as string);
-const emit = defineEmits(['todata']);
+import pureTextEditor from '../common/editor';
+import useCurrentInstance from '../utils/useCurrentInstance';
+import { useMainStore } from '../store/index';
+import { setContentTipPos, setHTMLdata, setTranslationContent } from '../hooks/contentTip';
+import '../style/toolTip.scss';
 
+const route = useRoute(), query_id = parseInt(route.query.id as string), { proxy } = useCurrentInstance();
+const $modal = proxy.$modal;
+const $message = proxy.$message;
+const emit = defineEmits(['todata', 'toWebView']);
+const mainStore = useMainStore();
+// const contextMenu_ref = ref();
+// , contentTip1 = ref(), contentTip2 = ref();
+const mainEditor = ref();
 loadFileData();
+
+onMounted(() => {
+    // contextMenu_ref.value.setContainer(mainEditor.value);
+})
 
 // 纸张宽度，纸张高度
 const boxWidth = ref(paperSize['A4']);
@@ -63,8 +87,76 @@ const setRoundType = (type: string) => {
 const setPaperSize = (type: string) => {
     boxWidth.value = paperSize[type];
 }
+
+// 右侧菜单栏触发
+let searchType = 'wordSearch_baidu';// 默认搜索类型
+// const choiceContextMenuItem = (data: { item: string, select: string }) => {
+//     if (data.select === '') {
+//         $message.warning('您未选中任何文字')
+//     } else {
+// let searchType = 'wordSearch_baidu';// 默认搜索类型
+watch(computed(() => {
+    return mainStore.curSelectedText;
+}), text => {
+    const contentTip2 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn2]');
+    const contentTip3 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn3]');
+    const toolTip = <HTMLElement>document.querySelector('#mainEditor-w .toolTip');
+    const mainEditor_r = <HTMLElement>document.querySelector('#mainEditor-r');
+    const currentText = text.trim();
+    contentTip2.style.display = contentTip3.style.display = 'none';
+
+    // 快速查词
+    const btn2 = <HTMLElement>document.querySelector('.btn2')!;
+    btn2.onclick = function () {
+        if (currentText.length > 10) {
+            $message.warning('字数太多了(>10)');
+        } else {
+            // 点击按钮显示/关闭
+            contentTip3.style.display = 'none';
+            setContentTipPos(toolTip, contentTip2, mainEditor_r);
+            // 配置并搜索项
+            getHTMLdata({
+                type: searchType,
+                word: currentText
+            });
+        }
+
+    }
+    // 快速翻译
+    const btn3 = <HTMLElement>document.querySelector('.btn2')!;
+    btn3.onclick = function () {
+        contentTip2.style.display = 'none';
+        setContentTipPos(toolTip, contentTip3, mainEditor_r);
+        setTranslationContent(contentTip3, currentText);
+    }
+    //右侧搜索
+    const btn4 = <HTMLElement>document.querySelector('.btn2')!;
+    btn4.onclick = function () {
+        emit('toWebView', currentText);
+    }
+
+    function getHTMLdata(config: { type: string, word: string }) {
+        contentTip2.innerHTML = '<div class="word-loading"><div class="word-loading-img"></div></div>';
+        window.$API.ipcSend('reptile', config);
+        window.$API.ipcOnce('getReptileData', (data: any) => {
+            if (setHTMLdata(contentTip2, data)) {
+                const rightTopBtn = <HTMLElement>document.getElementById('source-website');
+                // 点击更换搜索网站
+                rightTopBtn.onclick = () => {
+                    if (searchType === 'wordSearch_baidu') searchType = 'wordSearch_zdic';
+                    else if (searchType === 'wordSearch_zdic') searchType = 'wordSearch_baidu';
+                    getHTMLdata({ type: searchType, word: currentText });
+                }
+            }
+        })
+    }
+
+})
+
+
+
 // 读取文件数据
-const fileData: Ref<Array<string>> = ref([]);
+// const fileData: Ref<Array<string>> = ref([]);
 // 文件的总计数/当前计数
 let totalWordCount = 0, totalCharCount = 0, totalParagraphs = 0;
 const wordCount = ref(0), charCount = ref(0), paragraphs = ref(0);
@@ -92,12 +184,19 @@ function loadFileData() {
                 }
                 reader.onload = function () {
                     const ebookStr = reader.result;
-                    totalCharCount = (<string>ebookStr).length;
                     const ebookArr = (<string>ebookStr).replaceAll('\r', '').replaceAll('\t', '').split('\n');
+                    const displayData: Array<NodePara> = [];
+                    // 整理数据
+                    totalCharCount = (<string>ebookStr).length;
                     totalParagraphs = ebookArr.length;
                     ebookArr.forEach(item => {
                         totalWordCount += item.trim().length;
-                        fileData.value.push(item.trim());
+                        if (item.trim() !== '') {
+                            displayData.push({
+                                type: "paragraph",
+                                content: [{ type: "text", text: item.trim() }]
+                            })
+                        }
                     })
                     // 发送统计数据
                     emit('todata', {
@@ -105,6 +204,11 @@ function loadFileData() {
                         charCount: totalCharCount,
                         paragraphs: totalParagraphs
                     });
+                    // 渲染到页面
+                    pureTextEditor({
+                        type: "doc",
+                        content: displayData
+                    }, [], false); // 无高亮 禁用编辑
 
                     // 回到上次的位置
                     nextTick(() => {

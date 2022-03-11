@@ -15,6 +15,7 @@ class SelectionSizetoolTip {
     contentTip2: HTMLElement
     contentTip3: HTMLElement
     constructor(view: any) {
+        console.log('gjuuuuuu');
         this.toolTip = document.createElement('div');
         this.toolTip.className = 'toolTip';
         this.leftTip = document.createElement('div');
