@@ -16,6 +16,7 @@ const deleteFolder = require('./nodelib/deleteFolder');
 const writeFileByUser = require('./nodelib/writeFileByUser');
 const reptile = require('./nodelib/reptile');
 const HTMLtoDOCX = require('html-to-docx/dist/html-to-docx.umd');
+const { default: axios } = require('axios');
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -192,8 +193,25 @@ ipcMain.on('needChardet', (e, data) => {
     e.sender.send('getChardetResult', jschardet.detect(data));
 })
 
+// 数据爬取
 ipcMain.on('reptile', (e, config) => {
     reptile(config, (data => {
         e.sender.send('getReptileData', data);
     }));
+})
+// API代理
+ipcMain.on('api', (e, data) => {
+    if (data.type === 'youdao') {
+        axios.get('http://fanyi.youdao.com/translate', {
+            params: {
+                doctype: 'json',
+                type: 'AUTO',
+                i: data.word
+            }
+        }).then(res => {
+            e.sender.send('apiData', res.data);
+        }).catch(err => {
+            console.log(err);
+        })
+    }
 })

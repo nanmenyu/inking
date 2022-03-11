@@ -73,7 +73,8 @@
         position: absolute;
         top: -5px;
 
-        .word-search {
+        .word-search,
+        .translation {
             width: 300px;
             padding: 6px 10px;
             font-size: 15px;
@@ -81,6 +82,14 @@
             text-align: left;
             user-select: text;
             cursor: text;
+        }
+
+        .translation {
+            font-size: 16px;
+
+            p {
+                margin: 4px 2px;
+            }
         }
     }
 }

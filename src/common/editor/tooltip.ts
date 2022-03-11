@@ -11,7 +11,9 @@ class SelectionSizetoolTip {
     toolTip: HTMLElement
     leftTip: HTMLElement
     rightTip: HTMLElement
-    contentTip: HTMLElement
+    contentTip1: HTMLElement
+    contentTip2: HTMLElement
+    contentTip3: HTMLElement
     constructor(view: any) {
         this.toolTip = document.createElement('div');
         this.toolTip.className = 'toolTip';
@@ -19,11 +21,25 @@ class SelectionSizetoolTip {
         this.leftTip.className = 'leftTip';
         this.rightTip = document.createElement('div');
         this.rightTip.className = 'rightTip';
-        this.contentTip = document.createElement('div');
-        this.contentTip.className = 'contentTip';
+
+        // 第一个按钮内容框（添加关键词
+        this.contentTip1 = document.createElement('div');
+        this.contentTip1.className = 'contentTip';
+        this.contentTip1.setAttribute('data-belong', 'btn1');
+        // 第二个按钮内容框（快捷查词
+        this.contentTip2 = document.createElement('div');
+        this.contentTip2.className = 'contentTip';
+        this.contentTip2.setAttribute('data-belong', 'btn2');
+        // 第三个按钮内容框（快捷翻译
+        this.contentTip3 = document.createElement('div');
+        this.contentTip3.className = 'contentTip';
+        this.contentTip3.setAttribute('data-belong', 'btn3');
+
         this.toolTip.append(this.leftTip);
         this.toolTip.append(this.rightTip);
-        this.toolTip.append(this.contentTip);
+        this.toolTip.append(this.contentTip1);
+        this.toolTip.append(this.contentTip2);
+        this.toolTip.append(this.contentTip3);
 
         for (let i = 0; i < 4; i++) {
             const btn = document.createElement('span');
@@ -37,6 +53,10 @@ class SelectionSizetoolTip {
                 btn.innerHTML = '&#xe61a;';
             }
             if (i === 2) {
+                btn.setAttribute('title', '快速翻译');
+                btn.innerHTML = '&#xe61c;';
+            }
+            if (i === 3) {
                 btn.setAttribute('title', '右侧搜索');
                 btn.innerHTML = '&#xe915;';
             }

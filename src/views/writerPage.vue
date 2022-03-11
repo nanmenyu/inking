@@ -315,7 +315,12 @@
                             </a-space>
                         </a-space>
                     </div>
-                    <WritingPaper @todata="sendPaperData" @addKeyWord="addKeyWord" ref="paperRef"></WritingPaper>
+                    <WritingPaper
+                        @todata="sendPaperData"
+                        @addKeyWord="addKeyWord"
+                        @toWebView="toWebView"
+                        ref="paperRef"
+                    ></WritingPaper>
                 </a-layout-content>
                 <!-- style="width: 450px;" -->
                 <a-resize-box
@@ -419,7 +424,7 @@
                             </template>
                         </a-trigger>
                         <!-- 各个需要显示的组件 -->
-                        <WebviewBlock v-if="showModular === '0'"></WebviewBlock>
+                        <WebviewBlock v-if="showModular === '0'" ref="ref_WebviewBlock"></WebviewBlock>
                         <PlotEditor v-if="showModular === '1'"></PlotEditor>
                         <KeywordEditor
                             v-if="showModular === '2'"
@@ -476,6 +481,7 @@ const query_id = parseInt(<string>route.query.id);
 const vid = ref(route.query.vid);
 const cid = ref(route.query.cid);
 const mainStore = useMainStore();
+const ref_WebviewBlock = ref();
 const ref_TimelineEditor = ref();
 const paperRef = ref();
 const topToolRef = ref();
@@ -840,6 +846,18 @@ const KeywordEditorChange = ref(false);
 const changeKeyWordState = () => {
     KeywordEditorChange.value = true;
     loadListData();
+}
+
+// 使用webview快捷搜索关键词
+const toWebView = (str: string) => {
+    if (ref_WebviewBlock.value) {
+        ref_WebviewBlock.value.toSearch(str);
+    } else {
+        showModular.value = '0';
+        nextTick(() => {
+            ref_WebviewBlock.value.toSearch(str);
+        })
+    }
 }
 
 // 掠过关键字所在的span

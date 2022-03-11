@@ -12,7 +12,6 @@ export default defineConfig({
   ],
   server: {
     port: 3000,
-    proxy: {}
   },
   // 全局css 
   css: {

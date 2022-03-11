@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "9674277",
+      "name": "翻译",
+      "font_class": "tubiao-fanyi",
+      "unicode": "e61c",
+      "unicode_decimal": 58908
+    },
+    {
       "icon_id": "8985090",
       "name": "webx Web应用托管服务器",
       "font_class": "webx",

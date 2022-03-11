@@ -306,7 +306,8 @@ const showPrefix = () => {
         prefixType.value = 1;
     }
 }
-const toSearch = () => {
+const toSearch = (str?: string) => {
+    if (str) searchData.value = str;
     if (searchData.value !== '') {
         const reg = new RegExp('^https{0,1}://');
         let targetUrl = '';
@@ -562,6 +563,10 @@ function loadFavorites() {
     })
 
 }
+
+defineExpose({
+    toSearch
+})
 </script>
 
 <style src="../style/webviewblock.scss" lang="scss" scoped>

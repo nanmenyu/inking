@@ -24,10 +24,11 @@ import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { useMainStore } from '../store/index';
 import { v4 } from 'uuid';
+import axios from 'axios';
 import { paperSize } from '../hooks/paperSize';
 import '../style/toolTip.scss';
 
-const emit = defineEmits(['todata', 'addKeyWord']), { proxy } = useCurrentInstance();
+const emit = defineEmits(['todata', 'addKeyWord', 'toWebView']), { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
 const mainStore = useMainStore();
@@ -325,108 +326,133 @@ const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<{
     mEditor.value.firstElementChild.setAttribute('spellcheck', 'false');
 }
 
-// 监视选中文字的变化
+// 监视选中文字的变化 设置选中文字时的工具栏
 const currentText = ref('');
-// const getRightTopBtn = ref(false); // 是否可以获取右上角的点击按钮
+let contentTip1: HTMLElement, contentTip2: HTMLElement, contentTip3: HTMLElement,
+    toolTip: HTMLElement, mainEditor_w: HTMLElement;
+let btn1: HTMLElement | null = null, btn2: HTMLElement | null = null,
+    btn3: HTMLElement | null = null, btn4: HTMLElement | null = null;
 let rightTopBtn: HTMLElement | null;
-let btn1: HTMLElement | null = null;
-let btn2: HTMLElement | null = null;
 let searchType = 'wordSearch_baidu';// 默认搜索类型
-// let btnList: NodeList;
 watch(computed(() => {
     return mainStore.curSelectedText;
 }), text => {
+    contentTip1 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn1]');
+    contentTip2 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn2]');
+    contentTip3 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn3]');
+    toolTip = <HTMLElement>document.querySelector('#mainEditor-w .toolTip');
+    mainEditor_w = <HTMLElement>document.querySelector('#mainEditor-w');
+    contentTip1.style.display = contentTip2.style.display = contentTip3.style.display = 'none';
     currentText.value = text.trim();
-    const contentTip = <HTMLElement>document.querySelector('.contentTip');
-    const toolTip = <HTMLElement>contentTip.parentElement;
-    const mainEditor_w = <HTMLElement>toolTip.parentElement;
-    contentTip.style.display = 'none';
+
     // 添加选中文字到关键字
-    if (btn1 === null) { // btn1值为null时获取元素并添加事件
-        btn1 = document.querySelector('.btn1')!;
-        btn1.addEventListener('click', (e: MouseEvent) => {
-            // 字数检测
-            if (currentText.value.length > 10) {
-                $message.warning('字数太多了(>10)');
-            } else {
-                const fragment = document.createDocumentFragment();
-                let keyWordGroupArr = [];
-                // 点击按钮显示/关闭
-                displayContentTip('btn1');
-                // 整理关键字组
-                keyWordGroupArr = theKeyWordData.data.map(item => item.kGroupName);
-                keyWordGroupArr.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'group-name';
-                    div.innerText = item;
-                    fragment.append(div);
-                })
-                // 清空容器并append新元素
-                contentTip.innerHTML = '';
-                contentTip.append(fragment);
-                // 当点击某一组时
-                contentTip.onclick = function (e: MouseEvent) {
-                    const target = <HTMLElement>e.target;
-                    // 查看事件委托下触发的元素是否是目标元素
-                    if (target.className === 'group-name') {
-                        const groupName = target.innerText;
-                        // 避免全部关键字名重复
-                        if (allNameArr.value.indexOf(currentText.value) === -1) {
-                            db.opus.where(':id').equals(query_id).modify(item => {
-                                item.theKeyWord.forEach(item => {
-                                    // 通过组名匹配
-                                    if (item.kGroupName === groupName) {
-                                        item.data.push({
-                                            iid: v4(),
-                                            itemImg: '/static/img/default.png',
-                                            itemName: currentText.value,
-                                            otherName: [],
-                                            itemDesc: '点击左侧修改介绍',
-                                            associated: [],
-                                            itemString: [],
-                                            itemNumber: []
-                                        });
-                                    }
-                                })
-                            }).then(() => {
-                                emit('addKeyWord');
-                                $message.success('添加关键词成功！');
+    btn1 = document.querySelector('.btn1')!;
+    btn1.onclick = function () {
+        // 字数检测
+        if (currentText.value.length > 10) {
+            $message.warning('字数太多了(>10)');
+        } else {
+            const fragment = document.createDocumentFragment();
+            // 整理关键字组
+            theKeyWordData.data.map(item => item.kGroupName).forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'group-name';
+                div.innerText = item;
+                fragment.append(div);
+            })
+            // 清空容器并append新元素
+            contentTip1.innerHTML = '';
+            contentTip1.append(fragment);
+            contentTip2.style.display = contentTip3.style.display = 'none';
+            setContentTipPos(contentTip1);
+            // 当点击某一组时
+            contentTip1.onclick = function (e: MouseEvent) {
+                const target = <HTMLElement>e.target;
+                // 查看事件委托下触发的元素是否是目标元素
+                if (target.className === 'group-name') {
+                    const groupName = target.innerText;
+                    // 避免全部关键字名重复
+                    if (allNameArr.value.indexOf(currentText.value) === -1) {
+                        db.opus.where(':id').equals(query_id).modify(item => {
+                            item.theKeyWord.forEach(item => {
+                                // 通过组名匹配
+                                if (item.kGroupName === groupName) {
+                                    item.data.push({
+                                        iid: v4(),
+                                        itemImg: '/static/img/default.png',
+                                        itemName: currentText.value,
+                                        otherName: [],
+                                        itemDesc: '点击左侧修改介绍',
+                                        associated: [],
+                                        itemString: [],
+                                        itemNumber: []
+                                    });
+                                }
                             })
-                        } else {
-                            $message.warning('关键词不能重复！');
-                        }
-                        btn1 = null;
+                        }).then(() => {
+                            emit('addKeyWord');
+                            $message.success('添加关键词成功！');
+                        })
+                    } else {
+                        $message.warning('关键词不能重复！');
                     }
                 }
             }
+        }
+    }
+    // 选中文字快速查词
+    btn2 = document.querySelector('.btn2')!;
+    btn2.onclick = function () {
+        if (currentText.value.length > 10) {
+            $message.warning('字数太多了(>10)');
+        } else {
+            // 点击按钮显示/关闭
+            contentTip1.style.display = contentTip3.style.display = 'none';
+            setContentTipPos(contentTip2);
+            // 配置并搜索项
+            getHTMLdata({
+                type: searchType,
+                word: currentText.value
+            });
+        }
+    }
+    // 选中文字快速翻译
+    btn3 = document.querySelector('.btn3')!;
+    btn3.onclick = function () {
+        contentTip1.style.display = contentTip2.style.display = 'none';
+        setContentTipPos(contentTip3);
+        window.$API.ipcSend('api', {
+            type: 'youdao',
+            word: currentText.value
+        });
+        window.$API.ipcOnce('apiData', (data: any) => {
+            let transContent = '';
+            data.translateResult.forEach((para: Array<{ src: string, tgt: string }>) => {
+                let paragraph = '';
+                para.forEach(sent => {
+                    paragraph += sent.tgt;
+                })
+                if (paragraph !== '') transContent += '<p>' + paragraph + '</p>';
+            })
+            contentTip3.innerHTML = '<div class="translation">' + transContent + '</div>';
+            adjustHeight();
         })
     }
-    // 快速查词
-    if (!btn2) {
-        btn2 = document.querySelector('.btn2')!;
-        btn2.addEventListener('click', (e: MouseEvent) => {
-            if (currentText.value.length > 10) {
-                $message.warning('字数太多了(>10)');
-            } else {
-                // 点击按钮显示/关闭
-                displayContentTip('btn2');
-                // 配置并搜索项
-                getHTMLdata({
-                    type: searchType,
-                    word: currentText.value
-                });
-            }
-        })
+    // 右侧使用webview打开
+    btn4 = document.querySelector('.btn4')!;
+    btn4.onclick = function () {
+        emit('toWebView', currentText.value);
     }
+
     function getHTMLdata(config: { type: string, word: string }) {
-        contentTip.innerHTML = '<div class="word-loading"><div class="word-loading-img"></div></div>';
+        contentTip2.innerHTML = '<div class="word-loading"><div class="word-loading-img"></div></div>';
         window.$API.ipcSend('reptile', config);
         window.$API.ipcOnce('getReptileData', (data: any) => {
             let isFounded = false;
             if (data.site === 'baidu') {
                 // 百度汉语数据
                 if (data.basicmean === '' && data.detailmean === '' && data.source === '' && data.liju === '' && data.synonym === '' && data.antonym === '') {
-                    contentTip.innerHTML = '<div class="word-notfound"><div class="word-notfound-img"></div></div>';
+                    contentTip2.innerHTML = '<div class="word-notfound"><div class="word-notfound-img"></div></div>';
                     isFounded = false;
                 } else {
                     const basicmeanHTML = data.basicmean === '' ? '' : '<div class="basicmean"><h3>基本释义</h3>' + data.basicmean + '</div>';
@@ -436,20 +462,20 @@ watch(computed(() => {
                     const synonymHTML = data.synonym === '' ? '' : '<div class="synonym">' + data.synonym + '</div>';
                     const antonymHTML = data.antonym === '' ? '' : '<div class="antonym">' + data.antonym + '</div>';
                     const temp = basicmeanHTML + detailmeanHTML + sourceHTML + dataHTML + synonymHTML + antonymHTML;
-                    contentTip.innerHTML = '<div class="word-search"><div id="source-website" title="点击切换">来源:百度汉语</div>' + temp + '</div>';
+                    contentTip2.innerHTML = '<div class="word-search"><div id="source-website" title="点击切换">来源:百度汉语</div>' + temp + '</div>';
                     adjustHeight();
                     isFounded = true;
                 }
             } else if (data.site === 'zdic') {
                 // 汉典数据
                 if (data.jnr === '' && data.gnr === '' && data.cyjs === '') {
-                    contentTip.innerHTML = '<div class="word-notfound"><div class="word-notfound-img"></div></div>';
+                    contentTip2.innerHTML = '<div class="word-notfound"><div class="word-notfound-img"></div></div>';
                     isFounded = false;
                 } else {
                     const jnrHTML = data.jnr === '' ? '' : '<div class="jnr"><h3>词语解释</h3>' + data.jnr + '</div>';
                     const gnrHTML = data.gnr === '' ? '' : '<div class="gnr"><h3>国语辞典</h3>' + data.gnr + '</div>';
                     const cyjsHTML = data.cyjs === '' ? '' : '<div class="cyjs"><h3>成语解释</h3>' + data.cyjs + '</div>';
-                    contentTip.innerHTML = '<div class="word-search"><div id="source-website" title="点击切换">来源:汉典</div>' + jnrHTML + gnrHTML + cyjsHTML + '</div>';
+                    contentTip2.innerHTML = '<div class="word-search"><div id="source-website" title="点击切换">来源:汉典</div>' + jnrHTML + gnrHTML + cyjsHTML + '</div>';
                     adjustHeight();
                     isFounded = true;
                 }
@@ -463,33 +489,26 @@ watch(computed(() => {
                     getHTMLdata({ type: searchType, word: currentText.value });
                 }
             }
-            btn2 = null;
         })
     }
-    function displayContentTip(tar: string) {
+    function setContentTipPos(contentTip: HTMLElement) {
         // 是否需要调换搜索栏方向
         if (parseInt(toolTip.style.left.replace('px', '')) > mainEditor_w.clientWidth / 2) {
-            contentTip.removeAttribute('style');
-            contentTip.style.right = '174px';
+            contentTip.style.left = '';
+            contentTip.style.right = toolTip.clientWidth + 4 + 'px';
         } else {
-            contentTip.removeAttribute('style');
-            contentTip.style.left = '174px';
+            contentTip.style.right = '';
+            contentTip.style.left = toolTip.clientWidth + 4 + 'px';
         }
-        // 设置显示状态
-        if (contentTip.getAttribute('data-belong') === tar) {
-            if (contentTip.style.display === 'block') contentTip.style.display = 'none';
-            else contentTip.style.display = 'block';
-        } else {
-            contentTip.setAttribute('data-belong', tar);
-            contentTip.style.display = 'block';
-        }
+        if (contentTip.style.display === 'none') contentTip.style.display = 'block';
+        else if (contentTip.style.display === 'block') contentTip.style.display = 'none';
     }
     function adjustHeight() {
         // 高度要是太高就适当扩展宽度
-        if (contentTip.clientHeight > 500) {
-            (<HTMLElement>contentTip.firstElementChild).style.width = '500px';
+        if (contentTip2.clientHeight > 500) {
+            (<HTMLElement>contentTip2.firstElementChild).style.width = '500px';
         } else {
-            (<HTMLElement>contentTip.firstElementChild).style.width = '300px';
+            (<HTMLElement>contentTip2.firstElementChild).style.width = '300px';
         }
     }
 })

@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3233072 */
-  src: url('iconfont.woff2?t=1646927490504') format('woff2'),
-       url('iconfont.woff?t=1646927490504') format('woff'),
-       url('iconfont.ttf?t=1646927490504') format('truetype');
+  src: url('iconfont.woff2?t=1646978700473') format('woff2'),
+       url('iconfont.woff?t=1646978700473') format('woff'),
+       url('iconfont.ttf?t=1646978700473') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,10 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-tubiao-fanyi:before {
+  content: "\e61c";
 }
 
 .icon-webx:before {
