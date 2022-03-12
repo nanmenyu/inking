@@ -5,7 +5,7 @@ import { useMainStore } from '../../store/index';
 const mainStore = useMainStore();
 
 // 设置要包裹的关键词
-export const setHighlightKeyword = (keyMarks: Array<{ match: RegExp, class: string, style: string }>) => {
+export const setHighlightKeyword = (keyMarks: Array<Marker>) => {
     marks = keyMarks;
 }
 
@@ -85,7 +85,7 @@ function highlightDocument(doc: any) {
 }
 
 /* --------------------------关键字高亮功能----------------------*/
-let marks: Array<{ match: RegExp, class: string, style: string }>;
+let marks: Array<Marker>;
 function highlightKeyword(doc: any) {
     const content = doc.content, highlights: any = [];
     if (marks) {

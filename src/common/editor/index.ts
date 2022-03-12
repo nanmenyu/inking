@@ -12,7 +12,7 @@ import { useMainStore } from '../../store/index';
 // 使用pinia 
 const mainStore = useMainStore();
 
-export default function (initData: NodeDOC, keyMarks?: Array<{ match: RegExp, class: string, style: string }>, disabled?: boolean) {
+export default function (initData: NodeDOC, keyMarks?: Array<Marker>, disabled?: boolean) {
     // 初始化
     const nodes = {
         doc: {

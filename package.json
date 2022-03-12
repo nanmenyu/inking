@@ -60,6 +60,7 @@
   "devDependencies": {
     "@arco-design/web-vue": "^2.16.2",
     "@vitejs/plugin-vue": "^2.0.0",
+    "@ckpack/vue-color": "^1.1.8",
     "concurrently": "^7.0.0",
     "core-js": "^3.6.5",
     "cropperjs": "^1.5.12",

@@ -61,6 +61,7 @@ export function setHTMLdata(contentTip: HTMLElement, data: any): boolean {
 
 // 获取翻译后的内容并呈现
 export function setTranslationContent(contentTip: HTMLElement, currentText: string): void {
+    contentTip.innerHTML = '<div class="word-loading"><div class="word-loading-img"></div></div>';
     window.$API.ipcSend('api', {
         type: 'youdao',
         word: currentText

@@ -68,14 +68,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import {
-    IconRight,
-    IconBook,
-    IconSun,
-    IconDelete,
-    IconEdit,
-    IconSettings,
-    IconQuestionCircle,
-    IconNotification
+    IconRight, IconBook, IconSun, IconDelete, IconEdit,
+    IconSettings, IconQuestionCircle, IconNotification
 } from '@arco-design/web-vue/es/icon';
 import { useRoute } from 'vue-router';
 import * as echarts from 'echarts';

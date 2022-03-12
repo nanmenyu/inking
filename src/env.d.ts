@@ -20,6 +20,7 @@ declare module 'prosemirror-view';
 declare module 'prosemirror-schema-list';
 declare module 'prosemirror-example-setup';
 declare module 'pdfjs-dist/build/pdf.worker.entry';
+declare module '@ckpack/vue-color';
 
 declare interface Window {
   $API: any
@@ -170,4 +171,10 @@ declare interface Favorites {
   title: string;
   url: string;
   favicon: string;
+}
+
+declare interface Marker {
+  match: RegExp;
+  class: string;
+  style: string;
 }

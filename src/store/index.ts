@@ -16,12 +16,14 @@ export const useMainStore = defineStore('mainStore', {
         TotalNumber_thisTime: 0, // 改变后的总字数
         baseTotalNumber_today: 0, //从数据库中拿取的今日码字数
         curSelectedText: '', //当前选中的文字
+        keywordMarks: [], //当前的高亮标记目标
     }),
     getters: {
     },
     // optional actions
     actions: {
         updateTargetIndex(offset: number) {
+            // 更新搜索状态下当前搜索词的索引
             let temp = this.targetIndex;
             temp += offset;
             if (temp < 1) {

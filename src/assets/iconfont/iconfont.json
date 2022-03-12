@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "5114016",
+      "name": "电脑",
+      "font_class": "diannao--",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "5114076",
+      "name": "手机",
+      "font_class": "shouji--",
+      "unicode": "e615",
+      "unicode_decimal": 58901
+    },
+    {
       "icon_id": "9674277",
       "name": "翻译",
       "font_class": "tubiao-fanyi",

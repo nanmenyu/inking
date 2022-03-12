@@ -6,7 +6,7 @@
                 <TopToolbar ref="topToolRef"></TopToolbar>
             </a-layout-header>
             <a-layout>
-                <a-layout-sider class="siderLeft-r"></a-layout-sider>
+                <a-layout-sider style="display: none;"></a-layout-sider>
                 <a-layout-content
                     @mouseover="showScroll"
                     @mouseout="closeScroll"

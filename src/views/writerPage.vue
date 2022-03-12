@@ -494,9 +494,7 @@ const sendPaperData = (data: Pagecount) => {
 
 /*------------关键词搜索、替换功能------------*/
 const showIframeWrap = ref(false), showSearchBox = ref(false);
-const keywordMarks: Ref<Array<{
-    match: RegExp, class: string, style: string
-}>> = ref([]);
+const keywordMarks: Ref<Array<Marker>> = ref([]);
 const searchData = ref(''), replaceData = ref(''),
     totalKeyWord = ref(0), keyWordPos = ref(0);
 watch(showSearchBox, value => {
@@ -974,7 +972,7 @@ function loadListData() {
             })
             // 渲染关键词
             keywordMarks.value = genkeywordMarks(keyWordArr);
-            // mainStore.updateCodewords_thisTime();
+            (<Array<Marker>>mainStore.keywordMarks) = keywordMarks.value;
             paperRef.value.setBooksData(value, keywordMarks.value);
             // 加载卷章列表
             booksLists.data = value.data.filter((item: Volume) => {

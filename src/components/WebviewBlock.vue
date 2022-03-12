@@ -90,9 +90,9 @@
                     </span>
                 </template>
                 <a-dropdown @select="selectUA">
-                    <span class="selectUA" title="选择UA">
-                        {{ currentUaType }}
-                        <icon-down />
+                    <span class="selectUA iconfont" title="选择UA">
+                        {{ currentUaType === '手机' ? '&#xe615;' : '&#xe60c;' }}
+                        <!-- <icon-down /> -->
                     </span>
                     <template #content>
                         <a-doption>电脑</a-doption>

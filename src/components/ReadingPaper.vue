@@ -6,7 +6,7 @@
         ref="contextMenu_ref"
     ></ContextMenu>-->
     <div id="paper-box-r">
-        <main id="pEditor">
+        <main id="pEditor" ref="editor">
             <div id="mainEditor-r" ref="mainEditor">
                 <!-- <div class="contentTip contentTip-r" ref="contentTip1" style="display: none;"></div>
                 <div class="contentTip contentTip-r" ref="contentTip2" style="display: none;"></div>
@@ -33,9 +33,7 @@ const $modal = proxy.$modal;
 const $message = proxy.$message;
 const emit = defineEmits(['todata', 'toWebView']);
 const mainStore = useMainStore();
-// const contextMenu_ref = ref();
-// , contentTip1 = ref(), contentTip2 = ref();
-const mainEditor = ref();
+const mainEditor = ref(), editor = ref();
 loadFileData();
 
 onMounted(() => {
@@ -90,24 +88,21 @@ const setPaperSize = (type: string) => {
 
 // 右侧菜单栏触发
 let searchType = 'wordSearch_baidu';// 默认搜索类型
-// const choiceContextMenuItem = (data: { item: string, select: string }) => {
-//     if (data.select === '') {
-//         $message.warning('您未选中任何文字')
-//     } else {
-// let searchType = 'wordSearch_baidu';// 默认搜索类型
 watch(computed(() => {
     return mainStore.curSelectedText;
 }), text => {
     const contentTip2 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn2]');
     const contentTip3 = <HTMLElement>document.querySelector('.contentTip[data-belong=btn3]');
-    const toolTip = <HTMLElement>document.querySelector('#mainEditor-w .toolTip');
+    const toolTip = <HTMLElement>document.querySelector('#mainEditor-r .toolTip');
     const mainEditor_r = <HTMLElement>document.querySelector('#mainEditor-r');
     const currentText = text.trim();
     contentTip2.style.display = contentTip3.style.display = 'none';
+    (<HTMLElement>document.querySelector('.btn1'))?.remove();
 
     // 快速查词
     const btn2 = <HTMLElement>document.querySelector('.btn2')!;
     btn2.onclick = function () {
+        console.log('查词');
         if (currentText.length > 10) {
             $message.warning('字数太多了(>10)');
         } else {
@@ -123,14 +118,15 @@ watch(computed(() => {
 
     }
     // 快速翻译
-    const btn3 = <HTMLElement>document.querySelector('.btn2')!;
+    const btn3 = <HTMLElement>document.querySelector('.btn3')!;
     btn3.onclick = function () {
+        console.log('翻译');
         contentTip2.style.display = 'none';
         setContentTipPos(toolTip, contentTip3, mainEditor_r);
         setTranslationContent(contentTip3, currentText);
     }
     //右侧搜索
-    const btn4 = <HTMLElement>document.querySelector('.btn2')!;
+    const btn4 = <HTMLElement>document.querySelector('.btn4')!;
     btn4.onclick = function () {
         emit('toWebView', currentText);
     }
@@ -152,7 +148,6 @@ watch(computed(() => {
     }
 
 })
-
 
 
 // 读取文件数据
@@ -237,6 +232,8 @@ defineExpose({
 }
 #mainEditor-r {
     position: relative;
+}
+#mainEditor-r .ProseMirror {
     font-family: v-bind(currentFont);
     box-sizing: border-box;
     text-align: left;
@@ -247,13 +244,13 @@ defineExpose({
     color: v-bind(currentColor);
     cursor: text;
     word-wrap: break-word;
-    white-space: pre-wrap;
+    /* white-space: pre-wrap; */
     white-space: break-spaces;
     -webkit-font-variant-ligatures: none;
     font-variant-ligatures: none;
     font-feature-settings: "liga" 0;
 }
-#mainEditor-r p {
+#mainEditor-r .ProseMirror p {
     margin: 0;
     margin-top: v-bind(currentSpacing + "px");
     text-indent: v-bind(currentTextIndent + "em");

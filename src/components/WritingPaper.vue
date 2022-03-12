@@ -22,7 +22,7 @@ import hexToRgba from '../utils/hexToRgba';
 import pureTextEditor from '../common/editor';
 import { setHighlightKeyword } from '../common/editor/syntax';
 import { db } from '../db/db';
-import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
+// import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
 import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { useMainStore } from '../store/index';
@@ -30,6 +30,8 @@ import { setContentTipPos, setHTMLdata, setTranslationContent } from '../hooks/c
 import { v4 } from 'uuid';
 // import axios from 'axios';
 import { paperSize } from '../hooks/paperSize';
+import { exportTXT, exportDOCX, exportPDF } from '../hooks/paper';
+import prohibitedWords from '../assets/json/prohibitedWords.json';
 import '../style/toolTip.scss';
 
 const emit = defineEmits(['todata', 'addKeyWord', 'toWebView']), { proxy } = useCurrentInstance();
@@ -142,72 +144,6 @@ const saveDocData = throttle((showMsg: boolean) => {
     })
 }, 500);
 
-/*----另存为文件----*/
-let currentChapter = '未命名章', paperType;
-const pBox = ref();
-const expFile = (type: string) => {
-    switch (type) {
-        case 'txt':
-            window.$API.ipcSend('expFile', {
-                type: 'TXT',
-                name: currentChapter,
-                file: editor.value.innerText
-            });
-            break;
-        case 'docx':
-            const htmlString = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>' + pBox.value.outerHTML + '</body></html>';
-            window.$API.ipcSend('expFile', {
-                type: 'DOCX',
-                name: currentChapter,
-                file: htmlString
-            });
-            break;
-        case 'pdf':
-            paperType = JSON.parse((localStorage.getItem('uWritingOption') as string)).uPaperSize;
-            if (paperType === 'Max' || paperType === 'iPad Pro') {
-                $modal.warning({
-                    title: "导出警告",
-                    content: `当纸张宽度大于A4纸时, 部分内容会做裁剪处理`,
-                    simple: true,
-                    onOk: () => {
-                        exportPDF();
-                    }
-                })
-            } else {
-                exportPDF();
-            }
-            break;
-    }
-}
-
-// 导出为PDF
-function exportPDF() {
-    // 单章17k字左右的极限~~~15K
-    // 输出配置项 见：https://ekoopmans.github.io/html2pdf.js/
-    html2pdf().set({
-        // Margin ,[vMargin, hMargin] ,[top, left, bottom, right]
-        margin: [0.3, 0, 0.3, 0],
-        // 默认文件名
-        filename: currentChapter + '.pdf',
-        // 开启智能分页
-        pagebreak: {
-            mode: 'avoid-all'
-        },
-        // PDF中的链接是否有效
-        enableLinks: true,
-        html2canvas: {
-            scale: 2,
-            backgroundColor: '#fff' //默认白色（如果DOM中未指定）
-        },
-        jsPDF: {
-            unit: 'in',
-            format: 'a4',
-            orientation: 'portrait'
-        }
-    }).from(pBox.value).save();
-    $message.loading({ content: '正在渲染...', duration: 2000 });
-}
-
 /*----修改文字、段落相关----*/
 let currentFont = ref('KaiTi'), currentFontSize = ref(22), currentLineHeight = ref(1.5),
     currentFontWeight = ref('normal'), currentColor = ref('#333333'), currentSpacing = ref(10),
@@ -276,13 +212,65 @@ const setParaFocus = (type: string, isInit: boolean) => {
     if (!isInit) getData();
 }
 
+/*----另存为文件----*/
+let currentChapter = '未命名章';
+const pBox = ref();
+const expFile = (type: string) => {
+    switch (type) {
+        case 'txt':
+            exportTXT(currentChapter, editor.value);
+            break;
+        case 'docx':
+            exportDOCX(currentChapter, pBox.value);
+            break;
+        case 'pdf':
+            const paperType = JSON.parse((localStorage.getItem('uWritingOption') as string)).uPaperSize;
+            if (paperType === 'Max' || paperType === 'iPad Pro') {
+                $modal.warning({
+                    title: "导出警告",
+                    content: `当纸张宽度大于A4纸时, 部分内容会做裁剪处理`,
+                    simple: true,
+                    onOk: () => {
+                        $message.loading({ content: '正在渲染...', duration: 2000 });
+                        exportPDF(currentChapter, pBox.value);
+                    }
+                })
+            } else {
+                $message.loading({ content: '正在渲染...', duration: 2000 });
+                exportPDF(currentChapter, pBox.value);
+            }
+            break;
+    }
+}
+
+// 违禁词查询
+const sensitiveRetrieval = () => {
+    const words: { [key: string]: Array<string> } = prohibitedWords;// 导入敏感词库
+    const appearWords: Array<string> = [], appearMarks: Array<Marker> = [];
+    for (let i in words) {
+        words[i].forEach(item => {
+            if (editor.value.innerText.includes(item)) {
+                appearWords.push(item);
+                appearMarks.push({ match: new RegExp(item, 'g'), class: 'prohibitedWord', style: '' });
+            }
+        })
+    }
+    if (appearMarks.length === 0) {
+        $message.success('未发现敏感词');
+    } else {
+        db.opus.get(query_id).then(value => {
+            if (value) setBooksData(value, (<Array<Marker>>mainStore.keywordMarks).concat(appearMarks));
+            $message.success(`发现${document.querySelectorAll('.prohibitedWord').length}处敏感词:包括${appearWords.join('、')}`);
+        })
+    }
+}
+
 const theKeyWordData: { data: Array<KeyWordGroup> } = reactive({ data: [] });
 const allNameArr: Ref<Array<string>> = ref([]); // 全部关键词名称数组
-const setBooksData = (value: Userdb, keyMarks?: Array<{
-    match: RegExp, class: string, style: string
-}>) => {
+const setBooksData = (value: Userdb, keyMarks?: Array<Marker>) => {
     theKeyWordData.data = value.theKeyWord;
     const toDisplay: Array<NodePara> = [];
+    // toDisplay = []; // 清空
     value.data.forEach(item => {
         //获取本章数据
         if (item.vid === vid) {
@@ -319,9 +307,7 @@ const setBooksData = (value: Userdb, keyMarks?: Array<{
 // 刷新纸张内容
 // 读取数据并显示在当前页面
 const mEditor = ref();
-const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<{
-    match: RegExp, class: string, style: string
-}>) => {
+const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<Marker>) => {
     mEditor.value.innerHTML = '';
     if (keyMarks) setHighlightKeyword(keyMarks);
     pureTextEditor({
@@ -479,11 +465,9 @@ function moveCursor(selection: Selection, range: Range, startNode: Node, startOf
     selection.addRange(range);
 }
 
-
-
 defineExpose({
-    saveDocData, expFile, setFont, setFontSize, setLineHeight, setFontWeight, setColor, setSegSpacing,
-    setTextIndent, setBgcColor, setShowborder, setRoundType, setPaperSize, setParaFocus, setBooksData,
+    saveDocData, setFont, setFontSize, setLineHeight, setFontWeight, setColor, setSegSpacing, setTextIndent,
+    setBgcColor, setShowborder, setRoundType, setPaperSize, setParaFocus, expFile, sensitiveRetrieval, setBooksData,
     refreshPaper, setId
 })
 </script>
@@ -520,7 +504,7 @@ defineExpose({
     color: v-bind(currentColor);
     cursor: text;
     word-wrap: break-word;
-    white-space: pre-wrap;
+    /* white-space: pre-wrap; */
     white-space: break-spaces;
     -webkit-font-variant-ligatures: none;
     font-variant-ligatures: none;
@@ -554,7 +538,10 @@ defineExpose({
     visibility: visible;
     transform: scaleX(1);
 }
-
+#mainEditor-w .ProseMirror .prohibitedWord {
+    text-decoration: line-through;
+    text-decoration-color: red;
+}
 #mainEditor-w .ProseMirror .keyword_search {
     border-radius: 25%;
     background-color: #ff0;

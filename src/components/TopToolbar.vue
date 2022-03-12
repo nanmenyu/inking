@@ -113,13 +113,14 @@
                     </a-doption>
                     <template #content>
                         <div class="trigger" style="margin-top: 24px;">
-                            <color-picker
+                            <!-- <color-picker
                                 :isWidget="true"
                                 :format="'hex'"
                                 v-model:pureColor="fontColor"
                                 v-model:gradientColor="gradientColor"
                                 @pureColorChange="getColor"
-                            />
+                            />-->
+                            <Sketch v-model="fontColor" />
                         </div>
                     </template>
                 </a-trigger>
@@ -216,12 +217,13 @@
                     </a-doption>
                     <template #content>
                         <div class="trigger" style="margin-top: 76px;">
-                            <color-picker
+                            <!-- <color-picker
                                 :isWidget="true"
                                 v-model:pureColor="bgcColor"
                                 v-model:gradientColor="gradientColor"
                                 @pureColorChange="getBgcColor"
-                            />
+                            />-->
+                            <Sketch v-model="bgcColor" />
                         </div>
                     </template>
                 </a-trigger>
@@ -283,6 +285,18 @@
                 </a-trigger>
             </template>
         </a-dropdown>
+        <!-- 工具 -->
+        <a-dropdown v-if="query_path === '/writer'" trigger="hover">
+            <a-button class="headerBtn" style="padding-right: 0;">
+                <icon-tool />&nbsp;&nbsp;工具
+                <icon-caret-down />
+            </a-button>
+            <template #content>
+                <a-doption @click="sensitiveRetrieval">
+                    <img :src="sensitiveWords" style="transform: translateY(4px)" />&nbsp;&nbsp;敏感词检索
+                </a-doption>
+            </template>
+        </a-dropdown>
         <!-- 导出 -->
         <a-dropdown trigger="hover">
             <a-button class="headerBtn" style="padding-right: 0;">
@@ -330,14 +344,14 @@
 </template>
 
 <script setup lang='ts'>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, nextTick, watch, Ref } from 'vue';
 import {
     IconDown, IconExport, IconBook, IconCaretDown, IconCheckCircle, IconFullscreen,
-    IconCheck, IconClose
+    IconCheck, IconClose, IconTool
 } from '@arco-design/web-vue/es/icon';
-import { ColorPicker } from "vue3-colorpicker";
 import { throttle } from '../utils/flowControl';
 import { useRoute } from 'vue-router';
+import { Sketch } from '@ckpack/vue-color';
 import writtenwords from '../assets/svg/writtenwords.svg';
 import fontSizeIcon from '../assets/svg/fontSizeIcon.svg';
 import lineHeighIcon from '../assets/svg/lineHeighIcon.svg';
@@ -356,6 +370,7 @@ import softThemeIcon from '../assets/svg/softThemeIcon.svg';
 import expTXTIcon from '../assets/svg/expTXTIcon.svg';
 import expDOCXIcon from '../assets/svg/expDOCXIcon.svg';
 import expPDFIcon from '../assets/svg/expPDFIcon.svg';
+import sensitiveWords from '../assets/svg/sensitiveWords.svg';
 const route = useRoute(), query_path = route.path;
 
 /*-------------数据统计与初始化-------------*/
@@ -463,10 +478,6 @@ const showChoice = computed(() => {
 })
 
 /*----父组件调用子组件的方法----*/
-// 导出文件
-const exp = (type: string) => {
-    paperRef.value.expFile(type);
-}
 // 设置字体
 const selectFont = (i: number) => {
     paperRef.value.setFont(fontList.value[i]);
@@ -510,22 +521,21 @@ const changeTextIndent = () => {
 }
 
 // 获得子组件选择的color并修改字体颜色
-const fontColor = ref(uLocalOption.value.uColor);
-const gradientColor = ref("linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 100%)");
-const getColor = () => {
-    paperRef.value.setColor(fontColor.value);
-    uLocalOption.value.uColor = fontColor.value;
+const fontColor: Ref<any> = ref(uLocalOption.value.uColor);
+watch(fontColor, () => {
+    paperRef.value.setColor(fontColor.value.hex8);
+    uLocalOption.value.uColor = fontColor.value.hex8;
     // 聚焦模式下选择新颜色
     if (query_path === '/writer' && paraFocus.value === 'open') paperRef.value.setParaFocus(paraFocus.value);
     setLocalStorage();
-}
+})
 // 获得子组件选择的color并修改纸张背景色
-const bgcColor = ref(uLocalOption.value.uBgcColor);
-const getBgcColor = () => {
-    paperRef.value.setBgcColor(bgcColor.value);
-    uLocalOption.value.uBgcColor = bgcColor.value;
+const bgcColor: Ref<any> = ref(uLocalOption.value.uBgcColor);
+watch(bgcColor, () => {
+    paperRef.value.setBgcColor(bgcColor.value.hex8);
+    uLocalOption.value.uBgcColor = bgcColor.value.hex8;
     setLocalStorage();
-}
+})
 
 // 改变纸张边框
 const isShowBorder = ref(true);
@@ -576,6 +586,16 @@ const changeParaFocus = () => {
         uLocalOption.value.uParaFocus = paraFocus.value;
         localStorage.setItem('uWritingOption', JSON.stringify(uLocalOption.value));
     }
+}
+
+// 导出文件
+const exp = (type: string) => {
+    paperRef.value.expFile(type);
+}
+
+// 敏感词检索功能
+const sensitiveRetrieval = () => {
+    paperRef.value.sensitiveRetrieval();
 }
 
 // 生命周期

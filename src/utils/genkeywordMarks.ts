@@ -6,9 +6,7 @@
 
 export default function genkeywordMarks(keywordArr: Array<Array<string>>) {
     // [color,background-color]
-    const result: Array<{
-        match: RegExp, class: string, style: string
-    }> = [];
+    const result: Array<Marker> = [];
     const colorGroup = [
         ['#f53f3f', '#ffece8'], ['#d91ad9', '#ffe8fb'], ['#f77234', '#fff3e8'], ['#ff7d00', '#fff7e8'], ['#9fdb1d', '#fcffe8'], ['#f7ba1e', '#fffce8'], ['#00b42a', '#e8ffea'], ['#3491fa', '#e8f7ff'], ['#14c9c9', '#e8fffb'], ['#165dff', '#e8f3ff'], ['#722ed2', '#f5e8ff'], ['#f5319d', '#ffe8f1'],
         ['#86909c', '#f2f3f5']

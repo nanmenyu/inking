@@ -1,7 +1,7 @@
 import { Plugin } from 'prosemirror-state';
 import { useMainStore } from '../../store/index';
-// 使用pinia 
-const mainStore = useMainStore();
+
+const mainStore = useMainStore();// 使用pinia 
 
 export const selectionSizePlugin = new Plugin({
     view(editorView: any) { return new SelectionSizetoolTip(editorView) }
@@ -15,7 +15,6 @@ class SelectionSizetoolTip {
     contentTip2: HTMLElement
     contentTip3: HTMLElement
     constructor(view: any) {
-        console.log('gjuuuuuu');
         this.toolTip = document.createElement('div');
         this.toolTip.className = 'toolTip';
         this.leftTip = document.createElement('div');
