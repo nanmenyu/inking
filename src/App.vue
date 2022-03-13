@@ -1,10 +1,15 @@
 <template>
+  <div id="app-bg">
+    <!-- <img :src="defaultBg" /> -->
+  </div>
   <router-view></router-view>
 </template>
 
 <script setup lang="ts">
 import { useMainStore } from './store/index';
 import { db } from './db/db';
+import defaultBg from '../public/static/img/default-bg.jpg';
+import { onMounted } from 'vue';
 // import axios from 'axios';
 
 const mainStore = useMainStore();
@@ -61,10 +66,14 @@ db.opus.where(':id').between(1, Infinity).toArray().then(value => {
 }).then(() => {
   mainStore.contrastTotalNumber_thisTime = mainStore.TotalNumber_thisTime = mainStore.baseTotalNumber_thisTime = cout_temp;
 })
+onMounted(() => {
+  document.body.className = 'light-mode';
+})
 </script>
 
 <style>
 #app {
+  position: relative;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

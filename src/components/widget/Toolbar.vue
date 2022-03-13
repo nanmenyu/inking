@@ -64,20 +64,12 @@
         <div class="bar-midd">
             <a-tooltip content="反转顺序" position="top" background-color="#3491fa" mini>
                 <a-button type="text" @click="reOrder" :disabled="disableSort">
-                    <svg
-                        t="1642600478490"
-                        viewBox="0 0 1024 1024"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                    >
-                        <path p-id="2749" :fill="disableSort ? '#94bfff' : '#165dff'" />
-                    </svg>
+                    <icon-swap />
                 </a-button>
             </a-tooltip>
             <a-dropdown trigger="hover">
                 <a-button type="text" :disabled="disableSort">
-                    <icon-swap />
+                    <icon-swap style="transform:rotateZ(90deg)" />
                 </a-button>
                 <template #content>
                     <a-doption

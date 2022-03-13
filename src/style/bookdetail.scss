@@ -157,21 +157,21 @@
             width: 100px;
             height: 30px;
             margin-right: 4px;
-            background-color: #165dff;
+            background-color: rgb(var(--primary-6));
         }
 
         &:nth-child(2):hover {
-            background-color: #4080ff;
+            background-color: rgb(var(--primary-5));
         }
 
         &:last-child {
             width: 150px;
             height: 30px;
             border-radius: 0 15px 15px 0;
-            background-color: #165dff;
+            background-color: rgb(var(--primary-6));
 
             &:hover {
-                background-color: #4080ff;
+                background-color: rgb(var(--primary-5));
             }
         }
     }
@@ -200,7 +200,7 @@
             cursor: pointer;
 
             &:hover {
-                color: #165dff;
+                color: rgb(var(--primary-6));
             }
         }
     }
@@ -236,7 +236,7 @@
 
         &:hover {
             background-color: #f2f3f5;
-            color: #165dff;
+            color: rgb(var(--primary-6));
         }
     }
 }
@@ -278,7 +278,7 @@
 
             &:hover {
                 background-color: #f2f3f5;
-                color: #165dff;
+                color: rgb(var(--primary-6));
             }
         }
 
