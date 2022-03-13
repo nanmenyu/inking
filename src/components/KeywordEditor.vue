@@ -522,7 +522,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, nextTick } from 'vue';
+import { ref, reactive, watch, nextTick, onMounted } from 'vue';
 import {
     IconClose, IconEdit, IconCloseCircle, IconPlus,
     IconDelete, IconPen, IconCaretRight, IconReply, IconFire
@@ -535,6 +535,7 @@ import 'cropperjs/dist/cropper.css';
 import * as echarts from 'echarts';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { v4 } from 'uuid';
+import getStyle from '../utils/getStyle';
 import defaultImg from '../../public/static/img/default.png';
 import templateicon from '../assets/svg/templateicon.svg';
 import addKeyWord from '../assets/svg/addKeyWord.svg';
@@ -1661,6 +1662,12 @@ function deepClone_JSON(obj: object) {
     return JSON.parse(_obj);
 }
 
+const primaryColor = ref('');
+onMounted(() => {
+    // 获得主题色
+    primaryColor.value = getComputedStyle(document.body).getPropertyValue('--primary-6');
+})
+
 //准备echarts的容器
 const numberChart = ref();
 function setNumberChart(targetData: Array<{ key: string, value: number }>, unit: string, curMax: number) {
@@ -1702,7 +1709,7 @@ function setNumberChart(targetData: Array<{ key: string, value: number }>, unit:
                     // 限制name的长度,多余部分用省略号代替
                     return params.length > 10 ? params.slice(1, 10) + '...' : params;
                 },
-                color: '#165dff'
+                color: `rgb(${primaryColor.value})`
             },
         },
         series: [

@@ -1,7 +1,7 @@
 <template>
     <div class="head-item">
         <!-- 全屏洁净模式 -->
-        <a-tooltip background-color="#3491FA" position="bottom" mini content="全屏洁净模式(F1)">
+        <a-tooltip position="bottom" mini content="全屏洁净模式(F1)">
             <a-button class="headerBtn">
                 <icon-fullscreen />&nbsp;全屏
             </a-button>
@@ -96,7 +96,7 @@
                     </a-doption>
                     <template #content>
                         <ul class="trigger typeface" @scroll="fontlistScroll" ref="fontListNode">
-                            <li class="typeface-head" title="点击恢复默认">{{ uLocalOption.uFont }}</li>
+                            <li class="typeface-head">{{ uLocalOption.uFont }}</li>
                             <li
                                 v-for="(item, i) in fontList"
                                 :key="i"
@@ -268,7 +268,7 @@
                             <li
                                 v-for="item in paperSize"
                                 :key="item.type"
-                                :style="item.now ? 'background-color: #3491fa;color: #fff;' : ''"
+                                :style="item.now ? 'background-color: rgb(var(--my-secondary-6));color: #fff;' : ''"
                                 @click="changePaperSize(item.type)"
                             >
                                 <span>{{ item.type }}</span>
@@ -326,15 +326,24 @@
                 <icon-caret-down />
             </a-button>
             <template #content>
-                <a-doption @click="choice(0)" :style="choiceArr[0] ? 'color: #165dff;' : ''">
+                <a-doption
+                    @click="choice(0)"
+                    :style="choiceArr[0] ? 'color: rgb(var(--primary-6));' : ''"
+                >
                     <icon-check-circle :style="choiceArr[0] ? '' : 'visibility:hidden'" />
                     &nbsp;字数&nbsp;&nbsp;&nbsp;&nbsp;{{ wordCount }}字
                 </a-doption>
-                <a-doption @click="choice(1)" :style="choiceArr[1] ? 'color: #165dff;' : ''">
+                <a-doption
+                    @click="choice(1)"
+                    :style="choiceArr[1] ? 'color: rgb(var(--primary-6));' : ''"
+                >
                     <icon-check-circle :style="choiceArr[1] ? '' : 'visibility:hidden'" />
                     &nbsp;字符&nbsp;&nbsp;&nbsp;&nbsp;{{ charCount }}个
                 </a-doption>
-                <a-doption @click="choice(2)" :style="choiceArr[2] ? 'color: #165dff;' : ''">
+                <a-doption
+                    @click="choice(2)"
+                    :style="choiceArr[2] ? 'color: rgb(var(--primary-6));' : ''"
+                >
                     <icon-check-circle :style="choiceArr[2] ? '' : 'visibility:hidden'" />
                     &nbsp;段落&nbsp;&nbsp;&nbsp;&nbsp;{{ paragraphs }}段
                 </a-doption>

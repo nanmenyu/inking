@@ -33,7 +33,7 @@
                 cursor: pointer;
 
                 &:hover {
-                    color: #165dff;
+                    color: rgb(var(--primary-6));
                 }
             }
         }
@@ -56,7 +56,7 @@
                 cursor: pointer;
 
                 &:hover {
-                    color: #165dff;
+                    color: rgb(var(--primary-6));
                 }
             }
 
@@ -69,7 +69,7 @@
                 cursor: pointer;
 
                 &:hover {
-                    color: #165dff;
+                    color: rgb(var(--primary-6));
                 }
             }
         }
@@ -95,7 +95,7 @@
                 transition: color 0.2s;
 
                 &:hover {
-                    color: #165dff;
+                    color: rgb(var(--primary-6));
                 }
             }
         }

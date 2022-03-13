@@ -616,7 +616,7 @@ const selectedArr: Array<string> = reactive([]), deCheckedArr: Array<string> = r
 // 点击添加
 const addTag = () => {
     let i = tagData['qidian'].indexOf(inputTag.value);
-    if (i !== -1) deCheckedArr[i] = '#165dff';
+    if (i !== -1) deCheckedArr[i] = 'rgb(var(--primary-6))';
     selectedArr.push(inputTag.value);
     inputTag.value = '';
 }
@@ -643,7 +643,7 @@ const checkTag = (tname: string) => {
     }
     deCheckedArr.splice(0, deCheckedArr.length); // 清空数组 
     selectedArr.forEach(item => {
-        deCheckedArr[tagData['qidian'].indexOf(item)] = '#165dff';
+        deCheckedArr[tagData['qidian'].indexOf(item)] = 'rgb(var(--primary-6))';
     })
 }
 // 修改确定, 添加修改至数据库

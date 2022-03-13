@@ -62,7 +62,7 @@
             </a-dropdown>
         </div>
         <div class="bar-midd">
-            <a-tooltip content="反转顺序" position="top" background-color="#3491fa" mini>
+            <a-tooltip content="反转顺序" position="top" mini>
                 <a-button type="text" @click="reOrder" :disabled="disableSort">
                     <icon-swap />
                 </a-button>
@@ -74,25 +74,19 @@
                 <template #content>
                     <a-doption
                         @click="toSort('1')"
-                        :style="sortType === '1' ? 'background-color: #3491fa;color: #fff;' : ''"
+                        :style="sortType === '1' ? 'background-color: rgb(var(--my-secondary-6));color: #fff;' : ''"
                     >按创建时间排序</a-doption>
                     <a-doption
                         @click="toSort('2')"
-                        :style="sortType === '2' ? 'background-color: #3491fa;color: #fff;' : ''"
+                        :style="sortType === '2' ? 'background-color: rgb(var(--my-secondary-6));color: #fff;' : ''"
                     >按编辑时间排序</a-doption>
                     <a-doption
                         @click="toSort('3')"
-                        :style="sortType === '3' ? 'background-color: #3491fa;color: #fff;' : ''"
+                        :style="sortType === '3' ? 'background-color: rgb(var(--my-secondary-6));color: #fff;' : ''"
                     >按名称排序</a-doption>
                 </template>
             </a-dropdown>
-            <a-tooltip
-                v-if="!showAllDelete"
-                content="切换显示"
-                position="top"
-                background-color="#3491fa"
-                mini
-            >
+            <a-tooltip v-if="!showAllDelete" content="切换显示" position="top" mini>
                 <a-button
                     v-if="displyBlock"
                     :disabled="disableSwitch"
@@ -105,7 +99,7 @@
                     <icon-unordered-list />
                 </a-button>
             </a-tooltip>
-            <a-tooltip v-else content="全部清空" position="top" background-color="#3491fa" mini>
+            <a-tooltip v-else content="全部清空" position="top" mini>
                 <a-button @click="deleteAll" type="text">
                     <icon-delete />
                 </a-button>

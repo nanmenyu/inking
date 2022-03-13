@@ -120,11 +120,11 @@
                                     cursor: pointer;
 
                                     &:active {
-                                        color: #165dff;
+                                        color: rgb(var(--primary-6));
                                     }
 
                                     &:hover {
-                                        color: #165dff;
+                                        color: rgb(var(--primary-6));
                                     }
                                 }
                             }

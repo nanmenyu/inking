@@ -529,7 +529,7 @@ defineExpose({
     bottom: 0;
     width: 100%;
     height: 1px;
-    background-color: #3491fa;
+    background-color: rgb(var(--my-secondary-6));
     visibility: hidden;
     transform: scaleX(0);
     transition: all 0.3s ease-in-out 0s;

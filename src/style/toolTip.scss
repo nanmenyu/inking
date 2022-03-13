@@ -5,8 +5,7 @@
      align-items: center;
      user-select: none;
      font-size: 15px;
-     //  background-color: #fff;
-     background-color: var(--theme-bg-color);
+     background-color: #fff;
      border-radius: 4px;
      padding: 8px 6px 6px 6px;
      margin-bottom: 7px;
@@ -58,7 +57,7 @@
              }
 
              &:hover {
-                 color: #165dff;
+                 color: rgb(var(--primary-6));
              }
 
              &:active {
@@ -178,7 +177,7 @@
          user-select: none;
 
          &:hover {
-             color: #165dff;
+             color: rgb(var(--primary-6));
          }
      }
 
@@ -200,7 +199,7 @@
      .basicmean {
          dl {
              .pinyin {
-                 color: #165dff;
+                 color: rgb(var(--primary-6));
              }
 
              dd {
@@ -262,7 +261,7 @@
          }
 
          .dicpy {
-             color: #165dff;
+             color: rgb(var(--primary-6));
          }
 
          .diczx1 {
@@ -278,7 +277,7 @@
      }
 
      .encs {
-         color: #165dff;
+         color: rgb(var(--primary-6));
      }
 
      .gnr {

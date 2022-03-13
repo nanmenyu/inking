@@ -6,6 +6,34 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "12084434",
+      "name": "回收站",
+      "font_class": "huishouzhan",
+      "unicode": "e7f2",
+      "unicode_decimal": 59378
+    },
+    {
+      "icon_id": "7811212",
+      "name": "faxian",
+      "font_class": "faxian",
+      "unicode": "e609",
+      "unicode_decimal": 58889
+    },
+    {
+      "icon_id": "7933560",
+      "name": "书",
+      "font_class": "shu",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
+      "icon_id": "7933561",
+      "name": "写作",
+      "font_class": "xiezuo",
+      "unicode": "e60f",
+      "unicode_decimal": 58895
+    },
+    {
       "icon_id": "5114016",
       "name": "电脑",
       "font_class": "diannao--",

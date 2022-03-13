@@ -5,9 +5,9 @@
             <div class="user-info">
                 <a-avatar
                     :size="45"
-                    :trigger-icon-style="{ color: '#3491FA' }"
+                    :trigger-icon-style="{ color: 'rgb(var(--my-secondary-6))' }"
                     :auto-fix-font-size="false"
-                    :style="{ backgroundColor: '#168CFF' }"
+                    :style="{ backgroundColor: 'rgb(var(--my-secondary-6))' }"
                 >
                     南
                     <template #trigger-icon>
@@ -23,41 +23,45 @@
         </div>
         <div class="sidebar-model">
             <router-link to="/">
-                <a-button :type="choicedType === 't1' ? 'text' : 'secondary'" class="btn">
-                    <icon-edit />&nbsp;写作模式
+                <a-button :type="choicedType === 't1' ? 'primary' : 'text'" class="btn">
+                    <span class="iconfont">&#xe60f;</span>
+                    <span>写作模式</span>
                 </a-button>
             </router-link>
             <router-link to="readingMode">
-                <a-button :type="choicedType === 't2' ? 'text' : 'secondary'" class="btn">
-                    <icon-book />&nbsp;阅读模式
+                <a-button :type="choicedType === 't2' ? 'primary' : 'text'" class="btn">
+                    <span class="iconfont">&#xe60e;</span>
+                    <span>阅读模式</span>
                 </a-button>
             </router-link>
             <router-link to="bigworld">
-                <a-button :type="choicedType === 't3' ? 'text' : 'secondary'" class="btn">
-                    <icon-sun />&nbsp;大世界
+                <a-button :type="choicedType === 't3' ? 'primary' : 'text'" class="btn">
+                    <span class="iconfont">&#xe609;</span>
+                    <span>大世界</span>
                 </a-button>
             </router-link>
             <router-link to="recycle">
-                <a-button :type="choicedType === 't4' ? 'text' : 'secondary'" class="btn">
-                    <icon-delete />&nbsp;回收站
+                <a-button :type="choicedType === 't4' ? 'primary' : 'text'" class="btn">
+                    <span class="iconfont">&#xe7f2;</span>
+                    <span>回收站</span>
                 </a-button>
             </router-link>
         </div>
         <div class="sidebar-bottom">
             <div>
-                <a-tooltip background-color="#3491fa" content="设置">
+                <a-tooltip content="设置">
                     <icon-settings />
                 </a-tooltip>
             </div>
             <div>
-                <a-tooltip background-color="#3491fa" content="消息通知">
+                <a-tooltip content="消息通知">
                     <a-badge :count="9" :offset="[2, -2]">
                         <icon-notification />
                     </a-badge>
                 </a-tooltip>
             </div>
             <div>
-                <a-tooltip background-color="#3491fa" content="帮助反馈">
+                <a-tooltip content="帮助反馈">
                     <icon-question-circle />
                 </a-tooltip>
             </div>
@@ -92,6 +96,11 @@ switch (route.path) {
         break;
 }
 
+const secondaryColor = ref('');
+onMounted(() => {
+    // 获得副主题色
+    secondaryColor.value = getComputedStyle(document.body).getPropertyValue('--my-secondary-6');
+})
 onMounted(() => {
     //需要获取到element,所以是onMounted的Hook
     let myChart = echarts.init(uChart.value);
@@ -141,7 +150,7 @@ onMounted(() => {
                 ]
             }
         ],
-        color: ['#3491fa', '#ccc']
+        color: [`rgb(${secondaryColor.value})`, '#ccc']
     });
     window.onresize = function () {//自适应大小
         myChart.resize();

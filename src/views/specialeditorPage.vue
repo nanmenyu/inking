@@ -85,7 +85,7 @@ defineExpose({ switchModular });
     text-align: right;
     line-height: 30px;
     color: #fff;
-    background-color: #165dff;
+    background-color: rgb(var(--primary-6));
     cursor: pointer;
     border-radius: 0 8px 8px 0;
 }

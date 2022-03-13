@@ -309,14 +309,14 @@
             </div>
             <div class="slider-setting">
                 <a-space direction="vertical" size="large">
-                    <a-tooltip content="时间线设置" mini position="left" background-color="#3491FA">
+                    <a-tooltip content="时间线设置" mini position="left">
                         <a-button @click="showLineSetting('set')" type="primary" size="small">
                             <template #icon>
                                 <icon-settings />
                             </template>设置
                         </a-button>
                     </a-tooltip>
-                    <a-tooltip content="添加时间线" mini position="left" background-color="#3491FA">
+                    <a-tooltip content="添加时间线" mini position="left">
                         <a-button @click="showLineSetting('add')" type="primary" size="small">
                             <template #icon>
                                 <icon-plus />
@@ -324,7 +324,7 @@
                         </a-button>
                     </a-tooltip>
 
-                    <a-tooltip content="删除时间线" mini position="left" background-color="#3491FA">
+                    <a-tooltip content="删除时间线" mini position="left">
                         <a-button @click="deleteTimeLine" type="primary" size="small">
                             <template #icon>
                                 <icon-delete />

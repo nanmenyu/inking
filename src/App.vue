@@ -66,8 +66,9 @@ db.opus.where(':id').between(1, Infinity).toArray().then(value => {
 }).then(() => {
   mainStore.contrastTotalNumber_thisTime = mainStore.TotalNumber_thisTime = mainStore.baseTotalNumber_thisTime = cout_temp;
 })
+
 onMounted(() => {
-  document.body.className = 'light-mode';
+  // document.body.setAttribute('arco-theme', 'dark')
 })
 </script>
 

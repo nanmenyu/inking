@@ -3,7 +3,7 @@
     width: 100%;
 
     .headerBtn {
-        background-color: #fff;
+        background-color: rgb(var(--my-bg-color));
 
         &:hover {
             background-color: #f2f3f5;
@@ -54,10 +54,11 @@
         margin-bottom: 5px;
         border-bottom: 1px solid #e5e6eb;
         color: #fff;
-        background-color: #3491fa;
+        background-color: rgb(var(--my-secondary-6));
 
         &:hover {
-            background-color: #276dbc;
+            background-color: rgb(var(--my-secondary-5));
+            ;
         }
 
         span {

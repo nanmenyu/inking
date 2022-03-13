@@ -27,11 +27,7 @@
                 @click="choiceItem(i)"
                 class="card"
             >
-                <a-tooltip
-                    :content="timeFormat(item.discardTime as number)"
-                    background-color="#3491fa"
-                    mini
-                >
+                <a-tooltip :content="timeFormat(item.discardTime as number)" mini>
                     <a-avatar
                         :style="{ backgroundColor: avatarColor(item.reTime), fontSize: '18px' }"
                         shape="square"

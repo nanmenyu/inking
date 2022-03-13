@@ -1,12 +1,12 @@
 .arco-tooltip[trigger-placement="top"] {
     .arco-tooltip-content {
-        background-color: #3491fa;
+        background-color: rgb(var(--my-secondary-6));
         padding: 4px 6px;
         transform: translateY(-10px);
     }
 
     .arco-tooltip-popup-arrow {
-        background-color: #3491fa;
+        background-color: rgb(var(--my-secondary-6));
         transform: translate(-50%, -6px) rotate(45deg) !important;
     }
 }
@@ -15,11 +15,11 @@
 
 
     .arco-slider-track::before {
-        background-color: #165dff;
+        background-color: rgb(var(--primary-6));
     }
 
     .arco-slider-ticks .arco-slider-tick {
-        background-color: #165dff;
+        background-color: rgb(var(--primary-6));
     }
 
     .arco-slider-btn::after {
@@ -27,7 +27,7 @@
         background: hsla(0, 0%, 100%, .11);
         box-shadow: 0 0 7px 0 hsl(0deg 0% 100% / 50%);
         border-radius: 4px;
-        border: 2px solid #165dff;
+        border: 2px solid rgb(var(--primary-6));
         position: absolute;
         cursor: pointer;
         margin-top: -10px;
@@ -41,7 +41,7 @@
             border-radius: 0;
             border-left: 5px solid transparent;
             border-right: 5px solid transparent;
-            border-bottom: 10px solid #165dff;
+            border-bottom: 10px solid rgb(var(--primary-6));
             transform: rotateZ(90deg);
         }
 

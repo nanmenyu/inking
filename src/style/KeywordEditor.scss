@@ -275,7 +275,7 @@
             height: 30px;
             width: 100%;
             line-height: 30px;
-            color: #165dff;
+            color: rgb(var(--primary-6));
             cursor: pointer;
 
             &:hover {
@@ -365,7 +365,7 @@
 }
 
 .li-checked {
-    color: #165dff;
+    color: rgb(var(--primary-6));
     background-color: #f2f3f5;
 }
 
@@ -516,7 +516,7 @@
         border-right: 0;
         border-radius: 4px 0 0 4px;
         color: #fff;
-        background-color: #3491fa;
+        background-color: rgb(var(--my-secondary-6));
         overflow: hidden;
         cursor: pointer;
 
