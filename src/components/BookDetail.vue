@@ -311,13 +311,6 @@
                         <span>创建时间: {{ standTime(booksData.data.createTime, true) }}</span>
                         <span>最近修改: {{ showTimePipe(booksData.data.updateTime) }}</span>
                     </div>
-                    <div class="control">
-                        <a-popconfirm @ok="deleteOpus" content="确定将该作品移入回收站?" type="warning">
-                            <button>删除</button>
-                        </a-popconfirm>
-                        <button @click="showWastepaperBasket">废纸篓</button>
-                        <button @click="continueWriting">继续写作</button>
-                    </div>
                 </div>
                 <div class="right">
                     <div class="right-inside">
@@ -325,49 +318,51 @@
                             <a-button
                                 @click="toSpecialEditor('plot')"
                                 type="primary"
+                                class="iconfont"
                                 style="width: 100px;border-radius: 8px;"
-                            >
-                                <img :src="svg_plot" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;剧&nbsp;情
-                            </a-button>
+                            >&#xe620;&nbsp;&nbsp;剧&nbsp;&nbsp;情</a-button>
                         </div>
                         <div class="right-inside-item">
                             <a-button
                                 @click="toSpecialEditor('keyword')"
                                 type="primary"
+                                class="iconfont"
                                 style="width: 100px;border-radius: 8px;"
-                            >
-                                <img :src="svg_keyword" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;关键词
-                            </a-button>
+                            >&#xe669;&nbsp;&nbsp;关键词</a-button>
                         </div>
                         <div class="right-inside-item">
                             <a-button
                                 @click="toSpecialEditor('diagram')"
                                 type="primary"
+                                class="iconfont"
                                 style="width: 100px;border-radius: 8px;"
-                            >
-                                <img :src="svg_diagram" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;关系图
-                            </a-button>
+                            >&#xe703;&nbsp;&nbsp;关系图</a-button>
                         </div>
                         <div class="right-inside-item">
                             <a-button
                                 @click="toSpecialEditor('timeline')"
                                 type="primary"
+                                class="iconfont"
                                 style="width: 100px;border-radius: 8px;"
-                            >
-                                <img :src="svg_timeline" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;时间线
-                            </a-button>
+                            >&#xe6b5;&nbsp;&nbsp;时间线</a-button>
                         </div>
                         <div class="right-inside-item">
                             <a-button
                                 @click="toSpecialEditor('map')"
                                 type="primary"
+                                class="iconfont"
                                 style="width: 100px;border-radius: 8px;"
-                            >
-                                <img :src="svg_map" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;地&nbsp;图
-                            </a-button>
+                            >&#xe655;&nbsp;&nbsp;地&nbsp;&nbsp;图</a-button>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="control">
+                <a-popconfirm @ok="deleteOpus" content="确定将该作品移入回收站?" type="warning">
+                    <button>删除</button>
+                </a-popconfirm>
+                <button @click="showWastepaperBasket">废纸篓</button>
+                <button @click="continueWriting">继续写作</button>
             </div>
             <div class="cata">
                 <h2>

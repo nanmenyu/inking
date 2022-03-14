@@ -15,7 +15,7 @@
         margin: 0 auto;
         background-color: var(--color-bg-3);
         border-radius: 4px;
-        transform: translateY(-50%);
+        transform: translateY(-75%);
         animation: spredModify 0.3s ease-out;
 
         .box-header {
@@ -26,7 +26,7 @@
             height: 40px;
             padding: 0 20px;
             border-bottom: 1px solid var(--color-neutral-3);
-            color: var(--color-text-1);
+
 
             .header-title {
                 display: flex;
@@ -36,6 +36,7 @@
                 margin-top: 4px;
                 font-weight: 500;
                 font-size: 16px;
+                color: var(--color-text-1);
             }
 
             .header-close {
@@ -44,6 +45,7 @@
                 font-size: 12px;
                 cursor: pointer;
                 border-radius: 50%;
+                color: var(--color-text-1);
 
                 &:hover {
                     background-color: var(--color-fill-2);

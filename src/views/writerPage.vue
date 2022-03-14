@@ -329,7 +329,7 @@
                     @moving="resizeBoxMoving"
                     :directions="['left']"
                     class="sider-right"
-                    style="width: 100px;"
+                    style="width: 450px;"
                 >
                     <!-- 伸缩杆 -->
                     <template #resize-trigger="{ direction }">
@@ -354,7 +354,7 @@
                             <div
                                 @contextmenu="showFloatToolMenu($event)"
                                 ref="buttonTrigger"
-                                :class="`button-trigger ${popupVisible ? 'button-trigger-active' : ''}`"
+                                class="button-trigger"
                                 :style="floatToolPosition[position]"
                                 title="右键更换位置"
                             >
@@ -380,7 +380,7 @@
                             <template #content>
                                 <a-menu
                                     mode="popButton"
-                                    :tooltipProps="{ position: 'left', backgroundColor: '#3491fa', mini: true }"
+                                    :tooltipProps="{ position: 'left', mini: true }"
                                     showCollapseButton
                                     @menu-item-click="choicePopButton"
                                 >
@@ -793,10 +793,10 @@ const addNewVolume = () => {
 /*----右侧滚动条的样式设置----*/
 const scrollbarColor = ref('#ccc');
 const showScroll = () => {
-    scrollbarColor.value = '#ccc';
+    scrollbarColor.value = 'var(--scrollbar-color)';
 }
 const closeScroll = () => {
-    scrollbarColor.value = '#f5f5f5';
+    scrollbarColor.value = 'rgb(var(--my-bg-color))';
 }
 // 调整小窗口大小
 const resizeBoxMoving = () => {
@@ -1080,19 +1080,19 @@ onUnmounted(() => {
 ::-webkit-scrollbar-track {
     box-shadow: none;
     border-radius: 0;
-    border-left: 1px dashed #e5e6eb;
+    border-left: 1px dashed var(--color-border);
 }
 ::-webkit-scrollbar-thumb {
     background-color: v-bind(scrollbarColor);
     border-radius: 0;
-    border-left: 1px dashed #e5e6eb;
+    border-left: 1px dashed var(--color-border);
 }
 .trigger::-webkit-scrollbar-thumb {
     background-color: rgb(var(--my-bg2-color));
 }
 .layout-write :deep(.arco-layout-header) {
     height: 35px;
-    border-bottom: 2px dashed #e5e6eb;
+    border-bottom: 2px dashed var(--color-border);
     background-color: rgb(var(--my-bg-color));
 }
 

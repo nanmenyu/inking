@@ -5,12 +5,12 @@
      align-items: center;
      user-select: none;
      font-size: 15px;
-     background-color: rgb(var(--my-bg-color));
+     background-color: var(--color-bg-popup);
      border-radius: 4px;
      padding: 8px 6px 6px 6px;
      margin-bottom: 7px;
-     border: 1px solid #e5e6eb;
-     box-shadow: 0 2px 8px #00000026;
+     border: 1px solid var(--color-fill-3);
+     box-shadow: 0 4px 10px #0000001a;
      transform: translateX(-50%);
 
      &::before {
@@ -23,7 +23,7 @@
          bottom: -6px;
          border: 5px solid transparent;
          border-bottom-width: 0;
-         border-top-color: silver;
+         border-top-color: var(--color-bg-popup);
      }
 
      &::after {
@@ -36,7 +36,7 @@
          bottom: -4.5px;
          border: 5px solid transparent;
          border-bottom-width: 0;
-         border-top-color: white;
+         border-top-color: var(--color-bg-popup);
      }
 
      .rightTip {
@@ -96,9 +96,9 @@
  .contentTip {
      box-sizing: border-box;
      padding: 4px 0;
-     border: 1px solid #e5e6eb;
+     border: 1px solid var(--color-fill-3);
      border-radius: 4px;
-     background-color: rgb(var(--my-bg-color));
+     background-color: var(--color-bg-popup);
      box-shadow: 0 4px 10px #0000001a;
  }
 
@@ -106,7 +106,7 @@
      box-sizing: border-box;
      width: 100%;
      padding: 0 12px;
-     color: #1d2129;
+     color: var(--color-text-1);
      font-size: 14px;
      line-height: 36px;
      text-align: center;
@@ -118,7 +118,7 @@
  }
 
  .contentTip .group-name:hover {
-     background-color: rgb(var(--my-bg2-color));
+     background-color: var(--color-fill-2);
  }
 
  .word-loading,
@@ -126,6 +126,10 @@
      position: relative;
      width: 100px;
      height: 100px;
+ }
+
+ body[arco-theme="dark"] .word-notfound .word-notfound-img {
+     background: url(../assets/svg/wordnotfound_dark.svg) no-repeat;
  }
 
  .word-notfound {
@@ -156,11 +160,13 @@
      left: calc(50% - 25px);
  }
 
- .word-loading {
-     .word-loading-img {
-         background: url(../assets/svg/loading.svg) no-repeat;
-         animation: loading 1s linear infinite;
-     }
+ body[arco-theme="dark"] .word-loading .word-loading-img {
+     background: url(../assets/svg/loading_dark.svg) no-repeat;
+ }
+
+ .word-loading .word-loading-img {
+     background: url(../assets/svg/loading.svg) no-repeat;
+     animation: loading 1s linear infinite;
  }
 
  .word-search {

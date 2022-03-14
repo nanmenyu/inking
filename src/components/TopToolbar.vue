@@ -9,13 +9,29 @@
         <!-- 文字设置 -->
         <a-dropdown trigger="hover">
             <a-button class="headerBtn" style="padding-right: 0;">
-                <img :src="writtenwords" style="transform: translateY(2px)" />&nbsp;&nbsp;文字
+                <svg
+                    viewBox="0 0 1024 1024"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                >
+                    <path id="1" />
+                    <path id="2" />
+                </svg>&nbsp;&nbsp;文字
                 <icon-down />
             </a-button>
             <template #content>
                 <a-trigger position="right" :popup-translate="[5, 16]">
                     <a-doption>
-                        <img :src="fontSizeIcon" style="transform: translateY(2px)" />&nbsp;&nbsp;字体大小
+                        <svg
+                            viewBox="0 0 1024 1024"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                        >
+                            <path id="3" />
+                            <path id="4" />
+                        </svg>&nbsp;&nbsp;字体大小
                     </a-doption>
                     <template #content>
                         <a-space class="trigger" style="padding:0 10px;">
@@ -44,7 +60,14 @@
                 </a-trigger>
                 <a-trigger position="right" :popup-translate="[5, 0]">
                     <a-doption>
-                        <img :src="lineHeighIcon" style="transform: translateY(2px)" />&nbsp;&nbsp;字符行高
+                        <svg
+                            viewBox="0 0 1024 1024"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                        >
+                            <path id="5" />
+                        </svg>&nbsp;&nbsp;字符行高
                     </a-doption>
                     <template #content>
                         <a-space class="trigger" style="padding:0 10px;">
@@ -74,7 +97,15 @@
                 </a-trigger>
                 <a-trigger position="right" :popup-translate="[5, 0]">
                     <a-doption>
-                        <img :src="fontWeightIcon" style="transform: translateY(2px)" />&nbsp;&nbsp;文字粗细
+                        <svg
+                            viewBox="0 0 1024 1024"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                        >
+                            <path id="6" />
+                            <path id="7" />
+                        </svg>&nbsp;&nbsp;文字粗细
                     </a-doption>
                     <template #content>
                         <a-space class="trigger" style="padding: 10px 20px;">
@@ -92,7 +123,14 @@
                 </a-trigger>
                 <a-trigger position="right" :popup-translate="[5, 0]">
                     <a-doption>
-                        <img :src="fontFamilyIcon" style="transform: translateY(2px)" />&nbsp;&nbsp;选择字体
+                        <svg
+                            viewBox="0 0 1024 1024"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                        >
+                            <path id="8" />
+                        </svg>&nbsp;&nbsp;选择字体
                     </a-doption>
                     <template #content>
                         <ul class="trigger typeface" @scroll="fontlistScroll" ref="fontListNode">
@@ -109,17 +147,18 @@
                 </a-trigger>
                 <a-trigger position="right" :popup-translate="[5, 0]">
                     <a-doption>
-                        <img :src="fontColorIcon" style="transform: translateY(2px)" />&nbsp;&nbsp;文字颜色
+                        <svg
+                            viewBox="0 0 1024 1024"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                        >
+                            <path id="9" />
+                            <path id="10" />
+                        </svg>&nbsp;&nbsp;文字颜色
                     </a-doption>
                     <template #content>
                         <div class="trigger" style="margin-top: 24px;">
-                            <!-- <color-picker
-                                :isWidget="true"
-                                :format="'hex'"
-                                v-model:pureColor="fontColor"
-                                v-model:gradientColor="gradientColor"
-                                @pureColorChange="getColor"
-                            />-->
                             <Sketch v-model="fontColor" />
                         </div>
                     </template>
@@ -129,13 +168,30 @@
         <!-- 段落设置 -->
         <a-dropdown trigger="hover">
             <a-button class="headerBtn" style="padding-right: 0;">
-                <img :src="paragraphIcon" style="transform: translateY(2px)" />&nbsp;&nbsp;段落
+                <svg
+                    viewBox="0 0 1024 1024"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                >
+                    <path id="11" />
+                    <path id="12" />
+                </svg>&nbsp;&nbsp;段落
                 <icon-down />
             </a-button>
             <template #content>
                 <a-trigger position="right" :popup-translate="[5, 16]">
                     <a-doption>
-                        <img :src="segSpacingIcon" style="transform: translateY(2px)" />&nbsp;&nbsp;段落间距
+                        <svg
+                            viewBox="0 0 1024 1024"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                        >
+                            <path id="13" />
+                            <path id="14" />
+                            <path id="15" />
+                        </svg>&nbsp;&nbsp;段落间距
                     </a-doption>
                     <template #content>
                         <a-space class="trigger" style="padding: 0 10px;">
@@ -163,7 +219,14 @@
                 </a-trigger>
                 <a-trigger position="right" :popup-translate="[5, 30]">
                     <a-doption>
-                        <img :src="textIndentIcon" style="transform: translateY(2px)" />&nbsp;&nbsp;段前缩进
+                        <svg
+                            viewBox="0 0 1024 1024"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                        >
+                            <path id="16" />
+                        </svg>&nbsp;&nbsp;段前缩进
                     </a-doption>
                     <template #content>
                         <a-space class="trigger" style="padding: 10px 20px;">
@@ -187,7 +250,14 @@
                     :popup-translate="[5, 0]"
                 >
                     <a-doption>
-                        <img :src="paraFocusIcon" style="transform: translateY(2px)" />&nbsp;&nbsp;段落聚焦
+                        <svg
+                            viewBox="0 0 1024 1024"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                        >
+                            <path id="17" />
+                        </svg>&nbsp;&nbsp;段落聚焦
                     </a-doption>
                     <template #content>
                         <a-space class="trigger" style="padding: 10px 20px;">
@@ -207,7 +277,15 @@
         <!-- 其它设置 -->
         <a-dropdown trigger="hover">
             <a-button class="headerBtn">
-                <img :src="otherSettingIcon" style="transform: translateY(2px)" />&nbsp;&nbsp;其它
+                <svg
+                    viewBox="0 0 1024 1024"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                >
+                    <path id="18" />
+                    <path id="19" />
+                </svg>&nbsp;&nbsp;其它
                 <icon-down />
             </a-button>
             <template #content>

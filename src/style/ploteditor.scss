@@ -38,7 +38,7 @@
             details {
                 width: 100%;
                 overflow: hidden;
-                border-bottom: 1px solid #e2e8f0;
+                border-bottom: 1px solid var(--color-border);
 
                 &:last-of-type {
                     border-bottom: none;
@@ -48,6 +48,7 @@
                     padding: 1em;
                     cursor: pointer;
                     line-height: 1.25em;
+                    color: var(--color-text-1);
 
                     .summary-title {
                         user-select: none;
@@ -63,7 +64,7 @@
                 ul {
                     padding: 0;
                     margin: 0;
-                    border-top: 1px solid #e2e8f0;
+                    border-top: 2px solid var(--color-border);
                     transition: all 0.3s;
 
                     li {
@@ -81,7 +82,7 @@
                             // width: 1em;
                             height: calc(100% - 20px);
                             width: 2px;
-                            background-color: #bdc5cc;
+                            background-color: var(--color-border);
                             border-radius: 50%;
                             // border-left: 2px solid #bdc5cc;
                         }
@@ -93,6 +94,7 @@
 
                             span {
                                 display: block;
+                                color: var(--color-text-1);
 
                                 &:before {
                                     opacity: 0.3;

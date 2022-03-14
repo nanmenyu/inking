@@ -17,8 +17,9 @@
         justify-content: center;
         width: 40px;
         height: 40px;
-        color: rgb(var(--my-bg-color));
+        color: var(--color-white);
         background-color: rgb(var(--primary-6));
+        box-shadow: 0 4px 10px rgb(0 0 0 / 10%);
         font-size: 14px;
         border-radius: 50%;
         cursor: pointer;
@@ -61,12 +62,6 @@
             }
         }
     }
-
-    .button-trigger-active {
-        background-color: rgb(var(--my-bg-color));
-        color: #86909c;
-        box-shadow: 0 4px 10px rgb(0 0 0 / 10%);
-    }
 }
 
 
@@ -80,10 +75,10 @@
     margin-right: 0px !important;
     margin-bottom: -4px;
     border-radius: 4px;
+    transition: background-color 0.3s ease-in-out;
 
     &:hover {
-        background-color: #ddd;
-        transition: background-color 0.3s;
+        background-color: var(--color-secondary-hover);
     }
 }
 
@@ -100,7 +95,7 @@
 
 .resizebox-demo-line {
     flex: 1;
-    background-color: #e5e6eb;
+    background-color: var(--color-border);
 }
 
 .resizebox-demo-vertical {
@@ -109,11 +104,11 @@
     .resizebox-demo-line {
         width: 2px;
         height: 100%;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s ease-in-out;
 
         &:hover {
             width: 6px;
-            background-color: #ccc;
+            background-color: var(--color-secondary-hover);
         }
     }
 }
@@ -121,11 +116,11 @@
 .resizebox-demo-horizontal {
     .resizebox-demo-line {
         height: 2px;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s ease-in-out;
 
         &:hover {
             width: 6px;
-            background-color: #ccc;
+            background-color: var(--color-secondary-hover);
         }
     }
 }
@@ -133,16 +128,11 @@
 .topBtn {
     width: 100%;
     height: 30px;
-    color: #4e5969;
-    background-color: rgb(var(--my-bg-color));
     border: none;
+    color: var(--color-text-2);
+    background-color: var(--color-menu-light-bg);
     cursor: pointer;
     overflow: hidden;
-    // span {
-    //     line-height: 30px;
-    //     margin-left: 10px;
-    //     margin-top: -5px;
-    // }
 
     &:hover {
         background-color: rgb(var(--my-bg2-color));
@@ -166,7 +156,7 @@
         margin: 0 auto;
         background-color: rgb(var(--my-bg-color));
         border-radius: 4px;
-        transform: translateY(-50%);
+        transform: translateY(-75%);
     }
 }
 
@@ -313,7 +303,7 @@ path[p-id="1550"] {
     // height: auto;
     // height: 300px;
     padding: 10px;
-    background-color: rgb(var(--my-bg-color));
+    background-color: var(--color-bg-popup);
     border-radius: 6px;
     box-shadow: 0 2px 8px #00000026;
 
@@ -324,8 +314,8 @@ path[p-id="1550"] {
         left: 0;
         width: 8px;
         height: 8px;
-        background-color: rgb(var(--my-bg-color));
-        border: 1px solid #e5e6eb;
+        background-color: var(--color-bg-popup);
+        // border: 1px solid #e5e6eb;
         border-top: none;
         border-right: none;
         transform: translate(-50%, -50%) rotate(45deg);
@@ -338,7 +328,7 @@ path[p-id="1550"] {
         width: 100%;
         height: 60px;
         padding-bottom: 4px;
-        border-bottom: 2px solid rgb(var(--my-bg2-color));
+        border-bottom: 1px solid rgb(var(--my-bg2-color));
 
         .head-left {
             width: 60px;
@@ -349,7 +339,7 @@ path[p-id="1550"] {
                 width: 100%;
                 height: 100%;
                 border-radius: 8px;
-                box-shadow: 0 2px 8px #ccc;
+                box-shadow: 0 4px 10px #0000001a;
             }
         }
 

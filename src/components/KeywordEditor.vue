@@ -67,7 +67,14 @@
                             </a-button>
                             <a-button @click="setTemplate" size="small" title="模板">
                                 <template #icon>
-                                    <img :src="templateicon" />
+                                    <svg
+                                        viewBox="0 0 1024 1024"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="20"
+                                        height="20"
+                                    >
+                                        <path id="1" />
+                                    </svg>
                                 </template>
                             </a-button>
                         </a-space>
@@ -133,7 +140,10 @@
                                     placeholder="修改关键词"
                                 />
                             </h3>
-                            <div v-show="!modifyItemDesc" style="padding-right: 10px;">
+                            <div
+                                v-show="!modifyItemDesc"
+                                style="padding-right: 10px;color: var(--color-text-1);"
+                            >
                                 <a-button
                                     @mousedown.stop="modifyItem('itemDesc', true)"
                                     size="mini"
@@ -480,7 +490,7 @@
                 <a-space size="large">
                     <a-button
                         @click="saveTemplateData"
-                        :disabled="form.template.title.length === 0"
+                        :disabled="templateData.value.length === 0 || form.template.title.length === 0"
                         type="primary"
                     >保存</a-button>
                 </a-space>
@@ -510,10 +520,7 @@
             <img :src="item.cardImg === '' ? defaultImg : item.cardImg" class="card__image" />
             <div class="card__overlay">
                 <div class="card__header">
-                    <svg class="card__arc" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M 40 80 c 22 0 40 -22 40 -40 v 40 Z" fill="#fff" />
-                    </svg>
-                    <h3 class="card__title">{{ item.kGroupName }}</h3>
+                    <h2 class="card__title">{{ item.kGroupName }}</h2>
                 </div>
                 <p class="card__description">{{ item.kGroupDesc }}</p>
             </div>

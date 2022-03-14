@@ -30,7 +30,6 @@
                 <a-tooltip :content="timeFormat(item.discardTime as number)" mini>
                     <a-avatar
                         :style="{ backgroundColor: avatarColor(item.reTime), fontSize: '18px' }"
-                        shape="square"
                     >{{ item.reTime }}天</a-avatar>
                 </a-tooltip>
                 <span :title="item.title">{{ item.title }}</span>

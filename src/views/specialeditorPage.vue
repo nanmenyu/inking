@@ -53,17 +53,13 @@ defineExpose({ switchModular });
 
 .content-box :deep(.arco-layout-header) {
     height: 35px;
-    border-bottom: 2px dashed #e5e6eb;
+    border-bottom: 2px dashed var(--color-border);
     background-color: rgb(var(--my-bg-color));
 }
 
 .content-box :deep(.arco-layout-header) h2 {
     margin: 0;
     color: rgb(var(--primary-6));
-}
-
-.content-box :deep(.arco-layout-content) {
-    /* overflow-y: scroll; */
 }
 
 .bar-left {

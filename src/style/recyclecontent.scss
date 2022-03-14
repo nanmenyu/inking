@@ -23,8 +23,9 @@
     width: 200px;
     height: 60px;
     margin: 10px 20px;
-    border: 1px solid #e5e6eb;
+    border: 1px solid var(--color-neutral-3);
     border-radius: 4px;
+    background-color: var(--color-bg-2);
 
     &:hover {
         box-shadow: 0 4px 10px #0000001a;

@@ -6,6 +6,41 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "1454735",
+      "name": "关键字标签",
+      "font_class": "guanjianzibiaoqian",
+      "unicode": "e669",
+      "unicode_decimal": 58985
+    },
+    {
+      "icon_id": "5651340",
+      "name": "地图",
+      "font_class": "ditu",
+      "unicode": "e655",
+      "unicode_decimal": 58965
+    },
+    {
+      "icon_id": "16588063",
+      "name": "隶属关系",
+      "font_class": "lishuguanxi",
+      "unicode": "e703",
+      "unicode_decimal": 59139
+    },
+    {
+      "icon_id": "21835194",
+      "name": "笔记",
+      "font_class": "biji",
+      "unicode": "e620",
+      "unicode_decimal": 58912
+    },
+    {
+      "icon_id": "26072186",
+      "name": "时间轴",
+      "font_class": "timeline-fill",
+      "unicode": "e6b5",
+      "unicode_decimal": 59061
+    },
+    {
       "icon_id": "12084434",
       "name": "回收站",
       "font_class": "huishouzhan",

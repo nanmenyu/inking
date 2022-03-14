@@ -2,18 +2,20 @@
 <template>
     <div class="header">
         <div class="left">
-            <div @click="routerLink" class="left-btn" title="跳转到首页">
-                <svg
-                    class="icon"
-                    viewBox="0 0 1024 1024"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="25"
-                    height="25"
-                >
-                    <path p-id="16750" />
-                    <path p-id="16751" />
-                </svg>
-                <span>HOME</span>
+            <div class="left-btn" title="跳转到首页">
+                <router-link to="/">
+                    <svg
+                        class="icon"
+                        viewBox="0 0 1024 1024"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="25"
+                        height="25"
+                    >
+                        <path p-id="16750" />
+                        <path p-id="16751" />
+                    </svg>
+                    <span>HOME</span>
+                </router-link>
             </div>
             <button
                 @click="back"
@@ -70,11 +72,11 @@ const mainStore = useMainStore();
 
 /*----控制页面的前进后退----*/
 const backDisable = ref(false), forwardDisable = ref(false);
-const routerLink = () => {
-    router.push({
-        path: '/'
-    })
-}
+// const routerLink = () => {
+//     router.push({
+//         path: '/'
+//     })
+// }
 const back = () => {
     router.go(-1);
 }
@@ -106,12 +108,12 @@ function closeWin() {
 }
 
 // 通过route修改样式
-const route = useRoute(), leftColor = ref('#f2f3f5'), leftShadow = ref('');
+const route = useRoute(), leftColor = ref(''), leftShadow = ref('');
 if (route.path === '/writer' || route.path === '/specialEditor' || route.path === '/reading' || route.path === '/pdfreading') {
-    // leftColor.value = 'rgb(var(--my-bg-color))';
+    leftColor.value = 'rgb(var(--my-bg-color))';
     leftShadow.value = 'none';
 } else {
-    // leftColor.value = '#fff';
+    leftColor.value = 'var(--color-menu-light-bg)';
     leftShadow.value = '0 4px 10px #0000001a'
 }
 
@@ -128,6 +130,10 @@ if (route.path === '/writer' || route.path === '/specialEditor' || route.path ==
     -webkit-app-region: drag;
     user-select: none;
 }
+body[arco-theme="dark"] .header .left {
+    background-color: v-bind(leftColor);
+}
+
 .header .left {
     position: relative;
     display: flex;
@@ -140,11 +146,12 @@ if (route.path === '/writer' || route.path === '/specialEditor' || route.path ==
     border-radius: 0 40px 0 0;
     box-shadow: v-bind(leftShadow);
 }
-.left .left-btn {
+.left .left-btn a {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100px;
+    text-decoration: none;
     /* margin-top: 10px; */
     cursor: pointer;
     /* 避免拖动属性导致不能点击 */

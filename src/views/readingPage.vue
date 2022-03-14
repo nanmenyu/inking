@@ -107,7 +107,7 @@ onMounted(() => {
 }
 .layout-read :deep(.arco-layout-header) {
     height: 35px;
-    border-bottom: 2px dashed #e5e6eb;
+    border-bottom: 2px dashed var(--color-border);
     background-color: rgb(var(--my-bg-color));
 }
 

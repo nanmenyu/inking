@@ -58,8 +58,8 @@
                 <a-input-search
                     v-model="searchData"
                     @input="showPrefix"
-                    @search="toSearch"
-                    @press-enter="toSearch"
+                    @search="toSearch(null)"
+                    @press-enter="toSearch(null)"
                     size="small"
                     :style="{ width: '300px' }"
                     :placeholder="`从${searchSiteName}上搜索`"
@@ -283,7 +283,7 @@ const searchSite = ref('https://www.baidu.com/s?wd='), searchSiteName = ref('百
 setSiteList(defaultSiteKey);
 const changeSearch = (key: string) => {
     setSiteList(key)
-    toSearch();
+    toSearch(null);
     localStorage.setItem('searchSiteKey', key);
 }
 function setSiteList(key: string) {
@@ -306,7 +306,7 @@ const showPrefix = () => {
         prefixType.value = 1;
     }
 }
-const toSearch = (str?: string) => {
+const toSearch = (str: null | string) => {
     if (str) searchData.value = str;
     if (searchData.value !== '') {
         const reg = new RegExp('^https{0,1}://');
