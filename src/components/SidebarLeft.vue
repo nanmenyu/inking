@@ -96,10 +96,12 @@ switch (route.path) {
         break;
 }
 
-const secondaryColor = ref('');
+const secondaryColor = ref(''), fontColor = ref('');
 onMounted(() => {
     // 获得副主题色
     secondaryColor.value = getComputedStyle(document.body).getPropertyValue('--my-secondary-6');
+    // 获取文字色
+    fontColor.value = getComputedStyle(document.body).getPropertyValue('--color-text-1');
 })
 onMounted(() => {
     //需要获取到element,所以是onMounted的Hook
@@ -114,13 +116,17 @@ onMounted(() => {
                 fontSize: 14,
                 fontWeight: 'normal',
                 fontFamily: 'Microsoft YaHei',
-                lineHeight: 21
+                lineHeight: 21,
+                color: `${fontColor.value}`
             }
         }],
         legend: {
             bottom: '5%',
             itemStyle: {
                 borderWidth: 0
+            },
+            textStyle: {
+                color: `${fontColor.value}`
             },
             itemWidth: 14
         },

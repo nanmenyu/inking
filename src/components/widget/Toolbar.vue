@@ -74,15 +74,15 @@
                 <template #content>
                     <a-doption
                         @click="toSort('1')"
-                        :style="sortType === '1' ? 'background-color: rgb(var(--my-secondary-6));color: #fff;' : ''"
+                        :style="sortType === '1' ? 'background-color: rgb(var(--my-secondary-6));color: var(--color-text-1);' : ''"
                     >按创建时间排序</a-doption>
                     <a-doption
                         @click="toSort('2')"
-                        :style="sortType === '2' ? 'background-color: rgb(var(--my-secondary-6));color: #fff;' : ''"
+                        :style="sortType === '2' ? 'background-color: rgb(var(--my-secondary-6));color: var(--color-text-1);' : ''"
                     >按编辑时间排序</a-doption>
                     <a-doption
                         @click="toSort('3')"
-                        :style="sortType === '3' ? 'background-color: rgb(var(--my-secondary-6));color: #fff;' : ''"
+                        :style="sortType === '3' ? 'background-color: rgb(var(--my-secondary-6));color: var(--color-text-1);' : ''"
                     >按名称排序</a-doption>
                 </template>
             </a-dropdown>

@@ -48,18 +48,18 @@ defineExpose({ switchModular });
     width: 100vw;
     height: calc(100vh - 40px);
     border-radius: 4px 0 0 0;
-    background-color: #fff;
+    background-color: rgb(var(--my-bg-color));
 }
 
 .content-box :deep(.arco-layout-header) {
     height: 35px;
     border-bottom: 2px dashed #e5e6eb;
-    background-color: #fff;
+    background-color: rgb(var(--my-bg-color));
 }
 
 .content-box :deep(.arco-layout-header) h2 {
     margin: 0;
-    color: #105177;
+    color: rgb(var(--primary-6));
 }
 
 .content-box :deep(.arco-layout-content) {
@@ -84,7 +84,7 @@ defineExpose({ switchModular });
     font-size: 14px;
     text-align: right;
     line-height: 30px;
-    color: #fff;
+    color: rgb(var(--my-bg-color));
     background-color: rgb(var(--primary-6));
     cursor: pointer;
     border-radius: 0 8px 8px 0;

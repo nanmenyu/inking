@@ -6,14 +6,14 @@
         background-color: rgb(var(--my-bg-color));
 
         &:hover {
-            background-color: #f2f3f5;
+            background-color: rgb(var(--my-bg2-color));
         }
     }
 }
 
 /* 触发弹出框基本样式  */
 .trigger {
-    background-color: #fff;
+    background-color: rgb(var(--my-bg-color));
     border-radius: 4px;
     box-shadow: 2px 4px 10px #0000001a;
 }
@@ -46,14 +46,14 @@
         white-space: nowrap;
 
         &:hover {
-            background-color: #f2f3f5;
+            background-color: rgb(var(--my-bg2-color));
         }
     }
 
     .typeface-head {
         margin-bottom: 5px;
         border-bottom: 1px solid #e5e6eb;
-        color: #fff;
+        color: rgb(var(--my-bg-color));
         background-color: rgb(var(--my-secondary-6));
 
         &:hover {

@@ -70,7 +70,7 @@ defineExpose({
     padding: 4px 0;
     border: 1px solid #e5e6eb;
     border-radius: 4px;
-    background-color: #fff;
+    background-color: rgb(var(--my-bg-color));
     box-shadow: 0 4px 10px #0000001a;
     #contextmenu-item {
         box-sizing: border-box;
@@ -86,7 +86,7 @@ defineExpose({
         white-space: nowrap;
         text-overflow: ellipsis;
         &:hover {
-            background-color: #f2f3f5;
+            background-color: rgb(var(--my-bg2-color));
         }
     }
 }

@@ -38,7 +38,7 @@
                 <div v-else>
                     <div v-if="!item.checked" class="btn-unchecked"></div>
                     <div v-else class="btn-checked">
-                        <icon-check style="color: #fff;font-size: 18px;" />
+                        <icon-check style="color: rgb(var(--my-bg-color));font-size: 18px;" />
                     </div>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-body {
+@mixin theme {
     // 自定义组件库颜色 
     --primary-1: 165, 192, 192; // 去饱和85% + 加亮度25%
     --primary-2: 138, 192, 191; // 去饱和70% + 加亮度25%
@@ -9,12 +9,25 @@ body {
     --primary-7: 9, 128, 126; // 加暗度25%
     --primary-8: 7, 103, 101; // 加暗度40%
     --primary-9: 5, 77, 76; // 加暗度55%
-    --primary-9: 4, 51, 50; // 加暗度70%
-
+    --primary-10: 4, 51, 50; // 加暗度70%
     --my-secondary-5: 83, 133, 254; // 加亮度25%
     --my-secondary-6: 83, 133, 253; // 初始副色------------------------
+}
 
-    --my-bg-color: 255, 255, 255;
+body {
+    @include theme;
+    --my-bg-color: 255, 255, 255; // 白色背景色
+    --my-bg2-color: 242, 243, 245; // 次白色背景
+    // --my-font-color: 51, 51, 51; //#333黑色基础字体
+    --scrollbar-color: #e5e6eb;
+}
+
+body[arco-theme='dark'] {
+    @include theme;
+    --my-bg-color: 23, 23, 26; // 黑色背景色
+    --my-bg2-color: 35, 35, 36; // 次黑色背景
+    // --my-font-color: 255, 255, 255; //#fff白色基础字体
+    --scrollbar-color: #444;
 }
 
 body {
@@ -31,12 +44,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #e5e6eb;
+    background-color: var(--scrollbar-color);
     border-radius: 5px;
 }
 
 ::selection {
-    color: #fff;
+    color: rgb(var(--my-bg-color));
     background-color: #ef7a82;
 }
 

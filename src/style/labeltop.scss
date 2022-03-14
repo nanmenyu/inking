@@ -31,13 +31,7 @@
 #seleId::before,
 #seleId .lock {
     color: rgb(var(--primary-6));
-    // background-color: #fff;
 }
-
-// #seleId span::after,
-// #seleId span::before {
-//     background-color: #f5f5f5;
-// }
 
 .add-label {
     font-size: 20px;
@@ -45,6 +39,6 @@
     transform: translateY(12.5%);
 
     &:active {
-        color: #fff;
+        color: rgb(var(--my-bg-color));
     }
 }

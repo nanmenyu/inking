@@ -6,7 +6,7 @@
      height: calc(100vh - 75px);
      margin-top: 35px;
      border-radius: 4px 0 0 0;
-     background-color: #fff;
+     background-color: rgb(var(--my-bg-color));
  }
 
  #rich-text-editor {

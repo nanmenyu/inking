@@ -103,18 +103,18 @@ onMounted(() => {
     border-left: 1px dashed #e5e6eb;
 }
 .trigger::-webkit-scrollbar-thumb {
-    background-color: #f2f3f5;
+    background-color: rgb(var(--my-bg2-color));
 }
 .layout-read :deep(.arco-layout-header) {
     height: 35px;
     border-bottom: 2px dashed #e5e6eb;
-    background-color: #fff;
+    background-color: rgb(var(--my-bg-color));
 }
 
 .layout-read :deep(.arco-layout-content) {
     height: calc(100vh - 85px);
     min-width: 20px;
-    background-color: #fff;
+    background-color: rgb(var(--my-bg-color));
     overflow-y: scroll;
 }
 </style>

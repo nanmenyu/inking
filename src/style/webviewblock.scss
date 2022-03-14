@@ -141,7 +141,7 @@
         transition: background-color 0.3s ease-in-out;
 
         &:hover {
-            background-color: #f2f3f5;
+            background-color: rgb(var(--my-bg2-color));
         }
 
         .delete-btn {
@@ -154,7 +154,7 @@
             border-radius: 100%;
             cursor: pointer;
             opacity: 0;
-            background-color: #f2f3f5;
+            background-color: rgb(var(--my-bg2-color));
             transition: opacity 0.4s ease-in-out;
             transition: background-color 0.2s ease-in-out;
 

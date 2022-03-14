@@ -21,9 +21,7 @@
                 :class="backDisable ? 'disabled' : 'not-disabled'"
                 title="后退"
             >
-                <icon-left
-                    :style="{ fontSize: '16px', marginLeft: '-2px', color: backDisable ? '#babcbe' : '#5f6368' }"
-                />
+                <icon-left :style="{ fontSize: '16px', marginLeft: '-2px' }" />
             </button>
             <button
                 @click="forward"
@@ -31,9 +29,7 @@
                 :class="forwardDisable ? 'disabled' : 'not-disabled'"
                 title="前进"
             >
-                <icon-right
-                    :style="{ fontSize: '16px', marginRight: '-2px', color: forwardDisable ? '#babcbe' : '#5f6368' }"
-                />
+                <icon-right :style="{ fontSize: '16px', marginRight: '-2px' }" />
             </button>
         </div>
         <div class="middle">
@@ -112,10 +108,10 @@ function closeWin() {
 // 通过route修改样式
 const route = useRoute(), leftColor = ref('#f2f3f5'), leftShadow = ref('');
 if (route.path === '/writer' || route.path === '/specialEditor' || route.path === '/reading' || route.path === '/pdfreading') {
-    leftColor.value = 'rgb(var(--my-bg-color))';
+    // leftColor.value = 'rgb(var(--my-bg-color))';
     leftShadow.value = 'none';
 } else {
-    leftColor.value = '#fff';
+    // leftColor.value = '#fff';
     leftShadow.value = '0 4px 10px #0000001a'
 }
 
@@ -139,7 +135,8 @@ if (route.path === '/writer' || route.path === '/specialEditor' || route.path ==
     align-items: center;
     width: 250px;
     line-height: 40px;
-    background-color: v-bind(leftColor);
+    /* background-color: v-bind(leftColor); */
+    background-color: rgb(var(--my-bg-color));
     border-radius: 0 40px 0 0;
     box-shadow: v-bind(leftShadow);
 }
@@ -170,16 +167,22 @@ if (route.path === '/writer' || route.path === '/specialEditor' || route.path ==
     /* transform: translateY(-7.5px); */
     border: none;
     border-radius: 50%;
-    background-color: #ebebeb;
+    /* background-color: #ebebeb; */
+    background-color: var(--color-secondary);
     /* 避免拖动属性导致不能点击 */
     -webkit-app-region: no-drag;
 }
+
+.not-disabled {
+    color: var(--color-text-1);
+}
 .not-disabled:hover {
-    background-color: #ddd;
+    background-color: var(--color-secondary-hover);
     cursor: pointer;
 }
 .disabled {
     cursor: not-allowed;
+    color: var(--color-text-4);
 }
 
 .header .middle {
@@ -205,7 +208,7 @@ if (route.path === '/writer' || route.path === '/specialEditor' || route.path ==
     cursor: pointer;
 }
 .header .right span:hover {
-    background-color: #f2f3f5;
+    background-color: rgb(var(--my-bg2-color));
 }
 .left .left-btn:hover path[p-id="16750"] {
     fill: rgb(var(--primary-5));

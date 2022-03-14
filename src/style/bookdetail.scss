@@ -21,6 +21,12 @@
     justify-content: center;
     width: 95%;
     margin: 0 auto;
+    // box-shadow: 0 2px 8px #00000026;
+    border-radius: 10px;
+}
+
+body[arco-theme='dark'] .detail-content .left img {
+    box-shadow: 0 2px 8px #444;
 }
 
 .left {
@@ -32,7 +38,8 @@
         width: 204px;
         height: 272px;
         border-radius: 6px;
-        box-shadow: 6px 6px 6px #aaa;
+        box-shadow: 6px 6px 6px #ccc;
+        // box-shadow: 0 2px 8px #00000026;
         cursor: pointer;
         transition: opacity 0.3s;
 
@@ -66,22 +73,23 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 45px;
-    height: 300px;
-}
-
-.right-inside {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
     width: 120px;
-    height: 100%;
-    overflow: hidden;
-}
+    height: 250px;
 
-.right-inside-item {
-    width: 100%;
-    height: 30px;
+    .right-inside {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 120px;
+        height: 100%;
+        overflow: hidden;
+
+        .right-inside-item {
+            width: 100%;
+            height: 30px;
+        }
+
+    }
 }
 
 .title {
@@ -89,7 +97,7 @@
     padding: 0 6px;
     font-size: 24px;
     font-weight: bold;
-    color: #105177;
+    color: rgb(var(--primary-6));
 
     span {
         &:first-child {
@@ -100,7 +108,7 @@
             margin-left: 14px;
             font-size: 14px;
             font-weight: normal;
-            color: #333;
+            color: var(--color-text-1);
         }
     }
 }
@@ -126,7 +134,7 @@
     align-items: center;
     justify-content: space-between;
     padding-right: 25px;
-    color: #105177;
+    color: rgb(var(--primary-6));
 }
 
 .control {
@@ -181,21 +189,22 @@
     height: 300px;
     margin: 0 auto;
     text-align: left;
+    border-top: 1px solid var(--color-text-2);
 
     h2 {
         text-indent: 2em;
         padding-bottom: 4px;
-        border-bottom: 1px solid #3f5a93;
-        color: #3f5a93;
+        // border-bottom: 1px solid var(--color-text-2);
+        color: var(--color-text-2);
+        font-weight: lighter;
 
         .btn {
             float: right;
             padding: 0;
             border: 0;
             font-size: 18px;
-            font-weight: bold;
-            color: #3f5a93;
-            background-color: #fff;
+            color: var(--color-text-2);
+            background-color: rgb(var(--my-bg-color));
             cursor: pointer;
 
             &:hover {
@@ -210,9 +219,9 @@
     padding: 15px;
     font-size: 16px;
     text-indent: 2em;
-    font-weight: bold;
-    border-bottom: 1px solid #e5e6eb;
-    color: #3f5a93;
+    // font-weight: lighter;
+    // border-bottom: 1px solid #e5e6eb;
+    color: var(--color-text-2);
     cursor: pointer;
 
     &:hover {
@@ -228,13 +237,12 @@
         border: 0;
         margin-right: 10px;
         font-size: 14px;
-        font-weight: bold;
-        color: #3f5a93;
-        background-color: #fff;
+        color: var(--color-text-2);
+        background-color: rgb(var(--my-bg-color));
         cursor: pointer;
 
         &:hover {
-            background-color: #f2f3f5;
+            background-color: rgb(var(--my-bg2-color));
             color: rgb(var(--primary-6));
         }
     }
@@ -242,7 +250,7 @@
 
 .volume:hover,
 .volume:hover .btn2 {
-    background-color: #f2f3f5;
+    background-color: rgb(var(--my-bg2-color));
 }
 
 .chapter {
@@ -259,7 +267,7 @@
         width: 33%;
         height: 46px;
         text-indent: 2em;
-        border-bottom: 1px solid #e5e6eb;
+        // border-bottom: 1px solid #e5e6eb;
         text-decoration: none;
 
         .btn {
@@ -270,13 +278,12 @@
             padding: 2px;
             border: 0;
             font-size: 12px;
-            font-weight: bold;
-            color: #3f5a93;
-            background-color: #fff;
+            color: var(--color-text-2);
+            background-color: rgb(var(--my-bg-color));
             cursor: pointer;
 
             &:hover {
-                background-color: #f2f3f5;
+                background-color: rgb(var(--my-bg2-color));
                 color: rgb(var(--primary-6));
             }
         }
@@ -298,7 +305,7 @@
             &:first-child {
                 margin-top: 8px;
                 margin-left: 4px;
-                color: #333;
+                color: var(--color-text-2);
             }
 
             &:nth-child(2) {
@@ -313,7 +320,7 @@
 
 .chapter ._chapter:hover,
 .chapter ._chapter:hover .btn {
-    background-color: #f2f3f5;
+    background-color: rgb(var(--my-bg2-color));
 }
 
 /* 控制图标90度旋转/复位 */
@@ -335,26 +342,19 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--color-mask-bg);
 
     .wastepaperBasket {
         position: relative;
         top: 50%;
         width: 550px;
         margin: 0 auto;
-        background-color: #fff;
+        background-color: var(--color-bg-3);
         border-radius: 4px;
         transform: translateY(-50%);
         width: 400px;
     }
 
-    // .box {
-    //     animation: spredModify 0.3s ease-out;
-    // }
-
-    // .wastepaperBasket {
-    //     width: 400px;
-    // }
 }
 
 /* 裁剪图片框不能加动画 */
@@ -365,7 +365,8 @@
     width: 100%;
     height: 40px;
     padding: 0 20px;
-    border-bottom: 1px solid #e5e6eb;
+    // border-bottom: 1px solid var(--color-neutral-3);
+    color: var(--color-text-1);
 
     .header-title {
         display: flex;
@@ -373,7 +374,6 @@
         align-items: center;
         justify-content: center;
         margin-top: 4px;
-        color: #1d2129;
         font-weight: 500;
         font-size: 16px;
     }
@@ -381,13 +381,12 @@
     .header-close {
         margin-left: -12px;
         padding: 4px;
-        color: #1d2129;
         font-size: 12px;
         cursor: pointer;
         border-radius: 50%;
 
         &:hover {
-            background-color: #f2f3f5;
+            background-color: var(--color-fill-2);
         }
     }
 }
@@ -396,7 +395,7 @@
     position: relative;
     max-height: 300px;
     padding: 24px 20px;
-    color: #1d2129;
+    color: var(--color-text-1);
     font-size: 14px;
     overflow-y: scroll;
 
@@ -413,7 +412,7 @@
             padding: 5px;
 
             &:hover {
-                background-color: #f2f3f5;
+                background-color: rgb(var(--my-bg2-color));
             }
 
             .left {
@@ -446,31 +445,19 @@
     }
 }
 
-// .box-body-replace {
-//     img {
-//         display: block;
-//         max-width: 100%;
-//     }
-// }
-
 .box-footer {
     box-sizing: border-box;
     width: 100%;
     padding: 16px 20px;
     text-align: right;
-    border-top: 1px solid #e5e6eb;
-    box-sizing: border-box;
-    width: 100%;
-    padding: 16px 20px;
-    text-align: right;
-    border-top: 1px solid #e5e6eb;
+    border-top: 1px solid var(--color-neutral-3);
 }
 
 .btn-unchecked {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background-color: #f2f3f5;
+    background-color: rgb(var(--my-bg2-color));
     border: 2px solid #e5e6eb;
     cursor: pointer;
 }
@@ -488,7 +475,7 @@
     margin: 0 auto;
     padding: 0 40px;
     padding-bottom: 20px;
-    background-color: #f7f8fa;
+    // background-color: #f7f8fa;
     overflow: hidden;
 
     h4 {
@@ -512,35 +499,6 @@
     transition-duration: .3s;
     height: 0;
     visibility: hidden;
-}
-
-/* 右侧栏展开关闭效果 */
-.spread {
-    animation: spread 0.3s ease-in-out forwards;
-}
-
-.-spread {
-    animation: -spread 0.3s ease-in-out forwards;
-}
-
-@keyframes spread {
-    from {
-        width: 45px;
-    }
-
-    to {
-        width: 120px;
-    }
-}
-
-@keyframes -spread {
-    from {
-        width: 120px;
-    }
-
-    to {
-        width: 45px;
-    }
 }
 
 @keyframes spredModify {

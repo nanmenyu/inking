@@ -6,7 +6,7 @@
     height: calc(100vh - 75px);
     margin-top: 35px;
     border-radius: 4px 0 0 0;
-    background-color: #fff;
+    background-color: rgb(var(--my-bg-color));
 }
 
 .discard-item {
@@ -49,7 +49,7 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background-color: #f2f3f5;
+    background-color: rgb(var(--my-bg2-color));
     border: 2px solid #e5e6eb;
 }
 

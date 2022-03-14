@@ -14,11 +14,11 @@
         transition: background-color 0.3s;
 
         &:hover {
-            background-color: #f2f3f5;
+            background-color: rgb(var(--my-bg2-color));
         }
     }
 }
 
 .checked {
-    background-color: #f2f3f5;
+    background-color: rgb(var(--my-bg2-color));
 }

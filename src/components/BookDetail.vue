@@ -218,7 +218,9 @@
                         <div class="right">
                             <div v-if="!item.checked" class="btn-unchecked"></div>
                             <div v-else class="btn-checked">
-                                <icon-check style="color: #fff;font-size: 18px;" />
+                                <icon-check
+                                    style="color: rgb(var(--my-bg-color));font-size: 18px;"
+                                />
                             </div>
                         </div>
                     </li>
@@ -317,18 +319,13 @@
                         <button @click="continueWriting">继续写作</button>
                     </div>
                 </div>
-                <div
-                    class="right"
-                    @mouseenter.stop="rightExpansion(true)"
-                    @mouseleave.stop="rightExpansion(false)"
-                    :class="isspread === null ? '' : isspread ? 'spread' : '-spread'"
-                >
+                <div class="right">
                     <div class="right-inside">
                         <div class="right-inside-item">
                             <a-button
                                 @click="toSpecialEditor('plot')"
                                 type="primary"
-                                style="width: 120px;text-align: left;border-radius: 8px 0 0 8px;"
+                                style="width: 100px;border-radius: 8px;"
                             >
                                 <img :src="svg_plot" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;剧&nbsp;情
                             </a-button>
@@ -337,7 +334,7 @@
                             <a-button
                                 @click="toSpecialEditor('keyword')"
                                 type="primary"
-                                style="width: 120px;text-align: left;border-radius: 8px 0 0 8px;"
+                                style="width: 100px;border-radius: 8px;"
                             >
                                 <img :src="svg_keyword" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;关键词
                             </a-button>
@@ -346,7 +343,7 @@
                             <a-button
                                 @click="toSpecialEditor('diagram')"
                                 type="primary"
-                                style="width: 120px;text-align: left;border-radius: 8px 0 0 8px;"
+                                style="width: 100px;border-radius: 8px;"
                             >
                                 <img :src="svg_diagram" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;关系图
                             </a-button>
@@ -355,7 +352,7 @@
                             <a-button
                                 @click="toSpecialEditor('timeline')"
                                 type="primary"
-                                style="width: 120px;text-align: left;border-radius: 8px 0 0 8px;"
+                                style="width: 100px;border-radius: 8px;"
                             >
                                 <img :src="svg_timeline" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;时间线
                             </a-button>
@@ -364,7 +361,7 @@
                             <a-button
                                 @click="toSpecialEditor('map')"
                                 type="primary"
-                                style="width: 120px;text-align: left;border-radius: 8px 0 0 8px;"
+                                style="width: 100px;border-radius: 8px;"
                             >
                                 <img :src="svg_map" style="vertical-align:bottom" />&nbsp;&nbsp;&nbsp;地&nbsp;图
                             </a-button>
@@ -564,10 +561,6 @@ const booksData: { data: Userdb } = reactive({
 });
 const totalNumber = ref(0);
 loadData();
-
-const rightExpansion = (spread: boolean) => {
-    isspread.value = spread;
-}
 
 /*----旋转动画----*/
 const rotated = ref([false, false, false, false]);

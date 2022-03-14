@@ -268,7 +268,7 @@
                             <li
                                 v-for="item in paperSize"
                                 :key="item.type"
-                                :style="item.now ? 'background-color: rgb(var(--my-secondary-6));color: #fff;' : ''"
+                                :style="item.now ? 'background-color: rgb(var(--my-secondary-6));color: rgb(var(--my-bg-color));' : ''"
                                 @click="changePaperSize(item.type)"
                             >
                                 <span>{{ item.type }}</span>
