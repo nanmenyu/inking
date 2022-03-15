@@ -153,36 +153,13 @@
         <!-- 主题按钮 -->
         <div class="theme" title="更换主题">
             <a-trigger trigger="click" :popup-translate="[-130, -10]">
-                <a-button class="btn" type="primary" shape="circle">
-                    <icon-skin />
+                <a-button class="btn" type="primary">
+                    <template #icon>
+                        <icon-skin />
+                    </template>
                 </a-button>
                 <template #content>
-                    <div class="theme-container">
-                        <div class="theme-container-header">
-                            <a-radio-group
-                                :model-value="themeMode"
-                                @change="changeTheme"
-                                type="button"
-                                style="border-radius: 10px;"
-                            >
-                                <a-radio style="border-radius: 10px;" value="daytime">
-                                    <icon-sun-fill />白昼模式
-                                </a-radio>
-                                <a-radio style="border-radius: 10px;" value="night">
-                                    <icon-moon-fill />黑夜模式
-                                </a-radio>
-                            </a-radio-group>
-                        </div>
-                        <div class="theme-container-body">
-                            <ul>
-                                <li
-                                    v-for="color in themeColor"
-                                    :style="`background-color:${color}`"
-                                ></li>
-                                <!-- <li class="li-checked"></li> -->
-                            </ul>
-                        </div>
-                    </div>
+                    <ThemeContainer></ThemeContainer>
                 </template>
             </a-trigger>
         </div>
@@ -195,6 +172,7 @@ import { IconSkin, IconCheck, IconSunFill, IconMoonFill } from "@arco-design/web
 import Toolbar from "./widget/Toolbar.vue";
 import MultipleBar from "./widget/MultipleBar.vue";
 import PopupMenu from './widget/PopupMenu.vue';
+import ThemeContainer from './widget/ThemeContainer.vue';
 import { db } from "../db/db";
 import { useRouter } from 'vue-router';
 import timeFormat from "../utils/timeFormat";
@@ -202,8 +180,6 @@ import useCurrentInstance from '../utils/useCurrentInstance';
 import defaultCover from '../../public/static/img/default-cover.jpg';
 
 const { proxy } = useCurrentInstance();
-const themeColor = ['#0caba8', '#ff5c8a', '#ff7a9e', '#717ff9', '#4791eb', '#39afea',
-    '#6acc19', '#e2ab12', '#ff8f57', '#fd726d', '#fd544e', '#ccc'];
 
 /*----数据库取值----*/
 const booksData: { data: Array<Userdb> } = reactive({
@@ -498,17 +474,6 @@ const exportAll = () => {
         else if (data === 'err') $message.error('文件导出失败!');
     });
     isExportAll.value = false;
-}
-
-// 快速更换主题
-const themeMode = ref('daytime');
-const changeTheme = (value: 'daytime' | 'night') => {
-    themeMode.value = value;
-    if (value === 'daytime') {
-        document.body.removeAttribute('arco-theme');
-    } else if (value === 'night') {
-        document.body.setAttribute('arco-theme', 'dark');
-    }
 }
 
 function loadData() {

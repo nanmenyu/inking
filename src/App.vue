@@ -8,6 +8,7 @@
 <script setup lang="ts">
 import { useMainStore } from './store/index';
 import { db } from './db/db';
+import { setSharedColor, setupMainThemes, setupSecondaryThemes } from './hooks/setupThemes';
 import defaultBg from '../public/static/img/default-bg.jpg';
 import { onMounted } from 'vue';
 // import axios from 'axios';
@@ -67,8 +68,21 @@ db.opus.where(':id').between(1, Infinity).toArray().then(value => {
   mainStore.contrastTotalNumber_thisTime = mainStore.TotalNumber_thisTime = mainStore.baseTotalNumber_thisTime = cout_temp;
 })
 
+// 初始化主题
+let defaultTheme = {
+  mode: 'light',
+  mainColor: 'RGB(12,171,168)',
+  secondColor: 'RGB(83,133,253)'
+}
+const getUserTheme = localStorage.getItem('uTheme');
+if (getUserTheme === null) localStorage.setItem('uTheme', JSON.stringify(defaultTheme));
+else defaultTheme = JSON.parse(getUserTheme);
+
 onMounted(() => {
-  // document.body.setAttribute('arco-theme', 'dark');
+  if (defaultTheme.mode === 'dark') document.body.setAttribute('arco-theme', 'dark');
+  setupMainThemes(defaultTheme.mainColor);
+  setupSecondaryThemes(defaultTheme.secondColor);
+  setSharedColor(defaultTheme.mode);
 })
 </script>
 

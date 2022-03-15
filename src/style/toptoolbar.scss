@@ -27,7 +27,7 @@
     transform: translateY(62px);
 
     &::-webkit-scrollbar-thumb {
-        background-color: #e5e6eb;
+        background-color: var(--scrollbar-color);
     }
 
     &::-webkit-scrollbar-track {
@@ -41,20 +41,20 @@
         padding-left: 14px;
         padding-right: 20px;
         font-size: 16px;
+        color: var(--color-text-2);
         cursor: pointer;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
 
         &:hover {
-            background-color: rgb(var(--my-bg2-color));
+            background-color: var(--color-secondary-hover);
         }
     }
 
     .typeface-head {
         margin-bottom: 5px;
-        border-bottom: 1px solid #e5e6eb;
-        color: rgb(var(--my-bg-color));
+        color: #fff;
         background-color: rgb(var(--my-secondary-6));
 
         &:hover {

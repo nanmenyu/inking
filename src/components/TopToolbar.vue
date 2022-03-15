@@ -295,12 +295,6 @@
                     </a-doption>
                     <template #content>
                         <div class="trigger" style="margin-top: 76px;">
-                            <!-- <color-picker
-                                :isWidget="true"
-                                v-model:pureColor="bgcColor"
-                                v-model:gradientColor="gradientColor"
-                                @pureColorChange="getBgcColor"
-                            />-->
                             <Sketch v-model="bgcColor" />
                         </div>
                     </template>
@@ -346,7 +340,7 @@
                             <li
                                 v-for="item in paperSize"
                                 :key="item.type"
-                                :style="item.now ? 'background-color: rgb(var(--my-secondary-6));color: rgb(var(--my-bg-color));' : ''"
+                                :style="item.now ? 'background-color: rgb(var(--my-secondary-6));color: #fff' : ''"
                                 @click="changePaperSize(item.type)"
                             >
                                 <span>{{ item.type }}</span>

@@ -10,6 +10,7 @@
     --primary-8: 7, 103, 101; // 加暗度40%
     --primary-9: 5, 77, 76; // 加暗度55%
     --primary-10: 4, 51, 50; // 加暗度70%
+
     --my-secondary-5: 126, 163, 254; // 去饱和25%
     --my-secondary-6: 83, 133, 253; // 初始副色------------------------
 }
@@ -48,6 +49,10 @@ body {
     border-radius: 5px;
 }
 
+::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
 ::selection {
     color: rgb(var(--my-bg-color));
     background-color: #ef7a82;
@@ -83,8 +88,3 @@ body {
 .arco-tooltip-popup-arrow {
     background-color: rgb(var(--my-secondary-6));
 }
-
-/* 拾色器样式重置 */
-// .vc-hue-slider__bar {
-//     background: -webkit-linear-gradient(left, red 0%, yellow 16.66%, lime 33.33%, aqua 50%, blue 66.66%, fuchsia 83.33%, red 100%);
-// }

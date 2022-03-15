@@ -18,7 +18,7 @@ import { ref, onMounted, onBeforeUnmount, computed, watch, reactive, Ref, nextTi
 import ContextMenu from './widget/ContextMenu.vue'
 import getStyle from '../utils/getStyle';
 import { throttle } from '../utils/flowControl';
-import hexToRgba from '../utils/hexToRgba';
+import { hexToRgba } from '../utils/colorChange';
 import pureTextEditor from '../common/editor';
 import { setHighlightKeyword } from '../common/editor/syntax';
 import { db } from '../db/db';

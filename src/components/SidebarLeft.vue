@@ -70,17 +70,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import {
-    IconRight, IconBook, IconSun, IconDelete, IconEdit,
-    IconSettings, IconQuestionCircle, IconNotification
+    IconRight, IconEdit, IconSettings, IconQuestionCircle, IconNotification
 } from '@arco-design/web-vue/es/icon';
 import { useRoute } from 'vue-router';
+import { useThemeStore } from '../store';
 import * as echarts from 'echarts';
 
-const route = useRoute(),
-    choicedType = ref('t1'),
-    uChart = ref();
+const themeStore = useThemeStore();
+const route = useRoute(), choicedType = ref('t1'), uChart = ref();
 switch (route.path) {
     case '/':
         choicedType.value = 't1';
@@ -96,16 +95,37 @@ switch (route.path) {
         break;
 }
 
+// 检测主题变化修改颜色
 const secondaryColor = ref(''), fontColor = ref('');
+watch(computed(() => {
+    return themeStore.theme;
+}), () => {
+    secondaryColor.value = themeStore.my_secondary_6;
+    fontColor.value = themeStore.color_text_1;
+    setChart();
+})
+
+// 检测副颜色是否发生改变
+watch(computed(() => {
+    return themeStore.my_secondary_6;
+}), () => {
+    secondaryColor.value = themeStore.my_secondary_6;
+    fontColor.value = themeStore.color_text_1;
+    setChart();
+})
+
 onMounted(() => {
     // 获得副主题色
     secondaryColor.value = getComputedStyle(document.body).getPropertyValue('--my-secondary-6');
     // 获取文字色
     fontColor.value = getComputedStyle(document.body).getPropertyValue('--color-text-1');
-})
-onMounted(() => {
-    //需要获取到element,所以是onMounted的Hook
-    let myChart = echarts.init(uChart.value);
+    setChart();
+});
+
+function setChart() {
+    let myChart = echarts.getInstanceByDom(uChart.value);
+    if (myChart == null) myChart = echarts.init(uChart.value);
+
     // 绘制图表
     myChart.setOption({
         title: [{
@@ -159,9 +179,9 @@ onMounted(() => {
         color: [`rgb(${secondaryColor.value})`, '#ccc']
     });
     window.onresize = function () {//自适应大小
-        myChart.resize();
+        myChart!.resize();
     };
-});
+}
 
 </script>
 

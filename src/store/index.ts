@@ -1,7 +1,4 @@
 import { defineStore } from 'pinia';
-// import { setHighlightKeyword } from '../common/editor/syntax';
-
-// export const use
 
 export const useMainStore = defineStore('mainStore', {
     state: () => ({
@@ -35,4 +32,13 @@ export const useMainStore = defineStore('mainStore', {
             }
         }
     },
+})
+
+export const useThemeStore = defineStore('themeStore', {
+    state: () => ({
+        theme: '', // 黑暗或亮色主题
+        primary_6: '',
+        color_text_1: '',
+        my_secondary_6: ''
+    })
 })

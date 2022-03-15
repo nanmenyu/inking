@@ -7,8 +7,11 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { useThemeStore } from '../store';
 import * as echarts from 'echarts';
 import { db } from '../db/db';
+
+const themeStore = useThemeStore();
 
 interface CateData {
     name: string;
