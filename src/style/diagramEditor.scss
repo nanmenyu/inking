@@ -12,15 +12,17 @@
     width: 150px;
     height: 40px;
     line-height: 40px;
-    background-color: rgba(255, 255, 255, .8);
+    color: var(--color-text-2);
+    background-color: var(--color-secondary);
     border-radius: 10px;
     box-shadow: 0 4px 4px #0000001a;
     transition: background-color .1s linear;
-    cursor: pointer;
     user-select: none;
     font-size: 16px;
+    cursor: pointer;
 
     &:hover {
-        background-color: rgb(var(--my-bg2-color));
+        color: var(--color-text-3);
+        background-color: var(--color-secondary-hover);
     }
 }

@@ -20,7 +20,6 @@
     .timeline__section {
         box-sizing: border-box;
         position: relative;
-        // float: left;
         width: 35%;
         height: 100%;
         min-width: 300px;
@@ -40,13 +39,15 @@
             width: 100%;
 
             .timeline-item {
-                cursor: pointer;
-                transition: background-color 0.2s;
                 border-radius: 8px;
-                padding: 0 8px 4px 8px;
+                padding: 0 0 4px 8px;
+                margin-right: 8px;
+                border: 1px solid var(--color-border);
+                transition: background-color 0.2s;
+                cursor: pointer;
 
                 &:hover {
-                    background-color: rgb(var(--my-bg2-color));
+                    background-color: var(--color-secondary-hover);
                 }
 
                 h2 {
@@ -58,72 +59,14 @@
                 }
             }
 
+            .checked {
+                border: 1px solid rgb(var(--primary-6));
+            }
+
         }
-
-        // .timeline__nav {
-        //     position: absolute;
-        //     z-index: 9;
-        //     left: -20px;
-        //     top: calc(50% + 20px);
-        //     width: 55px;
-        //     max-height: 300px;
-        //     padding: 0 10px;
-        //     transform: translateY(-50%);
-        //     user-select: none;
-        //     text-align: left;
-        //     overflow: hidden;
-
-        //     ul {
-        //         width: 100%;
-        //         padding: 0;
-        //         margin: 0;
-        //         list-style-type: none;
-        //         transition: all 0.4s ease-in;
-
-        //         li {
-        //             margin: 15px 0;
-        //             padding-left: 0;
-        //             list-style-type: none;
-        //             border-bottom: 1px dotted rgba(0, 0, 0, 0.3);
-        //             cursor: pointer;
-
-        //             &:first-child {
-        //                 margin-top: 0;
-        //             }
-
-        //             &:last-child {
-        //                 margin-bottom: 0;
-        //             }
-
-        //             a {
-        //                 text-decoration: none;
-        //                 font-size: 16px;
-        //                 color: #bfc1c3;
-        //                 font-style: italic;
-
-        //                 &.active {
-        //                     font-size: 18px;
-        //                     font-weight: bold;
-        //                     color: #f53f3f;
-        //                     border-bottom: 1px dotted transparent;
-        //                     transform: scale(1.2);
-        //                     transition: color 0.2s ease-out;
-        //                 }
-        //             }
-        //         }
-        //     }
-
-        //     .active {
-        //         font-weight: bold;
-        //         color: #f94125;
-        //         border-bottom: 1px dotted transparent;
-        //         transform: scale(1.2);
-        //     }
-        // }
     }
 
     .timeline__block {
-        // float: left;
         width: calc(100% - 40%);
         height: 100%;
         min-width: 400px;
@@ -196,8 +139,15 @@
     }
 }
 
-.checked {
-    background-color: rgb(var(--my-bg2-color));
+.a-card {
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 10px;
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+        transform: translateY(-4px);
+    }
 }
 
 .rotate {

@@ -101,10 +101,6 @@
                 <div class="title">{{ item.title }}</div>
                 <div class="date">{{ standTime(item.updateTime, true) }}</div>
             </div>
-            <!-- 主题按钮 -->
-            <a-button class="theme" type="primary" shape="circle">
-                <icon-skin />
-            </a-button>
         </div>
         <div v-else class="content">
             <a-empty
@@ -153,16 +149,49 @@
                     </a-dropdown>
                 </div>
             </ul>
-            <a-button class="theme" type="primary" shape="circle">
-                <icon-skin />
-            </a-button>
+        </div>
+        <!-- 主题按钮 -->
+        <div class="theme" title="更换主题">
+            <a-trigger trigger="click" :popup-translate="[-130, -10]">
+                <a-button class="btn" type="primary" shape="circle">
+                    <icon-skin />
+                </a-button>
+                <template #content>
+                    <div class="theme-container">
+                        <div class="theme-container-header">
+                            <a-radio-group
+                                :model-value="themeMode"
+                                @change="changeTheme"
+                                type="button"
+                                style="border-radius: 10px;"
+                            >
+                                <a-radio style="border-radius: 10px;" value="daytime">
+                                    <icon-sun-fill />白昼模式
+                                </a-radio>
+                                <a-radio style="border-radius: 10px;" value="night">
+                                    <icon-moon-fill />黑夜模式
+                                </a-radio>
+                            </a-radio-group>
+                        </div>
+                        <div class="theme-container-body">
+                            <ul>
+                                <li
+                                    v-for="color in themeColor"
+                                    :style="`background-color:${color}`"
+                                ></li>
+                                <!-- <li class="li-checked"></li> -->
+                            </ul>
+                        </div>
+                    </div>
+                </template>
+            </a-trigger>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, nextTick, onUnmounted, watch } from "vue";
-import { IconSkin, IconCheck } from "@arco-design/web-vue/es/icon";
+import { IconSkin, IconCheck, IconSunFill, IconMoonFill } from "@arco-design/web-vue/es/icon";
 import Toolbar from "./widget/Toolbar.vue";
 import MultipleBar from "./widget/MultipleBar.vue";
 import PopupMenu from './widget/PopupMenu.vue';
@@ -173,6 +202,8 @@ import useCurrentInstance from '../utils/useCurrentInstance';
 import defaultCover from '../../public/static/img/default-cover.jpg';
 
 const { proxy } = useCurrentInstance();
+const themeColor = ['#0caba8', '#ff5c8a', '#ff7a9e', '#717ff9', '#4791eb', '#39afea',
+    '#6acc19', '#e2ab12', '#ff8f57', '#fd726d', '#fd544e', '#ccc'];
 
 /*----数据库取值----*/
 const booksData: { data: Array<Userdb> } = reactive({
@@ -385,6 +416,7 @@ const showExportOption = (id: number) => {
 const changeMode = (mode: string) => {
     modeType.value = mode;
 }
+// 导出操作
 const exportAll = () => {
     booksData.data.forEach(item => {
         if (item.id === targetId) {
@@ -466,6 +498,17 @@ const exportAll = () => {
         else if (data === 'err') $message.error('文件导出失败!');
     });
     isExportAll.value = false;
+}
+
+// 快速更换主题
+const themeMode = ref('daytime');
+const changeTheme = (value: 'daytime' | 'night') => {
+    themeMode.value = value;
+    if (value === 'daytime') {
+        document.body.removeAttribute('arco-theme');
+    } else if (value === 'night') {
+        document.body.setAttribute('arco-theme', 'dark');
+    }
 }
 
 function loadData() {

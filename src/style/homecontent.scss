@@ -92,24 +92,17 @@ body[arco-theme='dark'] .book {
     position: relative;
     width: 162px;
     height: 230px;
-    // background-color: rgb(62, 71, 152);
     transition: all .3s ease-in-out;
     transform-origin: left center 0px;
     transform-style: preserve-3d;
     border-radius: 6px;
-    // box-shadow: 4px 4px 8px #ccc;
     box-shadow: 0 2px 8px #00000026;
     ;
-    // background-color: #ccc;
-    // background-color: red;
     overflow: hidden;
 
     img {
-        // width: 162px;
-        // height: 230px;
         width: 162px;
         height: 230px;
-        // margin: 2px 0 0 2px;
         border-radius: 6px;
     }
 
@@ -184,9 +177,67 @@ body[arco-theme='dark'] .book {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
+
+    .btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+}
+
+body[arco-theme="dark"] {
+    .theme-container ul .li-checked {
+        border: 2px solid #fff;
+    }
+}
+
+.theme-container {
+    padding: 10px;
+    width: 330px;
+    height: 140px;
+    background-color: var(--color-bg-popup);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);
+
+    .theme-container-header {
+        width: 100%;
+        height: 30px;
+    }
+
+    .theme-container-body {
+        width: 100%;
+        height: calc(100% - 40px);
+        margin-top: 10px;
+        // background-color: var(--color-fill-2);
+        border-radius: 10px;
+
+        ul {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+
+            li {
+                box-sizing: border-box;
+                width: 40px;
+                height: 40px;
+                margin: 0 6px;
+                // background-color: #ff7a9e;
+                border: 2px solid transparent;
+                border-radius: 15px;
+                cursor: pointer;
+            }
+
+            .li-checked {
+                border: 2px solid #444;
+            }
+        }
+    }
 }
 
 .skin {

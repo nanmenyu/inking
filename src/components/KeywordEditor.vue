@@ -65,18 +65,13 @@
                                 </template>
                                 <template #default>添加新项目</template>
                             </a-button>
-                            <a-button @click="setTemplate" size="small" title="模板">
-                                <template #icon>
-                                    <svg
-                                        viewBox="0 0 1024 1024"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="20"
-                                        height="20"
-                                    >
-                                        <path id="1" />
-                                    </svg>
-                                </template>
-                            </a-button>
+                            <a-button
+                                class="iconfont"
+                                @click="setTemplate"
+                                type="text"
+                                size="small"
+                                title="模板"
+                            >&#xe636;</a-button>
                         </a-space>
                     </div>
                     <a-empty v-if="currentListName.data.length === 0" style="margin-top: 150px;"></a-empty>
@@ -529,7 +524,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, nextTick, onMounted } from 'vue';
+import { ref, reactive, watch, nextTick, onMounted, computed } from 'vue';
 import {
     IconClose, IconEdit, IconCloseCircle, IconPlus,
     IconDelete, IconPen, IconCaretRight, IconReply, IconFire
@@ -542,9 +537,7 @@ import 'cropperjs/dist/cropper.css';
 import * as echarts from 'echarts';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { v4 } from 'uuid';
-import getStyle from '../utils/getStyle';
 import defaultImg from '../../public/static/img/default.png';
-import templateicon from '../assets/svg/templateicon.svg';
 import addKeyWord from '../assets/svg/addKeyWord.svg';
 
 const { proxy } = useCurrentInstance();
@@ -1669,19 +1662,20 @@ function deepClone_JSON(obj: object) {
     return JSON.parse(_obj);
 }
 
-const primaryColor = ref('');
+const primaryColor = ref(''), labelColor = ref(''), chartsColor = ref('');
 onMounted(() => {
     // 获得主题色
     primaryColor.value = getComputedStyle(document.body).getPropertyValue('--primary-6');
+    labelColor.value = getComputedStyle(document.body).getPropertyValue('--color-text-1');
+    chartsColor.value = getComputedStyle(document.body).getPropertyValue('--my-secondary-6');
 })
 
 //准备echarts的容器
 const numberChart = ref();
 function setNumberChart(targetData: Array<{ key: string, value: number }>, unit: string, curMax: number) {
     let n_chart = echarts.getInstanceByDom(numberChart.value);
-    if (n_chart == null) {
-        n_chart = echarts.init(numberChart.value);
-    }
+    if (n_chart == null) n_chart = echarts.init(numberChart.value);
+
     const indicatorData: Array<{ name: string, max: number }> = [],
         data_value: Array<number> = [];
     targetData.forEach(item => {
@@ -1705,7 +1699,7 @@ function setNumberChart(targetData: Array<{ key: string, value: number }>, unit:
     // 大——>小排序
     itemTotal.sort(function (a, b) { return b - a });
     n_chart.setOption({
-        color: ['#ff9883'],
+        color: [`rgb(${chartsColor.value})`],
         tooltip: {
             trigger: 'axis'
         },
@@ -1745,23 +1739,23 @@ function setNumberChart(targetData: Array<{ key: string, value: number }>, unit:
                         areaStyle: {
                             color: new echarts.graphic.RadialGradient(0.1, 0.6, 1, [
                                 {
-                                    color: 'rgba(255, 145, 124, 0.1)',
+                                    color: `rgba(${chartsColor.value}, 0.1)`,
                                     offset: 0
                                 },
                                 {
-                                    color: 'rgba(255, 145, 124, 0.9)',
+                                    color: `rgba(${chartsColor.value}, 0.9)`,
                                     offset: 1
                                 }
                             ])
                         },
                         emphasis: {
                             areaStyle: {
-                                color: 'rgb(255, 145, 124)'
+                                color: `rgb(${chartsColor.value})`
                             }
                         },
                         label: {
                             show: true,
-                            color: '#666',
+                            color: labelColor.value,
                             formatter: function (params: any) {
                                 return params.value + unit;
                             }

@@ -57,7 +57,7 @@ db.opus.get(query_id).then(value => {
                     id: it.iid,
                     name: it.itemName,
                     value: it.associated.length,
-                    symbolSize: 15 + it.associated.length * 10,
+                    symbolSize: 15 + it.associated.length * 5,
                     category: item.kGroupName,
                     associated: it.associated
                 })
@@ -143,6 +143,7 @@ function setDiagramChart(graph: GraphData) {
 
     // 绘制图表
     // const intensity = ref(1); //默认关联强度
+    const textColor = getComputedStyle(document.body).getPropertyValue('--color-text-1');
     const option: any = {
         color: ['#3491fa', '#CC3399', '#FFCC99', '#FF6666', '#FF9999', '#FFCCCC', '#FF99CC', '#66CC99'],
         title: {
@@ -174,13 +175,15 @@ function setDiagramChart(graph: GraphData) {
                 }
             },
             textStyle: {
-                align: 'left'
+                align: 'left',
             },
         },
         legend: [
             {
                 top: 10,
-
+                textStyle: {
+                    color: textColor
+                },
             }
         ],
         animationDuration: 1500,
@@ -197,7 +200,9 @@ function setDiagramChart(graph: GraphData) {
                 categories: graph.categories,
                 roam: true,
                 label: {
-                    position: 'right'
+                    position: 'right',
+                    textBorderWidth: '0',
+                    color: textColor
                 },
                 lineStyle: {
                     color: 'source',

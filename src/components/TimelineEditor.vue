@@ -147,18 +147,6 @@
     </PopupMenu>
     <div class="timeline">
         <section @scroll="sectionScroll" ref="timelineSection" class="timeline__section">
-            <!-- <div class="timeline__nav" ref="timelineNav">
-                <ul :style="`transform: translateY(${timelineUl_tran})`" ref="timelineUl">
-                    <li v-for="(item, i) in yearData.data" :key="item.id" :id="'nav_' + i">
-                        <a
-                            @click.prevent="toAnchor('con_' + i)"
-                            :class="checkedId === ('con_' + i) ? 'active' : ''"
-                            :href="'#' + i"
-                            :title="item.timeSlot.toString()"
-                        >{{ timeSlot_format(item.timeSlot) }}</a>
-                    </li>
-                </ul>
-            </div>-->
             <div class="wrapper" ref="wrapper">
                 <a-empty v-if="yearData.data.length === 0" style="margin-top: 100px;">点击时间轴右上角添加历史事件</a-empty>
                 <a-timeline v-else>
@@ -168,10 +156,11 @@
                         :key="i"
                         @click="choiceOneYear(item.timeSlot)"
                         title="点击查看详情"
-                        dotColor="#F53F3F"
                     >
                         <template #dot>
-                            <IconClockCircle :style="{ fontSize: '12px', color: '#f53f3f' }" />
+                            <IconClockCircle
+                                :style="{ fontSize: '12px', color: ' rgb(var(--my-secondary-6))' }"
+                            />
                         </template>
                         <div
                             :class="currentDetail.curYear === item.timeSlot ? 'timeline-item checked' : 'timeline-item'"
@@ -289,7 +278,7 @@
                     v-for="item  in currentDetail.data"
                     :key="item.id"
                     hoverable
-                    style="width: 100%;margin-top: 5px;"
+                    class="a-card"
                     :title="'✨' + item.title + '\u3000' + (item.month === null ? '' : item.month + '月') + '' + (item.day === null ? '' : item.day + '日')"
                 >
                     <template #extra>
@@ -353,7 +342,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, Ref, onMounted, computed, nextTick, watch } from 'vue';
+import { ref, reactive, Ref, onMounted, computed, nextTick, watch, onBeforeUnmount } from 'vue';
 import {
     IconPlus, IconDown, IconPlusCircle, IconLocation, IconSettings, IconClose,
     IconZoomIn, IconZoomOut, IconToLeft, IconToRight, IconDelete, IconClockCircle
@@ -370,7 +359,7 @@ const { proxy } = useCurrentInstance();
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
 const theTimeLineData: { data: Array<TimeLineGroup> } = reactive({ data: [] });
-const timeline = ref();
+// const timeline = ref();
 const yearData: {
     data:
     Array<{ id: string, timeSlot: number, title: string, desc: string, totalNum: number }>
@@ -401,19 +390,19 @@ const timeLineMarks = computed(() => {
 const offsetTop_el: { data: Array<{ id: string, offsetTop: number }> } = reactive({ data: [] });
 const slider = ref(), sliderBox = ref();
 // 裁切太长的数字以省略号表示
-const timeSlot_format = (timeSlot: number): number | string => {
-    return timeSlot > 99999 ? timeSlot.toString().slice(0, 5) + '...' : timeSlot;
-}
+// const timeSlot_format = (timeSlot: number): number | string => {
+//     return timeSlot > 99999 ? timeSlot.toString().slice(0, 5) + '...' : timeSlot;
+// }
 // 锚点跳转
 const checkedId = ref('con_0'), wrapper: Ref<HTMLElement | undefined> = ref();
-const toAnchor = (id: string) => {
-    if (wrapper.value!.clientHeight > timelineSection.value!.clientHeight) {
-        checkedId.value = id;
-        const targetAnchor = document.getElementById(id);
-        if (targetAnchor) targetAnchor.scrollIntoView({ behavior: "smooth" });
-        // toNavCenter();
-    }
-}
+// const toAnchor = (id: string) => {
+//     if (wrapper.value!.clientHeight > timelineSection.value!.clientHeight) {
+//         checkedId.value = id;
+//         const targetAnchor = document.getElementById(id);
+//         if (targetAnchor) targetAnchor.scrollIntoView({ behavior: "smooth" });
+//         // toNavCenter();
+//     }
+// }
 // 内容滚动标记当前元素
 const timelineSection: Ref<HTMLElement | undefined> = ref();
 const sectionScroll = throttle(() => {
@@ -441,9 +430,10 @@ onMounted(() => {
     })
     sliderWidth.value = Math.round(sliderBox.value.clientWidth * scaleFactor.value * 0.9);
     // 窗口大小改变时自动适应时间轴右侧
-    window.addEventListener('resize', () => {
-        setSliderState();
-    })
+    window.addEventListener('resize', setSliderState)
+})
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', setSliderState);
 })
 watch(currentYear, (value) => {
     for (let i in yearData.data) {
@@ -453,7 +443,6 @@ watch(currentYear, (value) => {
         }
     }
 })
-
 
 /* ----------------------- 时间线工具栏-----------------------*/
 
@@ -477,6 +466,8 @@ const positionTimePoint = () => {
 const confirmPosition = (value: number) => {
     if (value === 0) {
         proxy.$message.error('0年是无意义的!');
+    } else if (value > timeLine.max || value < timeLine.min) {
+        proxy.$message.error('时间点越界!');
     } else {
         currentYear.value = value;
         setSliderState();

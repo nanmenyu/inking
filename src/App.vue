@@ -68,7 +68,7 @@ db.opus.where(':id').between(1, Infinity).toArray().then(value => {
 })
 
 onMounted(() => {
-  document.body.setAttribute('arco-theme', 'dark');
+  // document.body.setAttribute('arco-theme', 'dark');
 })
 </script>
 
