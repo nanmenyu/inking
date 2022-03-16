@@ -39,16 +39,45 @@
         </div>
         <div class="right">
             <span @click="minimizeWin">
-                <img :src="minimizeIcon" />
+                <svg
+                    viewBox="0 0 1024 1024"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                >
+                    <path p-id="h1" />
+                </svg>
             </span>
             <span v-if="!isMax" @click="maximizeWin">
-                <img :src="maximizeIcon" />
+                <svg
+                    viewBox="0 0 1024 1024"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                >
+                    <path p-id="h2" />
+                </svg>
             </span>
             <span v-else @click="maximizeWin">
-                <img :src="maximizeIcon2" />
+                <svg
+                    viewBox="0 0 1024 1024"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                >
+                    <path p-id="h3" />
+                </svg>
             </span>
             <span @click="closeWin">
-                <img :src="closeWinIcon" />
+                <svg
+                    viewBox="0 0 1024 1024"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                >
+                    <path p-id="h4" />
+                    <path p-id="h5" />
+                </svg>
             </span>
         </div>
     </div>
@@ -215,10 +244,42 @@ body[arco-theme="dark"] .header .left {
     cursor: pointer;
 }
 .header .right span:hover {
-    background-color: rgb(var(--my-bg2-color));
+    background-color: var(--color-fill-3);
 }
 .left .left-btn:hover path[p-id="16750"] {
     fill: rgb(var(--primary-5));
+}
+path[p-id="h1"],
+path[p-id="h2"],
+path[p-id="h3"],
+path[p-id="h4"],
+path[p-id="h5"] {
+    fill: var(--color-text-1);
+}
+path[p-id="h1"] {
+    d: path(
+        "M929.8 528.1H93.5c-15.5 0-28-12.5-28-28s12.5-28 28-28h836.3c15.5 0 28 12.5 28 28s-12.5 28-28 28z"
+    );
+}
+path[p-id="h2"] {
+    d: path(
+        "M812.3 959.4H213.7c-81.6 0-148-66.4-148-148V212.9c0-81.6 66.4-148 148-148h598.5c81.6 0 148 66.4 148 148v598.5c.1 81.6-66.3 148-147.9 148zM213.7 120.9c-50.7 0-92 41.3-92 92v598.5c0 50.7 41.3 92 92 92h598.5c50.7 0 92-41.3 92-92V212.9c0-50.7-41.3-92-92-92H213.7z"
+    );
+}
+path[p-id="h3"] {
+    d: path(
+        "M812.2 65H351.6c-78.3 0-142.5 61.1-147.7 138.1-77 5.1-138.1 69.4-138.1 147.7v460.6c0 81.6 66.4 148 148 148h460.6c78.3 0 142.5-61.1 147.7-138.1 77-5.1 138.1-69.4 138.1-147.7V213c0-81.6-66.4-148-148-148zm-45.8 746.3c0 50.7-41.3 92-92 92H213.8c-50.7 0-92-41.3-92-92V350.7c0-50.7 41.3-92 92-92h460.6c50.7 0 92 41.3 92 92v460.6zm137.8-137.7c0 47.3-35.8 86.3-81.8 91.4V350.7c0-81.6-66.4-148-148-148H260.2c5.1-45.9 44.2-81.8 91.4-81.8h460.6c50.7 0 92 41.3 92 92v460.7z"
+    );
+}
+path[p-id="h4"] {
+    d: path(
+        "M96.6 915c-10.9-10.9-10.9-28.7 0-39.6L887 85c10.9-10.9 28.7-10.9 39.6 0 10.9 10.9 10.9 28.7 0 39.6L136.2 915c-10.9 10.9-28.6 10.9-39.6 0z"
+    );
+}
+path[p-id="h5"] {
+    d: path(
+        "M887 915L96.6 124.6c-10.9-10.9-10.9-28.7 0-39.6 10.9-10.9 28.7-10.9 39.6 0l790.4 790.4c10.9 10.9 10.9 28.7 0 39.6-10.9 10.9-28.6 10.9-39.6 0z"
+    );
 }
 path[p-id="16750"] {
     d: path(

@@ -2,7 +2,7 @@
     <div class="head-item">
         <!-- 全屏洁净模式 -->
         <a-tooltip position="bottom" mini content="全屏洁净模式(F1)">
-            <a-button class="headerBtn">
+            <a-button @click="turnFullScreen" class="headerBtn">
                 <icon-fullscreen />&nbsp;全屏
             </a-button>
         </a-tooltip>
@@ -349,11 +349,13 @@
                         </ul>
                     </template>
                 </a-trigger>
-                <a-trigger position="right" :popup-translate="[8, 0]">
+                <a-trigger position="right" :popup-translate="[5, 0]">
                     <a-doption>
                         <img :src="softThemeIcon" style="transform: translateY(2px)" />&nbsp;&nbsp;软件主题
                     </a-doption>
-                    <template #content></template>
+                    <template #content>
+                        <ThemeContainer @changePaperColor="themeColorChange"></ThemeContainer>
+                    </template>
                 </a-trigger>
             </template>
         </a-dropdown>
@@ -433,17 +435,19 @@ import {
 import { throttle } from '../utils/flowControl';
 import { useRoute } from 'vue-router';
 import { Sketch } from '@ckpack/vue-color';
-import writtenwords from '../assets/svg/writtenwords.svg';
-import fontSizeIcon from '../assets/svg/fontSizeIcon.svg';
-import lineHeighIcon from '../assets/svg/lineHeighIcon.svg';
-import fontWeightIcon from '../assets/svg/fontWeightIcon.svg';
-import fontFamilyIcon from '../assets/svg/fontFamilyIcon.svg';
-import fontColorIcon from '../assets/svg/fontColorIcon.svg';
-import paragraphIcon from '../assets/svg/paragraphIcon.svg';
-import segSpacingIcon from '../assets/svg/segSpacingIcon.svg';
-import textIndentIcon from '../assets/svg/textIndentIcon.svg';
-import paraFocusIcon from '../assets/svg/paraFocusIcon.svg';
-import otherSettingIcon from '../assets/svg/otherSettingIcon.svg';
+import ThemeContainer from './widget/ThemeContainer.vue';
+import { useThemeStore } from '../store';
+// import writtenwords from '../assets/svg/writtenwords.svg';
+// import fontSizeIcon from '../assets/svg/fontSizeIcon.svg';
+// import lineHeighIcon from '../assets/svg/lineHeighIcon.svg';
+// import fontWeightIcon from '../assets/svg/fontWeightIcon.svg';
+// import fontFamilyIcon from '../assets/svg/fontFamilyIcon.svg';
+// import fontColorIcon from '../assets/svg/fontColorIcon.svg';
+// import paragraphIcon from '../assets/svg/paragraphIcon.svg';
+// import segSpacingIcon from '../assets/svg/segSpacingIcon.svg';
+// import textIndentIcon from '../assets/svg/textIndentIcon.svg';
+// import paraFocusIcon from '../assets/svg/paraFocusIcon.svg';
+// import otherSettingIcon from '../assets/svg/otherSettingIcon.svg';
 import paperColorIcon from '../assets/svg/paperColorIcon.svg';
 import paperBorderIcon from '../assets/svg/paperBorderIcon.svg';
 import paperSizeIcon from '../assets/svg/paperSizeIcon.svg';
@@ -453,7 +457,7 @@ import expDOCXIcon from '../assets/svg/expDOCXIcon.svg';
 import expPDFIcon from '../assets/svg/expPDFIcon.svg';
 import sensitiveWords from '../assets/svg/sensitiveWords.svg';
 const route = useRoute(), query_path = route.path;
-
+const themeStore = useThemeStore();
 /*-------------数据统计与初始化-------------*/
 const wordCount = ref(0), charCount = ref(0), paragraphs = ref(0), fontList = ref(), paperSize = ref([
     { type: 'Max', size: 1280, now: false },
@@ -485,12 +489,12 @@ const uLocalOption = ref({
     uLineHeight: 1.5,
     uFontWeight: 'normal',
     uFont: 'KaiTi',
-    uColor: '#333333',
+    uColor: themeStore.theme === 'light' ? '#333333ff' : '#ffffffff',
     uSpacing: 10,
     uTextIndent: '0',
     uParaFocus: 'close',
     uShowBorder: 'open',
-    uBgcColor: '#ffffff',
+    uBgcColor: themeStore.theme === 'light' ? '#ffffffff' : '#17171aff',
     uRoundType: 'none',
     uPaperSize: 'A4'
 });
@@ -604,23 +608,33 @@ const changeTextIndent = () => {
 // 获得子组件选择的color并修改字体颜色
 const fontColor: Ref<any> = ref(uLocalOption.value.uColor);
 watch(fontColor, () => {
-    paperRef.value.setColor(fontColor.value.hex8);
-    uLocalOption.value.uColor = fontColor.value.hex8;
-    // 聚焦模式下选择新颜色
-    if (query_path === '/writer' && paraFocus.value === 'open') paperRef.value.setParaFocus(paraFocus.value);
-    setLocalStorage();
+    changeFontColor(fontColor.value.hex8);
 })
 // 获得子组件选择的color并修改纸张背景色
 const bgcColor: Ref<any> = ref(uLocalOption.value.uBgcColor);
 watch(bgcColor, () => {
-    paperRef.value.setBgcColor(bgcColor.value.hex8);
-    uLocalOption.value.uBgcColor = bgcColor.value.hex8;
-    setLocalStorage();
+    changeBgcColor(bgcColor.value.hex8)
 })
+const changeFontColor = (color: string) => {
+    paperRef.value.setColor(color);
+    uLocalOption.value.uColor = color;
+    // 聚焦模式下选择新颜色
+    if (query_path === '/writer' && paraFocus.value === 'open') paperRef.value.setParaFocus(paraFocus.value);
+    setLocalStorage();
+}
+const changeBgcColor = (color: string) => {
+    paperRef.value.setBgcColor(color);
+    uLocalOption.value.uBgcColor = color;
+    setLocalStorage();
+}
+// 子组件主题切换暗亮时重新设置纸张文字颜色
+const themeColorChange = (color: [string, string]) => {
+    changeBgcColor(color[0]);
+    changeFontColor(color[1]);
+}
 
 // 改变纸张边框
 const isShowBorder = ref(true);
-
 const showBorderType = ref(uLocalOption.value.uShowBorder);
 if (showBorderType.value === 'open') isShowBorder.value = true;
 else isShowBorder.value = false;
@@ -667,6 +681,11 @@ const changeParaFocus = () => {
         uLocalOption.value.uParaFocus = paraFocus.value;
         localStorage.setItem('uWritingOption', JSON.stringify(uLocalOption.value));
     }
+}
+
+// 设置全屏模式
+const turnFullScreen = () => {
+    window.$API.ipcSend('fullscreen', true);
 }
 
 // 导出文件

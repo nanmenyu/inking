@@ -186,7 +186,7 @@ function highlightKeyword(doc: any) {
             if (mainStore.isInSearch && count === mainStore.targetIndex) {
                 // 将当前选中关键字更加高亮并添加自定义锚点属性'data-nowhere'
                 highlights.push(
-                    Decoration.inline(from, to, { class: match.mark.class, style: 'background-color: #f93;', id: 'search-anchor' })
+                    Decoration.inline(from, to, { class: match.mark.class, id: 'search-anchor' })
                 );
             } else {
                 highlights.push(

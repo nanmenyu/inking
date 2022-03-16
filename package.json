@@ -59,8 +59,8 @@
   },
   "devDependencies": {
     "@arco-design/web-vue": "^2.16.2",
-    "@vitejs/plugin-vue": "^2.0.0",
     "@ckpack/vue-color": "^1.1.8",
+    "@vitejs/plugin-vue": "^2.0.0",
     "concurrently": "^7.0.0",
     "core-js": "^3.6.5",
     "cropperjs": "^1.5.12",
@@ -89,7 +89,6 @@
     "vue": "^3.2.25",
     "vue-router": "^4.0.12",
     "vue-tsc": "^0.29.8",
-    "vue3-colorpicker": "^2.0.4",
     "wait-on": "^6.0.0"
   },
   "dependencies": {

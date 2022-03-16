@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import Toolbar from "./widget/Toolbar.vue";
 
 const word = ref(''), test = ref();

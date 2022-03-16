@@ -215,3 +215,8 @@ ipcMain.on('api', (e, data) => {
         })
     }
 })
+
+// 打开全屏
+ipcMain.on('fullscreen', (e, full) => {
+    win.setFullScreen(full);
+})

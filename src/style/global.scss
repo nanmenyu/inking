@@ -88,3 +88,12 @@ body {
 .arco-tooltip-popup-arrow {
     background-color: rgb(var(--my-secondary-6));
 }
+
+// 颜色选择器颜色适应
+.vc-sketch[aria-label="Sketch color picker"] {
+    background-color: var(--color-bg-popup);
+
+    .vc-sketch-field .vc-input__label {
+        color: var(--color-text-1);
+    }
+}

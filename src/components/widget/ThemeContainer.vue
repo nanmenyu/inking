@@ -39,8 +39,9 @@
 <script setup lang='ts'>
 import { computed, ref } from 'vue';
 import { setSharedColor, setupMainThemes, setupSecondaryThemes } from '../../hooks/setupThemes';
-import { useThemeStore } from '../../store';
-const themeStore = useThemeStore();
+// import { useThemeStore } from '../../store';
+// const themeStore = useThemeStore();
+const emit = defineEmits(['changePaperColor']);
 
 const themeColor = ['RGB(12,171,168)', 'RGB(255,92,138)', 'RGB(255,122,158)', 'RGB(113,127,249)',
     'RGB(71,145,235)', 'RGB(57,175,234)', 'RGB(106,204,25)', 'RGB(226,171,18)', 'RGB(255,143,87)',
@@ -61,8 +62,10 @@ const changeTheme = (value: 'light' | 'dark') => {
     themeMode.value = value;
     if (value === 'light') {
         document.body.removeAttribute('arco-theme');
+        emit('changePaperColor', ['#ffffff', '#333333']);
     } else if (value === 'dark') {
         document.body.setAttribute('arco-theme', 'dark');
+        emit('changePaperColor', ['#17171a', '#e8e8e9']);
     }
     setSharedColor(value);
     // 存储主题设置

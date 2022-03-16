@@ -8,8 +8,13 @@ export default function genkeywordMarks(keywordArr: Array<Array<string>>) {
     // [color,background-color]
     const result: Array<Marker> = [];
     const colorGroup = [
-        ['#f53f3f', '#ffece8'], ['#d91ad9', '#ffe8fb'], ['#f77234', '#fff3e8'], ['#ff7d00', '#fff7e8'], ['#9fdb1d', '#fcffe8'], ['#f7ba1e', '#fffce8'], ['#00b42a', '#e8ffea'], ['#3491fa', '#e8f7ff'], ['#14c9c9', '#e8fffb'], ['#165dff', '#e8f3ff'], ['#722ed2', '#f5e8ff'], ['#f5319d', '#ffe8f1'],
-        ['#86909c', '#f2f3f5']
+        ['rgb(var(--orange-6)) ', 'rgb(var(--orange-1))'], ['rgb(var(--lime-6))', 'rgb(var(--lime-1))'],
+        ['#f77234', '#fff3e8'], ['rgb(var(--red-6))', 'rgb(var(--red-1))'], ['rgb(var(--gold-6))', 'rgb(var(--gold-1))'],
+        ['rgb(var(--orangered-6))', 'rgb(var(--orangered-1))'], ['rgb(var(--green-6))', 'rgb(var(--green-1))'],
+        ['rgb(var(--gray-6))', 'rgb(var(--gray-2))'], ['rgb(var(--cyan-6))', 'rgb(var(--cyan-1))'],
+        ['rgb(var(--magenta-6))', 'rgb(var(--magenta-1))'], ['rgb(var(--blue-6))', 'rgb(var(--blue-1))'],
+        ['rgb(var(--pinkpurple-6))', 'rgb(var(--pinkpurple-1))'], ['rgb(var(--arcoblue-6))', 'rgb(var(--arcoblue-1))'],
+        ['rgb(var(--purple-6))', 'rgb(var(--purple-1))']
     ];
     keywordArr.forEach((item, index) => {
         const color = colorGroup[index % colorGroup.length][0];

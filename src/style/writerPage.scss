@@ -62,6 +62,30 @@
             }
         }
     }
+
+    .fold-button {
+        position: absolute;
+        z-index: 1;
+        top: 50%;
+        left: -3px;
+        width: 17.5px;
+        height: 35px;
+        transform: translate(0, -50%);
+        border-radius: 0 17.5px 17.5px 0;
+        background-color: var(--color-secondary);
+        border: 1px solid var(--color-neutral-3);
+        border-left: none;
+        cursor: pointer;
+
+        svg {
+            height: 100%;
+            margin-right: 2px;
+        }
+
+        &:hover {
+            background-color: var(--color-secondary-hover);
+        }
+    }
 }
 
 
@@ -239,16 +263,18 @@ path[p-id="1550"] {
     // width: 320px;
     padding: 6px 0 6px 2px;
     transform: translateX(-50%);
-    background-color: rgb(var(--my-bg-color));
-    border: 1px solid #e5e6eb;
+    background-color: var(--color-bg-popup);
+    border: 1px solid var(--color-fill-3);
     border-radius: 4px;
-    box-shadow: 0 2px 8px #00000026;
+    box-shadow: 0 4px 10px #0000001a;
     user-select: none;
 
     input {
         outline: none;
         border: none;
-        border-right: 1px solid #ccc;
+        color: var(--color-text-1);
+        background-color: var(--color-bg-popup);
+        border-right: 1px solid var(--color-fill-3);
     }
 
     .show-keywordCount {

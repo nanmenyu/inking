@@ -36,7 +36,15 @@
                 <a-divider direction="vertical" />
                 <a-statistic extra="今日码字" :value="toDayCodeword" />
                 <a-divider direction="vertical" />
-                <a-progress type="circle" title="今日计划完成度" :percent="0.4" />
+                <a-progress
+                    type="circle"
+                    title="今日计划完成度"
+                    :percent="0.4"
+                    :color="{
+                        '0%': 'rgb(var(--my-secondary-5))',
+                        '100%': 'rgb(var(--my-secondary-6))',
+                    }"
+                />
             </a-space>
         </div>
         <div class="block-head">

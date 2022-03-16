@@ -329,7 +329,7 @@
                     @moving="resizeBoxMoving"
                     :directions="['left']"
                     class="sider-right"
-                    style="width: 450px;"
+                    style="min-width: 250px;width: 450px;"
                 >
                     <!-- 伸缩杆 -->
                     <template #resize-trigger="{ direction }">
@@ -423,6 +423,9 @@
                                 </a-menu>
                             </template>
                         </a-trigger>
+                        <div class="fold-button" title="收起右侧">
+                            <icon-right style="line-height: 35px;" />
+                        </div>
                         <!-- 各个需要显示的组件 -->
                         <WebviewBlock v-if="showModular === '0'" ref="ref_WebviewBlock"></WebviewBlock>
                         <PlotEditor v-if="showModular === '1'"></PlotEditor>
@@ -446,7 +449,7 @@
 import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount, watch, Ref } from 'vue';
 import {
     IconCaretRight, IconCaretLeft, IconClose, IconUndo, IconMessage,
-    IconRightCircle, IconSearch, IconArrowUp, IconArrowDown, IconApps, IconPublic
+    IconRightCircle, IconSearch, IconArrowUp, IconArrowDown, IconApps, IconPublic, IconRight
 } from '@arco-design/web-vue/es/icon';
 import TitleBlock from '../components/TitleBlock.vue';
 import TopToolbar from '../components/TopToolbar.vue';
@@ -459,7 +462,6 @@ import DiagramEditor from '../components/DiagramEditor.vue';
 import TimelineEditor from '../components/TimelineEditor.vue';
 import MapEditor from '../components/MapEditor.vue';
 import { useRoute, useRouter } from 'vue-router';
-import "vue3-colorpicker/style.css";
 import { throttle } from '../utils/flowControl';
 import { db } from '../db/db';
 import useCurrentInstance from '../utils/useCurrentInstance';
@@ -800,6 +802,7 @@ const closeScroll = () => {
 }
 // 调整小窗口大小
 const resizeBoxMoving = () => {
+    console.log('moving');
     if (ref_TimelineEditor.value) ref_TimelineEditor.value.setSliderState();
     if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
 }
@@ -1028,6 +1031,14 @@ function shortcut(e: KeyboardEvent) {
                 searchInput.value.focus();
             })
         }
+    }
+    // 打开全屏模式
+    if (e.key === 'F1') {
+        window.$API.ipcSend('fullscreen', true);
+    }
+    // 打开关闭模式
+    if (e.key === 'Escape') {
+        window.$API.ipcSend('fullscreen', false);
     }
 }
 function leftMoreControl() {

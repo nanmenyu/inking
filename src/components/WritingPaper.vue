@@ -544,6 +544,15 @@ defineExpose({
 }
 #mainEditor-w .ProseMirror .keyword_search {
     border-radius: 25%;
-    background-color: #ff0;
+    background-color: rgba(255, 255, 0, 1);
+}
+#mainEditor-w .ProseMirror #search-anchor {
+    background-color: rgba(255, 153, 51, 1);
+}
+body[arco-theme="dark"] #mainEditor-w .ProseMirror .keyword_search {
+    background-color: rgba(255, 255, 0, 0.7);
+}
+body[arco-theme="dark"] #mainEditor-w .ProseMirror #search-anchor {
+    background-color: rgba(255, 153, 51, 0.7);
 }
 </style>
