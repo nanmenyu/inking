@@ -8,10 +8,10 @@
                 style="border-radius: 10px;"
             >
                 <a-radio style="border-radius: 10px;" value="light">
-                    <icon-sun-fill />白昼模式
+                    <icon-sun-fill />白昼
                 </a-radio>
                 <a-radio style="border-radius: 10px;" value="dark">
-                    <icon-moon-fill />黑夜模式
+                    <icon-moon-fill />黑夜
                 </a-radio>
             </a-radio-group>
             <a-radio-group
@@ -38,14 +38,14 @@
 
 <script setup lang='ts'>
 import { computed, ref } from 'vue';
+import { IconSunFill, IconMoonFill } from "@arco-design/web-vue/es/icon";
 import { setSharedColor, setupMainThemes, setupSecondaryThemes } from '../../hooks/setupThemes';
 // import { useThemeStore } from '../../store';
 // const themeStore = useThemeStore();
 const emit = defineEmits(['changePaperColor']);
 
-const themeColor = ['RGB(12,171,168)', 'RGB(255,92,138)', 'RGB(255,122,158)', 'RGB(113,127,249)',
-    'RGB(71,145,235)', 'RGB(57,175,234)', 'RGB(106,204,25)', 'RGB(226,171,18)', 'RGB(255,143,87)',
-    'RGB(253,114,109)', 'RGB(253,84,78)', 'RGB(204,204,204)'];
+const themeColor = ['RGB(0,176,255)', 'RGB(0,191,166)', 'RGB(245,0,87)', 'RGB(83,109,254)', 'RGB(249,168,38)', 'RGB(108,99,255)',
+    'RGB(57,175,234)', 'RGB(226,171,18)', 'RGB(255,143,87)', 'RGB(253,114,109)', 'RGB(253,84,78)', 'RGB(204,204,204)'];
 const getLocalTheme = JSON.parse(localStorage.getItem('uTheme')!);
 const themeMode = ref(getLocalTheme.mode),
     mainThemeColor = ref(getLocalTheme.mainColor),

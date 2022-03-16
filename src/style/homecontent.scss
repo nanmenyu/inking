@@ -1,11 +1,5 @@
 .home-content {
-    box-sizing: border-box;
-    position: relative;
-    float: right;
-    width: calc(100vw - 250px);
-    height: calc(100vh - 75px);
-    margin-top: 35px;
-    border-radius: 4px 0 0 0;
+    @include homecontent;
 }
 
 .content {
@@ -170,19 +164,6 @@ body[arco-theme='dark'] .book {
     img {
         width: 100%;
         height: 100%;
-    }
-}
-
-.theme {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-
-    .btn {
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
-        border-radius: 10px;
     }
 }
 

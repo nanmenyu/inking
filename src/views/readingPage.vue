@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang='ts'>
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted } from 'vue';
 import TitleBlock from '../components/TitleBlock.vue';
 import TopToolbar from '../components/TopToolbar.vue';
 import ReadingPaper from '../components/ReadingPaper.vue';

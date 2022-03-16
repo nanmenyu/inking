@@ -49,9 +49,11 @@
         </div>
         <div class="sidebar-bottom">
             <div>
-                <a-tooltip content="设置">
-                    <icon-settings />
-                </a-tooltip>
+                <router-link to="setting">
+                    <a-tooltip content="设置">
+                        <icon-settings />
+                    </a-tooltip>
+                </router-link>
             </div>
             <div>
                 <a-tooltip content="消息通知">
@@ -79,7 +81,7 @@ import { useThemeStore } from '../store';
 import * as echarts from 'echarts';
 
 const themeStore = useThemeStore();
-const route = useRoute(), choicedType = ref('t1'), uChart = ref();
+const route = useRoute(), choicedType = ref(''), uChart = ref();
 switch (route.path) {
     case '/':
         choicedType.value = 't1';

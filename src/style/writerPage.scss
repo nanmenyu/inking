@@ -1,6 +1,50 @@
 .sider-right {
     min-width: 50px;
-    // padding-left: 50px;
+}
+
+.open-button,
+.fold-button {
+    position: absolute;
+    top: 50%;
+    background-color: var(--color-secondary);
+    border: 1px solid var(--color-neutral-3);
+    border-left: none;
+    cursor: pointer;
+
+    &:hover {
+        background-color: var(--color-secondary-hover);
+    }
+
+    &:active {
+        background-color: var(--color-secondary);
+    }
+}
+
+.open-button {
+    right: 6px;
+    width: 25px;
+    height: 50px;
+    transform: translate(0, 50%);
+    border-radius: 25px 0 0 25px;
+
+    svg {
+        height: 100%;
+        margin-left: 2px;
+    }
+}
+
+.fold-button {
+    z-index: 1;
+    left: -2px;
+    width: 17.5px;
+    height: 35px;
+    transform: translate(0, -50%);
+    border-radius: 0 17.5px 17.5px 0;
+
+    svg {
+        height: 100%;
+        margin-right: 2px;
+    }
 }
 
 .sider-right-content {
@@ -62,30 +106,6 @@
             }
         }
     }
-
-    .fold-button {
-        position: absolute;
-        z-index: 1;
-        top: 50%;
-        left: -3px;
-        width: 17.5px;
-        height: 35px;
-        transform: translate(0, -50%);
-        border-radius: 0 17.5px 17.5px 0;
-        background-color: var(--color-secondary);
-        border: 1px solid var(--color-neutral-3);
-        border-left: none;
-        cursor: pointer;
-
-        svg {
-            height: 100%;
-            margin-right: 2px;
-        }
-
-        &:hover {
-            background-color: var(--color-secondary-hover);
-        }
-    }
 }
 
 
@@ -104,6 +124,7 @@
     &:hover {
         background-color: var(--color-secondary-hover);
     }
+
 }
 
 /* 伸缩杆内容 */

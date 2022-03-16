@@ -126,6 +126,10 @@ body[arco-theme='dark'] {
     justify-content: space-evenly;
     transform: translate(-50%, 0);
 
+    a {
+        color: inherit;
+    }
+
     div {
         width: 35px;
         height: 35px;
@@ -134,6 +138,8 @@ body[arco-theme='dark'] {
         line-height: 35px;
         color: var(--color-text-2);
         cursor: pointer;
+
+
 
         &:hover {
             color: var(--color-text-3);

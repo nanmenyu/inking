@@ -16,8 +16,8 @@
             <a-space direction="vertical">
                 <a-select v-model="optionValue">
                     <a-option>作品集</a-option>
-                    <a-option>笔记本</a-option>
-                    <a-option>Markdown</a-option>
+                    <!-- <a-option>笔记本</a-option> -->
+                    <!-- <a-option>Markdown</a-option> -->
                 </a-select>
                 <a-input
                     v-model="fileName"

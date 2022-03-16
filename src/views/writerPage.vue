@@ -1,6 +1,6 @@
 <!-- 作品(纯文本)编写页 -->
 <template>
-    <TitleBlock></TitleBlock>
+    <TitleBlock v-show="!fullScreenState"></TitleBlock>
     <div @click.stop v-if="showkeywordDetail" ref="keywordDetail" class="keyword-detail">
         <div class="keyword-head">
             <div class="head-left">
@@ -136,11 +136,16 @@
     </PopupMenu>
     <div class="layout-write">
         <a-layout>
-            <a-layout-header>
-                <TopToolbar ref="topToolRef"></TopToolbar>
+            <a-layout-header v-show="!fullScreenState">
+                <TopToolbar @fullscreen="turnfullScreen" ref="topToolRef"></TopToolbar>
             </a-layout-header>
             <a-layout>
-                <a-layout-sider collapsible @collapse="onCollapse" class="siderLeft-w">
+                <a-layout-sider
+                    collapsible
+                    :collapsed="isCollapse"
+                    @collapse="onCollapse"
+                    class="siderLeft-w"
+                >
                     <a-menu
                         :default-open-keys="[vid]"
                         :default-selected-keys="[cid]"
@@ -244,6 +249,14 @@
                     @mouseout="closeScroll"
                     @scroll="getScrollTop"
                 >
+                    <div
+                        v-if="!showSiderRight"
+                        @click="openTheSide"
+                        class="open-button"
+                        title="展开右侧 Ctrl+Shift+["
+                    >
+                        <icon-left :stroke-width="2" />
+                    </div>
                     <div v-if="showSearchBox" class="search-box">
                         <a-space
                             direction="vertical"
@@ -329,7 +342,9 @@
                     @moving="resizeBoxMoving"
                     :directions="['left']"
                     class="sider-right"
-                    style="min-width: 250px;width: 450px;"
+                    :style="{ minWidth: '250px' }"
+                    v-model:width="resizeBoxWdith"
+                    v-show="showSiderRight"
                 >
                     <!-- 伸缩杆 -->
                     <template #resize-trigger="{ direction }">
@@ -423,8 +438,13 @@
                                 </a-menu>
                             </template>
                         </a-trigger>
-                        <div class="fold-button" title="收起右侧">
-                            <icon-right style="line-height: 35px;" />
+                        <div
+                            v-if="showSiderRight"
+                            @click="stowTheSide"
+                            class="fold-button"
+                            title="收起右侧 Ctrl+Shift+]"
+                        >
+                            <icon-right :stroke-width="2" />
                         </div>
                         <!-- 各个需要显示的组件 -->
                         <WebviewBlock v-if="showModular === '0'" ref="ref_WebviewBlock"></WebviewBlock>
@@ -449,7 +469,7 @@
 import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount, watch, Ref } from 'vue';
 import {
     IconCaretRight, IconCaretLeft, IconClose, IconUndo, IconMessage,
-    IconRightCircle, IconSearch, IconArrowUp, IconArrowDown, IconApps, IconPublic, IconRight
+    IconRightCircle, IconSearch, IconArrowUp, IconArrowDown, IconApps, IconPublic, IconLeft, IconRight
 } from '@arco-design/web-vue/es/icon';
 import TitleBlock from '../components/TitleBlock.vue';
 import TopToolbar from '../components/TopToolbar.vue';
@@ -562,7 +582,7 @@ const stopSearchKeyword = () => {
 // 显示漂浮工具栏的菜单修改位置
 const isFloatToolMenu = ref(false), floatToolMenu = ref(), buttonTrigger = ref();
 //四个位置四种状态
-const floatToolPosition = ['top:0;left:0;', 'top:0;right:0;', 'bottom:10px;right:0;', 'bottom:10px;left:0;'];
+const floatToolPosition = ['top:0;left:4px;', 'top:0;right:4px;', 'bottom:15px;right:4px;', 'bottom:15px;left:4px;'];
 const floatToolMenuPositon = ['top:20px;left:20px', 'top:20px;right:20px', 'bottom:20px;right:20px', 'bottom:20px;left:20px'];
 const textPrompt = [['右上', '右下', '左下'], ['左上', '左下', '右下'], ['左下', '左上', '右上'], ['左上', '右上', '右下']];
 const position = ref(0); // 某个状态的索引
@@ -587,7 +607,9 @@ const moveFloatTool = (type: string) => {
 
 // 左侧是否折叠
 const isCollapse = ref(false);
-const onCollapse = (val: boolean) => { isCollapse.value = val; }
+const onCollapse = (val: boolean) => {
+    isCollapse.value = val;
+}
 
 /*----左侧栏功能----*/
 const onClickMenuItem = (tvid: string, tcid: string) => {
@@ -802,7 +824,6 @@ const closeScroll = () => {
 }
 // 调整小窗口大小
 const resizeBoxMoving = () => {
-    console.log('moving');
     if (ref_TimelineEditor.value) ref_TimelineEditor.value.setSliderState();
     if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
 }
@@ -833,7 +854,7 @@ const getAssociatedmark = (value: number) => {
     for (let i = 1; i < value; i++) {
         mark += '🔥';
     }
-    return mark
+    return mark;
 }
 
 const modify = () => {
@@ -929,11 +950,35 @@ const displayKeyPanel = () => {
     })
 }
 
+// 控制全屏模式
+//全屏状态，默认的核心区高度
+const fullScreenState = ref(false), layoutWriteHeight = ref('calc(100vh - 80px)');
+const turnfullScreen = (state: boolean) => {
+    window.$API.ipcSend('fullscreen', state);
+    window.$API.ipcOnce('isFullScreen', (state: boolean) => {
+        fullScreenState.value = state; // 能否全屏
+        if (state) stowTheSide(); // 若全屏，关闭右侧
+        else openTheSide(); // 否则开启右侧
+        isCollapse.value = state; // 若全屏，折叠左侧
+        // 修正高度，隐藏顶栏
+        if (state) layoutWriteHeight.value = 'calc(100vh - 5px)';
+        else layoutWriteHeight.value = 'calc(100vh - 80px)';
+    })
+}
+
 // 纸张组件快捷添加关键词时触发
 const addKeyWord = () => {
     // 如果当前侧面是关键字面板，则通知其刷新数据
     if (showModular.value === '2') keyWordRef.value.loadKeyWodData();
     else loadListData();
+}
+// 收起右侧伸缩栏
+const resizeBoxWdith = ref(450), showSiderRight = ref(true);
+const stowTheSide = () => {
+    showSiderRight.value = false;
+}
+const openTheSide = () => {
+    showSiderRight.value = true;
 }
 
 // 获取页面上下相对位置并保存
@@ -1023,8 +1068,9 @@ function shortcut(e: KeyboardEvent) {
         // Ctrl+S
         if (e.ctrlKey === true && e.key === 's') $message.error('目标已被删除!');
     } else {
-        // Ctrl+S
+        // Ctrl+s
         if (e.ctrlKey === true && e.key === 's') paperRef.value.saveDocData(true);
+        // Ctrl+f
         if (e.ctrlKey === true && e.key === 'f') {
             showSearchBox.value = true;
             nextTick(() => {
@@ -1032,13 +1078,29 @@ function shortcut(e: KeyboardEvent) {
             })
         }
     }
+    // 拉开/缩紧右侧栏 Ctrl+[/]
+    if (e.ctrlKey === true && e.key === '[') {
+        console.log('拉开');
+        if (showSiderRight.value && resizeBoxWdith.value < window.innerWidth - 200) resizeBoxWdith.value += 100;
+    }
+    if (e.ctrlKey === true && e.key === ']') {
+        console.log('关闭');
+        if (showSiderRight.value && resizeBoxWdith.value > 250) resizeBoxWdith.value -= 100;
+    }
+    // 展开/关闭右侧栏 Ctrl+{/}(Ctrl+Shift+[/])
+    if (e.ctrlKey === true && e.key === '{') {
+        openTheSide();
+    }
+    if (e.ctrlKey === true && e.key === '}') {
+        stowTheSide();
+    }
     // 打开全屏模式
     if (e.key === 'F1') {
-        window.$API.ipcSend('fullscreen', true);
+        turnfullScreen(true);
     }
-    // 打开关闭模式
+    // 关闭全屏模式
     if (e.key === 'Escape') {
-        window.$API.ipcSend('fullscreen', false);
+        turnfullScreen(false);
     }
 }
 function leftMoreControl() {
@@ -1108,7 +1170,8 @@ onUnmounted(() => {
 }
 
 .layout-write :deep(.arco-layout-content) {
-    height: calc(100vh - 85px);
+    /* height: calc(100vh - 80px); */
+    height: v-bind(layoutWriteHeight);
     min-width: 20px;
     background-color: rgb(var(--my-bg-color));
     overflow-y: scroll;

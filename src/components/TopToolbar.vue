@@ -458,6 +458,7 @@ import expPDFIcon from '../assets/svg/expPDFIcon.svg';
 import sensitiveWords from '../assets/svg/sensitiveWords.svg';
 const route = useRoute(), query_path = route.path;
 const themeStore = useThemeStore();
+const emit = defineEmits(['fullscreen']);
 /*-------------数据统计与初始化-------------*/
 const wordCount = ref(0), charCount = ref(0), paragraphs = ref(0), fontList = ref(), paperSize = ref([
     { type: 'Max', size: 1280, now: false },
@@ -685,7 +686,7 @@ const changeParaFocus = () => {
 
 // 设置全屏模式
 const turnFullScreen = () => {
-    window.$API.ipcSend('fullscreen', true);
+    emit('fullscreen', true);
 }
 
 // 导出文件

@@ -2,17 +2,28 @@
  * 输入hex字符串转rgb字符串
  */
 export function hexToRgba(hex: string, opacity: number): string {
-    let regExp = /^#[0-9A-F]{6}$/i;
-    if (regExp.test(hex)) {
-        let r = parseInt("0x" + hex.slice(1, 3)),
-            g = parseInt("0x" + hex.slice(3, 5)),
-            b = parseInt("0x" + hex.slice(5, 7));
-        if (opacity === undefined) {
-            return "rgb(" + r + "," + g + "," + b + ")";
-        } else if (opacity >= 0 && opacity <= 1) {
-            return "rgba(" + r + "," + g + "," + b + "," + opacity + ")";
-        }
+    // 这里算了#号的长度
+    if (hex.length === 7) {
+        return hex6ToRgba(hex, opacity);
+    } else if (hex.length === 9) {
+        return hex6ToRgba(hex.slice(1, 7), parseInt(hex.slice(7, 9), 16) / 255);
     }
+
+    function hex6ToRgba(hex: string, opacity: number) {
+        let regExp = /^#[0-9A-F]{6}$/i;
+        if (regExp.test(hex)) {
+            let r = parseInt("0x" + hex.slice(1, 3)),
+                g = parseInt("0x" + hex.slice(3, 5)),
+                b = parseInt("0x" + hex.slice(5, 7));
+            if (opacity === undefined) {
+                return "rgb(" + r + "," + g + "," + b + ")";
+            } else if (opacity >= 0 && opacity <= 1) {
+                return "rgba(" + r + "," + g + "," + b + "," + opacity + ")";
+            }
+        }
+        return '';
+    }
+
     return '';
 }
 

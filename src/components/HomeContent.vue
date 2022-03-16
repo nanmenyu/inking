@@ -150,29 +150,15 @@
                 </div>
             </ul>
         </div>
-        <!-- 主题按钮 -->
-        <div class="theme" title="更换主题">
-            <a-trigger trigger="click" :popup-translate="[-130, -10]">
-                <a-button class="btn" type="primary">
-                    <template #icon>
-                        <icon-skin />
-                    </template>
-                </a-button>
-                <template #content>
-                    <ThemeContainer></ThemeContainer>
-                </template>
-            </a-trigger>
-        </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, nextTick, onUnmounted, watch } from "vue";
-import { IconSkin, IconCheck, IconSunFill, IconMoonFill } from "@arco-design/web-vue/es/icon";
+import { IconCheck } from "@arco-design/web-vue/es/icon";
 import Toolbar from "./widget/Toolbar.vue";
 import MultipleBar from "./widget/MultipleBar.vue";
 import PopupMenu from './widget/PopupMenu.vue';
-import ThemeContainer from './widget/ThemeContainer.vue';
 import { db } from "../db/db";
 import { useRouter } from 'vue-router';
 import timeFormat from "../utils/timeFormat";

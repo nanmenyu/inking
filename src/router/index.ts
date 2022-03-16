@@ -30,6 +30,11 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Recycle',
         component: () => import('../views/recyclePage.vue')
     }, {
+        path: '/setting',
+        name: 'Setting',
+        component: () => import('../views/settingPage.vue')
+    },
+    {
         path: '/specialEditor',
         name: 'SpecialEditor',
         component: () => import('../views/specialeditorPage.vue')

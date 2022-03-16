@@ -5,7 +5,7 @@
         :menuItem="['快速查词', '快速翻译', '右侧搜索']"
         ref="contextMenu_ref"
     ></ContextMenu>-->
-    <div id="paper-box-r">
+    <div id="paper-box-r" ref="pBox">
         <main id="pEditor" ref="editor">
             <div id="mainEditor-r" ref="mainEditor">
                 <!-- <div class="contentTip contentTip-r" ref="contentTip1" style="display: none;"></div>
@@ -25,6 +25,7 @@ import { paperSize } from '../hooks/paperSize';
 import pureTextEditor from '../common/editor';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { useMainStore } from '../store/index';
+import { exportTXT, exportDOCX, exportPDF } from '../hooks/paper';
 import { setContentTipPos, setHTMLdata, setTranslationContent } from '../hooks/contentTip';
 import '../style/toolTip.scss';
 
@@ -33,12 +34,8 @@ const $modal = proxy.$modal;
 const $message = proxy.$message;
 const emit = defineEmits(['todata', 'toWebView']);
 const mainStore = useMainStore();
-const mainEditor = ref(), editor = ref();
+const mainEditor = ref(), editor = ref(), pBox = ref();
 loadFileData();
-
-onMounted(() => {
-    // contextMenu_ref.value.setContainer(mainEditor.value);
-})
 
 // 纸张宽度，纸张高度
 const boxWidth = ref(paperSize['A4']);
@@ -86,6 +83,33 @@ const setPaperSize = (type: string) => {
     boxWidth.value = paperSize[type];
 }
 
+const expFile = (type: string) => {
+    switch (type) {
+        case 'txt':
+            $message.warning('已经是txt文件了！');
+            break;
+        case 'docx':
+            exportDOCX(bookTitle, pBox.value);
+            break;
+        case 'pdf':
+            const paperType = JSON.parse((localStorage.getItem('uWritingOption') as string)).uPaperSize;
+            if (paperType === 'Max' || paperType === 'iPad Pro') {
+                $modal.warning({
+                    title: "导出警告",
+                    content: `当纸张宽度大于A4纸时, 部分内容会做裁剪处理`,
+                    simple: true,
+                    onOk: () => {
+                        $message.loading({ content: '正在渲染...', duration: 2000 });
+                        exportPDF(bookTitle, pBox.value);
+                    }
+                })
+            } else {
+                $message.loading({ content: '正在渲染...', duration: 2000 });
+                exportPDF(bookTitle, pBox.value);
+            }
+            break;
+    }
+}
 // 右侧菜单栏触发
 let searchType = 'wordSearch_baidu';// 默认搜索类型
 watch(computed(() => {
@@ -153,11 +177,11 @@ watch(computed(() => {
 // 读取文件数据
 // const fileData: Ref<Array<string>> = ref([]);
 // 文件的总计数/当前计数
-let totalWordCount = 0, totalCharCount = 0, totalParagraphs = 0;
-const wordCount = ref(0), charCount = ref(0), paragraphs = ref(0);
+let bookTitle = '', totalWordCount = 0, totalCharCount = 0, totalParagraphs = 0;
 function loadFileData() {
     db.ebooks.get(query_id).then(value => {
         const reader = new FileReader();
+        bookTitle = value?.title.replace('.txt', '') ?? '';
         // UTF-8 GB2312
         reader.readAsArrayBuffer(value!.data);
         reader.onload = function () {
@@ -217,7 +241,7 @@ function loadFileData() {
 
 defineExpose({
     setFont, setFontSize, setLineHeight, setFontWeight, setColor, setSegSpacing,
-    setTextIndent, setBgcColor, setShowborder, setRoundType, setPaperSize
+    setTextIndent, setBgcColor, setShowborder, setRoundType, setPaperSize, expFile
 })
 </script>
 
