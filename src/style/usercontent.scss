@@ -1,0 +1,26 @@
+.user-content {
+    @include homecontent;
+
+    &>h2 {
+        font-weight: lighter;
+    }
+
+    .chart-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: calc(100vh - 220px);
+
+        .chart {
+            width: 70%;
+            height: 100%;
+        }
+
+        .bar {
+            width: 30%;
+            height: 100%;
+            background-color: skyblue;
+        }
+    }
+}

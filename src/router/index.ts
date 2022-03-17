@@ -46,6 +46,10 @@ const routes: Array<RouteRecordRaw> = [
         path: '/pdfreading',
         name: 'PdfReading',
         component: () => import('../views/PDFPage.vue')
+    }, {
+        path: '/user',
+        name: 'User',
+        component: () => import('../views/userPage.vue')
     }
 ]
 

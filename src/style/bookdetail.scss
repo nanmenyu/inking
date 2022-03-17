@@ -471,9 +471,9 @@ body[arco-theme='dark'] .detail-content .left img {
 }
 
 #tagWall {
-    width: 370px;
+    width: 450px;
     margin: 0 auto;
-    padding: 0 40px;
+    // padding: 0 40px;
     padding-bottom: 20px;
     // background-color: #f7f8fa;
     overflow: hidden;
@@ -491,7 +491,7 @@ body[arco-theme='dark'] .detail-content .left img {
 /* ----------标签墙展开效果----------- */
 .expansion {
     transition-duration: .3s;
-    height: 450px;
+    height: 300px;
     visibility: visible;
 }
 

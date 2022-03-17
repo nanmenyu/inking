@@ -2,23 +2,25 @@
 <template>
     <div class="sidebar">
         <div class="sidebar-user">
-            <div class="user-info">
-                <a-avatar
-                    :size="45"
-                    :trigger-icon-style="{ color: 'rgb(var(--my-secondary-6))' }"
-                    :auto-fix-font-size="false"
-                    :style="{ backgroundColor: 'rgb(var(--my-secondary-6))' }"
-                >
-                    南
-                    <template #trigger-icon>
-                        <IconEdit />
-                    </template>
-                </a-avatar>
-                <div class="user-item">南门玉</div>
-                <div class="icon-right">
-                    <icon-right />
+            <router-link to="/user">
+                <div class="user-info">
+                    <a-avatar
+                        :size="45"
+                        :trigger-icon-style="{ color: 'rgb(var(--my-secondary-6))' }"
+                        :auto-fix-font-size="false"
+                        :style="{ backgroundColor: 'rgb(var(--my-secondary-6))' }"
+                    >
+                        南
+                        <template #trigger-icon>
+                            <IconEdit />
+                        </template>
+                    </a-avatar>
+                    <div class="user-item">南门玉</div>
+                    <div class="icon-right">
+                        <icon-right />
+                    </div>
                 </div>
-            </div>
+            </router-link>
             <div class="user-target" ref="uChart"></div>
         </div>
         <div class="sidebar-model">

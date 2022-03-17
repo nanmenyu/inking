@@ -81,25 +81,19 @@
             </a-form-item>
             <!-- 标签墙 -->
             <div id="tagWall" :class="tagRotated ? 'expansion' : '-expansion'">
-                <a-tabs default-active-key="1" :animation="true">
-                    <a-tab-pane key="1" title="起点">
-                        <h4>起点中文网热门标签</h4>
-                        <a-space wrap>
-                            <a-tag
-                                v-for="(item, i) in tagData['qidian']"
-                                :key="item"
-                                @click="checkTag(item)"
-                                :color="deCheckedArr[i] === undefined ? tagColor[i] : deCheckedArr[i]"
-                            >{{ item }}</a-tag>
-                        </a-space>
-                    </a-tab-pane>
-                    <a-tab-pane key="2" title="红袖">红袖添香网热门标签</a-tab-pane>
-                    <a-tab-pane key="3" title="晋江">晋江文学城热门标签</a-tab-pane>
-                    <a-tab-pane key="4" title="晋江">晋江文学城热门标签</a-tab-pane>
-                    <a-tab-pane key="5" title="晋江">晋江文学城热门标签</a-tab-pane>
-                    <a-tab-pane key="6" title="晋江">晋江文学城热门标签</a-tab-pane>
-                    <a-tab-pane key="7" title="晋江">晋江文学城热门标签</a-tab-pane>
-                </a-tabs>
+                <!-- <a-tabs default-active-key="1" :animation="true">
+                <a-tab-pane key="1" title="起点">-->
+                <h4>热门标签(起点)</h4>
+                <a-space wrap>
+                    <a-tag
+                        v-for="(item, i) in tagData"
+                        :key="item"
+                        @click="checkTag(item)"
+                        :color="deCheckedArr[i] === undefined ? tagColor[i] : deCheckedArr[i]"
+                    >{{ item }}</a-tag>
+                </a-space>
+                <!-- </a-tab-pane>
+                </a-tabs>-->
             </div>
             <!-- 标签墙 -->
             <a-divider style="border-bottom-style: dashed" />
@@ -261,12 +255,7 @@
                 <div class="middle">
                     <div class="title">
                         <span>{{ booksData.data.title }}</span>
-                        <a-button
-                            @click="isModify = true"
-                            type="primary"
-                            size="mini"
-                            title="修改作品信息"
-                        >
+                        <a-button @click="modifyInfo" type="primary" size="mini" title="修改作品信息">
                             <template #icon>
                                 <icon-edit class="edit" />
                             </template>
@@ -462,11 +451,6 @@ import 'cropperjs/dist/cropper.css';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { v4 } from 'uuid';
 import defaultCover from '../../public/static/img/default-cover.jpg';
-import svg_plot from '../assets/svg/plot2.svg';
-import svg_keyword from '../assets/svg/keyword2.svg';
-import svg_diagram from '../assets/svg/diagram2.svg';
-import svg_timeline from '../assets/svg/timeline2.svg';
-import svg_map from '../assets/svg/map2.svg';
 import category from '../assets/json/book_category.json';
 
 const { proxy } = useCurrentInstance();
@@ -480,12 +464,8 @@ interface Form {
     briefintro: string;
 }
 
-// 标签调试数据（模拟后端数据
-const tagData = {
-    'qidian': ['豪门', '孤儿', '盗贼', '特工', '黑客', '明星', '特种兵', '杀手', '老师', '学生', '胖子', '宠物', '蜀山', '魔王附体', 'LOL', '废材流', '护短', '卡片', '手游', '法师', '医生', '感情', '鉴宝', '亡灵', '职场', '吸血鬼', '龙', '西游', '鬼怪', '阵法', '魔兽', '勇猛', '玄学', '群穿', '丹药', '练功流', '召唤流', '恶搞', '爆笑', '轻松', '冷酷', '腹黑', '阳光', '狡猾', '机智', '猥琐', '嚣张', '淡定', '僵尸', '丧尸', '盗墓', '随身流', '软饭流', '无敌文', '异兽流', '系统流', '洪荒流', '学院流', '位面', '铁血', '励志', '坚毅', '变身', '强者回归', '赚钱', '争霸流', '种田文', '宅男', '无限流', '技术流', '凡人流', '热血', '重生', '穿越'],
-    'honxiu': [],
-    'jinjiang': []
-};
+// 标签调试数据
+const tagData = ['豪门', '孤儿', '盗贼', '特工', '黑客', '明星', '特种兵', '杀手', '老师', '学生', '胖子', '宠物', '蜀山', '魔王附体', 'LOL', '废材流', '护短', '卡片', '手游', '法师', '医生', '感情', '鉴宝', '亡灵', '职场', '吸血鬼', '龙', '西游', '鬼怪', '阵法', '魔兽', '勇猛', '玄学', '群穿', '丹药', '练功流', '召唤流', '恶搞', '爆笑', '轻松', '冷酷', '腹黑', '阳光', '狡猾', '机智', '猥琐', '嚣张', '淡定', '僵尸', '丧尸', '盗墓', '随身流', '软饭流', '无敌文', '异兽流', '系统流', '洪荒流', '学院流', '位面', '铁血', '励志', '坚毅', '变身', '强者回归', '赚钱', '争霸流', '种田文', '宅男', '无限流', '技术流', '凡人流', '热血', '重生', '穿越'];
 
 /*----点击修改封面----*/
 const wrapper = ref(false);
@@ -503,6 +483,15 @@ const routerLink = (id: number, vid: string, cid: string) => {
             cid: cid
         }
     })
+}
+
+// 点击修改作品信息按钮
+const modifyInfo = () => {
+    isModify.value = true;
+    // window.$API.ipcSend('reptile', { type: 'qidian', word: '' });
+    // window.$API.ipcOnce('getReptileData', (data: any) => {
+    //     console.log(data);
+    // })
 }
 
 const toSpecialEditor = (type: string) => {
@@ -589,7 +578,7 @@ const tagColor = computed(() => {
         'red', 'orangered', 'orange', 'gold', 'lime', 'green',
         'cyan', 'blue', 'arcoblue', 'purple', 'pinkpurple', 'magenta'];
     const temp = [];
-    for (let i = 0; i < tagData['qidian'].length; i++) {
+    for (let i = 0; i < tagData.length; i++) {
         temp.push(color[randomNum(0, 11)]);
     }
     return temp;
@@ -603,14 +592,14 @@ const promptText = computed(() => {
 const selectedArr: Array<string> = reactive([]), deCheckedArr: Array<string> = reactive([]);
 // 点击添加
 const addTag = () => {
-    let i = tagData['qidian'].indexOf(inputTag.value);
+    let i = tagData.indexOf(inputTag.value);
     if (i !== -1) deCheckedArr[i] = 'rgb(var(--primary-6))';
     selectedArr.push(inputTag.value);
     inputTag.value = '';
 }
 // 关闭标签
 const closeTag = (tname: string) => {
-    const index = tagData['qidian'].indexOf(tname), i = selectedArr.indexOf(tname);
+    const index = tagData.indexOf(tname), i = selectedArr.indexOf(tname);
     selectedArr.splice(i, 1);
     delete deCheckedArr[index];
 }
@@ -631,7 +620,7 @@ const checkTag = (tname: string) => {
     }
     deCheckedArr.splice(0, deCheckedArr.length); // 清空数组 
     selectedArr.forEach(item => {
-        deCheckedArr[tagData['qidian'].indexOf(item)] = 'rgb(var(--primary-6))';
+        deCheckedArr[tagData.indexOf(item)] = 'rgb(var(--primary-6))';
     })
 }
 // 修改确定, 添加修改至数据库

@@ -44,8 +44,8 @@ window.$API.ipcOnce('get-fonts-item', (data: Array<string>) => {
 
 // 设置系统字体
 const setFont = () => {
-    console.log(currentFont.value);
-    element_app?.setAttribute('style', `font-family:${currentFont.value};`);
+    if (currentFont.value === '默认字体') element_app?.removeAttribute('style');
+    else element_app?.setAttribute('style', `font-family:${currentFont.value};`);
 }
 
 // 设置主题

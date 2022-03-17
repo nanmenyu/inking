@@ -5,8 +5,6 @@
             @mousedown="choiceItem(item)"
             id="contextmenu-item"
         >{{ item }}</div>
-        <!-- <div id="contextmenu-item">随机取名</div>
-        <div id="contextmenu-item">文章续写</div>-->
     </div>
 </template>
 
@@ -68,16 +66,16 @@ defineExpose({
     right: 0;
     width: 90px;
     padding: 4px 0;
-    border: 1px solid #e5e6eb;
+    border: 1px solid var(--color-fill-3);
     border-radius: 4px;
-    background-color: rgb(var(--my-bg-color));
+    background-color: var(--color-bg-popup);
     box-shadow: 0 4px 10px #0000001a;
     #contextmenu-item {
         box-sizing: border-box;
         width: 100%;
         padding: 0 12px;
-        color: #1d2129;
-        font-size: 14px;
+        color: var(--color-text-1);
+        font-size: 12px;
         line-height: 36px;
         text-align: center;
         background-color: transparent;
@@ -86,7 +84,7 @@ defineExpose({
         white-space: nowrap;
         text-overflow: ellipsis;
         &:hover {
-            background-color: rgb(var(--my-bg2-color));
+            background-color: var(--color-fill-2);
         }
     }
 }

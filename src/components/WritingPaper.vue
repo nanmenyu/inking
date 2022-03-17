@@ -2,7 +2,7 @@
  <template>
     <ContextMenu
         mode="writing"
-        :menuItem="['随机取名', '文章续写']"
+        :menuItem="['复制 Ctrl+c', '粘贴 Ctrl+v', '剪切 Ctrl+x']"
         @choice="choiceContextMenuItem"
         ref="contextMenu_ref"
     ></ContextMenu>
@@ -435,7 +435,19 @@ watch(computed(() => {
 
 // 右侧菜单栏触发
 const choiceContextMenuItem = (data: { item: string, select?: string }) => {
-    console.log('&', data.item);
+    const sel = window.getSelection(), range = sel!.getRangeAt(0),
+        textNode = range.startContainer, selectedText = sel?.toString() ?? '';
+
+    if (data.item === '复制 Ctrl+c' && selectedText !== '') {
+        navigator.clipboard.writeText(selectedText);
+    } else if (data.item === '粘贴 Ctrl+v') {
+        navigator.clipboard.readText().then(clipText => {
+            (<Text>textNode).replaceData(range.startOffset, range.endOffset - range.startOffset, clipText);
+        })
+    } else if (data.item === '剪切 Ctrl+x' && selectedText !== '') {
+        (<Text>textNode).replaceData(range.startOffset, range.endOffset - range.startOffset, '');
+        navigator.clipboard.writeText(selectedText);
+    }
 }
 
 // TAB键插入两个中文空格
@@ -467,8 +479,8 @@ function moveCursor(selection: Selection, range: Range, startNode: Node, startOf
 
 defineExpose({
     saveDocData, setFont, setFontSize, setLineHeight, setFontWeight, setColor, setSegSpacing, setTextIndent,
-    setBgcColor, setShowborder, setRoundType, setPaperSize, setParaFocus, expFile, sensitiveRetrieval, setBooksData,
-    refreshPaper, setId
+    setBgcColor, setShowborder, setRoundType, setPaperSize, setParaFocus, expFile, sensitiveRetrieval,
+    setBooksData, refreshPaper, setId
 })
 </script>
 

@@ -1,0 +1,2 @@
+book_category: 作品分类列表
+prohibitedWords: 违禁词列表

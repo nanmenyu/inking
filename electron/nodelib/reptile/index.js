@@ -2,6 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 module.exports = (config, cb) => {
+    // 爬取百度汉语字词信息
     if (config.type === 'wordSearch_baidu') {
         // 先爬取基础链接
         axios.get('https://hanyu.baidu.com/s', {
@@ -57,7 +58,9 @@ module.exports = (config, cb) => {
             baidu_hanyu.antonym = baidu_hanyu.antonym.replaceAll(/href=".*"/g, '');
             return baidu_hanyu;
         }
-    } else if (config.type === 'wordSearch_zdic') {
+    }
+    // 爬取汉典字词信息
+    else if (config.type === 'wordSearch_zdic') {
         axios.get(encodeURI(`https://www.zdic.net/hans/${config.word}`)).then(res => {
             cb(organizeData(res));
 
@@ -77,6 +80,23 @@ module.exports = (config, cb) => {
                 zdic.gnr = zdic.gnr.replaceAll('<span class="gc_jfy_i">反</span>', '反:').replaceAll('<span class="gc_jfy_i">近</span>', '近:').replaceAll('<div class="div copyright"> 【漢典】 </div>', '');
                 zdic.cyjs = zdic.cyjs.replaceAll(/<div.*div>/g, '').replaceAll(/<h3.*h3>/g, '');
                 return zdic;
+            }
+        }).catch(err => {
+            console.log(err)
+        })
+    }
+    // 爬取起点小说标签
+    else if (config.type === 'qidian') {
+        axios.get('https://www.qidian.com/all/').then(res => {
+            cb(organizeData(res));
+            function organizeData(res) {
+                const $ = cheerio.load(res.data);
+                const listData = $('.select-list .tag ul li');
+                const respData = [];
+                for (let i = 1; i < listData.length; i++) {
+                    respData.push(listData.eq(i).text());
+                }
+                return respData;
             }
         }).catch(err => {
             console.log(err)
