@@ -309,7 +309,7 @@
                                 type="primary"
                                 class="iconfont"
                                 style="width: 100px;border-radius: 8px;"
-                            >&#xe620;&nbsp;&nbsp;剧&nbsp;&nbsp;情</a-button>
+                            >&#xe620;&nbsp;&nbsp;备&nbsp;&nbsp;忘</a-button>
                         </div>
                         <div class="right-inside-item">
                             <a-button

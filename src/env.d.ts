@@ -154,7 +154,7 @@ interface Eveday {
   timeSlot: number;
   data: { title: string, desc: string };
 }
-// 剧情大纲组
+// 备忘录
 declare interface PlotGroup {
   id: string;
   name: string;

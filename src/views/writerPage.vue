@@ -405,34 +405,24 @@
                                         </template>
                                         WebView
                                     </a-menu-item>
-                                    <a-menu-item style="margin: 10px 0;" key="1">
-                                        <template #icon>
-                                            <img :src="svg_plot" />
-                                        </template>
-                                        剧情
+                                    <a-menu-item style="margin: 10px 0;" key="1" class="iconfont">
+                                        <template #icon>&#xe620;</template>
+                                        备忘
                                     </a-menu-item>
-                                    <a-menu-item style="margin: 10px 0;" key="2">
-                                        <template #icon>
-                                            <img :src="svg_keyword" />
-                                        </template>
+                                    <a-menu-item style="margin: 10px 0;" key="2" class="iconfont">
+                                        <template #icon>&#xe669;</template>
                                         关键字
                                     </a-menu-item>
-                                    <a-menu-item style="margin: 10px 0;" key="3">
-                                        <template #icon>
-                                            <img :src="svg_diagram" />
-                                        </template>
+                                    <a-menu-item style="margin: 10px 0;" key="3" class="iconfont">
+                                        <template #icon>&#xe703;</template>
                                         关系图
                                     </a-menu-item>
-                                    <a-menu-item style="margin: 10px 0;" key="4">
-                                        <template #icon>
-                                            <img :src="svg_timeline" />
-                                        </template>
+                                    <a-menu-item style="margin: 10px 0;" key="4" class="iconfont">
+                                        <template #icon>&#xe6b5;</template>
                                         时间线
                                     </a-menu-item>
-                                    <a-menu-item style="margin: 10px 0;" key="5">
-                                        <template #icon>
-                                            <img :src="svg_map" />
-                                        </template>
+                                    <a-menu-item style="margin: 10px 0;" key="5" class="iconfont">
+                                        <template #icon>&#xe655;</template>
                                         地图
                                     </a-menu-item>
                                 </a-menu>
@@ -488,11 +478,6 @@ import useCurrentInstance from '../utils/useCurrentInstance';
 import { v4 } from 'uuid';
 import genkeywordMarks from '../utils/genkeywordMarks';
 import { useMainStore } from '../store/index';
-import svg_plot from '../assets/svg/plot.svg';
-import svg_keyword from '../assets/svg/keyword.svg';
-import svg_diagram from '../assets/svg/diagram.svg';
-import svg_timeline from '../assets/svg/timeline.svg';
-import svg_map from '../assets/svg/map.svg';
 import '../style/writerPage.scss';
 
 const { proxy } = useCurrentInstance();
@@ -973,7 +958,7 @@ const addKeyWord = () => {
     else loadListData();
 }
 // 收起右侧伸缩栏
-const resizeBoxWdith = ref(450), showSiderRight = ref(true);
+const resizeBoxWdith = ref(525), showSiderRight = ref(true);
 const stowTheSide = () => {
     showSiderRight.value = false;
 }

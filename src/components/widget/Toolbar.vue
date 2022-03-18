@@ -254,10 +254,10 @@ const addFile = () => {
                 }],// 时间线模块
                 thePlot: [{
                     id: v4(),
-                    name: '主线',
+                    name: '剧情备忘',
                     summary: [{
                         sid: v4(),
-                        itemsName: '自定义主线剧情待办组',
+                        itemsName: '自定义剧情相关待办组',
                         items: [{
                             title: '待办条目1',
                             imp: 3,
@@ -267,10 +267,10 @@ const addFile = () => {
                     }]
                 }, {
                     id: v4(),
-                    name: '支线1',
+                    name: '灵感备忘',
                     summary: [{
                         sid: v4(),
-                        itemsName: '自定义支线剧情待办组',
+                        itemsName: '自定义灵感相关待办组',
                         items: [{
                             title: '待办条目1',
                             imp: 5,
@@ -278,7 +278,7 @@ const addFile = () => {
                             con: '标题左侧的红点表示"待完成", 单击可变为"已完成"状态, importance表示该项的重要性(取值:1-5)'
                         }]
                     }]
-                }], // 剧情大纲模块
+                }], // 大纲备忘模块
                 opusNumber: 0 // 两个中文空格不算字
             }).then(() => {
                 emit('refresh');

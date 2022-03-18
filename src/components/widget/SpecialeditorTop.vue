@@ -3,7 +3,7 @@
         <span
             @click="toSpecialEditor('plot')"
             :class="type === 'plot' ? 'checked iconfont' : 'iconfont'"
-        >&#xe620;&nbsp;剧&nbsp;情</span>
+        >&#xe620;&nbsp;备&nbsp;忘</span>
         <span
             @click="toSpecialEditor('keyword')"
             :class="type === 'keyword' ? 'checked iconfont' : 'iconfont'"
