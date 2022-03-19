@@ -19,6 +19,7 @@ export interface Userdb {
     checked?: boolean;
     theTimeLine: Array<TimeLineGroup>,
     thePlot: Array<PlotGroup>,
+    theMaps: Array<Maps>,
     opusNumber: number
 }
 

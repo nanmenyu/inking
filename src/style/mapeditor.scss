@@ -1,0 +1,141 @@
+.map-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+
+    .map {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        // max-width: 100%;
+        // max-height: 100%;
+    }
+
+    .operationPanel {
+        display: block;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        width: 200px;
+        height: 300px;
+        background-color: red;
+    }
+
+    .anchor {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 30px;
+        height: 30px;
+        pointer-events: none;
+
+        /* 保持大小不变的小圆圈  */
+        .dot {
+            box-sizing: border-box;
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            left: 10px;
+            top: 10px;
+            border: 1px solid #f40d0d;
+            background: #f43d3db0;
+            border-radius: 100%;
+            z-index: 2;
+            animation: warn 0.6s ease-out;
+            animation-iteration-count: infinite;
+        }
+
+        /* 产生动画（向外扩散变大）的圆圈  */
+        .pulse {
+            box-sizing: border-box;
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            left: 3px;
+            top: 3px;
+            border: 1px solid #f4313169;
+            background: #ed2b2b4a;
+            border-radius: 100%;
+            z-index: 1;
+            animation: warn 0.6s ease-out;
+            animation-iteration-count: infinite;
+
+        }
+    }
+}
+
+.log {
+    position: absolute;
+    top: 10px;
+    // left: 0;
+    right: 100px;
+    // bottom: 0;
+    width: 100px;
+    height: 60px;
+    z-index: 99;
+    padding: 5px;
+    color: var(--color-text-2);
+    font-size: 12px;
+    line-height: 18px;
+    text-align: left;
+    pointer-events: none;
+}
+
+@keyframes warn {
+    0% {
+        transform: scale(0);
+        opacity: 0.0;
+    }
+
+    10% {
+        transform: scale(0.2);
+        opacity: 0.2;
+    }
+
+    20% {
+        transform: scale(0.4);
+        opacity: 0.4;
+    }
+
+    30% {
+        transform: scale(0.6);
+        opacity: 0.6;
+    }
+
+    40% {
+        transform: scale(0.8);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    60% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    70% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    80% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+
+    90% {
+        transform: scale(1);
+        opacity: 0.2;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}

@@ -1,146 +1,178 @@
-<!-- 地图编辑模块 -->
+<!-- 地图内部模块 -->
 <template>
-    <div class="map-content" ref="chart_ref">
-        <div class="map-container">
-            <img id="image" :src="Map_of_Iceland" ref="img_ref" />
+    <div class="map-container" ref="container_ref">
+        <a-dropdown trigger="contextMenu" alignPoint :style="{ display: 'block' }">
+            <img
+                class="map"
+                @click="clickTheImg"
+                @load="imgLoaded"
+                :src="props.mapImg"
+                ref="img_ref"
+            />
+            <template #content>
+                <a-doption @click="addNewSite">锚点处添加位点</a-doption>
+            </template>
+        </a-dropdown>
+        <!-- <div class="operationPanel"></div> -->
+        <div class="anchor" v-show="showAnchor" ref="anchor_ref">
+            <div class="dot"></div>
+            <div class="pulse"></div>
         </div>
-        <div class="log"></div>
     </div>
+    <div class="log" ref="log_ref"></div>
 </template>
 
-<script setup lang="ts">
-import { onMounted } from 'vue';
-import Map_of_Iceland from '../../public/static/img/Map_of_Iceland.svg';
+<script setup lang='ts'>
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 
-onMounted(() => {
-    // 获取dom
-    const container = document.querySelector('.map-container');
-    const image = document.getElementById('image');
-    const log = document.querySelector('.log');
+const props = defineProps<{
+    mapImg: string;
+}>();
+const container_ref = ref(), img_ref = ref(), log_ref = ref();
+const anchor_ref = ref();
 
-    // 全局变量
-    let result, x, y, scale = 1, minScale = 0.5, maxScale = 4,
-        isPointerdown = false, // 按下标识
-        diff = { x: 0, y: 0 }, // 相对于上一次pointermove移动差值
-        lastPointermove = { x: 0, y: 0 }; // 用于计算diff
-
-    // 图片加载完成后再绑定事件
-    image.addEventListener('load', function () {
-        result = getImgSize(image.naturalWidth, image.naturalHeight, window.innerWidth, window.innerHeight);
-        image.style.width = result.width + 'px';
-        image.style.height = result.height + 'px';
-        x = (window.innerWidth - result.width) * 0.5;
-        y = (window.innerHeight - result.height) * 0.5;
-        image.style.transform = 'translate3d(' + x + 'px, ' + y + 'px, 0) scale(1)';
-        // 拖拽查看
-        drag();
-        // 滚轮缩放
-        wheelZoom();
-    });
-    // image.src = '../images/liya.jpg';
-    /**
-     * 获取图片缩放尺寸
-     * @param {number} naturalWidth 
-     * @param {number} naturalHeight 
-     * @param {number} maxWidth 
-     * @param {number} maxHeight 
-     * @returns 
-     */
-    function getImgSize(naturalWidth, naturalHeight, maxWidth, maxHeight) {
-        const imgRatio = naturalWidth / naturalHeight;
-        const maxRatio = maxWidth / maxHeight;
-        let width, height;
-        // 如果图片实际宽高比例 >= 显示宽高比例
-        if (imgRatio >= maxRatio) {
-            if (naturalWidth > maxWidth) {
-                width = maxWidth;
-                height = maxWidth / naturalWidth * naturalHeight;
-            } else {
-                width = naturalWidth;
-                height = naturalHeight;
-            }
-        } else {
-            if (naturalHeight > maxHeight) {
-                width = maxHeight / naturalHeight * naturalWidth;
-                height = maxHeight;
-            } else {
-                width = naturalWidth;
-                height = naturalHeight;
-            }
-        }
-        return { width: width, height: height }
-    }
+// 全局变量
+let result = { width: 0, height: 0 }, x = 0, y = 0,
+    scale = 1, minScale = 0.5, maxScale = 4,
+    isPointerdown = false, // 按下标识
+    diff = { x: 0, y: 0 }, // 相对于上一次pointermove移动差值
+    lastPointermove = { x: 0, y: 0 }; // 用于计算diff
+let mapWidth: number, mapHeight: number, mapLeft: number, mapTop: number;
+// 图片加载完毕后
+const imgLoaded = () => {
+    // 初始化
+    result.width = img_ref.value.clientWidth;
+    result.height = img_ref.value.clientHeight;
+    img_ref.value.style.width = img_ref.value.clientWidth + 'px';
+    img_ref.value.style.height = img_ref.value.clientHeight + 'px';
+    img_ref.value.style.transform = 'translate3d(' + x + 'px, ' + y + 'px, 0) scale(1)';
+    // 初始位置垂直水平居中
+    img_ref.value.style.margin = `-${result.height / 2}px 0 0 -${result.width / 2}px`;
+    // 获取初次数据
+    getMapData();
     // 拖拽查看
-    function drag() {
-        // 绑定 pointerdown
-        image.addEventListener('pointerdown', function (e) {
-            isPointerdown = true;
-            image.setPointerCapture(e.pointerId);
-            lastPointermove = { x: e.clientX, y: e.clientY };
-        });
-        // 绑定 pointermove
-        image.addEventListener('pointermove', function (e) {
-            if (isPointerdown) {
-                const current = { x: e.clientX, y: e.clientY };
-                diff.x = current.x - lastPointermove.x;
-                diff.y = current.y - lastPointermove.y;
-                lastPointermove = { x: current.x, y: current.y };
-                x += diff.x;
-                y += diff.y;
-                image.style.transform = 'translate3d(' + x + 'px, ' + y + 'px, 0) scale(' + scale + ')';
-                log.innerHTML = `x = ${x.toFixed(0)}<br>y = ${y.toFixed(0)}<br>scale = ${scale.toFixed(5)}`;
-            }
-            e.preventDefault();
-        });
-        // 绑定 pointerup
-        image.addEventListener('pointerup', function (e) {
-            if (isPointerdown) {
-                isPointerdown = false;
-            }
-        });
-        // 绑定 pointercancel
-        image.addEventListener('pointercancel', function (e) {
-            if (isPointerdown) {
-                isPointerdown = false;
-            }
-        });
-    }
+    drag();
     // 滚轮缩放
-    function wheelZoom() {
-        container.addEventListener('wheel', function (e) {
-            let ratio = 1.1;
-            // 缩小
-            if (e.deltaY > 0) {
-                ratio = 1 / 1.1;
-            }
-            const _scale = scale * ratio;
-            if (_scale > maxScale) {
-                ratio = maxScale / scale;
-                scale = maxScale;
-            } else if (_scale < minScale) {
-                ratio = minScale / scale;
-                scale = minScale;
-            } else {
-                scale = _scale;
-            }
-            // 目标元素是img说明鼠标在img上，以鼠标位置为缩放中心，否则默认以图片中心点为缩放中心
-            if (e.target.tagName === 'IMG') {
-                const origin = {
-                    x: (ratio - 1) * result.width * 0.5,
-                    y: (ratio - 1) * result.height * 0.5
-                };
-                // 计算偏移量
-                x -= (ratio - 1) * (e.clientX - x) - origin.x;
-                y -= (ratio - 1) * (e.clientY - y) - origin.y;
-            }
-            image.style.transform = 'translate3d(' + x + 'px, ' + y + 'px, 0) scale(' + scale + ')';
-            log.innerHTML = `x = ${x.toFixed(0)}<br>y = ${y.toFixed(0)}<br>scale = ${scale.toFixed(5)}`;
-            e.preventDefault();
-        });
-    }
-})
+    wheelZoom();
+}
 
+// 点击移动定位点
+const showAnchor = ref(false);
+const anchorPos = { coordScaleX: 0, coordScaleY: 0 };
+const clickTheImg = (e: MouseEvent) => {
+    if (!showAnchor.value) showAnchor.value = true;
+    // 图片内坐标的比例（图片内的绝对位置）
+    anchorPos.coordScaleX = e.offsetX / img_ref.value.clientWidth;
+    anchorPos.coordScaleY = e.offsetY / img_ref.value.clientHeight;
+    setELementPos();
+}
+
+// 添加一个新位点
+const showFloatBox = ref(false);
+const addNewSite = () => {
+    showFloatBox.value = true;
+    console.log(anchorPos.coordScaleX, anchorPos.coordScaleY);
+}
+
+// 拖拽查看
+function drag() {
+    // 绑定 pointerdown
+    img_ref.value.addEventListener('pointerdown', (e: PointerEvent) => {
+        isPointerdown = true;
+        img_ref.value.setPointerCapture(e.pointerId);
+        lastPointermove = { x: e.clientX, y: e.clientY };
+    });
+    // 绑定 pointermove
+    img_ref.value.addEventListener('pointermove', (e: PointerEvent) => {
+        if (isPointerdown) {
+            const current = { x: e.clientX, y: e.clientY };
+            diff.x = current.x - lastPointermove.x;
+            diff.y = current.y - lastPointermove.y;
+            lastPointermove = { x: current.x, y: current.y };
+            x += diff.x;
+            y += diff.y;
+            img_ref.value.style.transform = 'translate3d(' + x + 'px, ' + y + 'px, 0) scale(' + scale + ')';
+            log_ref.value.innerHTML = `Δx = ${x.toFixed(0)}<br>Δy = ${y.toFixed(0)}<br>scale = ${scale.toFixed(5)}`;
+            getMapData();
+            setELementPos();
+        }
+        e.preventDefault();
+    });
+    // 绑定 pointerup
+    img_ref.value.addEventListener('pointerup', function (e: PointerEvent) {
+        if (isPointerdown) {
+            isPointerdown = false;
+        }
+    });
+    // 绑定 pointercancel
+    img_ref.value.addEventListener('pointercancel', function (e: PointerEvent) {
+        if (isPointerdown) {
+            isPointerdown = false;
+        }
+    });
+}
+// 滚轮缩放
+function wheelZoom() {
+    container_ref.value.addEventListener('wheel', (e: WheelEvent) => {
+        let ratio = 1.1;
+        if (e.deltaY > 0) ratio = 1 / 1.1;// 缩小
+
+        const _scale = scale * ratio;
+        if (_scale > maxScale) {
+            ratio = maxScale / scale;
+            scale = maxScale;
+        } else if (_scale < minScale) {
+            ratio = minScale / scale;
+            scale = minScale;
+        } else {
+            scale = _scale;
+        }
+        // 目标元素是img说明鼠标在img上，以鼠标位置为缩放中心，否则默认以图片中心点为缩放中心
+        if ((<HTMLElement>e.target).tagName === 'IMG') {
+            const origin = {
+                x: (ratio - 1) * result.width * 0.5,
+                y: (ratio - 1) * result.height * 0.5
+            };
+            // 计算偏移量
+            x -= (ratio - 1) * (e.clientX - x) - origin.x;
+            y -= (ratio - 1) * (e.clientY - y) - origin.y;
+        }
+        img_ref.value.style.transform = 'translate3d(' + x + 'px, ' + y + 'px, 0) scale(' + scale + ')';
+        log_ref.value.innerHTML = `Δx = ${x.toFixed(0)}<br>Δy = ${y.toFixed(0)}<br>scale = ${scale.toFixed(5)}`;
+        getMapData();
+        setELementPos();
+        e.preventDefault();
+    });
+}
+// 获得背景图片相关信息
+function getMapData() {
+    // 地图的显示宽高
+    mapWidth = img_ref.value.clientWidth * scale;
+    mapHeight = img_ref.value.clientHeight * scale;
+    // 图片离容器的总边距
+    const marginX = container_ref.value.clientWidth - mapWidth;
+    const marginY = container_ref.value.clientHeight - mapHeight;
+    // 图片距离容器的左、上边距
+    mapLeft = x + marginX / 2;
+    mapTop = y + marginY / 2;
+}
+// 设置锚点在地图上的位置
+function setELementPos() {
+    anchor_ref.value.style.left = mapLeft + mapWidth * anchorPos.coordScaleX - 15 + 'px';
+    anchor_ref.value.style.top = mapTop + mapHeight * anchorPos.coordScaleY - 15 + 'px';
+}
+
+function windowResize() {
+    showAnchor.value = false;
+    getMapData();
+}
+onMounted(() => {
+    window.addEventListener('resize', windowResize);
+})
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', windowResize);
+})
 </script>
 
-<style lang="scss" src="../style/mapcontent.scss" scoped>
+<style lang="scss" src="../style/mapeditor.scss" scoped>
 </style>

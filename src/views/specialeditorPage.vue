@@ -11,7 +11,7 @@
                     <KeywordEditor v-if="showModular === 'keyword'"></KeywordEditor>
                     <DiagramEditor v-if="showModular === 'diagram'"></DiagramEditor>
                     <TimelineEditor v-if="showModular === 'timeline'"></TimelineEditor>
-                    <MapEditor v-if="showModular === 'map'"></MapEditor>
+                    <MapContent v-if="showModular === 'map'"></MapContent>
                 </a-layout-content>
             </a-layout>
         </a-layout>
@@ -26,7 +26,7 @@ import PlotEditor from '../components/PlotEditor.vue';
 import KeywordEditor from '../components/KeywordEditor.vue';
 import DiagramEditor from '../components/DiagramEditor.vue';
 import TimelineEditor from '../components/TimelineEditor.vue';
-import MapEditor from '../components/MapEditor.vue';
+import MapContent from '../components/MapContent.vue';
 import { useRoute } from 'vue-router';
 
 // 通过route参数显示模块

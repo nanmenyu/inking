@@ -10,6 +10,12 @@
         <div class="floatBox-body" @mousedown.stop>
             <slot></slot>
         </div>
+        <div class="floatBox-footer">
+            <a-space size="large">
+                <a-button @mousedown.stop>取消</a-button>
+                <a-button @mousedown.stop type="primary">确定</a-button>
+            </a-space>
+        </div>
     </div>
     <!-- 悬浮框 -->
 </template>

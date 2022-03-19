@@ -762,9 +762,7 @@ const choiceDetele = (name: string, kid: string) => {
         onOk: () => {
             db.opus.where(':id').equals(query_id).modify(item => {
                 item.theKeyWord.forEach((it, i) => {
-                    if (it.kid === kid) {
-                        item.theKeyWord.splice(i, 1);
-                    }
+                    if (it.kid === kid) item.theKeyWord.splice(i, 1);
                 })
             }).then(() => {
                 loadKeyWodData();

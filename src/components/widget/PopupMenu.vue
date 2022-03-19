@@ -1,5 +1,5 @@
 <template>
-    <div id="modify-box">
+    <div id="modify-box" ref="floatBox">
         <div :class="props.boxClass ? [...props.boxClass] : 'box'">
             <div class="box-header">
                 <div class="header-title">{{ props.title }}</div>
@@ -43,6 +43,8 @@ const emit = defineEmits(['toModify', 'toDetermine']);
 const modify = () => { emit('toModify') }
 // 确认、添加键
 const determine = () => { emit('toDetermine') }
+
+
 </script>
 
 <style lang="scss" scoped>

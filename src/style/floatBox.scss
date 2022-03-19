@@ -2,54 +2,63 @@
 #floatBox {
     z-index: 999;
     position: fixed;
-    top: 300px;
-    left: 500px;
-    width: 300px;
-    height: 250px;
-    background-color: rgb(var(--my-bg-color));
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    transform: translateY(-75%, -50%);
+    background-color: var(--color-bg-3);
     border-radius: 4px;
     box-shadow: 0 4px 10px #0000001a;
-}
 
-.floatBox-header {
-    display: flex;
-    align-items: center;
-    box-sizing: border-box;
-    width: 100%;
-    height: 40px;
-    padding: 0 20px;
-    border-bottom: 1px solid #e5e6eb;
-    cursor: move;
-
-    .header-title {
+    .floatBox-header {
         display: flex;
-        flex: 1;
         align-items: center;
-        justify-content: center;
-        margin-top: 4px;
-        color: #1d2129;
-        font-weight: 500;
-        font-size: 16px;
-    }
+        box-sizing: border-box;
+        width: 100%;
+        height: 40px;
+        padding: 0 20px;
+        border-bottom: 1px solid var(--color-neutral-3);
+        cursor: move;
 
-    .header-close {
-        margin-left: -12px;
-        padding: 4px;
-        color: #1d2129;
-        font-size: 12px;
-        cursor: pointer;
-        border-radius: 50%;
+        .header-title {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            margin-top: 4px;
+            font-weight: 500;
+            font-size: 16px;
+            color: var(--color-text-1);
+        }
 
-        &:hover {
-            background-color: rgb(var(--my-bg2-color));
+        .header-close {
+            margin-left: -12px;
+            padding: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 50%;
+            color: var(--color-text-1);
+
+            &:hover {
+                background-color: var(--color-fill-2);
+            }
         }
     }
-}
 
-.floatBox-body {
-    box-sizing: border-box;
-    width: 80%;
-    height: 70%;
-    background-color: pink;
-    margin: 0 auto;
+    .floatBox-body {
+        position: relative;
+        max-height: 300px;
+        padding: 24px 20px;
+        color: var(--color-text-1);
+        font-size: 14px;
+        overflow-y: scroll;
+    }
+
+    .floatBox-footer {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 8px 10px;
+        text-align: right;
+        border-top: 1px solid var(--color-neutral-3);
+    }
 }

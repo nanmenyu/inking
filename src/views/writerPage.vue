@@ -446,7 +446,7 @@
                         ></KeywordEditor>
                         <DiagramEditor v-if="showModular === '3'"></DiagramEditor>
                         <TimelineEditor v-if="showModular === '4'" ref="ref_TimelineEditor"></TimelineEditor>
-                        <MapEditor v-if="showModular === '5'"></MapEditor>
+                        <MapContent v-if="showModular === '5'"></MapContent>
                         <div v-if="showIframeWrap" class="right-Wrap"></div>
                     </div>
                 </a-resize-box>
@@ -470,7 +470,7 @@ import PlotEditor from '../components/PlotEditor.vue';
 import KeywordEditor from '../components/KeywordEditor.vue';
 import DiagramEditor from '../components/DiagramEditor.vue';
 import TimelineEditor from '../components/TimelineEditor.vue';
-import MapEditor from '../components/MapEditor.vue';
+import MapContent from '../components/MapContent.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { throttle } from '../utils/flowControl';
 import { db } from '../db/db';

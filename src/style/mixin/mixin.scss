@@ -96,3 +96,133 @@
         border-radius: 10px;
     }
 }
+
+// 卡片样式
+@mixin cards {
+    .cards {
+        width: 100%;
+        height: calc(100vh - 85px);
+        padding: 0;
+        overflow-y: scroll;
+    }
+
+    .card {
+        position: relative;
+        float: left;
+        width: 160px;
+        height: 224px;
+        margin: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: rgb(var(--my-bg2-color));
+        cursor: pointer;
+        box-shadow: 0 4px 10px #0000001a;
+
+
+        &:hover {
+            .card__image {
+                transition: all 0.3s ease-in-out;
+                filter: blur(4px);
+            }
+
+            .card__overlay {
+                transform: translateY(0);
+            }
+
+            .card-edit {
+                display: block;
+            }
+
+            .card-delete {
+                display: block;
+            }
+
+            .card__header {
+                transform: translateY(0);
+                padding-bottom: 0;
+            }
+        }
+    }
+
+    .add-card {
+        box-sizing: border-box;
+        padding-top: 80px;
+        transition: background-color 0.3s;
+
+        &:hover {
+            background-color: var(--color-secondary-hover);
+        }
+    }
+
+    .card-edit,
+    .card-delete {
+        z-index: 9;
+        display: none;
+        position: absolute;
+        top: 10px;
+        color: #fff;
+        transition: color 0.3s ease-in-out;
+    }
+
+    .card-edit {
+        left: 10px;
+
+        &:hover {
+            color: #ccc;
+        }
+    }
+
+    .card-delete {
+        right: 10px;
+
+        &:hover {
+            color: #ccc;
+        }
+    }
+
+    .card__image {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 160px;
+        height: 224px;
+    }
+
+    .card__overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        border-radius: 20px 0 0 0;
+        transform: translateY(100%);
+        transition: 0.2s ease-in-out;
+    }
+
+    .card__header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding-bottom: 20px;
+        border-radius: 20px 0 0 0;
+        transform: translateY(-100%);
+        transition: 0.2s ease-in-out;
+    }
+
+    .card__title {
+        width: 100%;
+        margin: 0 auto;
+        color: #fff;
+        letter-spacing: 3px;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+        overflow: hidden;
+    }
+
+    .card__description {
+        padding: 0 1.5em;
+        line-height: 1.25em;
+        color: #fff;
+        overflow: hidden;
+    }
+}

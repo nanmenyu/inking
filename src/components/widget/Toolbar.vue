@@ -279,6 +279,7 @@ const addFile = () => {
                         }]
                     }]
                 }], // 大纲备忘模块
+                theMaps: [], // 地图模块
                 opusNumber: 0 // 两个中文空格不算字
             }).then(() => {
                 emit('refresh');
