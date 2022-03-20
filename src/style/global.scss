@@ -89,6 +89,14 @@ body {
     background-color: rgb(var(--my-secondary-6));
 }
 
+.arco-popover-popup-content {
+    padding: 6px !important;
+
+    p {
+        margin: 4px 0;
+    }
+}
+
 // 颜色选择器颜色适应
 .vc-sketch[aria-label="Sketch color picker"] {
     background-color: var(--color-bg-popup);

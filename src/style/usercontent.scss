@@ -13,14 +13,14 @@
         height: calc(100vh - 220px);
 
         .chart {
-            width: 70%;
+            width: 100%;
             height: 100%;
         }
 
-        .bar {
-            width: 30%;
-            height: 100%;
-            background-color: skyblue;
-        }
+        // .bar {
+ //     width: 10%;
+ //     height: 100%;
+ //     background-color: skyblue;
+ // }
     }
 }

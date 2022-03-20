@@ -193,6 +193,7 @@ declare interface Maps {
 }
 
 declare interface PosInfor {
+  id: string;// 数据id
   kid: string; // 放置关键字的kid
   iid: string; // 放置关键字的iid
   name: string; // 地点名

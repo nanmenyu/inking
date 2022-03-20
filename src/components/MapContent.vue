@@ -87,26 +87,31 @@
         </div>
         <div v-if="showContainer" class="top-bar">
             <div class="bar-inner">
-                <div @click="closeMap" class="close" title="关闭地图">
+                <div @click="closeMap" class="btn" title="关闭地图">
                     <icon-close :style="{ fontSize: '20px', marginTop: '10px' }" :stroke-width="2" />
+                </div>
+                <div @click="siteControl('add')" class="btn" title="添加地点">
+                    <icon-plus :style="{ fontSize: '20px', marginTop: '10px' }" :stroke-width="2" />
+                </div>
+                <!-- 阻止默认事件，避免要删除的位点失去焦点 -->
+                <div @mousedown.prevent @click="siteControl('delete')" class="btn" title="删除地点">
+                    <icon-delete
+                        :style="{ fontSize: '20px', marginTop: '10px' }"
+                        :stroke-width="2"
+                    />
                 </div>
             </div>
         </div>
-        <MapEditor
-            v-if="showContainer"
-            @clickMap="clickMap"
-            @sitecontrol="siteControl"
-            :mapImg="mapImg"
-            ref="mapeditor_ref"
-        ></MapEditor>
+        <MapEditor v-if="showContainer" @clickMap="clickMap" :mapImg="mapImg" ref="mapeditor_ref"></MapEditor>
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
-import { IconPlus, IconSync, IconEdit, IconClose } from '@arco-design/web-vue/es/icon';
+import { computed, nextTick, reactive, ref } from 'vue';
+import { IconPlus, IconSync, IconEdit, IconClose, IconCloseCircle, IconDelete } from '@arco-design/web-vue/es/icon';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { useRoute } from 'vue-router';
+import { useMainStore } from '../store';
 import { db } from '../db/db';
 import { v4 } from 'uuid';
 import MapEditor from './MapEditor.vue';
@@ -117,6 +122,7 @@ import addKeyWord from '../assets/svg/addKeyWord.svg';
 const { proxy } = useCurrentInstance();
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
+const mainStore = useMainStore();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
 
@@ -251,8 +257,10 @@ const choiceCard = (id: string) => {
             curPosInfor.data = item.posInfor; // 获得位置信息
         };
     })
-    // 显示所有位置信息
-    displayMapLocation();
+    nextTick(() => {
+        // 显示所有位置信息
+        displayMapLocation(false);
+    })
 }
 // 删除地图
 const choiceDetele = (name: string, id: string) => {
@@ -286,10 +294,44 @@ const clickMap = (pos: { coordScaleX: number, coordScaleY: number }) => {
 
 // 坐标控制
 const showFloatBox = ref(false);
-const siteControl = (type: 'add') => {
-    console.log(type);
+const siteControl = (type: 'add' | 'delete') => {
     if (type === 'add') {
         showFloatBox.value = true;
+    } else if (type === 'delete') {
+        const targetId = mainStore.focusedPlaceId;
+        if (targetId !== '') {
+            curPosInfor.data.forEach(item => {
+                if (item.id === targetId) {
+                    $modal.warning({
+                        title: "删除位置",
+                        content: `是否删除【${item.name}】的位置信息`,
+                        simple: true,
+                        onOk: () => {
+                            db.opus.where(':id').equals(query_id).modify(item => {
+                                item.theMaps.forEach(it => {
+                                    if (it.id === curId) {
+                                        it.posInfor.forEach((pos, i) => {
+                                            if (pos.id === targetId) it.posInfor.splice(i, 1);
+                                        })
+                                    }
+                                })
+                            }).then(() => {
+                                $message.success('删除成功!');
+                                loadMapsData(() => {
+                                    theMaps.data.forEach(item => {
+                                        // 刷新位置信息
+                                        if (item.id === curId) curPosInfor.data = item.posInfor;
+                                    })
+                                    displayMapLocation(true);
+                                });
+                            })
+                        }
+                    })
+                }
+            })
+        } else {
+            $message.warning('请选中一个地点!');
+        }
     }
 }
 
@@ -313,6 +355,7 @@ const panelDetermine = () => {
             if (item.kid === selectID.value) {
                 loadDB((map: Maps) => {
                     map.posInfor.push({
+                        id: v4(),
                         kid: item.kid,
                         iid: '',
                         name: item.kGroupName,
@@ -326,6 +369,7 @@ const panelDetermine = () => {
                     if (it.iid === selectID.value) {
                         loadDB((map: Maps) => {
                             map.posInfor.push({
+                                id: v4(),
                                 kid: item.kid,
                                 iid: it.iid,
                                 name: it.itemName,
@@ -350,15 +394,21 @@ const panelDetermine = () => {
         }).then(() => {
             showFloatBox.value = false;
             selectID.value = '';
-            loadMapsData();
+            loadMapsData(() => {
+                theMaps.data.forEach(item => {
+                    // 刷新位置信息
+                    if (item.id === curId) curPosInfor.data = item.posInfor;
+                })
+                displayMapLocation(true);
+            });
             $message.success('添加地点成功！');
         })
     }
 }
 
 // 子组件渲染位置节点
-function displayMapLocation() {
-    mapeditor_ref.value.setMapLocation(curPosInfor.data);
+function displayMapLocation(refresh: boolean) {
+    mapeditor_ref.value.setMapLocation(curPosInfor.data, refresh);
 }
 
 const modify = () => {
@@ -434,31 +484,36 @@ function fileToURL(file: File | null): string {
         z-index: 9;
         top: 0;
         left: 50%;
-        width: 100px;
+        width: 140px;
         height: 40px;
         transition: top 0.3s ease-in-out;
         overflow: hidden;
         .bar-inner {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
             position: absolute;
             top: -20px;
             left: 0;
-            width: 100px;
+            width: 100%;
             height: 40px;
             transition: top 0.2s ease-in-out;
-            .close {
+            .btn {
                 width: 40px;
                 height: 40px;
                 border-radius: 100%;
-                background-color: var(--color-bg-popup);
+                background-color: rgb(var(--my-bg-color));
                 cursor: pointer;
                 color: rgb(var(--primary-6));
+
                 &:hover {
-                    background-color: var(--color-fill-2);
+                    background-color: rgb(var(--my-bg2-color));
                 }
                 &:active {
-                    background-color: var(--color-bg-popup);
+                    background-color: var(--color-neutral-2);
                 }
             }
+
             &:hover {
                 top: 0;
             }

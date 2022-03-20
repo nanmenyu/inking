@@ -14,6 +14,7 @@ export const useMainStore = defineStore('mainStore', {
         baseTotalNumber_today: 0, //从数据库中拿取的今日码字数
         curSelectedText: '', //当前选中的文字
         keywordMarks: [], //当前的高亮标记目标
+        focusedPlaceId: '', // 当前选中的地图位点
     }),
     getters: {
     },
