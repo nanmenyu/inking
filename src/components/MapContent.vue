@@ -17,37 +17,44 @@
         </a-button>
         <a-form :model="form" style="margin-top: 20px;">
             <a-form-item field="地图名称" label="地图名称">
-                <a-input v-model.trim="form.title" :max-length="15" placeholder="请填写地图名称..." />
+                <a-input
+                    v-model.trim="form.title"
+                    :max-length="15"
+                    show-word-limit
+                    placeholder="请填写地图名称..."
+                />
             </a-form-item>
             <a-form-item field="描述" label="描述">
-                <a-textarea
-                    show-word-limit
+                <a-input
                     v-model.trim="form.desc"
                     :max-length="25"
-                    :auto-size="{
-                        s: 5
-                    }"
+                    show-word-limit
                     placeholder="请填写地图描述..."
                 />
             </a-form-item>
         </a-form>
     </PopupMenu>
-    <!-- <FloatBox >
-        <a-space direction="vertical" size="large">
-            <a-radio-group>
-                <a-radio value="A">A</a-radio>
-                <a-radio value="B">B</a-radio>
-                <a-radio value="C">C</a-radio>
-                <a-radio value="D">D</a-radio>
-            </a-radio-group>
-            <a-radio-group>
-                <a-radio value="A">A</a-radio>
-                <a-radio value="B">B</a-radio>
-                <a-radio value="C">C</a-radio>
-                <a-radio value="D" disabled>D</a-radio>
-            </a-radio-group>
+    <FloatBox
+        v-if="showFloatBox"
+        title="坐标面板"
+        determine="添加"
+        @toModify="modify"
+        @toDetermine="panelDetermine"
+        :determineDisabled="selectID === ''"
+    >
+        <a-space :size="10">
+            <a-typography-text type="primary">相对坐标X: {{ anchorPos.coordScaleX.toFixed(5) }}</a-typography-text>
+            <a-divider direction="vertical" />
+            <a-typography-text type="primary">相对坐标Y: {{ anchorPos.coordScaleY.toFixed(5) }}</a-typography-text>
         </a-space>
-    </FloatBox>-->
+        <a-cascader
+            @change="selectLocation"
+            :options="keyWordOption.data"
+            allow-search
+            placeholder="从关键词中选择地点"
+            :style="{ width: '320px', marginTop: '20px' }"
+        />
+    </FloatBox>
     <div class="map-content">
         <div v-if="!showContainer" class="cards">
             <div @click="choiceEdit('', true)" class="card add-card" title="添加地图">
@@ -85,7 +92,13 @@
                 </div>
             </div>
         </div>
-        <MapEditor v-if="showContainer" :mapImg="mapImg"></MapEditor>
+        <MapEditor
+            v-if="showContainer"
+            @clickMap="clickMap"
+            @sitecontrol="siteControl"
+            :mapImg="mapImg"
+            ref="mapeditor_ref"
+        ></MapEditor>
     </div>
 </template>
 
@@ -98,7 +111,7 @@ import { db } from '../db/db';
 import { v4 } from 'uuid';
 import MapEditor from './MapEditor.vue';
 import PopupMenu from './widget/PopupMenu.vue';
-// import FloatBox from './widget/FloatBox.vue';
+import FloatBox from './widget/FloatBox.vue';
 import addKeyWord from '../assets/svg/addKeyWord.svg';
 
 const { proxy } = useCurrentInstance();
@@ -108,7 +121,9 @@ const $modal = proxy.$modal;
 const $message = proxy.$message;
 
 const showContainer = ref(false);
+const mapeditor_ref = ref();
 loadMapsData();
+loadKeyWordData();
 
 // 地图模块增删改查
 const isMapEdit = ref(false), mapEditTitle = ref('');
@@ -226,11 +241,18 @@ const confirmMap = () => {
 
 // 点击卡片
 const mapImg = ref('');
+const curPosInfor: { data: Array<PosInfor> } = reactive({ data: [] });
 const choiceCard = (id: string) => {
+    curId = id; // 当前的地图的id
     showContainer.value = true;
     theMaps.data.forEach(item => {
-        if (item.id === id) mapImg.value = fileToURL(item.mapImg);
+        if (item.id === id) {
+            mapImg.value = fileToURL(item.mapImg); // 渲染地图
+            curPosInfor.data = item.posInfor; // 获得位置信息
+        };
     })
+    // 显示所有位置信息
+    displayMapLocation();
 }
 // 删除地图
 const choiceDetele = (name: string, id: string) => {
@@ -253,19 +275,140 @@ const choiceDetele = (name: string, id: string) => {
 // 关闭地图编辑页
 const closeMap = () => {
     showContainer.value = false;
+    showFloatBox.value = false
+}
+// 点击地图时获取坐标
+const anchorPos = reactive({ coordScaleX: 0, coordScaleY: 0 });
+const clickMap = (pos: { coordScaleX: number, coordScaleY: number }) => {
+    anchorPos.coordScaleX = pos.coordScaleX;
+    anchorPos.coordScaleY = pos.coordScaleY;
+}
+
+// 坐标控制
+const showFloatBox = ref(false);
+const siteControl = (type: 'add') => {
+    console.log(type);
+    if (type === 'add') {
+        showFloatBox.value = true;
+    }
+}
+
+// 从关键词中选择地点
+const selectID = ref('');
+const selectLocation = (id: string) => {
+    selectID.value = id;
+}
+// 点击确认添加按钮
+const panelDetermine = () => {
+    let flag = true;
+    // 查看坐标是否重复
+    curPosInfor.data.forEach(item => {
+        if (item.coordX === anchorPos.coordScaleX &&
+            item.coordY === anchorPos.coordScaleY) {
+            flag = false;
+        }
+    });
+    if (flag) {
+        theKeyWords.data.forEach(item => {
+            if (item.kid === selectID.value) {
+                loadDB((map: Maps) => {
+                    map.posInfor.push({
+                        kid: item.kid,
+                        iid: '',
+                        name: item.kGroupName,
+                        desc: item.kGroupDesc,
+                        coordX: anchorPos.coordScaleX,
+                        coordY: anchorPos.coordScaleY,
+                    });
+                })
+            } else {
+                item.data.forEach(it => {
+                    if (it.iid === selectID.value) {
+                        loadDB((map: Maps) => {
+                            map.posInfor.push({
+                                kid: item.kid,
+                                iid: it.iid,
+                                name: it.itemName,
+                                desc: it.itemDesc,
+                                coordX: anchorPos.coordScaleX,
+                                coordY: anchorPos.coordScaleY,
+                            });
+                        })
+                    }
+                })
+            }
+        })
+    } else {
+        $message.warning('与已有坐标位置重复!');
+    }
+    // 局部方法
+    function loadDB(cb: Function) {
+        db.opus.where(':id').equals(query_id).modify(value => {
+            value.theMaps.forEach(map => {
+                if (map.id === curId) cb(map);
+            })
+        }).then(() => {
+            showFloatBox.value = false;
+            selectID.value = '';
+            loadMapsData();
+            $message.success('添加地点成功！');
+        })
+    }
+}
+
+// 子组件渲染位置节点
+function displayMapLocation() {
+    mapeditor_ref.value.setMapLocation(curPosInfor.data);
 }
 
 const modify = () => {
     isMapEdit.value = false;
     mapImgLoaded.value = false;
     fileData = null;
+    showFloatBox.value = false;
+    selectID.value = '';
 }
 
-// 加载数据
+// 加载地图数据
 const theMaps: { data: Array<Maps> } = reactive({ data: [] });
 function loadMapsData(cb?: Function) {
     db.opus.get(query_id).then(value => {
         theMaps.data = value!.theMaps;
+        if (typeof cb === 'function') cb();
+    })
+}
+// 加载关键字数据
+const theKeyWords: { data: Array<KeyWordGroup> } = reactive({ data: [] });
+const keyWordOption: {
+    data: Array<{
+        value: string,
+        label: string,
+        children?: Array<{ value: string, label: string }>
+    }>
+} = reactive({ data: [] });
+function loadKeyWordData(cb?: Function) {
+    db.opus.get(query_id).then(value => {
+        theKeyWords.data = value!.theKeyWord;
+        keyWordOption.data = theKeyWords.data.map(item => {
+            const children = item.data.map(it => {
+                return {
+                    value: it.iid,
+                    label: it.itemName
+                }
+            })
+            if (children.length == 0) {
+                return {
+                    value: item.kid,
+                    label: item.kGroupName,
+                }
+            } else {
+                return {
+                    value: item.kid,
+                    label: item.kGroupName,
+                    children
+                }
+            }
+        })
         if (typeof cb === 'function') cb();
     })
 }
@@ -289,7 +432,7 @@ function fileToURL(file: File | null): string {
     .top-bar {
         position: absolute;
         z-index: 9;
-        top: 5px;
+        top: 0;
         left: 50%;
         width: 100px;
         height: 40px;

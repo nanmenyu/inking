@@ -189,14 +189,15 @@ declare interface Maps {
   mapName: string; // 地图名称
   mapDesc: string; // 地图描述
   mapImg: File | null; // 地图背景
-  posInfor: Array<PosInfor> // 地图位点信息
+  posInfor: Array<PosInfor> // 地图坐标信息
 }
 
 declare interface PosInfor {
-  pid: string; // id
+  kid: string; // 放置关键字的kid
+  iid: string; // 放置关键字的iid
   name: string; // 地点名
+  desc: string; // 地点描述
   coordX: number; // 坐标x
   coordY: number; // 坐标y
-  desc: string; // 地点描述
-  keywords: Array<[string, string]>; // 关联的关键词[kid,iid]
+  // keywords: Array<[string, string]>; // 关联的关键词[kid,iid]
 }

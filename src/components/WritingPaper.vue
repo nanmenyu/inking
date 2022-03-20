@@ -369,7 +369,7 @@ watch(computed(() => {
                                         itemImg: '/static/img/default.png',
                                         itemName: currentText.value,
                                         otherName: [],
-                                        itemDesc: '点击左侧修改介绍',
+                                        itemDesc: '暂无相关简介',
                                         associated: [],
                                         itemString: [],
                                         itemNumber: []

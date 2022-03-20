@@ -10,7 +10,7 @@
                 ref="img_ref"
             />
             <template #content>
-                <a-doption @click="addNewSite">锚点处添加位点</a-doption>
+                <a-doption @click="addNewSite">锚点处添加地点</a-doption>
             </template>
         </a-dropdown>
         <!-- <div class="operationPanel"></div> -->
@@ -28,6 +28,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 const props = defineProps<{
     mapImg: string;
 }>();
+const emit = defineEmits(['clickMap', 'sitecontrol']);
 const container_ref = ref(), img_ref = ref(), log_ref = ref();
 const anchor_ref = ref();
 
@@ -54,24 +55,27 @@ const imgLoaded = () => {
     drag();
     // 滚轮缩放
     wheelZoom();
+    // 初始化锚点位置
+    setELementPos();
+    emit('clickMap', anchorPos);
 }
 
 // 点击移动定位点
-const showAnchor = ref(false);
-const anchorPos = { coordScaleX: 0, coordScaleY: 0 };
+const showAnchor = ref(true);
+const anchorPos = { coordScaleX: 0.5, coordScaleY: 0.5 };
 const clickTheImg = (e: MouseEvent) => {
-    if (!showAnchor.value) showAnchor.value = true;
+    // if (!showAnchor.value)
+    showAnchor.value = true;
     // 图片内坐标的比例（图片内的绝对位置）
     anchorPos.coordScaleX = e.offsetX / img_ref.value.clientWidth;
     anchorPos.coordScaleY = e.offsetY / img_ref.value.clientHeight;
+    emit('clickMap', anchorPos);
     setELementPos();
 }
 
-// 添加一个新位点
-const showFloatBox = ref(false);
+// 添加一个新位置
 const addNewSite = () => {
-    showFloatBox.value = true;
-    console.log(anchorPos.coordScaleX, anchorPos.coordScaleY);
+    emit('sitecontrol', 'add');
 }
 
 // 拖拽查看
@@ -162,6 +166,12 @@ function setELementPos() {
     anchor_ref.value.style.top = mapTop + mapHeight * anchorPos.coordScaleY - 15 + 'px';
 }
 
+// 将指定数据群渲染到地图上
+function setMapLocation(data: Array<PosInfor>) {
+    console.log('setMapLocation');
+    console.log(data);
+}
+
 function windowResize() {
     showAnchor.value = false;
     getMapData();
@@ -171,6 +181,10 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
     window.removeEventListener('resize', windowResize);
+})
+
+defineExpose({
+    setMapLocation
 })
 </script>
 

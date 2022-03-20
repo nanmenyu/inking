@@ -709,16 +709,14 @@ const confirmKeywordGroup = () => {
             let path: string;
             db.opus.where(':id').equals(query_id).modify(item => {
                 const kid = v4();
-                item.theKeyWord.push(
-                    {
-                        kid: kid,
-                        kGroupName: form.keyword.title,
-                        kGroupDesc: form.keyword.desc,
-                        cardImg: form.keyword.cardImg,
-                        data: [],
-                        template: []
-                    }
-                );
+                item.theKeyWord.push({
+                    kid: kid,
+                    kGroupName: form.keyword.title,
+                    kGroupDesc: form.keyword.desc,
+                    cardImg: form.keyword.cardImg,
+                    data: [],
+                    template: []
+                });
                 // 获得保存图片的路径
                 path = 'workspace/opus/' + item.id + '/keyword/' + kid;
             }).then(() => {
@@ -1193,7 +1191,7 @@ const addNewKeyWord = () => {
                     itemImg: '/static/img/default.png',
                     itemName: '主名' + item.maxNamLen,
                     otherName: [],
-                    itemDesc: '点击左侧修改介绍',
+                    itemDesc: '暂无相关简介',
                     associated: [],
                     itemString: targetItemString,
                     itemNumber: targetItemNumber
