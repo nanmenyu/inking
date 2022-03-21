@@ -22,7 +22,7 @@ export default function genkeywordMarks(keywordArr: Array<Array<string>>) {
         item.forEach((it, i) => {
             // 跳过前两位的kid和iid
             if (i > 1 && it !== '') result.push({
-                match: new RegExp(it, 'g'),
+                match: new RegExp(it, 'ig'),
                 class: 'keyWord',
                 style: `color: ${color};background-color:${bgColor};`
             })

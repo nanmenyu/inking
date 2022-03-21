@@ -998,6 +998,7 @@ function loadListData() {
                 let tempArr: Array<string> = [];
                 item.data.forEach(it => {
                     tempArr = it.otherName;
+                    // kid iid 有其它用处 genkeywordMarks会忽略
                     tempArr.unshift(item.kid, it.iid, it.itemName);
                     // 去重
                     keyWordArr.push([...new Set(tempArr)]);

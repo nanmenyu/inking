@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "18166405",
+      "name": "折线图,统计图",
+      "font_class": "chart-trend-full",
+      "unicode": "e8bf",
+      "unicode_decimal": 59583
+    },
+    {
       "icon_id": "4599422",
       "name": "模板管理",
       "font_class": "mobanguanli",

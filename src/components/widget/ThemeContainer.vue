@@ -89,8 +89,8 @@ const chooseThemeColor = (color: string) => {
     } else if (colorMode.value === 'second') {
         secondThemeColor.value = color;
         setupSecondaryThemes(color);
-        setSharedColor(themeMode.value);
     }
+    setSharedColor(themeMode.value);
     localStorage.setItem('uTheme', JSON.stringify({
         mode: document.body.getAttribute('arco-theme') === 'dark' ? 'dark' : 'light',
         mainColor: mainThemeColor.value,

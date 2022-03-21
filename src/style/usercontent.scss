@@ -6,6 +6,7 @@
     }
 
     .chart-content {
+        position: relative;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -17,10 +18,10 @@
             height: 100%;
         }
 
-        // .bar {
- //     width: 10%;
- //     height: 100%;
- //     background-color: skyblue;
- // }
+        .chart-btn {
+            position: absolute;
+            top: -10px;
+            right: 0;
+        }
     }
 }
