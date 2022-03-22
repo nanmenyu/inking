@@ -30,7 +30,7 @@
                 </svg>
                 <template #content>
                     <div style="max-width: 300px;">
-                        <p>{{ item.desc }}sfdc反对sfdc反对大师傅广泛广泛和被告返还不规范sfdc反对大师傅广泛广泛和被告返还不规范大师傅广泛广泛和被告返还不规范</p>
+                        <p>{{ item.desc }}</p>
                     </div>
                 </template>
             </a-popover>

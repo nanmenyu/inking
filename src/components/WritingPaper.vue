@@ -320,7 +320,8 @@ const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<Marker>) =>
 
 // 监视选中文字的变化 设置选中文字时的工具栏
 const currentText = ref('');
-let searchType = 'wordSearch_baidu';// 默认搜索类型
+let searchType = mainStore.searchEngine; // 加载默认搜索类型
+console.log(searchType);
 watch(computed(() => {
     return mainStore.curSelectedText;
 }), text => {

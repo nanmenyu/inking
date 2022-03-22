@@ -9,13 +9,8 @@
                         :trigger-icon-style="{ color: 'rgb(var(--my-secondary-6))' }"
                         :auto-fix-font-size="false"
                         :style="{ backgroundColor: 'rgb(var(--my-secondary-6))' }"
-                    >
-                        南
-                        <template #trigger-icon>
-                            <IconEdit />
-                        </template>
-                    </a-avatar>
-                    <div class="user-item">南门玉</div>
+                    >数</a-avatar>
+                    <div class="user-item">数据中心</div>
                     <div class="icon-right">
                         <icon-right />
                     </div>
@@ -76,7 +71,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
 import {
-    IconRight, IconEdit, IconSettings, IconQuestionCircle, IconNotification
+    IconRight, IconSettings, IconQuestionCircle, IconNotification
 } from '@arco-design/web-vue/es/icon';
 import { useRoute } from 'vue-router';
 import { useThemeStore, useMainStore } from '../store';

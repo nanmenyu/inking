@@ -31,6 +31,17 @@
                     :max="100000"
                 />
             </li>
+            <li>
+                <span>默认查词引擎</span>
+                <a-radio-group
+                    @change="changeSearchEngine"
+                    :model-value="searchEngine"
+                    type="button"
+                >
+                    <a-radio value="wordSearch_baidu">百度汉语</a-radio>
+                    <a-radio value="wordSearch_zdic">汉典</a-radio>
+                </a-radio-group>
+            </li>
         </ul>
     </div>
 </template>
@@ -70,6 +81,14 @@ watch(uDailyPlan, value => {
     localStorage.setItem('uDailyPlan', value);
     mainStore.dailyPlan = value;
 })
+
+// 设置查词引擎
+const searchEngine = ref(mainStore.searchEngine);
+const changeSearchEngine = (value: string) => {
+    searchEngine.value = value;
+    localStorage.setItem('uSearchEngine', value);
+    mainStore.searchEngine = value;
+}
 
 onMounted(() => {
     element_app = document.getElementById('app');

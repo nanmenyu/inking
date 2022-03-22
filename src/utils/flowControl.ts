@@ -13,23 +13,3 @@ export function throttle(func: (para: any) => void, delay: number) {
         }
     }
 }
-
-/**
- * 函数防抖
- */
-// export function debounce(func: (para: any) => void, wait = 0) {
-//     let timeid, result;
-//     return function () {
-//         let context = this;
-//         let args = arguments;
-
-//         if (timeid) {
-//             clearTimeout(timeid);
-//         }
-//         timeid = setTimeout(function () {
-//             result = func.apply(context, args);
-//         }, wait);
-
-//         return result;
-//     }
-// }

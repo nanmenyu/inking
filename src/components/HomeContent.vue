@@ -113,7 +113,7 @@
                     v-for="(item, i) in booksData.data"
                     :key="item.id"
                     @click="choiceItem(i)"
-                    :style="item.checked ? 'background-color: #f2f3f5' : ''"
+                    :class="item.checked ? 'checked-li' : ''"
                     title="右键查看更多"
                 >
                     <a-dropdown

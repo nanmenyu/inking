@@ -76,7 +76,7 @@
                     class="card-delete"
                     :style="{ fontSize: '32px' }"
                 />
-                <img :src="fileToURL(item.mapImg)" class="card__image" style="object-fit:cover;" />
+                <img :src="item.mapImg ?? ''" class="card__image" style="object-fit:cover;" />
                 <div class="card__overlay">
                     <div class="card__header">
                         <h2 class="card__title">{{ item.mapName }}</h2>
@@ -168,7 +168,7 @@ const buttonStatus = computed(() => {
     else return mapImgLoaded.value ? 'success' : 'danger';
 })
 // 导入地图图片 
-let fileData: File | null = null; // 保存图片数据
+let fileData: string | null = null; // 保存图片数据
 const mapImgLoaded = ref(false);
 const importMapImg = () => {
     if (isNew.value) {
@@ -190,9 +190,13 @@ const importMapImg = () => {
         input.click();
         input.onchange = () => {
             if (input.files) {
-                fileData = input.files![0];
-                mapImgLoaded.value = true;
-                $message.success('地图图片导入成功');
+                const reader = new FileReader();
+                reader.readAsDataURL(input.files![0]);
+                reader.onload = () => {
+                    fileData = <string>reader.result;
+                    mapImgLoaded.value = true;
+                    $message.success('地图图片导入成功');
+                }
             }
         }
     }
@@ -253,7 +257,7 @@ const choiceCard = (id: string) => {
     showContainer.value = true;
     theMaps.data.forEach(item => {
         if (item.id === id) {
-            mapImg.value = fileToURL(item.mapImg); // 渲染地图
+            mapImg.value = item.mapImg ?? ''; // 直接使用
             curPosInfor.data = item.posInfor; // 获得位置信息
         };
     })
@@ -461,11 +465,6 @@ function loadKeyWordData(cb?: Function) {
         })
         if (typeof cb === 'function') cb();
     })
-}
-// 将file对象转换为指向文件的URL
-function fileToURL(file: File | null): string {
-    if (file === null) return '';
-    else return window.URL.createObjectURL(file);
 }
 
 </script>

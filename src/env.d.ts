@@ -206,7 +206,8 @@ declare interface Maps {
   id: string; // id
   mapName: string; // 地图名称
   mapDesc: string; // 地图描述
-  mapImg: File | null; // 地图背景
+  // mapImg: File | string | null; // 地图背景
+  mapImg: string | null;
   posInfor: Array<PosInfor> // 地图坐标信息
 }
 

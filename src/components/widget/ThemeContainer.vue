@@ -44,8 +44,8 @@ import { setSharedColor, setupMainThemes, setupSecondaryThemes } from '../../hoo
 // const themeStore = useThemeStore();
 const emit = defineEmits(['changePaperColor']);
 
-const themeColor = ['RGB(0,176,255)', 'RGB(0,191,166)', 'RGB(245,0,87)', 'RGB(83,109,254)', 'RGB(249,168,38)', 'RGB(108,99,255)',
-    'RGB(57,175,234)', 'RGB(226,171,18)', 'RGB(255,143,87)', 'RGB(253,114,109)', 'RGB(253,84,78)', 'RGB(204,204,204)'];
+const themeColor = ['RGB(0,176,255)', 'RGB(0,191,166)', 'RGB(245,61,127)', 'RGB(83,109,254)', 'RGB(249,168,38)', 'RGB(253,84,78)',
+    'RGB(1,121,202)', 'RGB(0,143,145)', 'RGB(241,100,100)', 'RGB(104,103,209)', 'RGB(255,143,87)', 'RGB(253,114,109)'];
 const getLocalTheme = JSON.parse(localStorage.getItem('uTheme')!);
 const themeMode = ref(getLocalTheme.mode),
     mainThemeColor = ref(getLocalTheme.mainColor),

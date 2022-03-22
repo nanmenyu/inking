@@ -25,6 +25,38 @@
     position: absolute;
     top: 20px;
     right: 40px;
+
+    .search-result {
+        position: absolute;
+        z-index: 1;
+        top: 42px;
+        box-sizing: border-box;
+        width: 320px;
+        padding: 4px 0;
+        background-color: var(--color-bg-popup);
+        border: 1px solid var(--color-fill-3);
+        border-radius: var(--border-radius-medium);
+        box-shadow: 0 4px 10px #0000001a;
+
+        .result-item {
+            padding: 0 12px;
+            color: var(--color-text-1);
+            font-size: 14px;
+            line-height: 36px;
+            text-align: left;
+            background-color: transparent;
+            cursor: pointer;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            transition: background-color .1s ease-in-out;
+
+            &:hover {
+                color: var(--color-text-1);
+                background-color: var(--color-fill-2);
+            }
+        }
+    }
 }
 
 path[p-id="2749"] {

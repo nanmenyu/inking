@@ -172,10 +172,16 @@ body[arco-theme='dark'] .book {
 }
 
 .list {
+    position: relative;
     margin: 0 28px;
     padding: 0;
     list-style-type: none;
     border-radius: 4px;
+
+    .checked-li {
+        border-left: 4px solid rgb(var(--danger-6));
+        border-radius: 4px;
+    }
 
     .li {
         display: flex;
@@ -188,6 +194,7 @@ body[arco-theme='dark'] .book {
         box-shadow: 0 4px 4px #0000001a;
         background-color: var(--color-bg-3);
         cursor: pointer;
+
 
         &:nth-last-of-type(1) {
             border: none;

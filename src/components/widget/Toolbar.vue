@@ -28,6 +28,7 @@
             </a-space>
         </a-space>
     </PopupMenu>
+
     <!-- 工具栏 -->
     <div class="toolbar">
         <div class="bar-left">
@@ -38,17 +39,16 @@
                         <template #icon>
                             <icon-export />
                         </template>
-                        <template #default>&nbsp;导 出</template>
+                        <template #default>&nbsp;导出作品备份</template>
                     </a-doption>
                     <a-doption @click="importBackup">
                         <template #icon>
                             <icon-import />
                         </template>
-                        <template #default>&nbsp;导 入</template>
+                        <template #default>&nbsp;导入作品备份</template>
                     </a-doption>
                 </template>
             </a-dropdown>
-
             <a-dropdown>
                 <a-button
                     type="primary"
@@ -62,13 +62,13 @@
                         <template #icon>
                             <icon-plus />
                         </template>
-                        <template #default>&nbsp;新 建</template>
+                        <template #default>&nbsp;新建作品</template>
                     </a-doption>
                     <a-doption @click="importFile">
                         <template #icon>
                             <icon-import />
                         </template>
-                        <template #default>&nbsp;导 入</template>
+                        <template #default>&nbsp;导入书籍</template>
                     </a-doption>
                 </template>
             </a-dropdown>
@@ -119,25 +119,44 @@
         </div>
         <div class="bar-right">
             <a-input-search
+                @input="getSearchWord"
+                @focus="toSearch"
+                @blur="findSearchResult = _findSearchResult = false"
                 :style="{ width: '320px' }"
                 placeholder="Search for something"
                 search-button
             />
+            <div @mousedown.prevent v-if="findSearchResult" class="search-result">
+                <div
+                    v-for="item in opusData"
+                    :key="item.id"
+                    @click="routerLink('/detail', item.id)"
+                    class="result-item iconfont"
+                >{{ '&#xe60f;&nbsp;&nbsp;&nbsp;&nbsp;' + item.title }}</div>
+                <div
+                    v-for="item in ebooks"
+                    :key="item.id"
+                    @click="routerLink('', item.id, item.type)"
+                    class="result-item iconfont"
+                >{{ '&#xe60e;&nbsp;&nbsp;&nbsp;&nbsp;' + item.title }}</div>
+            </div>
+            <a-empty v-if="_findSearchResult" class="search-result"></a-empty>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, Ref, computed, watch } from 'vue';
 import {
     IconPlus, IconImport, IconSwap, IconExport,
     IconApps, IconUnorderedList, IconDelete
 } from '@arco-design/web-vue/es/icon';
 import PopupMenu from './PopupMenu.vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { db } from '../../db/db';
 import useCurrentInstance from '../../utils/useCurrentInstance';
 import { v4 } from 'uuid';
+import { throttle } from '../../utils/flowControl';
 
 const { proxy } = useCurrentInstance();
 const $message = proxy.$message;
@@ -155,6 +174,24 @@ if (route.path === '/') {
     disableSort.value = true;
     if (route.path === '/recycle') showAllDelete.value = true;
     else showAllDelete.value = false;
+}
+
+// 搜索项快捷跳转
+const router = useRouter();
+const routerLink = (path: string, id: number, type?: string) => {
+    let tempPath = '';
+    if (path !== '') {
+        tempPath = path;
+    } else {
+        if (type === 'txt') tempPath = '/reading';
+        else if (type === 'pdf') tempPath = '/pdfreading';
+    }
+    router.push({
+        path: tempPath,
+        query: {
+            id: id
+        }
+    })
 }
 
 // 是否以作品封面的方式显示
@@ -327,29 +364,60 @@ const toSort = (type: string) => {
     localStorage.setItem('sortType', sortType.value);
 }
 
-// 导出备份
+// 搜索功能
+let searchWord = '';
+const getSearchWord = (value: string) => {
+    searchWord = value.trim();
+    if (searchWord !== '') toSearch(); // 节流搜索
+    else findSearchResult.value = _findSearchResult.value = false;
+}
+const findSearchResult = ref(false), _findSearchResult = ref(false);
+const opusData: Ref<Array<{ id: number, title: string }>> = ref([]);
+const ebooks: Ref<Array<{ id: number, title: string, type: string }>> = ref([]);
+const toSearch = throttle(async () => {
+    if (searchWord !== '') {
+        opusData.value = [];
+        ebooks.value = [];
+        await db.opus.where(':id').between(1, Infinity).toArray().then(data => {
+            data.forEach(item => {
+                if (item.title.indexOf(searchWord) !== -1) {
+                    opusData.value.push({
+                        id: item.id!,
+                        title: item.title
+                    });
+                }
+            })
+        });
+        await db.ebooks.where(':id').between(1, Infinity).toArray().then(data => {
+            data.forEach(item => {
+                if (item.title.indexOf(searchWord) !== -1) {
+                    ebooks.value.push({
+                        id: item.id!,
+                        title: item.title,
+                        type: item.type
+                    });
+                }
+            })
+        });
+        // 查看是否匹配到了关键字
+        if (opusData.value.length > 0 || ebooks.value.length > 0) {
+            findSearchResult.value = true;
+            _findSearchResult.value = false;
+        } else {
+            findSearchResult.value = false;
+            _findSearchResult.value = true;
+        }
+    }
+}, 500);
+
+
+// 导出作品的备份数据
 const exportBackup = async () => {
     // 全部数据库数据
-    const inkingBackup: {
-        searchSiteList: string,
-        opus: Array<Userdb>,
-        user: Array<User>,
-        ebooks: Array<Ebooks>,
-        favorites: Array<Favorites>
-    } = { searchSiteList: '', opus: [], user: [], ebooks: [], favorites: [] };
+    let inkingBackup: Array<Userdb> = [];
     await db.opus.where(':id').between(1, Infinity).toArray().then(value => {
-        inkingBackup.opus = value;
+        inkingBackup = value;
     })
-    await db.user.where(':id').between(1, Infinity).toArray().then(value => {
-        inkingBackup.user = value;
-    })
-    await db.ebooks.where(':id').between(1, Infinity).toArray().then(value => {
-        inkingBackup.ebooks = value;
-    })
-    await db.favorites.where(':id').between(1, Infinity).toArray().then(value => {
-        inkingBackup.favorites = value;
-    })
-    inkingBackup.searchSiteList = localStorage.getItem('searchSiteList') ?? '';
 
     window.$API.ipcSend('expFile', {
         type: 'JSON',
@@ -363,9 +431,35 @@ const exportBackup = async () => {
     });
 }
 
-// 导入备份
+// 导入作品备份
 const importBackup = () => {
-    console.log('导入备份');
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', '.json');
+    input.click();
+    input.onchange = () => {
+        if (input.files) {
+            const reader = new FileReader();
+            reader.readAsText(input.files[0]);
+            reader.onload = function (evt) {
+                let newOpus: Array<Userdb>;
+                try {
+                    newOpus = JSON.parse(evt.target!.result as string);
+                } catch (error) {
+                    $message.error('解析出现错误！');
+                    return;
+                }
+                // 去除旧id
+                newOpus.forEach(item => {
+                    delete item.id;
+                })
+                db.opus.bulkAdd(newOpus).then(() => {
+                    emit('refresh');
+                    $message.success('数据导入成功！');
+                })
+            }
+        }
+    }
 }
 </script>
 

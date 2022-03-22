@@ -89,6 +89,14 @@ if (getDailyPlan === null) {
   mainStore.dailyPlan = getDailyPlan;
 }
 
+// 获取用户设置数据 ----------- 查词引擎
+const getSearchEngine = localStorage.getItem('uSearchEngine');
+if (getSearchEngine === null) {
+  localStorage.setItem('uSearchEngine', 'wordSearch_baidu'); // 默认百度汉语
+} else {
+  mainStore.searchEngine = getSearchEngine;
+}
+
 onMounted(() => {
   // 设置主题
   if (defaultTheme.mode === 'dark') document.body.setAttribute('arco-theme', 'dark');
