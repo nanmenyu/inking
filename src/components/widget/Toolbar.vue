@@ -31,12 +31,24 @@
     <!-- 工具栏 -->
     <div class="toolbar">
         <div class="bar-left">
-            <a-button
-                :loading="iCloud"
-                @click="handleSync"
-                type="primary"
-                style="margin-right: 2px;"
-            >云同步</a-button>
+            <a-dropdown>
+                <a-button type="primary" style="margin-right: 2px;">数据备份</a-button>
+                <template #content>
+                    <a-doption @click="exportBackup">
+                        <template #icon>
+                            <icon-export />
+                        </template>
+                        <template #default>&nbsp;导 出</template>
+                    </a-doption>
+                    <a-doption @click="importBackup">
+                        <template #icon>
+                            <icon-import />
+                        </template>
+                        <template #default>&nbsp;导 入</template>
+                    </a-doption>
+                </template>
+            </a-dropdown>
+
             <a-dropdown>
                 <a-button
                     type="primary"
@@ -118,7 +130,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import {
-    IconPlus, IconImport, IconSwap,
+    IconPlus, IconImport, IconSwap, IconExport,
     IconApps, IconUnorderedList, IconDelete
 } from '@arco-design/web-vue/es/icon';
 import PopupMenu from './PopupMenu.vue';
@@ -130,12 +142,6 @@ import { v4 } from 'uuid';
 const { proxy } = useCurrentInstance();
 const $message = proxy.$message;
 const emit = defineEmits(['onBack', 'refresh', 'toDeleteAll', 'toReverse', 'toSort', 'toImport']);
-
-/*----点击触发云同步动画----*/
-const iCloud = ref(false);
-const handleSync = () => {
-    iCloud.value = !iCloud.value;
-}
 
 /*.----根据路由选择是否禁用按键----*/
 const route = useRoute();
@@ -319,6 +325,47 @@ const toSort = (type: string) => {
     sortType.value = type;
     emit('toSort', type);
     localStorage.setItem('sortType', sortType.value);
+}
+
+// 导出备份
+const exportBackup = async () => {
+    // 全部数据库数据
+    const inkingBackup: {
+        searchSiteList: string,
+        opus: Array<Userdb>,
+        user: Array<User>,
+        ebooks: Array<Ebooks>,
+        favorites: Array<Favorites>
+    } = { searchSiteList: '', opus: [], user: [], ebooks: [], favorites: [] };
+    await db.opus.where(':id').between(1, Infinity).toArray().then(value => {
+        inkingBackup.opus = value;
+    })
+    await db.user.where(':id').between(1, Infinity).toArray().then(value => {
+        inkingBackup.user = value;
+    })
+    await db.ebooks.where(':id').between(1, Infinity).toArray().then(value => {
+        inkingBackup.ebooks = value;
+    })
+    await db.favorites.where(':id').between(1, Infinity).toArray().then(value => {
+        inkingBackup.favorites = value;
+    })
+    inkingBackup.searchSiteList = localStorage.getItem('searchSiteList') ?? '';
+
+    window.$API.ipcSend('expFile', {
+        type: 'JSON',
+        name: 'inkingBackup' + new Date().getTime(),
+        file: JSON.stringify(inkingBackup)
+    });
+
+    window.$API.ipcOnce('expFile-result', (data: 'success' | 'err') => {
+        if (data === 'success') $message.success('导出成功!');
+        else if (data === 'err') $message.error('导出失败!');
+    });
+}
+
+// 导入备份
+const importBackup = () => {
+    console.log('导入备份');
 }
 </script>
 

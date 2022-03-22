@@ -92,10 +92,10 @@ import { db } from '../db/db';
 import { useMainStore } from '../store/index';
 import router from '../router/index';
 import { useRoute } from 'vue-router';
-import minimizeIcon from '../assets/svg/minimizeIcon.svg';
-import maximizeIcon from '../assets/svg/maximizeIcon.svg';
-import maximizeIcon2 from '../assets/svg/maximizeIcon2.svg';
-import closeWinIcon from '../assets/svg/closeWinIcon.svg';
+// import minimizeIcon from '../assets/svg/minimizeIcon.svg';
+// import maximizeIcon from '../assets/svg/maximizeIcon.svg';
+// import maximizeIcon2 from '../assets/svg/maximizeIcon2.svg';
+// import closeWinIcon from '../assets/svg/closeWinIcon.svg';
 
 const mainStore = useMainStore();
 

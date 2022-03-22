@@ -636,7 +636,7 @@ const changeTimeLine = (index: number) => {
     defaultPos.value = index;
     currentDetail.data = [];
     getTimeLineData();
-    setLineStorage();
+    // setLineStorage();
 }
 // 删除某一历史点(全年)
 const deleteOneYear = (year: number) => {
@@ -777,7 +777,7 @@ const choiceOneYear = (year: number) => {
         })
         currentDetail.data = summaryObj.data[year];
         currentChoice.value = year;
-        setLineStorage();
+        // setLineStorage();
     }
 }
 
@@ -785,12 +785,16 @@ const choiceOneYear = (year: number) => {
 /* ----------------------- 非触发事件 -----------------------*/
 // 读取本地缓存
 const defaultPos = ref(0);
-const timeLineCache = localStorage.getItem('timeLineCache');
-if (timeLineCache) {
-    let temp = JSON.parse(timeLineCache);
-    currentChoice.value = temp.selectYear;
-    defaultPos.value = temp.selectLine;
-}
+// const timeLineCache = localStorage.getItem('timeLineCache');
+// if (timeLineCache) {
+//     let temp = JSON.parse(timeLineCache);
+//     temp.forEach((item: { query_id: number; selectYear: number; selectLine: number; }) => {
+//         if (item.query_id === query_id) {
+//             currentChoice.value = item.selectYear;
+//             defaultPos.value = item.selectLine;
+//         }
+//     })
+// }
 // 获取数据
 let summaryObj: {
     data: { [key: number]: Array<Detail> }
@@ -877,27 +881,6 @@ function setSliderState() {
         }
     })
 }
-// 计算每个元素距离父元素顶部的大小
-// function calculateOffsetTop() {
-//     let targetElement: HTMLElement;
-//     offsetTop_el.data = yearData.data.map((_, index) => {
-//         targetElement = document.getElementById('con_' + index)!;
-//         return {
-//             id: 'con_' + index,
-//             offsetTop: targetElement.offsetTop
-//         }
-//     })
-// }
-// 计算nav中已checked元素高度
-// const timelineUl: Ref<HTMLElement | undefined> = ref(),
-//     timelineNav: Ref<HTMLElement | undefined> = ref();
-// const timelineUl_tran: Ref<string> = ref('0px');
-// function toNavCenter() {
-//     const currentElement = document.getElementById(checkedId.value.replace('con_', 'nav_'));
-//     if (currentElement && (timelineUl.value?.clientHeight! > timelineNav.value?.clientHeight!)) {
-//         timelineUl_tran.value = -1 * currentElement.offsetTop + 'px';
-//     }
-// }
 // 滑动时间轴
 function slidingTimeline(e: MouseEvent) {
     const x = e.pageX - slider.value.offsetLeft;
@@ -917,9 +900,12 @@ function slidingTimeline(e: MouseEvent) {
 
 }
 // 缓存数据
-function setLineStorage() {
-    localStorage.setItem('timeLineCache', JSON.stringify({ selectYear: currentChoice.value, selectLine: defaultPos.value }));
-}
+// function setLineStorage() {
+//     if (timeLineCache) {
+//         let temp = JSON.parse(timeLineCache);
+//         localStorage.setItem('timeLineCache', JSON.stringify({ query_id: query_id, selectYear: currentChoice.value, selectLine: defaultPos.value }));
+//     }
+// }
 defineExpose({ setSliderState });
 </script>
 

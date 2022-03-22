@@ -1,5 +1,27 @@
 <!-- 右侧阅读页面 -->
 <template>
+    <PopupMenu
+        v-if="showReName"
+        title="重命名"
+        determine="确定"
+        @toModify="showReName = false"
+        @toDetermine="renameFile"
+        :determineDisabled="renameForm.title.length === 0"
+    >
+        <a-space>
+            <a-form-item field="name" label="名称">
+                <a-input
+                    v-model.trim="renameForm.title"
+                    style="width: 370px"
+                    :max-length="30"
+                    :error="renameForm.title.length === 0"
+                    show-word-limit
+                    allow-clear
+                    placeholder="请输入文件名..."
+                />
+            </a-form-item>
+        </a-space>
+    </PopupMenu>
     <div class="reading-content">
         <Toolbar @toImport="toImport"></Toolbar>
         <div class="content">
@@ -20,6 +42,7 @@
                         <div class="title">{{ item.title }}</div>
                     </div>
                     <template #content>
+                        <a-doption @click="showRenameBox(item.id, item.title)">重命名</a-doption>
                         <a-doption @click="deleteFile(item.id, item.title)">移除</a-doption>
                     </template>
                 </a-dropdown>
@@ -33,6 +56,7 @@ import { reactive, ref } from 'vue';
 import Toolbar from "./widget/Toolbar.vue";
 import { db } from '../db/db';
 import { useRouter } from 'vue-router';
+import PopupMenu from './widget/PopupMenu.vue';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import txtFile from '../assets/svg_cover/txtFile.svg';
 import pdfFile from '../assets/svg_cover/pdfFile.svg';
@@ -64,6 +88,29 @@ const routerLink = (id: number, type: string) => {
 }
 const toImport = () => {
     loadFileLiset();
+}
+
+// 修改文件名
+const showReName = ref(false);
+const renameForm = reactive({
+    id: 0,
+    title: ''
+})
+const showRenameBox = (id: number, title: string) => {
+    const titleArr = title.split('.');
+    titleArr.splice(titleArr.length - 1, 1);
+    showReName.value = true;
+    renameForm.id = id;
+    renameForm.title = titleArr.join('.');
+}
+const renameFile = () => {
+    db.ebooks.where(':id').equals(renameForm.id).modify(value => {
+        value.title = renameForm.title + '.' + value.type;
+    }).then(() => {
+        showReName.value = false;
+        loadFileLiset();
+        $message.success('重命名成功');
+    })
 }
 
 const deleteFile = (id: number, title: string) => {

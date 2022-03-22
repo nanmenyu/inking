@@ -16,20 +16,31 @@
             <li>
                 <span>系统主题</span>
                 <a-trigger trigger="click" :popup-translate="[0, 10]" show-arrow>
-                    <a-button @click="setThemeContainer" type="outline">点击修改</a-button>
+                    <a-button type="outline">点击修改</a-button>
                     <template #content>
                         <ThemeContainer></ThemeContainer>
                     </template>
                 </a-trigger>
+            </li>
+            <li>
+                <span>每日计划</span>
+                <a-input-number
+                    v-model="uDailyPlan"
+                    :style="{ width: '250px' }"
+                    :min="1"
+                    :max="100000"
+                />
             </li>
         </ul>
     </div>
 </template>
 
 <script setup lang='ts'>
-import { onMounted, ref, Ref } from 'vue';
+import { onMounted, ref, Ref, watch } from 'vue';
 import ThemeContainer from '../components/widget/ThemeContainer.vue';
+import { useMainStore } from '../store';
 
+const mainStore = useMainStore();
 let element_app: HTMLElement | null = null;
 
 // 获取字体列表
@@ -44,13 +55,21 @@ window.$API.ipcOnce('get-fonts-item', (data: Array<string>) => {
 
 // 设置系统字体
 const setFont = () => {
-    if (currentFont.value === '默认字体') element_app?.removeAttribute('style');
-    else element_app?.setAttribute('style', `font-family:${currentFont.value};`);
+    if (currentFont.value === '默认字体') {
+        element_app?.removeAttribute('style');
+        localStorage.setItem('uSystemFont', '');
+    } else {
+        element_app?.setAttribute('style', `font-family:${currentFont.value};`);
+        localStorage.setItem('uSystemFont', currentFont.value);
+    }
 }
 
-// 设置主题
-const setThemeContainer = () => {
-}
+// 设置每日计划
+const uDailyPlan = ref(mainStore.dailyPlan);
+watch(uDailyPlan, value => {
+    localStorage.setItem('uDailyPlan', value);
+    mainStore.dailyPlan = value;
+})
 
 onMounted(() => {
     element_app = document.getElementById('app');

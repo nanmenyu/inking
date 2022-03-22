@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { useMainStore } from './store/index';
+import { useMainStore } from './store';
 import { db } from './db/db';
 import { setSharedColor, setupMainThemes, setupSecondaryThemes } from './hooks/setupThemes';
 import defaultBg from '../public/static/img/default-bg.jpg';
@@ -68,21 +68,37 @@ db.opus.where(':id').between(1, Infinity).toArray().then(value => {
   mainStore.contrastTotalNumber_thisTime = mainStore.TotalNumber_thisTime = mainStore.baseTotalNumber_thisTime = cout_temp;
 })
 
-// 初始化主题
+// 获取用户设置数据 ----------- 主题
 let defaultTheme = {
   mode: 'light',
-  mainColor: 'RGB(12,171,168)',
-  secondColor: 'RGB(83,133,253)'
+  mainColor: 'RGB(0,191,166)',
+  secondColor: 'RGB(0,176,255)'
 }
 const getUserTheme = localStorage.getItem('uTheme');
 if (getUserTheme === null) localStorage.setItem('uTheme', JSON.stringify(defaultTheme));
 else defaultTheme = JSON.parse(getUserTheme);
 
+// 获取用户设置数据 ----------- 系统字体
+const getSystemFont = localStorage.getItem('uSystemFont');
+
+// 获取用户设置数据 ----------- 每日计划
+const getDailyPlan = localStorage.getItem('uDailyPlan');
+if (getDailyPlan === null) {
+  localStorage.setItem('uDailyPlan', '2000'); // 默认2000字
+} else {
+  mainStore.dailyPlan = getDailyPlan;
+}
+
 onMounted(() => {
+  // 设置主题
   if (defaultTheme.mode === 'dark') document.body.setAttribute('arco-theme', 'dark');
   setupMainThemes(defaultTheme.mainColor);
   setupSecondaryThemes(defaultTheme.secondColor);
   setSharedColor(defaultTheme.mode);
+
+  // 设置字体
+  const element_app = document.getElementById('app');
+  element_app!.setAttribute('style', `font-family:${getSystemFont ?? '默认字体'};`);
 })
 </script>
 

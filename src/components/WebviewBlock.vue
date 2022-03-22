@@ -39,7 +39,7 @@
                 <a-progress
                     type="circle"
                     title="今日计划完成度"
-                    :percent="0.4"
+                    :percent="todayPercent.toFixed(3)"
                     :color="{
                         '0%': 'rgb(var(--my-secondary-5))',
                         '100%': 'rgb(var(--my-secondary-6))',
@@ -144,23 +144,6 @@
                 </a-tab-pane>
             </a-tabs>
         </div>
-        <!-- <a-spin v-if="showLoading" class="loadingSpin" style="margin-top: 200px;" :size="20" dot /> -->
-        <!-- <div v-if="errorMsg.isErr" class="errorPage">
-            <a-result status="error" :title="errorMsg.errorCode">
-                <template #icon>
-                    <IconFaceFrownFill />
-                </template>
-                <template #subtitle>{{ errorMsg.errorDescription }}</template>
-                <template #extra>
-                    <a-button
-                        @click="toRefresh"
-                        type="primary"
-                        status="danger"
-                        shape="round"
-                    >Refresh</a-button>
-                </template>
-            </a-result>
-        </div>-->
         <div v-show="!isShowWebview" class="favorites">
             <a-empty v-if="favoritesData.length === 0" style="margin-top: 100px;" />
             <div
@@ -193,7 +176,6 @@
             disablewebsecurity
             nodeintegration
         ></webview>
-        <!-- :style="showLoading ? 'opacity:0.5' : ''" -->
     </div>
 </template>
 
@@ -217,7 +199,6 @@ const $modal = proxy.$modal;
 const $message = proxy.$message;
 const mainStore = useMainStore();
 loadFavorites();
-console.log(route.path);
 
 const favoritesData: Ref<Array<Favorites>> = ref([]);
 const currentURL = ref(''), currentSiteId = ref(0), currentSiteTitle = ref('');
@@ -244,6 +225,11 @@ const thisTimeCodeword = computed(() => {
 // 今日码字数量
 const toDayCodeword = computed(() => {
     return mainStore.baseTotalNumber_today + mainStore.TotalNumber_thisTime - mainStore.contrastTotalNumber_thisTime;
+})
+
+// 今日码字数量占比
+const todayPercent = computed(() => {
+    return toDayCodeword.value / parseInt(mainStore.dailyPlan);
 })
 
 const preloadFile = 'file://' + window.$API.__dirname + '/webview/preload.js';

@@ -49,6 +49,24 @@ interface Pagecount {
   paragraphs: number; // 段落数
 }
 
+interface User {
+  id?: number;
+  creationTime: number;
+  creationYear: number;
+  creationMonth: number;
+  creationDay: number;
+  codewords: number;
+}
+
+interface Ebooks {
+  id?: number;
+  data: File;
+  type: string;
+  title: string;
+  creationTime: number;
+  scrollTop?: number;
+}
+
 // 作品
 interface Userdb {
   id?: number; // id

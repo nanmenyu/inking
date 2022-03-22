@@ -79,10 +79,12 @@ import {
     IconRight, IconEdit, IconSettings, IconQuestionCircle, IconNotification
 } from '@arco-design/web-vue/es/icon';
 import { useRoute } from 'vue-router';
-import { useThemeStore } from '../store';
+import { useThemeStore, useMainStore } from '../store';
 import * as echarts from 'echarts';
 
 const themeStore = useThemeStore();
+const mainStore = useMainStore();
+
 const route = useRoute(), choicedType = ref(''), uChart = ref();
 switch (route.path) {
     case '/':
@@ -117,6 +119,16 @@ watch(computed(() => {
     fontColor.value = themeStore.color_text_1;
     setChart();
 })
+// 检测每日计划是否发生改变
+watch(computed(() => {
+    return mainStore.dailyPlan;
+}), () => {
+    setChart();
+})
+// 今日码字数量
+const toDayCodeword = computed(() => {
+    return mainStore.baseTotalNumber_today + mainStore.TotalNumber_thisTime - mainStore.contrastTotalNumber_thisTime;
+})
 
 onMounted(() => {
     // 获得副主题色
@@ -133,7 +145,7 @@ function setChart() {
     // 绘制图表
     myChart.setOption({
         title: [{
-            text: '今日计划\n2000字',
+            text: `今日计划\n${mainStore.dailyPlan}字`,
             top: '25%',
             left: 'center',
             textStyle: {
@@ -175,8 +187,8 @@ function setChart() {
                     show: false
                 },
                 data: [
-                    { value: 1500, name: '已完成' },
-                    { value: 500, name: '未完成' }
+                    { value: toDayCodeword.value, name: '已完成' },
+                    { value: parseInt(mainStore.dailyPlan) - toDayCodeword.value, name: '未完成' }
                 ]
             }
         ],

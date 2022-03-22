@@ -286,6 +286,7 @@ const reName = () => {
     db.opus.update(temp_id, { title: showName.value }).then(() => {
         loadData();
         isRename.value = false;
+        $message.success('重命名成功')
     })
 }
 

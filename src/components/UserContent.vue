@@ -44,7 +44,10 @@
                 >
                     <a-radio value="m1" style="border-radius: 10px;">详细</a-radio>
                     <a-radio value="m2" style="border-radius: 10px;">总览</a-radio>
-                    <a-radio value="m3" style="border-radius: 10px;">趋势</a-radio>
+                    <a-radio
+                        value="m3"
+                        style="border-radius: 10px;"
+                    >趋势{{ keMode === 'm3' ? (currentPage + '/' + numberOfPages) : '' }}</a-radio>
                     <a-dropdown>
                         <a-button type="text" style="border-radius: 10px;">{{ currentOpus }}</a-button>
                         <template #content>
@@ -61,10 +64,20 @@
                 <div class="chart" ref="chart_ref"></div>
                 <div v-if="showChartBtn" class="chart-btn">
                     <a-button-group>
-                        <a-button type="primary" size="small">
+                        <a-button
+                            @click="lineChartTurning(-1)"
+                            type="primary"
+                            size="small"
+                            style="border-radius: 10px 0 0 10px;"
+                        >
                             <icon-left />上页
                         </a-button>
-                        <a-button type="primary" size="small">
+                        <a-button
+                            @click="lineChartTurning(1)"
+                            type="primary"
+                            size="small"
+                            style="border-radius: 0 10px 10px 0;"
+                        >
                             下页
                             <icon-right />
                         </a-button>
@@ -159,6 +172,16 @@ const selectOpus = (key: number, value: string) => {
 // 选择关键词分析模式
 const keMode = ref('m1');
 const showChartBtn = ref(false);
+const currentPage = ref(1);
+const numberOfPages = ref(0);
+const lineXAxisData: Ref<Array<string>> = ref([]);
+const lineSeriesData: Ref<Array<{
+    name: string,
+    data: Array<number>,
+    type: 'line',
+    smooth: true
+}>> = ref([]);
+const numberPerPage = 2; // 每页多少条数据
 const choiceAnalysisMode = (mode: string) => {
     keMode.value = mode;
     showChartBtn.value = false;
@@ -227,21 +250,29 @@ const choiceAnalysisMode = (mode: string) => {
                     if (!tempData[yAxisData[item[1]]]) tempData[yAxisData[item[1]]] = [];
                     tempData[yAxisData[item[1]]].push(item[2]);
                 })
-                const lineSeriesData = [];
+                // 暴露总数据
+                lineSeriesData.value = [];//先清空旧数据
                 for (let key in tempData) {
-                    lineSeriesData.push({
+                    lineSeriesData.value.push({
                         name: key,
                         data: tempData[key],
                         type: 'line',
                         smooth: true
                     })
                 }
-                if (lineSeriesData.length <= 3) {
-                    drawLinesChart(xAxisData, lineSeriesData);
+                lineXAxisData.value = xAxisData; // 暴露x轴数据
+                // 分页(10页)
+                if (lineSeriesData.value.length <= numberPerPage) {
+                    showChartBtn.value = false;
+                    drawLinesChart(lineXAxisData.value, lineSeriesData.value);
                 } else {
                     // 显示翻页按钮进行分页渲染图标
                     showChartBtn.value = true;
-                    drawLinesChart(xAxisData, lineSeriesData);
+                    // 计算需要的页数
+                    numberOfPages.value = Math.ceil(lineSeriesData.value.length / numberPerPage);
+                    // 默认渲染第一页的数据，即currentPage为1
+                    const tempSeriesData = lineSeriesData.value.slice(numberPerPage * (currentPage.value - 1), numberPerPage * currentPage.value);
+                    drawLinesChart(lineXAxisData.value, tempSeriesData);
                 }
             }
         }
@@ -253,12 +284,25 @@ const choiceAnalysisMode = (mode: string) => {
     }
 }
 
+// 词频趋势数据翻页
+const lineChartTurning = (offset: 1 | -1) => {
+    if (currentPage.value === 1 && offset === -1) {
+        currentPage.value = numberOfPages.value;
+    } else if (currentPage.value === numberOfPages.value && offset === 1) {
+        currentPage.value = 1;
+    } else {
+        currentPage.value += offset;
+    }
+    const tempSeriesData = lineSeriesData.value.slice(numberPerPage * (currentPage.value - 1), numberPerPage * currentPage.value);
+    drawLinesChart(lineXAxisData.value, tempSeriesData);
+}
+
 function loadCodewordData() {
     // 读取用户数据
     db.user.where(':id').between(1, Infinity).toArray().then(value => {
         value.forEach(item => {
             codewordsData.data.push({
-                codewords: item.codewords + randomNum(1000, 4000),
+                codewords: item.codewords,
                 creationTime: item.creationYear + '/' + item.creationMonth + '/' + item.creationDay
             })
         })
@@ -347,6 +391,12 @@ function drawLineChart(xAxisData: Array<string>, seriesData: any) {
         yAxis: {
             type: 'value'
         },
+        dataZoom: [{
+            type: 'inside'
+        }, {
+            type: 'slider',
+            show: false
+        }],
         series: [{
             data: seriesData,
             type: 'line',
@@ -556,6 +606,12 @@ function drawLinesChart(xAxisData: any, lineSeriesData: any) {
         yAxis: {
             type: 'value'
         },
+        dataZoom: [{
+            type: 'inside'
+        }, {
+            type: 'slider',
+            show: false
+        }],
         tooltip: {
             order: 'valueDesc',
             trigger: 'axis',

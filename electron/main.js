@@ -113,7 +113,7 @@ ipcMain.on('deleteFolder', (e, path) => {
     deleteFolder(path);
 })
 
-// 转html至txt/docx
+// 转html至txt/docx/json
 ipcMain.on('expFile', async (e, data) => {
     if (data.type === 'DOCX') {
         const fileBuffer = await HTMLtoDOCX(data.file, null, {
@@ -182,6 +182,19 @@ ipcMain.on('expFile', async (e, data) => {
                         if (writeFileByUser(chapterPath, fileBuffer)) e.sender.send('expFile-result', 'err');
                         else e.sender.send('expFile-result', 'success');
                     })
+                });
+            }
+        })
+    } else if (data.type === 'JSON') {
+        dialog.showSaveDialog({
+            title: '导出为JSON',
+            defaultPath: data.name + '.json',
+            filters: [{ name: 'JSON', extensions: ['json'] }]
+        }).then(file => {
+            if (file) {
+                fs.writeFile(file.filePath, data.file, err => {
+                    if (err) e.sender.send('expFile-result', 'err');
+                    else e.sender.send('expFile-result', 'success');
                 });
             }
         })

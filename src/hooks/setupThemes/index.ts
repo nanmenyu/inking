@@ -16,16 +16,16 @@ export function setSharedColor(theme: string) {
 // 传入RGB字符串重写主题变量(主色)
 export function setupMainThemes(color: string) {
     const rgbColor = color.replace('RGB(', '').replace(')', '').split(',').map(it => parseInt(it));
-    const primary1 = rgbDecreaseSaturation(rgbIncreaseBrightness(rgbColor, 25), 85);
-    const primary2 = rgbDecreaseSaturation(rgbIncreaseBrightness(rgbColor, 25), 70);
-    const primary3 = rgbDecreaseSaturation(rgbIncreaseBrightness(rgbColor, 25), 55);
-    const primary4 = rgbDecreaseSaturation(rgbIncreaseBrightness(rgbColor, 25), 40);
-    const primary5 = rgbIncreaseBrightness(rgbColor, 25);
-    const primary6 = rgbColor;
-    const primary7 = rgbDecreaseBrightness(rgbColor, 25);
-    const primary8 = rgbDecreaseBrightness(rgbColor, 40);
-    const primary9 = rgbDecreaseBrightness(rgbColor, 55);
-    const primary10 = rgbDecreaseBrightness(rgbColor, 70);
+    const primary1 = rgbDecreaseSaturation(rgbColor, 90); // 去饱和90%
+    const primary2 = rgbDecreaseSaturation(rgbColor, 72); // 去饱和72%
+    const primary3 = rgbDecreaseSaturation(rgbColor, 54); // 去饱和54%
+    const primary4 = rgbDecreaseSaturation(rgbColor, 36); // 去饱和36%
+    const primary5 = rgbDecreaseSaturation(rgbColor, 18); // 去饱和18%
+    const primary6 = rgbColor; // 初始色
+    const primary7 = rgbDecreaseBrightness(rgbColor, 35); // 增加35%暗度
+    const primary8 = rgbDecreaseBrightness(rgbColor, 65); // 增加65%暗度
+    const primary9 = rgbDecreaseBrightness(rgbColor, 85); // 增加85%暗度
+    const primary10 = rgbDecreaseBrightness(rgbColor, 95); // 增加95%暗度
     const newStyle = `
         body, body[arco-theme='dark'] {
             --nanmenyu: primary;
@@ -51,7 +51,7 @@ export function setupMainThemes(color: string) {
 // 副色
 export function setupSecondaryThemes(color: string) {
     const rgbColor = color.replace('RGB(', '').replace(')', '').split(',').map(it => parseInt(it));
-    const mySecondary5 = rgbDecreaseSaturation(rgbColor, 25);;
+    const mySecondary5 = rgbDecreaseSaturation(rgbColor, 18);
     const mySecondary6 = rgbColor;
     const newStyle = `
         body, body[arco-theme='dark'] {
