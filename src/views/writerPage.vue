@@ -555,7 +555,6 @@ const replaceKeyword = (type: 'single' | 'whole') => {
             paperRef.value.saveDocData(false);
         })
     }
-
 }
 const stopSearchKeyword = () => {
     mainStore.isInSearch = showSearchBox.value = false;
@@ -606,27 +605,23 @@ const onClickMenuItem = (tvid: string, tcid: string) => {
         const toDisplay: Array<object> = [];
         db.opus.get(query_id).then(value => {
             if (value) {
-                for (let i = 0; i < value.data.length; i++) {
-                    if (value.data[i].vid === tvid) {
-                        for (let j = 0; j < value.data[i].volume.length; j++) {
-                            if (value.data[i].volume[j].cid === tcid) {
-                                value.data[i].volume[j].chapter.forEach((item: string) => {
+                value.data.forEach(item => {
+                    if (item.vid === tvid) {
+                        item.volume.forEach(it => {
+                            if (it.cid === tcid) {
+                                it.chapter.forEach((item: string) => {
                                     toDisplay.push({
                                         type: "paragraph",
-                                        content: [
-                                            {
-                                                type: "text",
-                                                text: item
-                                            }
-                                        ]
+                                        content: [{
+                                            type: "text",
+                                            text: item
+                                        }]
                                     });
                                 });
-                                break;
                             }
-                        }
-                        break;
+                        })
                     }
-                }
+                });
             }
             loadListData();
             if (showSearchBox.value) {
@@ -1055,7 +1050,7 @@ function shortcut(e: KeyboardEvent) {
         if (e.ctrlKey === true && e.key === 's') $message.error('目标已被删除!');
     } else {
         // Ctrl+s
-        if (e.ctrlKey === true && e.key === 's') paperRef.value.saveDocData(true);
+        if (e.ctrlKey === true && e.key === 's') paperRef.value.saveDocData('保存成功！');
         // Ctrl+f
         if (e.ctrlKey === true && e.key === 'f') {
             showSearchBox.value = true;
@@ -1124,7 +1119,6 @@ onMounted(() => {
     window.addEventListener('click', () => { if (showkeywordDetail.value) showkeywordDetail.value = false; });
 })
 onBeforeUnmount(() => {
-    // setScrollTop(<string>vid.value, <string>cid.value);
     // 更新继续写作对应的vid_cid
     db.opus.update(query_id, { historRecord: { vid: vid.value, cid: cid.value } });
 })

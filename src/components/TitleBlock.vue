@@ -101,11 +101,7 @@ const mainStore = useMainStore();
 
 /*----控制页面的前进后退----*/
 const backDisable = ref(false), forwardDisable = ref(false);
-// const routerLink = () => {
-//     router.push({
-//         path: '/'
-//     })
-// }
+
 const back = () => {
     router.go(-1);
 }

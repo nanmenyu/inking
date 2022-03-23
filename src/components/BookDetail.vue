@@ -986,15 +986,15 @@ const saveImgData = () => {
     }
 
     // 设置图片本地保存的路径
-    const path = 'workspace/opus/' + booksData.data.id;
-    window.$API.ipcSend('saveBase64-toImg', { b64: base64Img, path: path, fname: 'cover.jpeg' });
-    window.$API.ipcOnce('saveBase64-toImg-successful', () => {
-        db.opus.update(query_id, { imgSrc: base64Img }).then(() => {
-            isReplaceCover.value = false;
-            $message.success('设置成功!');
-            loadData();
-        })
-    });
+    // const path = 'workspace/opus/' + booksData.data.id;
+    // window.$API.ipcSend('saveBase64-toImg', { b64: base64Img, path: path, fname: 'cover.jpeg' });
+    // window.$API.ipcOnce('saveBase64-toImg-successful', () => {
+    db.opus.update(query_id, { imgSrc: base64Img }).then(() => {
+        isReplaceCover.value = false;
+        $message.success('设置成功!');
+        loadData();
+    })
+    // });
 }
 
 // 加载数据

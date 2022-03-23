@@ -1,7 +1,4 @@
 <template>
-  <div id="app-bg">
-    <!-- <img :src="defaultBg" /> -->
-  </div>
   <router-view></router-view>
 </template>
 
@@ -9,11 +6,16 @@
 import { useMainStore } from './store';
 import { db } from './db/db';
 import { setSharedColor, setupMainThemes, setupSecondaryThemes } from './hooks/setupThemes';
-import defaultBg from '../public/static/img/default-bg.jpg';
+// import bg from '../public/static/img/bg.png';
 import { onMounted } from 'vue';
 // import axios from 'axios';
 
 const mainStore = useMainStore();
+
+
+// axios.get('https://inking-app-3g71u4uxff7c8113-1305098148.ap-shanghai.app.tcloudbase.com/test').then(res => {
+//   console.log(res.data);
+// })
 
 // 初始化用户数据表
 db.user.where(':id').between(1, Infinity).toArray().then(value => {
@@ -107,6 +109,10 @@ onMounted(() => {
   // 设置字体
   const element_app = document.getElementById('app');
   element_app!.setAttribute('style', `font-family:${getSystemFont ?? '默认字体'};`);
+
+
+  // 检测更新
+  // window.$API.ipcSend('checkForUpdate');
 })
 </script>
 

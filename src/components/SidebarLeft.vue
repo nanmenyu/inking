@@ -31,12 +31,12 @@
                     <span>阅读模式</span>
                 </a-button>
             </router-link>
-            <router-link to="bigworld">
+            <!-- <router-link to="bigworld">
                 <a-button :type="choicedType === 't3' ? 'primary' : 'text'" class="btn">
                     <span class="iconfont">&#xe609;</span>
                     <span>大世界</span>
                 </a-button>
-            </router-link>
+            </router-link>-->
             <router-link to="recycle">
                 <a-button :type="choicedType === 't4' ? 'primary' : 'text'" class="btn">
                     <span class="iconfont">&#xe7f2;</span>

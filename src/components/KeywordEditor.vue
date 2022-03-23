@@ -718,15 +718,15 @@ const confirmKeywordGroup = () => {
                     template: []
                 });
                 // 获得保存图片的路径
-                path = 'workspace/opus/' + item.id + '/keyword/' + kid;
+                // path = 'workspace/opus/' + item.id + '/keyword/' + kid;
             }).then(() => {
-                window.$API.ipcSend('saveBase64-toImg', { b64: form.keyword.cardImg, path: path, fname: 'kcover.jpeg' });
-                window.$API.ipcOnce('saveBase64-toImg-successful', () => {
-                    $message.success('设置成功!');
-                    loadKeyWodData();
-                    isCardEdit.value = false;
-                })
+                // window.$API.ipcSend('saveBase64-toImg', { b64: form.keyword.cardImg, path: path, fname: 'kcover.jpeg' });
+                // window.$API.ipcOnce('saveBase64-toImg-successful', () => {
+                $message.success('设置成功!');
+                loadKeyWodData();
+                isCardEdit.value = false;
             })
+            // })
         } else {
             //修改原有关键组
             let path: string;
@@ -739,15 +739,15 @@ const confirmKeywordGroup = () => {
                     }
                 });
                 // 获得保存图片的路径
-                path = 'workspace/opus/' + item.id + '/keyword/' + curKid;
+                // path = 'workspace/opus/' + item.id + '/keyword/' + curKid;
             }).then(() => {
-                window.$API.ipcSend('saveBase64-toImg', { b64: form.keyword.cardImg, path: path, fname: 'kcover.jpeg' });
-                window.$API.ipcOnce('saveBase64-toImg-successful', () => {
-                    $message.success('设置成功!');
-                    loadKeyWodData();
-                    isCardEdit.value = false;
-                })
+                // window.$API.ipcSend('saveBase64-toImg', { b64: form.keyword.cardImg, path: path, fname: 'kcover.jpeg' });
+                // window.$API.ipcOnce('saveBase64-toImg-successful', () => {
+                $message.success('设置成功!');
+                loadKeyWodData();
+                isCardEdit.value = false;
             })
+            // })
         }
     }
 }

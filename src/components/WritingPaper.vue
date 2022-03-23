@@ -75,15 +75,7 @@ const getData = () => {
     };
     // 适应纸张高度
     adaHeight();
-    // 节流
-    emit_throttle();
-}
-const adaHeight = () => {
-    // 纸张高度紧随编辑框的变化
-    boxHeight.value = parseInt(data.paperHeight.replace('px', '')) >= 1000 ? parseInt(data.paperHeight.replace('px', '')) : 1000;
-}
-// 具体节流项目
-const emit_throttle = throttle(() => {
+    // 
     emit('todata', data);
     // 字数提示
     if (data.charCount >= 15000) {
@@ -92,7 +84,11 @@ const emit_throttle = throttle(() => {
             content: '单章字符数不宜过多(>15000),因为可能会影响导出PDF的性能(不导出就随意)'
         })
     }
-}, 300);
+}
+const adaHeight = () => {
+    // 纸张高度紧随编辑框的变化
+    boxHeight.value = parseInt(data.paperHeight.replace('px', '')) >= 1000 ? parseInt(data.paperHeight.replace('px', '')) : 1000;
+}
 
 // 键盘抬起时保存
 const input_saveDocData = (e: KeyboardEvent) => {
@@ -100,13 +96,19 @@ const input_saveDocData = (e: KeyboardEvent) => {
     const keyToIgnore = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
         'Shift', 'Meta', 'Alt', 'Control', 'CapsLock', 'PageUp', 'PageDown', 'Escape',
         'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'];
-    if (keyToIgnore.indexOf(e.key) === -1) saveDocData(false);
+    // 只在有修改文档内容的输入时才保存
+    if (keyToIgnore.indexOf(e.key) === -1 && !e.ctrlKey) {
+        throttleSaveDocData();
+    }
 }
 
+//  保存数据至数据库(节流)
+const throttleSaveDocData = throttle(() => { saveDocData('') }, 500);
+
 // 保存数据至数据库
-const saveDocData = throttle((showMsg: boolean) => {
-    // console.log('save');
-    const editorData = editor.value.firstElementChild.firstElementChild.children, dataArr: Array<string> = [];
+const saveDocData = (showMsg: string) => {
+    const editorData = editor.value.firstElementChild.firstElementChild.children,
+        dataArr: Array<string> = [];
     for (let i = 0; i < editorData.length; i++) {
         dataArr.push(editorData[i].innerText);
     }
@@ -126,9 +128,9 @@ const saveDocData = throttle((showMsg: boolean) => {
                     if (!it.discard) totalNumber += it.chapterNum ?? 0;
                 })
             }
-        })
+        });
     }).then(() => {
-        if (showMsg) $message.success('保存成功');
+        if (showMsg !== '') $message.success(showMsg);
         // 更新总字数数据
         db.opus.update(query_id, { opusNumber: totalNumber }).then(() => {
             // 获取改变后的总字数
@@ -142,7 +144,7 @@ const saveDocData = throttle((showMsg: boolean) => {
             })
         })
     })
-}, 500);
+}
 
 /*----修改文字、段落相关----*/
 let currentFont = ref('KaiTi'), currentFontSize = ref(22), currentLineHeight = ref(1.5),
@@ -321,7 +323,6 @@ const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<Marker>) =>
 // 监视选中文字的变化 设置选中文字时的工具栏
 const currentText = ref('');
 let searchType = mainStore.searchEngine; // 加载默认搜索类型
-console.log(searchType);
 watch(computed(() => {
     return mainStore.curSelectedText;
 }), text => {
@@ -444,10 +445,12 @@ const choiceContextMenuItem = (data: { item: string, select?: string }) => {
     } else if (data.item === '粘贴 Ctrl+v') {
         navigator.clipboard.readText().then(clipText => {
             (<Text>textNode).replaceData(range.startOffset, range.endOffset - range.startOffset, clipText);
+            // saveDocData('');
         })
     } else if (data.item === '剪切 Ctrl+x' && selectedText !== '') {
         (<Text>textNode).replaceData(range.startOffset, range.endOffset - range.startOffset, '');
         navigator.clipboard.writeText(selectedText);
+        // saveDocData('');
     }
 }
 

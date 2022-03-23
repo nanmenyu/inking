@@ -130,11 +130,11 @@ const getDeleteAll = () => {
                 return item.id;
             }) as Array<number>)
                 .then(() => {
-                    booksData.data.forEach(item => {
-                        // 将该作品的文件夹一并清除
-                        const path = 'workspace/opus/' + item.id + item.title;
-                        window.$API.ipcSend('deleteFolder', path);
-                    })
+                    // booksData.data.forEach(item => {
+                    //     // 将该作品的文件夹一并清除
+                    //     const path = 'workspace/opus/' + item.id + item.title;
+                    //     window.$API.ipcSend('deleteFolder', path);
+                    // })
                     loadData();
                     $message.success('已全部清空!');
                 });
@@ -155,11 +155,11 @@ const getDeleteSelect = () => {
             db.opus.bulkDelete(tarArr.map(item => {
                 return item.id;
             })).then(() => {
-                tarArr.forEach(item => {
-                    // 将该作品的文件夹一并清除
-                    const path = 'workspace/opus/' + item.id + item.title;
-                    window.$API.ipcSend('deleteFolder', path);
-                })
+                // tarArr.forEach(item => {
+                //     // 将该作品的文件夹一并清除
+                //     const path = 'workspace/opus/' + item.id + item.title;
+                //     window.$API.ipcSend('deleteFolder', path);
+                // })
                 loadData();
                 $message.success('删除成功!');
             });
