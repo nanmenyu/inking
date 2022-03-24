@@ -97,7 +97,7 @@ const input_saveDocData = (e: KeyboardEvent) => {
         'Shift', 'Meta', 'Alt', 'Control', 'CapsLock', 'PageUp', 'PageDown', 'Escape',
         'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'];
     // 只在有修改文档内容的输入时才保存
-    if (keyToIgnore.indexOf(e.key) === -1 && !e.ctrlKey) {
+    if (keyToIgnore.indexOf(e.key) === -1) {
         throttleSaveDocData();
     }
 }

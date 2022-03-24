@@ -21,13 +21,7 @@ const routes: Array<RouteRecordRaw> = [
         path: '/readingMode',
         name: 'ReadingMode',
         component: () => import('../views/readingModePage.vue')
-    }
-    // , {
-    //     path: '/bigworld',
-    //     name: 'Bigworld',
-    //     component: () => import('../views/bigworldPage.vue')
-    // }
-    , {
+    }, {
         path: '/recycle',
         name: 'Recycle',
         component: () => import('../views/recyclePage.vue')
@@ -52,8 +46,7 @@ const routes: Array<RouteRecordRaw> = [
         path: '/user',
         name: 'User',
         component: () => import('../views/userPage.vue')
-    }
-]
+    }]
 
 const router = createRouter({
     history: createWebHashHistory(),

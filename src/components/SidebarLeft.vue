@@ -31,14 +31,8 @@
                     <span>阅读模式</span>
                 </a-button>
             </router-link>
-            <!-- <router-link to="bigworld">
-                <a-button :type="choicedType === 't3' ? 'primary' : 'text'" class="btn">
-                    <span class="iconfont">&#xe609;</span>
-                    <span>大世界</span>
-                </a-button>
-            </router-link>-->
             <router-link to="recycle">
-                <a-button :type="choicedType === 't4' ? 'primary' : 'text'" class="btn">
+                <a-button :type="choicedType === 't3' ? 'primary' : 'text'" class="btn">
                     <span class="iconfont">&#xe7f2;</span>
                     <span>回收站</span>
                 </a-button>
@@ -47,21 +41,19 @@
         <div class="sidebar-bottom">
             <div>
                 <router-link to="setting">
-                    <a-tooltip content="设置">
+                    <a-tooltip content="设置" mini>
                         <icon-settings />
                     </a-tooltip>
                 </router-link>
             </div>
             <div>
-                <a-tooltip content="消息通知">
-                    <a-badge :count="9" :offset="[2, -2]">
-                        <icon-notification />
-                    </a-badge>
+                <a-tooltip content="官网" mini>
+                    <icon-public />
                 </a-tooltip>
             </div>
             <div>
-                <a-tooltip content="帮助反馈">
-                    <icon-question-circle />
+                <a-tooltip content="源码" mini>
+                    <icon-github />
                 </a-tooltip>
             </div>
         </div>
@@ -71,7 +63,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
 import {
-    IconRight, IconSettings, IconQuestionCircle, IconNotification
+    IconRight, IconSettings, IconGithub, IconPublic
 } from '@arco-design/web-vue/es/icon';
 import { useRoute } from 'vue-router';
 import { useThemeStore, useMainStore } from '../store';
@@ -88,11 +80,8 @@ switch (route.path) {
     case '/readingMode':
         choicedType.value = 't2';
         break;
-    case '/bigworld':
-        choicedType.value = 't3';
-        break;
     case '/recycle':
-        choicedType.value = 't4';
+        choicedType.value = 't3';
         break;
 }
 

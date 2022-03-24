@@ -32,11 +32,11 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 #pdf-container {
-    height: calc(100vh - 40px);
+    height: calc(100vh - 45px);
 }
 #pdf-container-temp {
     // width: 100vw;
     width: 100%;
-    height: calc(100vh - 40px);
+    height: calc(100vh - 45px);
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
     <div class="setting-content">
-        <h2>设置(v1.0.0)</h2>
+        <h2>设置 (v{{ config.version }})</h2>
         <ul class="list">
             <li title="选择从系统中获取的字体">
                 <span>系统字体</span>
@@ -42,6 +42,9 @@
                     <a-radio value="wordSearch_zdic">汉典</a-radio>
                 </a-radio-group>
             </li>
+            <li>
+                <span>检测更新</span>
+            </li>
         </ul>
     </div>
 </template>
@@ -50,6 +53,7 @@
 import { onMounted, ref, Ref, watch } from 'vue';
 import ThemeContainer from '../components/widget/ThemeContainer.vue';
 import { useMainStore } from '../store';
+import config from '../../package.json';
 
 const mainStore = useMainStore();
 let element_app: HTMLElement | null = null;

@@ -1,0 +1,7 @@
+.notice-content {
+    @include homecontent;
+
+    &>h2 {
+        font-weight: lighter;
+    }
+}

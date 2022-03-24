@@ -35,7 +35,9 @@
             </button>
         </div>
         <div class="middle">
-            <span>📢:Arco Design ProArco Pro v2.0 全新上线 🎉</span>
+            <!-- <span>📢:Arco Design ProArco Pro v2.0 全新上线 🎉</span> -->
+            正在下载更新:
+            <a-progress :percent="0.6" />
         </div>
         <div class="right">
             <span @click="minimizeWin">
@@ -92,10 +94,6 @@ import { db } from '../db/db';
 import { useMainStore } from '../store/index';
 import router from '../router/index';
 import { useRoute } from 'vue-router';
-// import minimizeIcon from '../assets/svg/minimizeIcon.svg';
-// import maximizeIcon from '../assets/svg/maximizeIcon.svg';
-// import maximizeIcon2 from '../assets/svg/maximizeIcon2.svg';
-// import closeWinIcon from '../assets/svg/closeWinIcon.svg';
 
 const mainStore = useMainStore();
 
