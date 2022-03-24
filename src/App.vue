@@ -1,9 +1,4 @@
 <template>
-  <a-modal v-model:visible="visible" @ok="handleOk" @cancel="visible = false">
-    <template #title>发现新版本</template>
-    <div>发现新版本，是否开启下载更新？</div>
-  </a-modal>
-  <!-- <TitleBlock></TitleBlock> -->
   <router-view></router-view>
 </template>
 
@@ -11,25 +6,13 @@
 import { useMainStore } from './store';
 import { db } from './db/db';
 import { setSharedColor, setupMainThemes, setupSecondaryThemes } from './hooks/setupThemes';
-// import bg from '../public/static/img/bg.png';
-// import TitleBlock from './components/TitleBlock.vue';
-
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import toupdate from './hooks/toupdate';
+import { ref, onMounted, nextTick } from 'vue';
+// import axios from 'axios';
 import useCurrentInstance from './utils/useCurrentInstance';
-import config from '../package.json';
 
 const mainStore = useMainStore();
 const { proxy } = useCurrentInstance();
-const $message = proxy.$message;
-const visible = ref(false);
-const upDateUrl = ref('');// 版本更新路径
-const newVersion = ref(''); // 新版本版本号
-
-// console.log(config.version);
-// axios.get('https://inking-app-3g71u4uxff7c8113-1305098148.ap-shanghai.app.tcloudbase.com/test').then(res => {
-//   console.log(res.data);
-// })
 
 // 初始化用户数据表
 db.user.where(':id').between(1, Infinity).toArray().then(value => {
@@ -113,36 +96,6 @@ if (getSearchEngine === null) {
   mainStore.searchEngine = getSearchEngine;
 }
 
-// 确认更新
-const handleOk = () => {
-  window.$API.ipcSend('checkForUpdate', upDateUrl.value + '/' + newVersion.value);
-  window.$API.ipcOn('get-updateMsg', (data: { msg: number, data: any }) => {
-    switch (data.msg) {
-      case -1:
-        $message.error('网络连接问题');
-        break;
-      case 0:
-        $message.error('更新出现错误');
-        break;
-      case 1:
-        $message.error('开始检查更新');
-        break;
-      case 2:
-        console.log('发现更新');
-        break;
-      case 3:
-        $message.error('没有发现更新');
-        break;
-      case 4:
-        console.log(data.data.percent.toFixed(1));
-        break;
-      case 5:
-        console.log('下载完成');
-        break;
-    }
-  })
-}
-
 onMounted(() => {
   // 设置主题
   if (defaultTheme.mode === 'dark') document.body.setAttribute('arco-theme', 'dark');
@@ -153,15 +106,9 @@ onMounted(() => {
   // 设置字体
   const element_app = document.getElementById('app');
   element_app!.setAttribute('style', `font-family:${getSystemFont ?? '默认字体'};`);
-
-  // 自动检测更新
-  axios.get('http://localhost:8888/update').then(res => {
-    if (res.data.version !== config.version) {
-      // 发现新版本
-      visible.value = true;
-      upDateUrl.value = res.data.upDateUrl;
-      newVersion.value = res.data.version;
-    }
+  nextTick(() => {
+    // 近软件执行一次检测更新
+    toupdate(proxy, false);
   })
 })
 </script>

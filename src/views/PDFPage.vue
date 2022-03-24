@@ -1,20 +1,28 @@
 <template>
     <TitleBlock></TitleBlock>
-    <!-- <webview id="pdf-container" :src="pdfFile"></webview> -->
-    <iframe id="pdf-container-temp" :src="pdfFile" frameborder="0"></iframe>
+    <iframe @load="iframeLoaded" id="pdf-container" :src="pdfFile" frameborder="0"></iframe>
 </template>
 
 <script setup lang='ts'>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 import TitleBlock from '../components/TitleBlock.vue';
 import { db } from '../db/db';
+import { useThemeStore } from '../store';
 
-console.log();
+const themeStore = useThemeStore();
 const route = useRoute(), query_id = parseInt(route.query.id as string);
-
 const pdfFile = ref('');
 loadFileData();
+
+// iframe加载完毕后获取其DOM
+const iframeLoaded = () => {
+    const frameDOM = (<HTMLIFrameElement>document.getElementById('pdf-container')).contentWindow!;
+    // 修改主题
+    if (themeStore.theme === 'dark') {
+        frameDOM.document.body.setAttribute('theme', 'dark');
+    }
+}
 
 function loadFileData() {
     db.ebooks.get(query_id).then(value => {
@@ -22,20 +30,10 @@ function loadFileData() {
         pdfFile.value = './lib/pdfjs.min/web/viewer.html?file=' + URL.createObjectURL(value?.data!);
     })
 }
-onMounted(() => {
-    // const webview: any = document.querySelector('webview');
-    // webview.addEventListener('dom-ready', () => {
-    //     // webview.openDevTools(); // 新窗口打开webview内的调试工具
-    // })
-})
 </script>
 
 <style lang="scss" scoped>
 #pdf-container {
-    height: calc(100vh - 45px);
-}
-#pdf-container-temp {
-    // width: 100vw;
     width: 100%;
     height: calc(100vh - 45px);
 }

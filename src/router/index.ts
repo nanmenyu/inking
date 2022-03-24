@@ -43,6 +43,10 @@ const routes: Array<RouteRecordRaw> = [
         name: 'PdfReading',
         component: () => import('../views/PDFPage.vue')
     }, {
+        path: '/epubreading',
+        name: 'EpubReading',
+        component: () => import('../views/epubPage.vue')
+    }, {
         path: '/user',
         name: 'User',
         component: () => import('../views/userPage.vue')

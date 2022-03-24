@@ -35,9 +35,11 @@
             </button>
         </div>
         <div class="middle">
-            <!-- <span>📢:Arco Design ProArco Pro v2.0 全新上线 🎉</span> -->
-            正在下载更新:
-            <a-progress :percent="0.6" />
+            <span v-if="downloading">
+                正在下载更新:
+                <a-progress :percent="downloadProgress" />
+            </span>
+            <span v-else>📢:Arco Design ProArco Pro v2.0 全新上线 🎉</span>
         </div>
         <div class="right">
             <span @click="minimizeWin">
@@ -86,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import {
     IconLeft, IconRight
 } from '@arco-design/web-vue/es/icon';
@@ -96,6 +98,13 @@ import router from '../router/index';
 import { useRoute } from 'vue-router';
 
 const mainStore = useMainStore();
+// 顶部显示下载进度
+const downloading = computed(() => {
+    return mainStore.downloading;
+})
+const downloadProgress = computed(() => {
+    return mainStore.downloadProgress / 100;
+})
 
 /*----控制页面的前进后退----*/
 const backDisable = ref(false), forwardDisable = ref(false);
@@ -132,7 +141,8 @@ function closeWin() {
 
 // 通过route修改样式
 const route = useRoute(), leftColor = ref(''), leftShadow = ref('');
-if (route.path === '/writer' || route.path === '/specialEditor' || route.path === '/reading' || route.path === '/pdfreading') {
+const targetPath = ['/writer', '/specialEditor', '/reading', '/pdfreading', '/epubreading'];
+if (targetPath.indexOf(route.path) !== -1) {
     leftColor.value = 'rgb(var(--my-bg-color))';
     leftShadow.value = 'none';
 } else {

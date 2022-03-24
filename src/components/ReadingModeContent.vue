@@ -39,6 +39,7 @@
                     >
                         <img v-if="item.type === 'txt'" :src="txtFile" />
                         <img v-else-if="item.type === 'pdf'" :src="pdfFile" />
+                        <img v-else-if="item.type === 'epub'" :src="epubFile" />
                         <div class="title">{{ item.title }}</div>
                     </div>
                     <template #content>
@@ -60,6 +61,7 @@ import PopupMenu from './widget/PopupMenu.vue';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import txtFile from '../assets/svg_cover/txtFile.svg';
 import pdfFile from '../assets/svg_cover/pdfFile.svg';
+import epubFile from '../assets/svg_cover/epubFile.svg';
 
 const { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
@@ -79,6 +81,7 @@ const routerLink = (id: number, type: string) => {
     let tempPath = '';
     if (type === 'txt') tempPath = '/reading';
     else if (type === 'pdf') tempPath = '/pdfreading';
+    else if (type === 'epub') tempPath = '/epubreading';
     router.push({
         path: tempPath,
         query: {

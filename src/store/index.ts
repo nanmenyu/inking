@@ -2,6 +2,8 @@ import { defineStore } from 'pinia';
 
 export const useMainStore = defineStore('mainStore', {
     state: () => ({
+        downloading: false, // 是否正在更新(下载) 
+        downloadProgress: 0, // 下载更新的进度
         currentUserId: 0, //当前对应用户表的ID 
         isHighlightCount: false, // 高亮记数触发器
         isInSearch: false, // 是否处在搜索状态

@@ -1,6 +1,6 @@
 {
   "name": "inking",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "main": "electron/main.js",
   "private": true,
   "description": "墨迹写作,基于electron和Vue3的文字创作工具",
@@ -83,6 +83,7 @@
     "electron": "^13.0.0",
     "electron-builder": "^22.14.13",
     "electron-log": "^4.4.5",
+    "epubjs": "^0.3.71",
     "html2pdf.js": "^0.10.1",
     "pdfjs-dist": "^2.13.216",
     "pinia": "^2.0.11",

@@ -185,6 +185,7 @@ const routerLink = (path: string, id: number, type?: string) => {
     } else {
         if (type === 'txt') tempPath = '/reading';
         else if (type === 'pdf') tempPath = '/pdfreading';
+        else if (type === 'epub') tempPath = '/epubreading';
     }
     router.push({
         path: tempPath,
@@ -235,7 +236,7 @@ const explain = computed(() => {
 const importFile = () => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
-    input.setAttribute('accept', '.txt,.pdf');
+    input.setAttribute('accept', '.txt,.pdf,.epub');
     input.click();
     input.onchange = () => {
         if (input.files) {

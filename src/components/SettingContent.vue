@@ -44,6 +44,7 @@
             </li>
             <li>
                 <span>检测更新</span>
+                <a-button @click="detectNewversion" type="outline">点击检测</a-button>
             </li>
         </ul>
     </div>
@@ -54,8 +55,11 @@ import { onMounted, ref, Ref, watch } from 'vue';
 import ThemeContainer from '../components/widget/ThemeContainer.vue';
 import { useMainStore } from '../store';
 import config from '../../package.json';
+import toupdate from '../hooks/toupdate';
+import useCurrentInstance from '../utils/useCurrentInstance';
 
 const mainStore = useMainStore();
+const { proxy } = useCurrentInstance();
 let element_app: HTMLElement | null = null;
 
 // 获取字体列表
@@ -92,6 +96,11 @@ const changeSearchEngine = (value: string) => {
     searchEngine.value = value;
     localStorage.setItem('uSearchEngine', value);
     mainStore.searchEngine = value;
+}
+
+// 检测更新
+const detectNewversion = () => {
+    toupdate(proxy, true);
 }
 
 onMounted(() => {

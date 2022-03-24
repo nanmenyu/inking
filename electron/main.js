@@ -20,7 +20,6 @@ const { autoUpdater } = require('electron-updater');
 const { default: axios } = require('axios');
 
 const NODE_ENV = process.env.NODE_ENV;
-const uploadUrl = 'http://localhost:8888/download/'; // 安装包helatest.yml所在服务器地址
 
 let win;
 async function createWindow() {
@@ -242,22 +241,22 @@ ipcMain.on('checkForUpdate', (e, url) => {
     let upDateUrl = '';
     switch (process.platform) {
         case 'darwin':
-            upDateUrl = url + '/mac';
+            upDateUrl = url['mac'];
             break;
         case 'win32':
-            upDateUrl = url + '/win';
+            upDateUrl = url['win'];
             break;
         case 'linux':
-            upDateUrl = url + '/linux';
+            upDateUrl = url['linux'];
             break;
     }
     autoUpdater.setFeedURL(upDateUrl);
-    autoUpdater.checkForUpdates().catch(err => {
+    autoUpdater.checkForUpdates().catch(() => {
         sendUpdateMsg(-1);
     })
 
     // 当更新发生错误的时候触发。
-    autoUpdater.on('error', (err) => {
+    autoUpdater.on('error', () => {
         sendUpdateMsg(0);
     })
 
@@ -283,11 +282,11 @@ ipcMain.on('checkForUpdate', (e, url) => {
 
     // 下载完成
     autoUpdater.on('update-downloaded', () => {
-        sendUpdateMsg(5, progressObj);
-        setTimeout(() => { // 重启更新提示2秒后在进行重启安装
+        sendUpdateMsg(5);
+        setTimeout(() => { // 重启更新提示3秒后在进行重启安装
             global.willQuitApp = true;
             autoUpdater.quitAndInstall();
-        }, 2000);
+        }, 3000);
     })
 
     function sendUpdateMsg(msg, data) {
