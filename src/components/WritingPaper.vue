@@ -22,7 +22,6 @@ import { hexToRgba } from '../utils/colorChange';
 import pureTextEditor from '../common/editor';
 import { setHighlightKeyword } from '../common/editor/syntax';
 import { db } from '../db/db';
-// import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
 import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { useMainStore } from '../store/index';
@@ -39,6 +38,7 @@ const $modal = proxy.$modal;
 const $message = proxy.$message;
 const mainStore = useMainStore();
 const contextMenu_ref = ref();
+const ProseMirror = ref();
 
 onMounted(() => {
     editor.value.addEventListener('keydown', insertSpace);
@@ -66,7 +66,7 @@ let data: Pagecount, chapterNumber = 0;
 let timer: any = null; // 定时器用于测速
 // 监视输入框中的各项数值
 const getData = () => {
-    chapterNumber = editor.value.innerText.replaceAll('\n', '').replaceAll('\u0020', '').replaceAll('\u3000', '').length; // 字数统计
+    chapterNumber = ProseMirror.value.innerText.replaceAll('\n', '').replaceAll('\u0020', '').replaceAll('\u3000', '').length; // 字数统计
     data = {
         paperHeight: getStyle(editor.value, 'height'), // 输入框的高度
         wordCount: chapterNumber,
@@ -248,10 +248,14 @@ const expFile = (type: string) => {
 // 违禁词查询
 const sensitiveRetrieval = () => {
     const words: { [key: string]: Array<string> } = prohibitedWords;// 导入敏感词库
+    // 添加自定义违禁词
+    words['cust'] = (localStorage.getItem('sWords') ?? '').split('/');
+    // 添加非敏感词（用于忽略）
+    const noneSWords = (localStorage.getItem('noneSWords') ?? '').split('/');
     const appearWords: Array<string> = [], appearMarks: Array<Marker> = [];
     for (let i in words) {
         words[i].forEach(item => {
-            if (editor.value.innerText.includes(item)) {
+            if (noneSWords.indexOf(item) === -1 && editor.value.innerText.includes(item)) {
                 appearWords.push(item);
                 appearMarks.push({ match: new RegExp(item, 'g'), class: 'prohibitedWord', style: '' });
             }
@@ -318,6 +322,8 @@ const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<Marker>) =>
     });
     // 屏蔽自带的拼写检查
     mEditor.value.firstElementChild.setAttribute('spellcheck', 'false');
+    // 获得ProseMirror元素
+    ProseMirror.value = document.querySelector('.ProseMirror');
 }
 
 // 监视选中文字的变化 设置选中文字时的工具栏

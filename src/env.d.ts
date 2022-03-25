@@ -51,11 +51,11 @@ interface Pagecount {
 
 interface User {
   id?: number;
-  creationTime: number;
-  creationYear: number;
-  creationMonth: number;
-  creationDay: number;
-  codewords: number;
+  cTime: Date; // 时间戳
+  // creationYear: number;
+  // creationMonth: number;
+  // creationDay: number;
+  cWords: number; // 码字数
 }
 
 interface Ebooks {

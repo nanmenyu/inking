@@ -37,9 +37,11 @@
                         @click="routerLink(item.id, item.type)"
                         class="book-cover"
                     >
-                        <img v-if="item.type === 'txt'" :src="txtFile" />
-                        <img v-else-if="item.type === 'pdf'" :src="pdfFile" />
-                        <img v-else-if="item.type === 'epub'" :src="epubFile" />
+                        <div :class="`card-cover ${item.type}-cover`">
+                            <div :class="`folding-angle  ${item.type}-angle`"></div>
+                            <div class="angle"></div>
+                            <div class="card-title">{{ '.' + item.type }}</div>
+                        </div>
                         <div class="title">{{ item.title }}</div>
                     </div>
                     <template #content>
@@ -59,9 +61,6 @@ import { db } from '../db/db';
 import { useRouter } from 'vue-router';
 import PopupMenu from './widget/PopupMenu.vue';
 import useCurrentInstance from '../utils/useCurrentInstance';
-import txtFile from '../assets/svg_cover/txtFile.svg';
-import pdfFile from '../assets/svg_cover/pdfFile.svg';
-import epubFile from '../assets/svg_cover/epubFile.svg';
 
 const { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;

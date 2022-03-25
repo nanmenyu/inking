@@ -1,5 +1,6 @@
 .setting-content {
     @include homecontent;
+    overflow-y: scroll;
 
     &>h2 {
         font-weight: lighter;

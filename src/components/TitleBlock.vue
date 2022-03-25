@@ -92,10 +92,10 @@ import { computed, onMounted, ref, watch } from 'vue';
 import {
     IconLeft, IconRight
 } from '@arco-design/web-vue/es/icon';
-import { db } from '../db/db';
 import { useMainStore } from '../store/index';
 import router from '../router/index';
 import { useRoute } from 'vue-router';
+import { saveTodaysCodewords } from '../hooks/db';
 
 const mainStore = useMainStore();
 // 顶部显示下载进度
@@ -131,11 +131,8 @@ function maximizeWin() {
 }
 function closeWin() {
     // 关闭之前做点善后工作
-    db.user.where(':id').equals(mainStore.currentUserId).modify(item => {
-        // 保存今日码字数
-        item.codewords = item.codewords + mainStore.TotalNumber_thisTime - mainStore.contrastTotalNumber_thisTime;
-    }).then(() => {
-        window.$API.ipcSend("window-close");
+    saveTodaysCodewords(() => {
+        window.$API.ipcSend('window-close');
     })
 }
 

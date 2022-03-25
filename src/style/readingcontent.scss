@@ -16,10 +16,78 @@
          padding: 10px 0;
          cursor: pointer;
          border-radius: 8px;
-         transition: background-color 0.3s ease-in-out;
+         transition: all 0.3s ease-in-out;
 
          &:hover {
              background-color: rgb(var(--my-bg2-color));
+         }
+
+         &:hover .card-cover .angle {
+             border-color: rgb(var(--my-bg2-color)) rgb(var(--my-bg2-color)) transparent transparent;
+         }
+     }
+
+     .txt-cover {
+         background-color: #61abfd;
+     }
+
+     .txt-angle {
+         background-color: #3491fa;
+     }
+
+     .pdf-cover {
+         background-color: #ef6d64;
+     }
+
+     .pdf-angle {
+         background-color: #d75f59;
+     }
+
+     .epub-cover {
+         background-color: #478f84;
+     }
+
+     .epub-angle {
+         background-color: #3c7b72;
+     }
+
+     .card-cover {
+         position: relative;
+         width: 120px;
+         height: 150px;
+         margin: 0 auto;
+         border-radius: 15px;
+
+         .folding-angle {
+             position: absolute;
+             top: 0;
+             right: 0;
+             width: 38px;
+             height: 38px;
+             border-radius: 0 0 0 10px;
+         }
+
+         .angle {
+             position: absolute;
+             top: 0;
+             right: 0;
+             width: 0;
+             height: 0;
+             border: 19px solid #fff;
+             border-color: rgb(var(--my-bg-color)) rgb(var(--my-bg-color)) transparent transparent;
+             transition: all 0.3s ease-in-out;
+         }
+
+         .card-title {
+             position: absolute;
+             top: 50%;
+             right: 0;
+             width: 100%;
+             margin: 0;
+             font-size: 36px;
+             text-align: center;
+             transform: translateY(-50%);
+             color: #fff;
          }
      }
 
@@ -36,15 +104,4 @@
          white-space: nowrap;
      }
 
-     //  .books-cover {
-     //      box-sizing: border-box;
-     //      float: left;
-     //      width: 130px;
-     //      height: 170px;
-     //      margin: 20px 40px;
-     //      border-radius: 4px;
-     //      box-shadow: 0 4px 10px #0000001a;
-     //      border: 8px solid red;
-     //      cursor: pointer;
-     //  }
  }

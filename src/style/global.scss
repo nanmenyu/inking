@@ -21,13 +21,17 @@ body {
 }
 
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    // height: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-color);
+    background-color: var(--color-fill-3);
     border-radius: 5px;
+
+    &:hover {
+        background-color: var(--color-fill-4);
+    }
 }
 
 ::-webkit-scrollbar-corner {
@@ -35,8 +39,8 @@ body {
 }
 
 ::selection {
-    color: rgb(var(--my-bg-color));
-    background-color: #ef7a82;
+    color: #fff;
+    background-color: rgb(var(--my-secondary-6));
 }
 
 /* 组件库微调 */

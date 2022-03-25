@@ -478,6 +478,7 @@ import useCurrentInstance from '../utils/useCurrentInstance';
 import { v4 } from 'uuid';
 import genkeywordMarks from '../utils/genkeywordMarks';
 import { useMainStore } from '../store/index';
+import { saveTodaysCodewords } from '../hooks/db';
 import '../style/writerPage.scss';
 
 const { proxy } = useCurrentInstance();
@@ -1121,6 +1122,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
     // 更新继续写作对应的vid_cid
     db.opus.update(query_id, { historRecord: { vid: vid.value, cid: cid.value } });
+    saveTodaysCodewords();
 })
 onUnmounted(() => {
     window.removeEventListener('keydown', shortcut);

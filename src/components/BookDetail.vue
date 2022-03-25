@@ -92,8 +92,6 @@
                         :color="deCheckedArr[i] === undefined ? tagColor[i] : deCheckedArr[i]"
                     >{{ item }}</a-tag>
                 </a-space>
-                <!-- </a-tab-pane>
-                </a-tabs>-->
             </div>
             <!-- 标签墙 -->
             <a-divider style="border-bottom-style: dashed" />
@@ -540,7 +538,8 @@ const booksData: { data: Userdb } = reactive({
         checked: false,
         thePlot: [],
         theTimeLine: [],
-        opusNumber: 0
+        opusNumber: 0,
+        theMaps: []
     }
 });
 const totalNumber = ref(0);

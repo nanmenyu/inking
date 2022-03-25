@@ -89,13 +89,15 @@
 </template>
 
 <script setup lang='ts'>
-import { ref, Ref, onMounted, reactive, computed } from 'vue';
+import { ref, Ref, reactive, computed } from 'vue';
 import { IconLeft, IconRight } from '@arco-design/web-vue/es/icon';
-import { useThemeStore } from '../store';
+import { useMainStore, useThemeStore } from '../store';
 import { db } from '../db/db';
 import * as echarts from 'echarts';
+import { drawCodewordChart, drawLineChart, drawScatterChart, drawPieChart, drawLinesChart } from '../hooks/userContent';
 
 const themeStore = useThemeStore();
+const mainStore = useMainStore();
 const chart_ref = ref();
 const codewordsData: {
     data: Array<{ codewords: number, creationTime: string }>
@@ -153,9 +155,11 @@ const choiceCodewordRange = (value: string) => {
     }).slice(range);
 
     if (value === '365') {
-        drawLineChart(xAxisData, seriesData);
+        // 绘制码字数统计(折线图)
+        drawLineChart(chart_ref.value, xAxisData, seriesData);
     } else {
-        drawCodewordChart(xAxisData, seriesData);
+        // 绘制码字数统计(柱状图)
+        drawCodewordChart(chart_ref.value, xAxisData, seriesData);
     }
 }
 
@@ -181,7 +185,7 @@ const lineSeriesData: Ref<Array<{
     type: 'line',
     smooth: true
 }>> = ref([]);
-const numberPerPage = 2; // 每页多少条数据
+const numberPerPage = mainStore.numPerpage; // 每页多少条数据
 const choiceAnalysisMode = (mode: string) => {
     keMode.value = mode;
     showChartBtn.value = false;
@@ -222,8 +226,10 @@ const choiceAnalysisMode = (mode: string) => {
             })
 
             if (mode === 'm1') {
-                drawScatterChart(xAxisData, yAxisData, scatterData);
+                // 关键词词频分析(散点图)
+                drawScatterChart(chart_ref.value, xAxisData, yAxisData, scatterData);
             } else if (mode === 'm2') {
+                // 关键词词频总览(饼图)
                 const tempData: { [key: string]: number } = {};
                 // 计算总频次
                 scatterData.forEach(item => {
@@ -243,8 +249,9 @@ const choiceAnalysisMode = (mode: string) => {
                         otherPieData.push(key);
                     }
                 }
-                drawPieChart(pieData, otherPieData);
+                drawPieChart(chart_ref.value, pieData, otherPieData);
             } else if (mode === 'm3') {
+                // 关键词词频趋势（折线）
                 const tempData: { [key: string]: Array<number> } = {};
                 scatterData.forEach(item => {
                     if (!tempData[yAxisData[item[1]]]) tempData[yAxisData[item[1]]] = [];
@@ -264,7 +271,7 @@ const choiceAnalysisMode = (mode: string) => {
                 // 分页(10页)
                 if (lineSeriesData.value.length <= numberPerPage) {
                     showChartBtn.value = false;
-                    drawLinesChart(lineXAxisData.value, lineSeriesData.value);
+                    drawLinesChart(chart_ref.value, lineXAxisData.value, lineSeriesData.value);
                 } else {
                     // 显示翻页按钮进行分页渲染图标
                     showChartBtn.value = true;
@@ -272,7 +279,7 @@ const choiceAnalysisMode = (mode: string) => {
                     numberOfPages.value = Math.ceil(lineSeriesData.value.length / numberPerPage);
                     // 默认渲染第一页的数据，即currentPage为1
                     const tempSeriesData = lineSeriesData.value.slice(numberPerPage * (currentPage.value - 1), numberPerPage * currentPage.value);
-                    drawLinesChart(lineXAxisData.value, tempSeriesData);
+                    drawLinesChart(chart_ref.value, lineXAxisData.value, tempSeriesData);
                 }
             }
         }
@@ -294,22 +301,47 @@ const lineChartTurning = (offset: 1 | -1) => {
         currentPage.value += offset;
     }
     const tempSeriesData = lineSeriesData.value.slice(numberPerPage * (currentPage.value - 1), numberPerPage * currentPage.value);
-    drawLinesChart(lineXAxisData.value, tempSeriesData);
+    drawLinesChart(chart_ref.value, lineXAxisData.value, tempSeriesData);
 }
 
-function loadCodewordData() {
+function loadCodewordData(): void {
     // 读取用户数据
     db.user.where(':id').between(1, Infinity).toArray().then(value => {
-        value.forEach(item => {
+        const currentTime = new Date().getTime();
+        const len = value.length;
+        let targetIndex = 0;
+
+        for (let i = 0; i < len; i++) {
+            // 时间戳对应同一天
+            if (new Date(currentTime).toDateString() === new Date(value[i].cTime).toDateString()) {
+                targetIndex = i; // 获得今天对应数据的索引
+                break;
+            }
+        }
+
+        // 以今天的数据为尾元素，向前切出最多365条数据
+        let newValue = [];
+        if (targetIndex < 365) {
+            newValue = value.slice(0, targetIndex + 1);
+        } else {
+            newValue = value.slice(targetIndex + 1 - 365, targetIndex + 1);
+        }
+
+        // 数据整形
+        newValue.forEach(item => {
+            const y = new Date(item.cTime).getFullYear();
+            const m = new Date(item.cTime).getMonth() + 1;
+            const d = new Date(item.cTime).getDate();
             codewordsData.data.push({
-                codewords: item.codewords,
-                creationTime: item.creationYear + '/' + item.creationMonth + '/' + item.creationDay
+                codewords: item.cWords,
+                creationTime: y + '/' + m + '/' + d
             })
         })
+
     }).then(() => {
         choiceCodewordRange('7');
-        // drawScatterChart()
     })
+
     // 读取所有作品列表
     db.opus.where(':id').between(1, Infinity).toArray().then(value => {
         opusList.value = value.filter(item => item.discard === 'f').map(item => {
@@ -318,325 +350,6 @@ function loadCodewordData() {
         currentOpusKey.value = opusList.value[0][0];
         currentOpus.value = opusList.value[0][1];
     })
-}
-
-// 绘制码字数统计(柱状图)
-function drawCodewordChart(xAxisData: any, seriesData: any) {
-    let myChart = echarts.getInstanceByDom(chart_ref.value);
-    if (myChart) myChart!.dispose();
-    myChart = echarts.init(chart_ref.value);
-
-    myChart.setOption({
-        xAxis: {
-            type: 'category',
-            data: xAxisData
-        },
-        yAxis: {
-            type: 'value'
-        },
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-                type: 'shadow'
-            },
-            formatter: (param: any) => {
-                return `${param[0].axisValue}<br />${param[0].marker}   ${param[0].value}字`;
-            }
-        },
-        grid: {
-            left: '3%',
-            right: '3%',
-            bottom: '3%',
-            containLabel: true
-        },
-        dataZoom: [{
-            type: 'inside'
-        }, {
-            type: 'slider',
-            show: false
-        }],
-        series: [{
-            data: seriesData,
-            type: 'bar',
-            itemStyle: {
-                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                    { offset: 0, color: `rgba(${themeStore.my_secondary_6},0.3)` },
-                    { offset: 1, color: `rgba(${themeStore.my_secondary_6},1)` }
-                ]),
-                barBorderRadius: [0, 20, 20, 0]
-            }
-        }]
-    })
-
-    window.onresize = function () {//自适应大小
-        myChart!.resize();
-    }
-}
-
-// 绘制码字数统计(折线图 365天时)
-function drawLineChart(xAxisData: Array<string>, seriesData: any) {
-    let myChart = echarts.getInstanceByDom(chart_ref.value);
-    if (myChart) myChart!.dispose();
-    myChart = echarts.init(chart_ref.value);
-
-    myChart.setOption({
-        xAxis: {
-            type: 'category',
-            boundaryGap: false,
-            data: xAxisData
-        },
-        tooltip: {
-            trigger: 'axis'
-        },
-        yAxis: {
-            type: 'value'
-        },
-        dataZoom: [{
-            type: 'inside'
-        }, {
-            type: 'slider',
-            show: false
-        }],
-        series: [{
-            data: seriesData,
-            type: 'line',
-            smooth: true,
-            symbol: 'none',
-            lineStyle: {
-                color: 'rgba(255,255,255,0)'
-            },
-            areaStyle: {
-                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                    { offset: 0, color: `rgb(${themeStore.my_secondary_6})` },
-                    { offset: 1, color: `rgb(${themeStore.primary_6})` }
-                ])
-            }
-        }]
-    })
-    window.onresize = function () {//自适应大小
-        myChart!.resize();
-    }
-}
-
-// 关键词词频分析(散点图)
-function drawScatterChart(xAxisData: any, yAxisData: any, scatterData: any) {
-    let myChart = echarts.getInstanceByDom(chart_ref.value);
-    if (myChart) myChart!.dispose(); // 避免重复option
-    myChart = echarts.init(chart_ref.value);
-
-    myChart.setOption({
-        color: [`rgb(${themeStore.primary_6})`],
-        tooltip: {
-            position: 'top',
-            formatter: (param: any) => {
-                return `${param.marker} ${yAxisData[param.value[1]]}  ${param.value[2]}次`
-            }
-        },
-        grid: {
-            left: '3%',
-            right: '3%',
-            bottom: '3%',
-            top: '0%',
-            containLabel: true
-        },
-        dataZoom: [
-            {
-                type: 'inside',
-                start: 0,
-                end: 100,
-                show: true
-            },
-            {
-                show: true,
-                start: 0,
-                end: (() => {
-                    if (yAxisData.length < 10) return 100;
-                    else if (yAxisData.length < 20) return 50;
-                    else return 25;
-                })(),
-                yAxisIndex: 0,
-                // filterMode: 'empty',
-                width: 20,
-                // height: '100%',
-                showDataShadow: false,
-                // left: '93%',
-                brushSelect: false // 关闭刷选
-            }
-        ],
-        xAxis: {
-            type: 'category',
-            data: xAxisData,
-            boundaryGap: false,
-            splitLine: {
-                show: true
-            },
-            axisLine: {
-                show: false
-            }
-        },
-        yAxis: {
-            type: 'category',
-            data: yAxisData,
-            axisLine: {
-                show: false
-            }
-        },
-        series: [{
-            type: 'scatter',
-            symbolSize: function (val: any) {
-                if (val[2] <= 6 && val[2] > 0) return 6;
-                else return val[2];
-            },
-            data: scatterData,
-            animationDelay: function (idx: number) {
-                return idx * 5;
-            }
-        }]
-    })
-
-    window.onresize = function () {//自适应大小
-        myChart!.resize();
-    }
-}
-
-// 关键词词频总览(饼图)
-function drawPieChart(pieData: any, otherPieData: Array<string>) {
-    let myChart = echarts.getInstanceByDom(chart_ref.value);
-    if (myChart) myChart!.dispose(); // 避免重复option
-    myChart = echarts.init(chart_ref.value);
-
-    const otherPie = otherPieData.map(item => {
-        return {
-            value: 1,
-            name: item
-        }
-    })
-
-    myChart.setOption({
-        title: [{
-            text: '前20个关键词',
-            left: '25%',
-            bottom: '10%',
-            textAlign: 'center',
-            textStyle: {
-                color: `rgb(${themeStore.my_secondary_6})`
-            }
-        }, {
-            text: '后20个关键词',
-            left: '75%',
-            bottom: '10%',
-            textAlign: 'center',
-            textStyle: {
-                color: `rgb(${themeStore.my_secondary_6})`
-            }
-        }, , {
-            text: '频率为零的关键词',
-            left: '50%',
-            top: '0',
-            textAlign: 'center',
-            textStyle: {
-                color: `rgb(${themeStore.my_secondary_6})`
-            }
-        }],
-        tooltip: {
-            trigger: 'item',
-        },
-        series: [{
-            name: '前20个关键词',
-            type: 'pie',
-            radius: [50, 250],
-            center: ['25%', '50%'],
-            roseType: 'area',
-            label: {
-                show: false
-            },
-            itemStyle: {
-                borderRadius: 8
-            },
-            data: pieData.slice(0, 20)
-        }, {
-            name: '后20个关键词',
-            type: 'pie',
-            radius: [50, 250],
-            center: ['75%', '50%'],
-            roseType: 'area',
-            label: {
-                show: false
-            },
-            itemStyle: {
-                borderRadius: 8
-            },
-            data: pieData.slice(-20)
-        }, {
-            name: '频率为零的关键词',
-            type: 'pie',
-            radius: [20, 50],
-            center: ['50%', '11%'],
-            label: {
-                show: false
-            },
-            itemStyle: {
-                borderRadius: 8
-            },
-            data: otherPie,
-            tooltip: {
-                formatter: (param: any) => {
-                    return `${param.seriesName}<br />${param.marker}    ${param.name}`;
-                }
-            }
-        }]
-    })
-
-    window.onresize = function () {//自适应大小
-        myChart!.resize();
-    }
-}
-
-// 关键词词频趋势（折线）
-function drawLinesChart(xAxisData: any, lineSeriesData: any) {
-    let myChart = echarts.getInstanceByDom(chart_ref.value);
-    if (myChart) myChart!.dispose(); // 避免重复option
-    myChart = echarts.init(chart_ref.value);
-
-    myChart.setOption({
-        xAxis: {
-            type: 'category',
-            data: xAxisData
-        },
-        yAxis: {
-            type: 'value'
-        },
-        dataZoom: [{
-            type: 'inside'
-        }, {
-            type: 'slider',
-            show: false
-        }],
-        tooltip: {
-            order: 'valueDesc',
-            trigger: 'axis',
-            textStyle: {
-                align: 'left'
-            }
-        },
-        series: lineSeriesData
-    })
-
-    window.onresize = function () {//自适应大小
-        myChart!.resize();
-    }
-}
-
-//生成从minNum到maxNum的随机数
-function randomNum(minNum: number, maxNum: number) {
-    switch (arguments.length) {
-        case 1:
-            return parseInt((Math.random() * minNum + 1).toString(), 10);
-        case 2:
-            return parseInt((Math.random() * (maxNum - minNum + 1) + minNum).toString(), 10);
-        default:
-            return 0;
-    }
 }
 
 </script>

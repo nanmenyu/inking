@@ -18,7 +18,8 @@ export const useMainStore = defineStore('mainStore', {
         keywordMarks: [], //当前的高亮标记目标
         focusedPlaceId: '', // 当前选中的地图位点
         // 用户设置
-        dailyPlan: '2000', // 每日码字计划
+        dailyPlan: 2000, // 每日码字计划
+        numPerpage: 10, // 趋势分析每页显示数
         searchEngine: 'wordSearch_baidu', // 默认查词引擎
     }),
     getters: {

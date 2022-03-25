@@ -25,11 +25,11 @@ export interface Userdb {
 
 export interface User {
     id?: number;
-    creationTime: number;
-    creationYear: number;
-    creationMonth: number;
-    creationDay: number;
-    codewords: number;
+    cTime: Date;
+    // creationYear: number;
+    // creationMonth: number;
+    // creationDay: number;
+    cWords: number;
 }
 
 export interface Favorites {

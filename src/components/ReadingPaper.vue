@@ -1,17 +1,7 @@
 <template>
-    <!-- <ContextMenu
-        mode="reading"
-        @choice="choiceContextMenuItem"
-        :menuItem="['快速查词', '快速翻译', '右侧搜索']"
-        ref="contextMenu_ref"
-    ></ContextMenu>-->
     <div id="paper-box-r" ref="pBox">
         <main id="pEditor" ref="editor">
-            <div id="mainEditor-r" ref="mainEditor">
-                <!-- <div class="contentTip contentTip-r" ref="contentTip1" style="display: none;"></div>
-                <div class="contentTip contentTip-r" ref="contentTip2" style="display: none;"></div>
-                <p v-for="item in fileData">{{ item }}</p>-->
-            </div>
+            <div id="mainEditor-r" ref="mainEditor"></div>
         </main>
     </div>
 </template>
@@ -19,7 +9,6 @@
 <script setup lang='ts'>
 import { nextTick, onMounted, ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
-// import ContextMenu from './widget/ContextMenu.vue'
 import { db } from '../db/db';
 import { paperSize } from '../hooks/paperSize';
 import pureTextEditor from '../common/editor';

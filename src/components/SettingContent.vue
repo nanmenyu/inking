@@ -2,6 +2,15 @@
     <div class="setting-content">
         <h2>设置 (v{{ config.version }})</h2>
         <ul class="list">
+            <li title="选择页面的主题与配色">
+                <span>系统主题</span>
+                <a-trigger trigger="click" :popup-translate="[0, 10]" show-arrow>
+                    <a-button type="outline">点击修改</a-button>
+                    <template #content>
+                        <ThemeContainer></ThemeContainer>
+                    </template>
+                </a-trigger>
+            </li>
             <li title="选择从系统中获取的字体">
                 <span>系统字体</span>
                 <a-select
@@ -13,25 +22,27 @@
                     :virtual-list-props="{ height: 200 }"
                 />
             </li>
-            <li>
-                <span>系统主题</span>
-                <a-trigger trigger="click" :popup-translate="[0, 10]" show-arrow>
-                    <a-button type="outline">点击修改</a-button>
-                    <template #content>
-                        <ThemeContainer></ThemeContainer>
-                    </template>
-                </a-trigger>
-            </li>
-            <li>
+            <li title="设定每日的目标码字数">
                 <span>每日计划</span>
                 <a-input-number
-                    v-model="uDailyPlan"
+                    :default-value="uDailyPlan"
+                    @change="changeDailyPlan"
                     :style="{ width: '250px' }"
                     :min="1"
                     :max="100000"
                 />
             </li>
-            <li>
+            <li title="数据中心-关键词分析-趋势中每页的数据条数">
+                <span>趋势分析每页显示数</span>
+                <a-input-number
+                    :default-value="uNumPerpage"
+                    @change="changeNumPerpage"
+                    :style="{ width: '250px' }"
+                    :min="1"
+                    :max="20"
+                />
+            </li>
+            <li title="快捷查词默认的引擎">
                 <span>默认查词引擎</span>
                 <a-radio-group
                     @change="changeSearchEngine"
@@ -42,9 +53,43 @@
                     <a-radio value="wordSearch_zdic">汉典</a-radio>
                 </a-radio-group>
             </li>
+            <li style="height: 100px;">
+                <span>敏感词词典</span>
+                <a-textarea
+                    :default-value="sensitiveWords"
+                    @input="getSensitiveWords"
+                    @clear="getSensitiveWords('')"
+                    placeholder="添加自定义敏感词，每个词用'/'分开,例如: 词A/词B/词C"
+                    :max-length="1000"
+                    style="width:70%;overflow: hidden;"
+                    :auto-size="{
+                        minRows: 4,
+                        maxRows: 4
+                    }"
+                    allow-clear
+                    show-word-limit
+                />
+            </li>
+            <li style="height: 100px;">
+                <span>非敏感词</span>
+                <a-textarea
+                    :default-value="noneSensitiveWords"
+                    @input="getNoneSensitiveWords"
+                    @clear="getNoneSensitiveWords('')"
+                    placeholder="声明非敏感词，用于忽略默认的敏感词，用法同上"
+                    :max-length="1000"
+                    style="width:70%;overflow: hidden;"
+                    :auto-size="{
+                        minRows: 4,
+                        maxRows: 4
+                    }"
+                    allow-clear
+                    show-word-limit
+                />
+            </li>
             <li>
                 <span>检测更新</span>
-                <a-button @click="detectNewversion" type="outline">点击检测</a-button>
+                <a-button @click="detectNewversion" type="outline" :loading="loading">点击检测</a-button>
             </li>
         </ul>
     </div>
@@ -85,10 +130,20 @@ const setFont = () => {
 
 // 设置每日计划
 const uDailyPlan = ref(mainStore.dailyPlan);
-watch(uDailyPlan, value => {
-    localStorage.setItem('uDailyPlan', value);
-    mainStore.dailyPlan = value;
-})
+const changeDailyPlan = (value: number) => {
+    if (value) {
+        localStorage.setItem('uDailyPlan', value.toString());
+        mainStore.dailyPlan = value;
+    }
+}
+// 趋势分析每页显示数
+const uNumPerpage = ref(mainStore.numPerpage);
+const changeNumPerpage = (value: number) => {
+    if (value) {
+        localStorage.setItem('uNumPerpage', value.toString());
+        mainStore.numPerpage = value;
+    }
+}
 
 // 设置查词引擎
 const searchEngine = ref(mainStore.searchEngine);
@@ -99,8 +154,23 @@ const changeSearchEngine = (value: string) => {
 }
 
 // 检测更新
+const loading = ref(false);
 const detectNewversion = () => {
-    toupdate(proxy, true);
+    loading.value = true;
+    toupdate(proxy, true, () => {
+        // 加载结束
+        loading.value = false;
+    });
+}
+
+// 自定义敏感词和非敏感词
+const sensitiveWords = ref(localStorage.getItem('sWords') ?? '');
+const noneSensitiveWords = ref(localStorage.getItem('noneSWords') ?? '');
+const getSensitiveWords = (value: string) => {
+    localStorage.setItem('sWords', value);
+}
+const getNoneSensitiveWords = (value: string) => {
+    localStorage.setItem('noneSWords', value);
 }
 
 onMounted(() => {

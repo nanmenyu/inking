@@ -2,7 +2,7 @@ import axios from "axios";
 import config from '../../package.json';
 import { useMainStore } from '../store';
 
-export default function toupdate(proxy: Record<string, any>, haveMsg: boolean) {
+export default function toupdate(proxy: Record<string, any>, haveMsg: boolean, cb?: Function) {
     const mainStore = useMainStore();
     const $message = proxy.$message;
     const $modal = proxy.$modal;
@@ -47,9 +47,11 @@ export default function toupdate(proxy: Record<string, any>, haveMsg: boolean) {
             })
         } else {
             if (haveMsg) $message.success('现在已经是最新版本');
+            if (typeof cb === 'function') cb();
         }
     }).catch((err) => {
         if (haveMsg) $message.error('网络出现问题');
+        if (typeof cb === 'function') cb();
     })
 }
 

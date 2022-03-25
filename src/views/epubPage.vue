@@ -3,35 +3,33 @@
     <a-layout class="layout-content">
         <a-layout-sider collapsible breakpoint="xl">
             <div class="logo" />
-            <a-menu
-                :default-open-keys="['1']"
-                :default-selected-keys="['0_3']"
-                :style="{ width: '100%' }"
-            >
-                <a-sub-menu key="1">
-                    <template #title>
-                        <IconCalendar></IconCalendar>Navigation 1
-                    </template>
-                    <a-menu-item key="1_1">Menu 1</a-menu-item>
-                    <a-menu-item key="1_2">Menu 2</a-menu-item>
-                    <a-sub-menu key="2" title="Navigation 2">
-                        <a-menu-item key="2_1">Menu 1</a-menu-item>
-                        <a-menu-item key="2_2">Menu 2</a-menu-item>
+            <a-menu style="text-align: left;">
+                <!-- 渲染列表 -->
+                <div v-for="item in catalogItme" :key="item.id">
+                    <a-sub-menu
+                        v-if="item.subitems.length > 0"
+                        :key="item.id"
+                        :title="item.label.trim()"
+                    >
+                        <a-tooltip
+                            v-for="it in item.subitems"
+                            :key="it.id"
+                            :content="it.label.trim()"
+                            position="right"
+                            mini
+                        >
+                            <a-menu-item
+                                @click="directoryJump(it.href)"
+                                style="font-size: 12px;"
+                            >{{ it.label.trim() }}</a-menu-item>
+                        </a-tooltip>
                     </a-sub-menu>
-                    <a-sub-menu key="3" title="Navigation 3">
-                        <a-menu-item key="3_1">Menu 1</a-menu-item>
-                        <a-menu-item key="3_2">Menu 2</a-menu-item>
-                        <a-menu-item key="3_3">Menu 3</a-menu-item>
-                    </a-sub-menu>
-                </a-sub-menu>
-                <a-sub-menu key="4">
-                    <template #title>
-                        <IconCalendar></IconCalendar>Navigation 4
-                    </template>
-                    <a-menu-item key="4_1">Menu 1</a-menu-item>
-                    <a-menu-item key="4_2">Menu 2</a-menu-item>
-                    <a-menu-item key="4_3">Menu 3</a-menu-item>
-                </a-sub-menu>
+                    <a-menu-item
+                        v-else
+                        @click="directoryJump(item.href)"
+                        :key="'-' + item.id"
+                    >{{ item.label.trim() }}</a-menu-item>
+                </div>
             </a-menu>
             <!-- trigger -->
             <template #trigger="{ collapsed }">
@@ -46,7 +44,7 @@
 </template>
 
 <script setup lang='ts'>
-import { ref } from 'vue';
+import { nextTick, Ref, ref } from 'vue';
 import {
     IconCaretRight, IconCaretLeft
 } from '@arco-design/web-vue/es/icon';
@@ -60,35 +58,38 @@ import { onMounted } from 'vue';
 const route = useRoute(), query_id = parseInt(route.query.id as string);
 const container = ref();
 
+const catalogItme: Ref<Array<any>> = ref([]);
+let rendition: any;
+
+const directoryJump = (url: string) => {
+    rendition.display(url);
+}
+
 function loadFileData() {
     db.ebooks.get(query_id).then(value => {
         const book = ePub(value?.data! as any);
-        const rendition = book.renderTo(container.value, {
+        rendition = book.renderTo(container.value, {
             width: '100%',
             height: '100%',
             manager: 'continuous',
             flow: 'scrolled'
         });
         rendition.display();
-        // console.log(container.value);
-        // console.log(document.querySelector('iframe'));
-        // sandbox="allow-scripts"
+        rendition.themes.fontSize(24 + 'px');
+        // rendition.on('selected', function (cfiRange: any) {
+        //     book.getRange(cfiRange).then(range => {
+        //         console.log(range.toString());
+        //     })
+        // })
+
         book.loaded.navigation.then(function (toc: any) {
-            // 方式一 toc是一个多维数组，下面这种只能显示第一级的目录
-
-            var catalogItme = '';
+            // 获得电子书的目录
             toc.forEach((chapter: any) => {
-                catalogItme += '<p class="catalog-itme" data-catalog="' + chapter.href + '">' + chapter.label + '</p>'
+                // console.log(chapter);
+                catalogItme.value.push(chapter);
             });
-            // console.log(catalogItme);
-            // 将拼接好的目录渲染到页面里       
-            // document.querySelector('catalog').innerHTML = catalogItme
-
-            // 方式二 将所有的目录全部显示出来
-            // 第一级的catalog-itme-0
-            // 第二级的catalog-itme-1 以此类推...
-            // document.querySelector('catalog').innerHTML = recursionHandle(toc.toc, [], 0).join('')
         })
+
     })
 }
 
