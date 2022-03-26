@@ -1,5 +1,5 @@
+<!-- 悬浮框 -->
 <template>
-    <!-- 悬浮框 -->
     <div id="floatBox" ref="floatBox" @mousedown="moveStart">
         <div class="floatBox-header">
             <div class="header-title">{{ props.title }}</div>
@@ -22,7 +22,6 @@
             </a-space>
         </div>
     </div>
-    <!-- 悬浮框 -->
 </template>
 
 <script setup lang="ts">

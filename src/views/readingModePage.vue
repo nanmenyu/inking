@@ -1,7 +1,6 @@
 <template>
     <TitleBlock></TitleBlock>
     <SidebarLeft></SidebarLeft>
-    <!-- <LabelTop></LabelTop> -->
     <ReadingModeContent></ReadingModeContent>
     <!-- 主题按钮 -->
     <div class="theme" title="更换主题">
@@ -21,11 +20,9 @@
 <script setup lang="ts">
 import TitleBlock from '../components/TitleBlock.vue';
 import SidebarLeft from '../components/SidebarLeft.vue';
-// import LabelTop from '../components/LabelTop.vue';
 import ReadingModeContent from '../components/ReadingModeContent.vue';
 import ThemeContainer from '../components/widget/ThemeContainer.vue';
 import { IconSkin } from "@arco-design/web-vue/es/icon";
-
 </script>
 
 <style lang="scss" scoped>

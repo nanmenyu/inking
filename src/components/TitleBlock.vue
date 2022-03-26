@@ -130,10 +130,14 @@ function maximizeWin() {
     isMax.value = !isMax.value;
 }
 function closeWin() {
-    // 关闭之前做点善后工作
-    saveTodaysCodewords(() => {
+    if (route.path === '/writer') {
+        // 从写作页直接关闭时
+        saveTodaysCodewords(() => {
+            window.$API.ipcSend('window-close');
+        })
+    } else {
         window.$API.ipcSend('window-close');
-    })
+    }
 }
 
 // 通过route修改样式

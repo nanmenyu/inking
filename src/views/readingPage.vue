@@ -46,19 +46,19 @@
 
 <script setup lang='ts'>
 import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import TitleBlock from '../components/TitleBlock.vue';
 import TopToolbar from '../components/TopToolbar.vue';
 import ReadingPaper from '../components/ReadingPaper.vue';
 import WebviewBlock from '../components/WebviewBlock.vue';
 import { throttle } from '../utils/flowControl';
 import { db } from '../db/db';
-import { useRoute } from 'vue-router';
 import '../style/readingPage.scss';
 
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
 const topToolRef = ref(), paperRef = ref(), ref_WebviewBlock = ref();
-const showIframeWrap = ref(false);
+const showIframeWrap = ref(false); // 遮罩显示
 
 // 转发纸张-->头部工具栏的数据
 const sendPaperData = (data: Pagecount) => {

@@ -12,7 +12,7 @@ import { useThemeStore } from '../store';
 
 const themeStore = useThemeStore();
 const route = useRoute(), query_id = parseInt(route.query.id as string);
-const pdfFile = ref('');
+const pdfFile = ref(''); // pdf文件的url
 loadFileData();
 
 // iframe加载完毕后获取其DOM

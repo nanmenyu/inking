@@ -20,19 +20,20 @@
 
 <script setup lang="ts">
 import { ref, defineExpose } from 'vue';
+import { useRoute } from 'vue-router';
 import TitleBlock from '../components/TitleBlock.vue';
-import SpecialeditorTop from '../components/widget/SpecialeditorTop.vue';
 import PlotEditor from '../components/PlotEditor.vue';
 import KeywordEditor from '../components/KeywordEditor.vue';
 import DiagramEditor from '../components/DiagramEditor.vue';
 import TimelineEditor from '../components/TimelineEditor.vue';
 import MapContent from '../components/MapContent.vue';
-import { useRoute } from 'vue-router';
+import SpecialeditorTop from '../components/widget/SpecialeditorTop.vue';
 
-// 通过route参数显示模块
+// 通过route参数显示对应模块
 const route = useRoute(), showModular = ref('');
 showModular.value = route.query.type as string;
 
+// 修改显示模块
 const switchModular = (type: string) => {
     showModular.value = type;
 }

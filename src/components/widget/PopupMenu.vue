@@ -1,3 +1,4 @@
+<!-- 基本弹窗 -->
 <template>
     <div id="modify-box" ref="floatBox">
         <div :class="props.boxClass ? [...props.boxClass] : 'box'">

@@ -1,3 +1,4 @@
+<!-- 主题选择器 -->
 <template>
     <div class="theme-container">
         <div class="theme-container-header">

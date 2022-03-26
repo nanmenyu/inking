@@ -58,7 +58,7 @@ export class MySubClassedDexie extends Dexie {
 
     constructor() {
         super('uDatabase');
-        this.version(3.2).stores({
+        this.version(3.3).stores({
             // 作品集
             opus: '++id, author, title, discard',
             user: '++id',

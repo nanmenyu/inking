@@ -1,73 +1,12 @@
 <!-- 作品(纯文本)编写页 -->
 <template>
     <TitleBlock v-show="!fullScreenState"></TitleBlock>
-    <div @click.stop v-if="showkeywordDetail" ref="keywordDetail" class="keyword-detail">
-        <div class="keyword-head">
-            <div class="head-left">
-                <img :src="currentKeyword.data.itemImg" />
-            </div>
-            <div class="head-middle">
-                <ul>
-                    <li>🔸{{ currentKeyword.data.itemName }}</li>
-                    <li v-for="item in currentKeyword.data.otherName.slice(0, 2)">🔸{{ item }}</li>
-                </ul>
-            </div>
-            <div class="head-right">
-                <a-space size="mini" direction="vertical">
-                    <a-popover
-                        style="max-width: 300px;"
-                        trigger="click"
-                        position="rt"
-                        :title="currentKeyword.data.itemName + '/' + currentKeyword.data.otherName.join('/')"
-                    >
-                        <span title="查看更多">
-                            <icon-apps />
-                        </span>
-                        <template #content>
-                            <div class="popover-content">
-                                <span>{{ currentKeyword.data.itemDesc }}</span>
-                            </div>
-                        </template>
-                    </a-popover>
-                    <span @click="nextPage(1)" title="下一页">
-                        <icon-caret-right />
-                    </span>
-                    <span @click="nextPage(-1)" title="上一页">
-                        <icon-caret-left />
-                    </span>
-                </a-space>
-            </div>
-        </div>
-        <div class="keyword-middle">
-            <a-space v-if="currentPage === 1" wrap size="mini">
-                <a-tag
-                    v-for="item in currentKeyword.data.itemString"
-                    style="max-width: 200px;border-radius: 5px;"
-                    color="arcoblue"
-                >{{ item.key }}🔸{{ item.value }}</a-tag>
-            </a-space>
-            <a-space v-if="currentPage === 2" wrap size="mini">
-                <a-tag
-                    v-for="item in currentKeyword.data.itemNumber"
-                    style="max-width: 200px;border-radius: 5px;"
-                    color="green"
-                >{{ item.key }}🔸{{ item.value + item.unit }}</a-tag>
-            </a-space>
-            <ul v-if="currentPage === 3" class="middle-associated">
-                <li
-                    v-for="item in currentKeyword.data.associated.sort((a, b) => b.value - a.value)"
-                >
-                    <a-tag
-                        style="max-width: 100px;border-radius: 5px;"
-                        color="magenta"
-                    >{{ item.key }}</a-tag>
-                    <span class="degree">{{ getAssociatedmark(item.value) }}</span>
-                </li>
-            </ul>
-        </div>
-        <!-- <div class="keyword-bottom"></div> -->
-        <div @click="displayKeyPanel" class="panel-btn" title="唤出关键字面板">🛩️</div>
-    </div>
+    <KeywordDetail
+        v-if="showkeywordDetail"
+        @getkeywordDetail="getkeywordDetail"
+        @displayKeyPanel="displayKeyPanel"
+        ref="keywordDetail_ref"
+    ></KeywordDetail>
     <PopupMenu
         v-if="isRename"
         title="重命名"
@@ -335,7 +274,6 @@
                         ref="paperRef"
                     ></WritingPaper>
                 </a-layout-content>
-                <!-- style="width: 450px;" -->
                 <a-resize-box
                     @moving-start="showIframeWrap = true"
                     @moving-end="showIframeWrap = false"
@@ -458,9 +396,10 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount, watch, Ref } from 'vue';
 import {
-    IconCaretRight, IconCaretLeft, IconClose, IconUndo, IconMessage,
-    IconRightCircle, IconSearch, IconArrowUp, IconArrowDown, IconApps, IconPublic, IconLeft, IconRight
+    IconCaretRight, IconCaretLeft, IconClose, IconUndo, IconMessage, IconRightCircle, IconSearch,
+    IconArrowUp, IconArrowDown, IconPublic, IconLeft, IconRight
 } from '@arco-design/web-vue/es/icon';
+import { useRoute, useRouter } from 'vue-router';
 import TitleBlock from '../components/TitleBlock.vue';
 import TopToolbar from '../components/TopToolbar.vue';
 import WritingPaper from '../components/WritingPaper.vue';
@@ -471,28 +410,26 @@ import KeywordEditor from '../components/KeywordEditor.vue';
 import DiagramEditor from '../components/DiagramEditor.vue';
 import TimelineEditor from '../components/TimelineEditor.vue';
 import MapContent from '../components/MapContent.vue';
-import { useRoute, useRouter } from 'vue-router';
-import { throttle } from '../utils/flowControl';
-import { db } from '../db/db';
+import KeywordDetail from '../components/widget/KeywordDetail.vue'
 import useCurrentInstance from '../utils/useCurrentInstance';
-import { v4 } from 'uuid';
+import { throttle } from '../utils/flowControl';
 import genkeywordMarks from '../utils/genkeywordMarks';
 import { useMainStore } from '../store/index';
 import { saveTodaysCodewords } from '../hooks/db';
+import { db } from '../db/db';
+import { v4 } from 'uuid';
 import '../style/writerPage.scss';
 
 const { proxy } = useCurrentInstance();
+const mainStore = useMainStore();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
-const vid = ref(route.query.vid);
-const cid = ref(route.query.cid);
-const mainStore = useMainStore();
-const ref_WebviewBlock = ref();
-const ref_TimelineEditor = ref();
-const paperRef = ref();
-const topToolRef = ref();
+const vid = ref(route.query.vid); // 缓存当前卷vid
+const cid = ref(route.query.cid); // 缓存当前章cid
+const paperRef = ref(); // 纸张
+const topToolRef = ref(); // 顶部工具栏
 loadListData();
 
 // 转发纸张-->头部工具栏的数据
@@ -573,8 +510,11 @@ const textPrompt = [['右上', '右下', '左下'], ['左上', '左下', '右下
 const position = ref(0); // 某个状态的索引
 // 读取缓存
 const getFloatToolPosition = localStorage.getItem('floatToolPosition');
-if (getFloatToolPosition === null) localStorage.setItem('floatToolPosition', '0');
-else position.value = parseInt(getFloatToolPosition);
+if (getFloatToolPosition === null) {
+    localStorage.setItem('floatToolPosition', '0');
+} else {
+    position.value = parseInt(getFloatToolPosition);
+}
 // 显示与切换
 const showFloatToolMenu = (e: MouseEvent) => {
     isFloatToolMenu.value = true;
@@ -599,33 +539,32 @@ const onCollapse = (val: boolean) => {
 /*----左侧栏功能----*/
 const onClickMenuItem = (tvid: string, tcid: string) => {
     if (tcid !== cid.value) {
-        // setScrollTop(<string>vid.value, <string>cid.value);
         vid.value = tvid;
         cid.value = tcid;
         paperRef.value.setId(tvid, tcid);
         const toDisplay: Array<object> = [];
         db.opus.get(query_id).then(value => {
-            if (value) {
-                value.data.forEach(item => {
-                    if (item.vid === tvid) {
-                        item.volume.forEach(it => {
-                            if (it.cid === tcid) {
-                                it.chapter.forEach((item: string) => {
-                                    toDisplay.push({
-                                        type: "paragraph",
-                                        content: [{
-                                            type: "text",
-                                            text: item
-                                        }]
-                                    });
+            value?.data.forEach(item => {
+                if (item.vid === tvid) {
+                    item.volume.forEach(it => {
+                        if (it.cid === tcid) {
+                            it.chapter.forEach((item: string) => {
+                                toDisplay.push({
+                                    type: "paragraph",
+                                    content: [{
+                                        type: "text",
+                                        text: item
+                                    }]
                                 });
-                            }
-                        })
-                    }
-                });
-            }
+                            });
+                        }
+                    })
+                }
+            });
             loadListData();
+            // 搜索框状态
             if (showSearchBox.value) {
+                // 搜索框显示，重新搜索切换后页面的关键字
                 toSearchKeyword();
                 mainStore.targetIndex = 1;
             } else {
@@ -804,6 +743,7 @@ const closeScroll = () => {
     scrollbarColor.value = 'rgb(var(--my-bg-color))';
 }
 // 调整小窗口大小
+const ref_TimelineEditor = ref();
 const resizeBoxMoving = () => {
     if (ref_TimelineEditor.value) ref_TimelineEditor.value.setSliderState();
     if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
@@ -820,23 +760,6 @@ const choicePopButton = (key: string) => {
     showModular.value = key;
     localStorage.setItem('showModular', key);
 }
-// 点击右侧快捷键进行关键字翻页
-const currentPage: Ref<number> = ref(1);// 1 2 3
-const nextPage = (offset: 1 | -1) => {
-    if (offset == 1) {
-        currentPage.value = currentPage.value === 3 ? 1 : currentPage.value + 1;
-    } else if (offset == -1) {
-        currentPage.value = currentPage.value === 1 ? 3 : currentPage.value - 1;
-    }
-}
-// 获得关联值标记
-const getAssociatedmark = (value: number) => {
-    let mark = '🔥';
-    for (let i = 1; i < value; i++) {
-        mark += '🔥';
-    }
-    return mark;
-}
 
 const modify = () => {
     isRename.value = false;
@@ -845,13 +768,14 @@ const modify = () => {
 }
 
 // 关键字面板状态改变
-const KeywordEditorChange = ref(false);
+// const KeywordEditorChange = ref(false);
 const changeKeyWordState = () => {
-    KeywordEditorChange.value = true;
+    // KeywordEditorChange.value = true;
     loadListData();
 }
 
 // 使用webview快捷搜索关键词
+const ref_WebviewBlock = ref();
 const toWebView = (str: string) => {
     if (ref_WebviewBlock.value) {
         ref_WebviewBlock.value.toSearch(str);
@@ -863,22 +787,17 @@ const toWebView = (str: string) => {
     }
 }
 
-// 掠过关键字所在的span
-const showkeywordDetail = ref(false), keywordDetail = ref();
-const currentKeyword: { data: KeyWord } = reactive({
-    data: {
-        iid: '',
-        itemDesc: '',
-        itemImg: '',
-        itemName: '',
-        associated: [],
-        itemNumber: [],
-        itemString: [],
-        otherName: []
-    }
-}); // 当前的关键字数据
-// kid_iid_old用来防指多次触发多次访问数据库拿取同一段数据
-let kid_iid_old = '', currentKid = '', currentIid = '';
+// 掠过关键词显示卡片
+const showkeywordDetail = ref(false),
+    keywordDetail_ref = ref(), // 卡片组件实例
+    keywordDetail = ref(); // 卡片根DOM
+
+// 获得小卡片的根DOM元素
+const getkeywordDetail = (tarDOM: HTMLElement) => {
+    keywordDetail.value = tarDOM;
+}
+
+let currentKid = '', currentIid = '';
 const showSpanDetail = throttle((e: MouseEvent) => {
     if ((<HTMLElement>e.target).getAttribute('class') === 'keyWord') {
         showkeywordDetail.value = true;
@@ -889,16 +808,9 @@ const showSpanDetail = throttle((e: MouseEvent) => {
             for (let i = 2; i < item.length; i++) {
                 if (item[i] === targetText) {
                     [currentKid, currentIid] = [item[0], item[1]];
-                    let kid_iid_new = item[0] + item[1];
-                    // 关键字数据状态改变||新旧id不相等
-                    if (KeywordEditorChange.value || kid_iid_new !== kid_iid_old) {
-                        kid_iid_old = kid_iid_new;
-                        modifyDbforItem(item[0], item[1], (item: KeyWord) => {
-                            currentKeyword.data = item;
-                        }, () => {
-                            KeywordEditorChange.value = false;
-                        })
-                    }
+                    modifyDbforItem(item[0], item[1], (item: KeyWord) => {
+                        keywordDetail_ref.value.getCurrentKeyword(item);
+                    })
                     break;
                 }
             }

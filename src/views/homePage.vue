@@ -2,7 +2,6 @@
 <template>
     <TitleBlock></TitleBlock>
     <SidebarLeft></SidebarLeft>
-    <!-- <LabelTop></LabelTop> -->
     <HomeContent></HomeContent>
     <!-- 主题按钮 -->
     <div class="theme" title="更换主题">
@@ -20,13 +19,12 @@
 </template>
 
 <script setup lang="ts">
+import { useRoute } from 'vue-router';
 import TitleBlock from '../components/TitleBlock.vue';
 import SidebarLeft from '../components/SidebarLeft.vue';
 import HomeContent from '../components/HomeContent.vue';
-// import LabelTop from '../components/LabelTop.vue';
 import ThemeContainer from '../components/widget/ThemeContainer.vue';
 import { IconSkin } from "@arco-design/web-vue/es/icon";
-import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
 
 /*----根据路由参数弹出提示信息----*/

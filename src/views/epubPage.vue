@@ -2,7 +2,6 @@
     <TitleBlock></TitleBlock>
     <a-layout class="layout-content">
         <a-layout-sider collapsible breakpoint="xl">
-            <div class="logo" />
             <a-menu style="text-align: left;">
                 <!-- 渲染列表 -->
                 <div v-for="item in catalogItme" :key="item.id">
@@ -44,23 +43,19 @@
 </template>
 
 <script setup lang='ts'>
-import { nextTick, Ref, ref } from 'vue';
-import {
-    IconCaretRight, IconCaretLeft
-} from '@arco-design/web-vue/es/icon';
-import TitleBlock from '../components/TitleBlock.vue';
+import { Ref, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import TitleBlock from '../components/TitleBlock.vue';
+import { IconCaretRight, IconCaretLeft } from '@arco-design/web-vue/es/icon';
 import { db } from '../db/db';
 import ePub from 'epubjs';
-import { onMounted } from 'vue';
 
-// const themeStore = useThemeStore();
 const route = useRoute(), query_id = parseInt(route.query.id as string);
-const container = ref();
+const catalogItme: Ref<Array<any>> = ref([]); // 目录数据
+const container = ref(); // 容器
 
-const catalogItme: Ref<Array<any>> = ref([]);
+// 目录跳转
 let rendition: any;
-
 const directoryJump = (url: string) => {
     rendition.display(url);
 }
@@ -76,6 +71,7 @@ function loadFileData() {
         });
         rendition.display();
         rendition.themes.fontSize(24 + 'px');
+
         // rendition.on('selected', function (cfiRange: any) {
         //     book.getRange(cfiRange).then(range => {
         //         console.log(range.toString());
@@ -85,7 +81,6 @@ function loadFileData() {
         book.loaded.navigation.then(function (toc: any) {
             // 获得电子书的目录
             toc.forEach((chapter: any) => {
-                // console.log(chapter);
                 catalogItme.value.push(chapter);
             });
         })
