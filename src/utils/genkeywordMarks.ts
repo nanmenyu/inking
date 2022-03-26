@@ -1,11 +1,7 @@
 /**
  * 通过关键字生成对应的Marks数组
  */
-// import { useMainStore } from '../store/index';
-// const mainStore = useMainStore();
-
 export default function genkeywordMarks(keywordArr: Array<Array<string>>) {
-    // [color,background-color]
     const result: Array<Marker> = [];
     const colorGroup = [
         ['rgb(var(--orange-6)) ', 'rgb(var(--orange-1))'], ['rgb(var(--lime-6))', 'rgb(var(--lime-1))'],

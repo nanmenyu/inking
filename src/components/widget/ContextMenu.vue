@@ -11,6 +11,7 @@
 
 <script setup lang='ts'>
 import { ref, onMounted, nextTick } from 'vue';
+
 const props = defineProps<{
     mode: 'reading' | 'writing',
     menuItem: Array<string>

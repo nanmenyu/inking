@@ -1,5 +1,6 @@
-
-// 调整快捷搜索块的方向
+/**
+ * 调整快捷搜索块的方向
+ */
 export function setContentTipPos(toolTip: HTMLElement, contentTip: HTMLElement, mainEditor: HTMLElement) {
     // 是否需要调换
     if (parseInt(toolTip.style.left.replace('px', '')) > mainEditor.clientWidth / 2) {
@@ -13,7 +14,9 @@ export function setContentTipPos(toolTip: HTMLElement, contentTip: HTMLElement, 
     else if (contentTip.style.display === 'block') contentTip.style.display = 'none';
 }
 
-// 设置快捷查词的内容
+/**
+ * 设置快捷查词的内容
+ */
 export function setHTMLdata(contentTip: HTMLElement, data: any): boolean {
     let isFounded = false;
     if (data.site === 'baidu') {
@@ -58,8 +61,9 @@ export function setHTMLdata(contentTip: HTMLElement, data: any): boolean {
     return isFounded;
 }
 
-
-// 获取翻译后的内容并呈现
+/**
+ * 获取翻译后的内容并呈现
+ */
 export function setTranslationContent(contentTip: HTMLElement, currentText: string): void {
     contentTip.innerHTML = '<div class="word-loading"><div class="word-loading-img"></div></div>';
     window.$API.ipcSend('api', {

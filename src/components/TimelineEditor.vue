@@ -359,7 +359,6 @@ const { proxy } = useCurrentInstance();
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
 const theTimeLineData: { data: Array<TimeLineGroup> } = reactive({ data: [] });
-// const timeline = ref();
 const yearData: {
     data:
     Array<{ id: string, timeSlot: number, title: string, desc: string, totalNum: number }>
@@ -389,20 +388,9 @@ const timeLineMarks = computed(() => {
 
 const offsetTop_el: { data: Array<{ id: string, offsetTop: number }> } = reactive({ data: [] });
 const slider = ref(), sliderBox = ref();
-// 裁切太长的数字以省略号表示
-// const timeSlot_format = (timeSlot: number): number | string => {
-//     return timeSlot > 99999 ? timeSlot.toString().slice(0, 5) + '...' : timeSlot;
-// }
 // 锚点跳转
 const checkedId = ref('con_0'), wrapper: Ref<HTMLElement | undefined> = ref();
-// const toAnchor = (id: string) => {
-//     if (wrapper.value!.clientHeight > timelineSection.value!.clientHeight) {
-//         checkedId.value = id;
-//         const targetAnchor = document.getElementById(id);
-//         if (targetAnchor) targetAnchor.scrollIntoView({ behavior: "smooth" });
-//         // toNavCenter();
-//     }
-// }
+
 // 内容滚动标记当前元素
 const timelineSection: Ref<HTMLElement | undefined> = ref();
 const sectionScroll = throttle(() => {

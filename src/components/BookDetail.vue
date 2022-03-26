@@ -81,8 +81,6 @@
             </a-form-item>
             <!-- 标签墙 -->
             <div id="tagWall" :class="tagRotated ? 'expansion' : '-expansion'">
-                <!-- <a-tabs default-active-key="1" :animation="true">
-                <a-tab-pane key="1" title="起点">-->
                 <h4>热门标签(起点)</h4>
                 <a-space wrap>
                     <a-tag
@@ -431,29 +429,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
 import {
     IconClose, IconPlus, IconEdit, IconTag, IconCheckCircleFill,
     IconStar, IconDown, IconCaretRight, IconPlusCircle, IconCloseCircle,
     IconCheck, IconMinusCircle
 } from '@arco-design/web-vue/es/icon';
+import { ref, reactive, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import Toolbar from './widget/Toolbar.vue';
 import PopupMenu from './widget/PopupMenu.vue';
-import { useRoute, useRouter } from 'vue-router';
-import { db } from '../db/db';
-import timeFormat from '../utils/timeFormat';
+import useCurrentInstance from '../utils/useCurrentInstance';
+import { timeFormat, standTime } from '../utils/timeFormat';
 import showTimePipe from '../utils/showTimePipe';
 import randomNum from '../utils/randomNum';
+import { db } from '../db/db';
+import { v4 } from 'uuid';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
-import useCurrentInstance from '../utils/useCurrentInstance';
-import { v4 } from 'uuid';
 import defaultCover from '../../public/static/img/default-cover.jpg';
 import category from '../assets/json/book_category.json';
-
-const { proxy } = useCurrentInstance();
-const $modal = proxy.$modal;
-const $message = proxy.$message;
 
 interface Form {
     name: string;
@@ -462,15 +456,28 @@ interface Form {
     briefintro: string;
 }
 
-// 标签调试数据
-const tagData = ['豪门', '孤儿', '盗贼', '特工', '黑客', '明星', '特种兵', '杀手', '老师', '学生', '胖子', '宠物', '蜀山', '魔王附体', 'LOL', '废材流', '护短', '卡片', '手游', '法师', '医生', '感情', '鉴宝', '亡灵', '职场', '吸血鬼', '龙', '西游', '鬼怪', '阵法', '魔兽', '勇猛', '玄学', '群穿', '丹药', '练功流', '召唤流', '恶搞', '爆笑', '轻松', '冷酷', '腹黑', '阳光', '狡猾', '机智', '猥琐', '嚣张', '淡定', '僵尸', '丧尸', '盗墓', '随身流', '软饭流', '无敌文', '异兽流', '系统流', '洪荒流', '学院流', '位面', '铁血', '励志', '坚毅', '变身', '强者回归', '赚钱', '争霸流', '种田文', '宅男', '无限流', '技术流', '凡人流', '热血', '重生', '穿越'];
+interface BasketData {
+    id: string;
+    name: string;
+    discardTime: string;
+    reTime: number;
+    checked: boolean;
+}
 
-/*----点击修改封面----*/
-const wrapper = ref(false);
-
-/*----获取路由参数确定详情页显示的目标----*/
+const { proxy } = useCurrentInstance();
+const $modal = proxy.$modal;
+const $message = proxy.$message;
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
+loadData();
+
+// 标签数据
+const tagData = ref(['豪门', '孤儿', '盗贼', '特工', '黑客', '明星', '特种兵', '杀手', '老师', '学生', '胖子', '宠物', '蜀山', '魔王附体', 'LOL', '废材流', '护短', '卡片', '手游', '法师', '医生', '感情', '鉴宝', '亡灵', '职场', '吸血鬼', '龙', '西游', '鬼怪', '阵法', '魔兽', '勇猛', '玄学', '群穿', '丹药', '练功流', '召唤流', '恶搞', '爆笑', '轻松', '冷酷', '腹黑', '阳光', '狡猾', '机智', '猥琐', '嚣张', '淡定', '僵尸', '丧尸', '盗墓', '随身流', '软饭流', '无敌文', '异兽流', '系统流', '洪荒流', '学院流', '位面', '铁血', '励志', '坚毅', '变身', '强者回归', '赚钱', '争霸流', '种田文', '宅男', '无限流', '技术流', '凡人流', '热血', '重生', '穿越']);
+
+// 点击修改封面 
+const wrapper = ref(false);
+
+// 路由跳转
 const router = useRouter();
 const routerLink = (id: number, vid: string, cid: string) => {
     router.push({
@@ -483,15 +490,7 @@ const routerLink = (id: number, vid: string, cid: string) => {
     })
 }
 
-// 点击修改作品信息按钮
-const modifyInfo = () => {
-    isModify.value = true;
-    // window.$API.ipcSend('reptile', { type: 'qidian', word: '' });
-    // window.$API.ipcOnce('getReptileData', (data: any) => {
-    //     console.log(data);
-    // })
-}
-
+// 跳转到五大模块
 const toSpecialEditor = (type: string) => {
     router.push({
         path: '/specialEditor',
@@ -504,8 +503,8 @@ const toSpecialEditor = (type: string) => {
 
 // 继续写作按键
 const continueWriting = () => {
-    const vid = booksData.data.historRecord.vid,
-        cid = booksData.data.historRecord.cid;
+    const vid = booksData.data.historRecord.vid;
+    const cid = booksData.data.historRecord.cid;
     if (vid !== '' && cid !== '') {
         router.push({
             path: '/writer',
@@ -518,50 +517,32 @@ const continueWriting = () => {
     }
 }
 
-/*----数据库取值----*/
-const booksData: { data: Userdb } = reactive({
-    data: {
-        id: 0,
-        author: '',
-        title: '',
-        createTime: 0,
-        updateTime: 0,
-        categories: [],
-        tag: [],
-        desc: '',
-        imgSrc: '',
-        data: [],
-        discard: '',
-        discardTime: 0,
-        historRecord: { vid: '', cid: '' },
-        theKeyWord: [],
-        checked: false,
-        thePlot: [],
-        theTimeLine: [],
-        opusNumber: 0,
-        theMaps: []
+// 点击修改作品信息按钮
+let crawled = false; // 是否已经爬取
+const modifyInfo = () => {
+    isModify.value = true;
+    // 爬取数据
+    if (!crawled) {
+        window.$API.ipcSend('reptile', { type: 'qidian', word: '' });
+        window.$API.ipcOnce('getReptileData', (data: any) => {
+            if (data.length > 0) tagData.value = data;
+            crawled = true;
+        })
     }
-});
-const totalNumber = ref(0);
-loadData();
+}
 
-/*----旋转动画----*/
+// 旋转动画
 const rotated = ref([false, false, false, false]);
 const tagRotated = ref(false);
 const rotateIcon = (i: number | string) => {
-    if (i === 'tag') tagRotated.value = !tagRotated.value
-    else rotated.value[<number>i] = !rotated.value[<number>i];
+    if (i === 'tag') {
+        tagRotated.value = !tagRotated.value;
+    } else {
+        rotated.value[<number>i] = !rotated.value[<number>i];
+    }
 }
 
-/*----时间格式化计算属性----*/
-const standTime = computed(() => (ts: number, mode?: boolean) => {
-    // 选择格式,是否裁切后半部分的准确时间
-    mode = mode || false;
-    if (mode) return timeFormat(ts).split(' ')[0];
-    else return timeFormat(ts);
-});
-
-/*----修改作品信息的弹窗----*/
+// 修改作品信息的弹窗
 const isModify = ref(false);
 const inputTag = ref('');
 const form: Form = reactive({
@@ -577,31 +558,35 @@ const tagColor = computed(() => {
         'red', 'orangered', 'orange', 'gold', 'lime', 'green',
         'cyan', 'blue', 'arcoblue', 'purple', 'pinkpurple', 'magenta'];
     const temp = [];
-    for (let i = 0; i < tagData.length; i++) {
+    for (let i = 0; i < tagData.value.length; i++) {
         temp.push(color[randomNum(0, 11)]);
     }
     return temp;
 })
+
 // 提示文本
 const promptText = computed(() => {
     return '已选择 ' + selectedArr.length + '/4';
 })
+
 // 标签墙控制
 // 用户选择的标签保存在数组中
-const selectedArr: Array<string> = reactive([]), deCheckedArr: Array<string> = reactive([]);
+const selectedArr: Array<string> = reactive([]);
+const deCheckedArr: Array<string> = reactive([]);
 // 点击添加
 const addTag = () => {
-    let i = tagData.indexOf(inputTag.value);
+    let i = tagData.value.indexOf(inputTag.value);
     if (i !== -1) deCheckedArr[i] = 'rgb(var(--primary-6))';
     selectedArr.push(inputTag.value);
     inputTag.value = '';
 }
 // 关闭标签
 const closeTag = (tname: string) => {
-    const index = tagData.indexOf(tname), i = selectedArr.indexOf(tname);
+    const index = tagData.value.indexOf(tname), i = selectedArr.indexOf(tname);
     selectedArr.splice(i, 1);
     delete deCheckedArr[index];
 }
+
 const modify = () => {
     isModify.value = false;
     isNewVolume.value = false;
@@ -609,6 +594,7 @@ const modify = () => {
     isRename.value = false;
     isWastepaperBasket.value = false;
 }
+
 const checkTag = (tname: string) => {
     const i = selectedArr.indexOf(tname);
     // 判断tempArr是否有tname, 没有就push, 有就删除
@@ -619,9 +605,10 @@ const checkTag = (tname: string) => {
     }
     deCheckedArr.splice(0, deCheckedArr.length); // 清空数组 
     selectedArr.forEach(item => {
-        deCheckedArr[tagData.indexOf(item)] = 'rgb(var(--primary-6))';
+        deCheckedArr[tagData.value.indexOf(item)] = 'rgb(var(--primary-6))';
     })
 }
+
 // 修改确定, 添加修改至数据库
 const determine = () => {
     const categoryArr: Array<string> = [], tagArr: Array<string> = [];
@@ -647,20 +634,19 @@ const determine = () => {
     modify();
 }
 
-/*----控制鼠标事件-右侧栏展开关闭----*/
-const isspread: any = ref(null);
-
-/*----删除作品----*/
+// 删除作品
 const deleteOpus = () => {
-    db.opus.update(query_id, { discard: 't', discardTime: new Date().getTime() })
-        .then(() => {
-            router.push({
-                path: '/',
-                query: {
-                    Message: `《${booksData.data.title}》已移入回收站`
-                }
-            });
+    db.opus.update(query_id, {
+        discard: 't',
+        discardTime: new Date().getTime()
+    }).then(() => {
+        router.push({
+            path: '/',
+            query: {
+                Message: `《${booksData.data.title}》已移入回收站`
+            }
         });
+    });
 }
 
 // 点击添加卷
@@ -684,6 +670,7 @@ const addNewVolume = () => {
         $message.success('添加成功!');
     })
 }
+
 // 点击添加章
 const isNewChapter = ref(false), chapterName = ref('未命名章');
 let volumeId = ''; // 找到目标卷才能向里面push章
@@ -693,7 +680,8 @@ const newChapter = (vid: string) => {
 }
 const addNewChapter = () => {
     db.opus.where(':id').equals(query_id).modify(item => {
-        for (let i = 0; i < item.data.length; i++) {
+        const len = item.data.length;
+        for (let i = 0; i < len; i++) {
             if (item.data[i].vid === volumeId) {
                 item.data[i].volume.push({
                     cid: v4(),
@@ -721,7 +709,8 @@ const deleteVolume = (vid: string, vname: string) => {
         simple: true,
         onOk: () => {
             db.opus.where(':id').equals(query_id).modify(item => {
-                for (let i = 0; i < item.data.length; i++) {
+                const len = item.data.length;
+                for (let i = 0; i < len; i++) {
                     if (item.data[i].vid === vid) {
                         item.data[i].discard = true;
                         item.data[i].discardTime = new Date().getTime();
@@ -735,6 +724,7 @@ const deleteVolume = (vid: string, vname: string) => {
         }
     })
 }
+
 // 删除章（移至废纸篓）
 const deleteChapter = (vid: string, cid: string, cname: string) => {
     $modal.warning({
@@ -743,9 +733,11 @@ const deleteChapter = (vid: string, cid: string, cname: string) => {
         simple: true,
         onOk: () => {
             db.opus.where(':id').equals(query_id).modify(item => {
-                for (let i = 0; i < item.data.length; i++) {
+                const len1 = item.data.length;
+                for (let i = 0; i < len1; i++) {
                     if (item.data[i].vid === vid) {
-                        for (let j = 0; j < item.data[i].volume.length; j++) {
+                        const len2 = item.data[i].volume.length
+                        for (let j = 0; j < len2; j++) {
                             if (item.data[i].volume[j].cid === cid) {
                                 item.data[i].volume[j].discard = true;
                                 item.data[i].volume[j].discardTime = new Date().getTime();
@@ -762,6 +754,7 @@ const deleteChapter = (vid: string, cid: string, cname: string) => {
         }
     })
 }
+
 // 重命名
 const isRename = ref(false), showName = ref('');
 let temp_id: string, reType: string = '';
@@ -774,29 +767,36 @@ const showReName = (type: string, id: string, vname: string) => {
 const reName = () => {
     // 修改卷
     if (reType === 'v') {
-        db.opus.where(':id').equals(query_id).modify(item => {
-            for (let i = 0; i < item.data.length; i++) {
+        loadDB((item: Userdb) => {
+            const len = item.data.length;
+            for (let i = 0; i < len; i++) {
                 if (item.data[i].vid === temp_id) {
                     item.data[i].volumeName = showName.value;
                     break;
                 }
             }
-        }).then(() => {
-            isRename.value = false;
-            loadData();
         })
     }
     // 修改章
     else if (reType === 'c') {
-        db.opus.where(':id').equals(query_id).modify(item => {
-            for (let i = 0; i < item.data.length; i++) {
-                for (let j = 0; j < item.data[i].volume.length; j++) {
+        loadDB((item: Userdb) => {
+            const len1 = item.data.length;
+            for (let i = 0; i < len1; i++) {
+                const len2 = item.data[i].volume.length;
+                for (let j = 0; j < len2; j++) {
                     if (item.data[i].volume[j].cid === temp_id) {
                         item.data[i].volume[j].chapterName = showName.value;
                         break;
                     }
                 }
             }
+        })
+    }
+
+    // 局部方法
+    function loadDB(cb: Function) {
+        db.opus.where(':id').equals(query_id).modify(item => {
+            cb(item);
         }).then(() => {
             isRename.value = false;
             loadData();
@@ -810,17 +810,11 @@ const showWastepaperBasket = () => {
     isWastepaperBasket.value = true;
     loadWastepaperBasketData();
 }
-interface BasketData {
-    id: string;
-    name: string;
-    discardTime: string;
-    reTime: number;
-    checked: boolean;
-}
+
 // 废纸篓中的数据
 let wastepaperBasketData: Array<any> = [];
 const basketData: { data: Array<BasketData> } = reactive({ data: [] });
-function loadWastepaperBasketData() {
+function loadWastepaperBasketData(): void {
     basketData.data = wastepaperBasketData.map(item => {
         return {
             id: item.vid || item.cid,
@@ -831,6 +825,7 @@ function loadWastepaperBasketData() {
         }
     })
 }
+
 // 点击全选键
 const selectAll = () => {
     let temp = 0, len = basketData.data.length;
@@ -849,6 +844,7 @@ const selectAll = () => {
         });
     }
 }
+
 // 点击还原选中键
 const restoreSelect = () => {
     const targetId: Array<string> = [];
@@ -879,6 +875,7 @@ const restoreSelect = () => {
         })
     }
 }
+
 // 点击删除选中键
 const deleteSelect = () => {
     const targetId: Array<string> = [];
@@ -940,17 +937,11 @@ const _replaceCover = () => {
                     cropper = new Cropper(coverImg.value, {
                         aspectRatio: 3 / 4, // 封面这里采用宽3高四的固定比例
                         viewMode: 1,
-                        // 设置图片是否可以拖拽功能
                         dragMode: 'move',
-                        // 是否显示图片后面的网格背景,一般默认为true
                         background: true,
-                        // 进行图片预览的效果
                         preview: '.before',
-                        // 设置裁剪区域占图片的大小 值为 0-1 默认 0.8 表示 80%的区域
                         autoCropArea: 1,
-                        // 设置图片是否可以进行收缩功能
                         zoomOnWheel: true,
-                        // 是否显示 + 箭头
                         center: true
                     })
                 }
@@ -983,22 +974,39 @@ const saveImgData = () => {
             i--;
         }
     }
-
-    // 设置图片本地保存的路径
-    // const path = 'workspace/opus/' + booksData.data.id;
-    // window.$API.ipcSend('saveBase64-toImg', { b64: base64Img, path: path, fname: 'cover.jpeg' });
-    // window.$API.ipcOnce('saveBase64-toImg-successful', () => {
     db.opus.update(query_id, { imgSrc: base64Img }).then(() => {
         isReplaceCover.value = false;
         $message.success('设置成功!');
         loadData();
     })
-    // });
 }
 
 // 加载数据
+const booksData: { data: Userdb } = reactive({
+    data: {
+        id: 0,
+        author: '',
+        title: '',
+        createTime: 0,
+        updateTime: 0,
+        categories: [],
+        tag: [],
+        desc: '',
+        imgSrc: '',
+        data: [],
+        discard: '',
+        discardTime: 0,
+        historRecord: { vid: '', cid: '' },
+        theKeyWord: [],
+        checked: false,
+        thePlot: [],
+        theTimeLine: [],
+        opusNumber: 0,
+        theMaps: []
+    }
+});
+const totalNumber = ref(0), totalWords = ref(0);
 const isEmpty = ref(false);
-const totalWords = ref(0);
 function loadData() {
     db.opus.get(query_id)
         .then(value => {

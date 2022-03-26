@@ -15,15 +15,11 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import {
-    IconArrowLeft,
-    IconArrowRight
-} from '@arco-design/web-vue/es/icon';
+import { IconArrowLeft, IconArrowRight } from '@arco-design/web-vue/es/icon';
 import router from '../../router/index';
 
-/*----控制页面的前进后退----*/
-const backDisable = ref(false),
-    forwardDisable = ref(false);
+// 控制页面的前进后退
+const backDisable = ref(false), forwardDisable = ref(false);
 const back = () => {
     router.go(-1);
 }

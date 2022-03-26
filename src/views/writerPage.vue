@@ -5,7 +5,7 @@
         v-if="showkeywordDetail"
         @getkeywordDetail="getkeywordDetail"
         @displayKeyPanel="displayKeyPanel"
-        ref="keywordDetail_ref"
+        ref="keywordDetailRef"
     ></KeywordDetail>
     <PopupMenu
         v-if="isRename"
@@ -196,77 +196,7 @@
                     >
                         <icon-left :stroke-width="2" />
                     </div>
-                    <div v-if="showSearchBox" class="search-box">
-                        <a-space
-                            direction="vertical"
-                            align="start"
-                            size="mini"
-                            style="padding:0 4px;"
-                        >
-                            <a-space style="padding-bottom: 4px;border-bottom:1px solid #ccc;">
-                                <icon-search />
-                                <input
-                                    v-model="searchData"
-                                    ref="searchInput"
-                                    @input="toSearchKeyword"
-                                    type="text"
-                                    placeholder="查找"
-                                />
-                                <span
-                                    class="show-keywordCount"
-                                >{{ keyWordPos > 9999 ? '9999+' : keyWordPos }}/{{ totalKeyWord > 9999 ? '9999+' : totalKeyWord }}</span>
-                                <a-space size="mini">
-                                    <span
-                                        @click="mainStore.updateTargetIndex(-1), toSearchKeyword()"
-                                        class="mini-btn"
-                                        title="上一个"
-                                    >
-                                        <icon-arrow-up />
-                                    </span>
-                                    <span
-                                        @click="mainStore.updateTargetIndex(1), toSearchKeyword()"
-                                        class="mini-btn"
-                                        title="下一个"
-                                    >
-                                        <icon-arrow-down />
-                                    </span>
-                                    <span @click="stopSearchKeyword" class="mini-btn" title="关闭">
-                                        <icon-close />
-                                    </span>
-                                </a-space>
-                            </a-space>
-                            <a-space>
-                                <icon-undo style="transform: rotateZ(180deg);" />
-                                <input v-model="replaceData" type="text" placeholder="替换" />
-                                <span @click="replaceKeyword('single')" class="mini-btn" title="替换">
-                                    <svg
-                                        viewBox="0 0 1024 1024"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="14"
-                                        height="14"
-                                        style="margin-bottom: -2px;"
-                                    >
-                                        <path p-id="3277" />
-                                    </svg>
-                                </span>
-                                <span
-                                    @click="replaceKeyword('whole')"
-                                    class="mini-btn"
-                                    title="全部替换"
-                                >
-                                    <svg
-                                        viewBox="0 0 1024 1024"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="14"
-                                        height="14"
-                                        style="margin-bottom: -2px;"
-                                    >
-                                        <path p-id="9876" />
-                                    </svg>
-                                </span>
-                            </a-space>
-                        </a-space>
-                    </div>
+                    <SearchBox v-if="showSearchBox" @close="closeSearch" ref="searchBoxRef"></SearchBox>
                     <WritingPaper
                         @todata="sendPaperData"
                         @addKeyWord="addKeyWord"
@@ -298,74 +228,7 @@
                     <!-- 内容区 -->
                     <div class="sider-right-content">
                         <!-- 漂浮工具栏 -->
-                        <a-trigger
-                            :trigger="['click']"
-                            clickToClose
-                            position="bottom"
-                            v-model:popupVisible="popupVisible"
-                        >
-                            <div
-                                @contextmenu="showFloatToolMenu($event)"
-                                ref="buttonTrigger"
-                                class="button-trigger"
-                                :style="floatToolPosition[position]"
-                                title="右键更换位置"
-                            >
-                                <!-- 漂浮工具栏的菜单 -->
-                                <div
-                                    @click.stop
-                                    v-if="isFloatToolMenu"
-                                    ref="floatToolMenu"
-                                    class="floatTool-menu"
-                                    :style="floatToolMenuPositon[position]"
-                                >
-                                    <ul>
-                                        <li
-                                            v-for="(item, i) in textPrompt[position]"
-                                            @click="moveFloatTool(item)"
-                                            :key="i"
-                                        >到{{ item }}角</li>
-                                    </ul>
-                                </div>
-                                <IconClose v-if="popupVisible" />
-                                <IconMessage v-else />
-                            </div>
-                            <template #content>
-                                <a-menu
-                                    mode="popButton"
-                                    :tooltipProps="{ position: 'left', mini: true }"
-                                    showCollapseButton
-                                    @menu-item-click="choicePopButton"
-                                >
-                                    <a-menu-item style="margin: 10px 0;" key="0">
-                                        <template #icon>
-                                            <icon-public />
-                                        </template>
-                                        WebView
-                                    </a-menu-item>
-                                    <a-menu-item style="margin: 10px 0;" key="1" class="iconfont">
-                                        <template #icon>&#xe620;</template>
-                                        备忘
-                                    </a-menu-item>
-                                    <a-menu-item style="margin: 10px 0;" key="2" class="iconfont">
-                                        <template #icon>&#xe669;</template>
-                                        关键字
-                                    </a-menu-item>
-                                    <a-menu-item style="margin: 10px 0;" key="3" class="iconfont">
-                                        <template #icon>&#xe703;</template>
-                                        关系图
-                                    </a-menu-item>
-                                    <a-menu-item style="margin: 10px 0;" key="4" class="iconfont">
-                                        <template #icon>&#xe6b5;</template>
-                                        时间线
-                                    </a-menu-item>
-                                    <a-menu-item style="margin: 10px 0;" key="5" class="iconfont">
-                                        <template #icon>&#xe655;</template>
-                                        地图
-                                    </a-menu-item>
-                                </a-menu>
-                            </template>
-                        </a-trigger>
+                        <FloatTool @choiceItem="choicePopButton"></FloatTool>
                         <div
                             v-if="showSiderRight"
                             @click="stowTheSide"
@@ -375,7 +238,7 @@
                             <icon-right :stroke-width="2" />
                         </div>
                         <!-- 各个需要显示的组件 -->
-                        <WebviewBlock v-if="showModular === '0'" ref="ref_WebviewBlock"></WebviewBlock>
+                        <WebviewBlock v-if="showModular === '0'" ref="webviewBlockRef"></WebviewBlock>
                         <PlotEditor v-if="showModular === '1'"></PlotEditor>
                         <KeywordEditor
                             v-if="showModular === '2'"
@@ -394,11 +257,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount, watch, Ref } from 'vue';
-import {
-    IconCaretRight, IconCaretLeft, IconClose, IconUndo, IconMessage, IconRightCircle, IconSearch,
-    IconArrowUp, IconArrowDown, IconPublic, IconLeft, IconRight
-} from '@arco-design/web-vue/es/icon';
+import { ref, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount, Ref } from 'vue';
+import { IconCaretRight, IconCaretLeft, IconRightCircle, IconLeft, IconRight } from '@arco-design/web-vue/es/icon';
 import { useRoute, useRouter } from 'vue-router';
 import TitleBlock from '../components/TitleBlock.vue';
 import TopToolbar from '../components/TopToolbar.vue';
@@ -410,7 +270,9 @@ import KeywordEditor from '../components/KeywordEditor.vue';
 import DiagramEditor from '../components/DiagramEditor.vue';
 import TimelineEditor from '../components/TimelineEditor.vue';
 import MapContent from '../components/MapContent.vue';
-import KeywordDetail from '../components/widget/KeywordDetail.vue'
+import KeywordDetail from '../components/widget/KeywordDetail.vue';
+import FloatTool from '../components/widget/FloatTool.vue';
+import SearchBox from '../components/widget/SearchBox.vue';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { throttle } from '../utils/flowControl';
 import genkeywordMarks from '../utils/genkeywordMarks';
@@ -430,104 +292,14 @@ const vid = ref(route.query.vid); // 缓存当前卷vid
 const cid = ref(route.query.cid); // 缓存当前章cid
 const paperRef = ref(); // 纸张
 const topToolRef = ref(); // 顶部工具栏
+const searchBoxRef = ref(); // 搜索框
+const showIframeWrap = ref(false); // 遮罩
+const keywordMarks: Ref<Array<Marker>> = ref([]);
 loadListData();
 
 // 转发纸张-->头部工具栏的数据
 const sendPaperData = (data: Pagecount) => {
     topToolRef.value.getData(data);
-}
-
-/*------------关键词搜索、替换功能------------*/
-const showIframeWrap = ref(false), showSearchBox = ref(false);
-const keywordMarks: Ref<Array<Marker>> = ref([]);
-const searchData = ref(''), replaceData = ref(''),
-    totalKeyWord = ref(0), keyWordPos = ref(0);
-watch(showSearchBox, value => {
-    mainStore.isInSearch = value
-    if (value && searchData.value !== '') toSearchKeyword();
-})
-// 关键字统计
-let isHighlightCount = computed(() => mainStore.isHighlightCount);
-watch(isHighlightCount, () => {
-    if (showSearchBox.value && searchData.value !== '') {
-        totalKeyWord.value = mainStore.highlightCount;
-        if (totalKeyWord.value === 0) {
-            keyWordPos.value = 0;
-        } else {
-            keyWordPos.value = mainStore.targetIndex;
-        }
-    } else {
-        keyWordPos.value = totalKeyWord.value = 0;
-    }
-})
-watch(searchData, () => {
-    mainStore.targetIndex = 1;
-})
-const toSearchKeyword = () => {
-    db.opus.get(query_id).then(value => {
-        if (value) paperRef.value.setBooksData(value, [{ match: new RegExp(searchData.value, 'g'), class: 'keyword_search' }]);
-        [...document.querySelectorAll('.keyword_search')].forEach(el => {
-            if (el.id === 'search-anchor') {
-                const viewportHeight = document.querySelector('.arco-layout-content')?.clientHeight!;
-                // 锚点链接跳转到当前高亮关键字
-                const distanceFromViewport = el.getBoundingClientRect().top - 75;
-                if (distanceFromViewport > viewportHeight || distanceFromViewport < 0) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }
-        })
-    })
-}
-// 替换关键字
-const replaceKeyword = (type: 'single' | 'whole') => {
-    if (type === 'single') {
-        [...document.querySelectorAll('.keyword_search')].forEach(el => {
-            if (el.id === 'search-anchor' && replaceData.value !== '') {
-                (<HTMLElement>el).innerText = replaceData.value;
-                paperRef.value.saveDocData(false);
-            }
-        })
-    } else if (type === 'whole') {
-        [...document.querySelectorAll('.keyword_search')].forEach(el => {
-            (<HTMLElement>el).innerText = replaceData.value;
-            paperRef.value.saveDocData(false);
-        })
-    }
-}
-const stopSearchKeyword = () => {
-    mainStore.isInSearch = showSearchBox.value = false;
-    db.opus.get(query_id).then(value => {
-        if (value) paperRef.value.setBooksData(value, keywordMarks.value);
-    })
-}
-
-// 显示漂浮工具栏的菜单修改位置
-const isFloatToolMenu = ref(false), floatToolMenu = ref(), buttonTrigger = ref();
-//四个位置四种状态
-const floatToolPosition = ['top:0;left:4px;', 'top:0;right:4px;', 'bottom:15px;right:4px;', 'bottom:15px;left:4px;'];
-const floatToolMenuPositon = ['top:20px;left:20px', 'top:20px;right:20px', 'bottom:20px;right:20px', 'bottom:20px;left:20px'];
-const textPrompt = [['右上', '右下', '左下'], ['左上', '左下', '右下'], ['左下', '左上', '右上'], ['左上', '右上', '右下']];
-const position = ref(0); // 某个状态的索引
-// 读取缓存
-const getFloatToolPosition = localStorage.getItem('floatToolPosition');
-if (getFloatToolPosition === null) {
-    localStorage.setItem('floatToolPosition', '0');
-} else {
-    position.value = parseInt(getFloatToolPosition);
-}
-// 显示与切换
-const showFloatToolMenu = (e: MouseEvent) => {
-    isFloatToolMenu.value = true;
-    popupVisible.value = false;
-}
-const moveFloatTool = (type: string) => {
-    textPrompt.forEach((item, index) => {
-        if (item.indexOf(type) === -1) {
-            position.value = index;
-            localStorage.setItem('floatToolPosition', index.toString());
-        }
-    })
-    isFloatToolMenu.value = false;
 }
 
 // 左侧是否折叠
@@ -536,48 +308,39 @@ const onCollapse = (val: boolean) => {
     isCollapse.value = val;
 }
 
-/*----左侧栏功能----*/
+// 左栏展开更多操作
+const editVid1 = ref(''), editVid2 = ref(''), editVid3 = ref('');
+const showLeftMore = ref('');
+
+// 点击左侧项目切换章节
 const onClickMenuItem = (tvid: string, tcid: string) => {
     if (tcid !== cid.value) {
         vid.value = tvid;
         cid.value = tcid;
         paperRef.value.setId(tvid, tcid);
-        const toDisplay: Array<object> = [];
-        db.opus.get(query_id).then(value => {
-            value?.data.forEach(item => {
-                if (item.vid === tvid) {
-                    item.volume.forEach(it => {
-                        if (it.cid === tcid) {
-                            it.chapter.forEach((item: string) => {
-                                toDisplay.push({
-                                    type: "paragraph",
-                                    content: [{
-                                        type: "text",
-                                        text: item
-                                    }]
-                                });
-                            });
-                        }
-                    })
-                }
-            });
-            loadListData();
+
+        // 加载新数据
+        loadListData(() => {
             // 搜索框状态
             if (showSearchBox.value) {
                 // 搜索框显示，重新搜索切换后页面的关键字
-                toSearchKeyword();
                 mainStore.targetIndex = 1;
-            } else {
-                paperRef.value.refreshPaper(toDisplay, []);
+                searchBoxRef.value.toSearchKeyword();
             }
-        })
+        });
     }
 }
 
-// 左栏展开更多操作
-const editVid1 = ref(''), editVid2 = ref(''), editVid3 = ref(''), showLeftMore = ref('');
+// 关闭搜索框
+const showSearchBox = ref(false);
+const closeSearch = () => {
+    showSearchBox.value = false;
+    db.opus.get(query_id).then(value => {
+        if (value) paperRef.value.setBooksData(value, keywordMarks.value);
+    })
+}
 
-// 重命名
+// 卷章重命名
 const isRename = ref(false), showName = ref('');
 let temp_id: string, reType: string = '';
 const showReName = (type: string, id: string, vname: string) => {
@@ -589,34 +352,65 @@ const showReName = (type: string, id: string, vname: string) => {
 const reName = () => {
     // 修改卷
     if (reType === 'v') {
-        db.opus.where(':id').equals(query_id).modify(item => {
-            for (let i = 0; i < item.data.length; i++) {
+        loadDB((item: Userdb) => {
+            const len = item.data.length;
+            for (let i = 0; i < len; i++) {
                 if (item.data[i].vid === temp_id) {
                     item.data[i].volumeName = showName.value;
                     break;
                 }
             }
-        }).then(() => {
-            isRename.value = false;
-            loadListData();
         })
     }
     // 修改章
     else if (reType === 'c') {
-        db.opus.where(':id').equals(query_id).modify(item => {
-            for (let i = 0; i < item.data.length; i++) {
-                for (let j = 0; j < item.data[i].volume.length; j++) {
+        loadDB((item: Userdb) => {
+            const len1 = item.data.length;
+            for (let i = 0; i < len1; i++) {
+                const len2 = item.data[i].volume.length;
+                for (let j = 0; j < len2; j++) {
                     if (item.data[i].volume[j].cid === temp_id) {
                         item.data[i].volume[j].chapterName = showName.value;
                         break;
                     }
                 }
             }
+        })
+    }
+
+    // 局部方法
+    function loadDB(cb: Function) {
+        db.opus.where(':id').equals(query_id).modify(item => {
+            cb(item);
         }).then(() => {
             isRename.value = false;
             loadListData();
         })
     }
+}
+
+// 删除卷（移至废纸篓）
+const deleteVolume = (vid: string, vname: string) => {
+    $modal.warning({
+        title: "删除卷",
+        content: `目标卷【${vname}】将放入废纸篓,并保留30天`,
+        simple: true,
+        onOk: () => {
+            db.opus.where(':id').equals(query_id).modify(item => {
+                const len = item.data.length;
+                for (let i = 0; i < len; i++) {
+                    if (item.data[i].vid === vid) {
+                        item.data[i].discard = true;
+                        item.data[i].discardTime = new Date().getTime();
+                        break;
+                    }
+                }
+            }).then(() => {
+                loadListData();
+                $message.success('删除成功!');
+            })
+        }
+    })
 }
 
 // 删除章（移至废纸篓）
@@ -628,9 +422,11 @@ const deleteChapter = (dvid: string, dcid: string, cname: string) => {
         simple: true,
         onOk: () => {
             db.opus.where(':id').equals(query_id).modify(item => {
-                for (let i = 0; i < item.data.length; i++) {
+                const len1 = item.data.length
+                for (let i = 0; i < len1; i++) {
                     if (item.data[i].vid === dvid) {
-                        for (let j = 0; j < item.data[i].volume.length; j++) {
+                        const len2 = item.data[i].volume.length;
+                        for (let j = 0; j < len2; j++) {
                             if (item.data[i].volume[j].cid === dcid) {
                                 item.data[i].volume[j].discard = true;
                                 item.data[i].volume[j].discardTime = new Date().getTime();
@@ -646,39 +442,14 @@ const deleteChapter = (dvid: string, dcid: string, cname: string) => {
                     deletedCid.value = dcid;
                     paperRef.value.refreshPaper([{
                         type: "paragraph",
-                        content: [
-                            {
-                                type: "text",
-                                text: ''
-                            }
-                        ]
+                        content: [{
+                            type: "text",
+                            text: ''
+                        }]
                     }]);
                 } else {
                     loadListData();
                 }
-                $message.success('删除成功!');
-            })
-        }
-    })
-}
-
-// 删除卷（移至废纸篓）
-const deleteVolume = (vid: string, vname: string) => {
-    $modal.warning({
-        title: "删除卷",
-        content: `目标卷【${vname}】将放入废纸篓,并保留30天`,
-        simple: true,
-        onOk: () => {
-            db.opus.where(':id').equals(query_id).modify(item => {
-                for (let i = 0; i < item.data.length; i++) {
-                    if (item.data[i].vid === vid) {
-                        item.data[i].discard = true;
-                        item.data[i].discardTime = new Date().getTime();
-                        break;
-                    }
-                }
-            }).then(() => {
-                loadListData();
                 $message.success('删除成功!');
             })
         }
@@ -694,13 +465,14 @@ const newChapter = (vid: string) => {
 }
 const addNewChapter = () => {
     db.opus.where(':id').equals(query_id).modify(item => {
-        for (let i = 0; i < item.data.length; i++) {
+        const len = item.data.length;
+        for (let i = 0; i < len; i++) {
             if (item.data[i].vid === volumeId) {
                 item.data[i].volume.push({
                     cid: v4(),
                     chapterName: chapterName.value,
                     updateTime: new Date().getTime(),
-                    chapter: ['\u3000\u3000']
+                    chapter: ['\u3000\u3000'] // 两个中文空格
                 });
                 break;
             }
@@ -724,7 +496,7 @@ const addNewVolume = () => {
                 cid: v4(),
                 chapterName: '未命名章',
                 updateTime: new Date().getTime(),
-                chapter: ['\u3000\u3000']
+                chapter: ['\u3000\u3000'] // 两个中文空格
             }]
         });
     }).then(() => {
@@ -734,7 +506,7 @@ const addNewVolume = () => {
     })
 }
 
-/*----右侧滚动条的样式设置----*/
+// 右侧滚动条的样式设置
 const scrollbarColor = ref('#ccc');
 const showScroll = () => {
     scrollbarColor.value = 'var(--scrollbar-color)';
@@ -742,15 +514,17 @@ const showScroll = () => {
 const closeScroll = () => {
     scrollbarColor.value = 'rgb(var(--my-bg-color))';
 }
-// 调整小窗口大小
+
+// 调整右侧小窗口大小
 const ref_TimelineEditor = ref();
 const resizeBoxMoving = () => {
     if (ref_TimelineEditor.value) ref_TimelineEditor.value.setSliderState();
-    if (showkeywordDetail.value) showkeywordDetail.value = false; // 关闭悬浮卡片
+    // 关闭悬浮卡片
+    if (showkeywordDetail.value) showkeywordDetail.value = false;
 }
 
-// 右侧PopButton选择并渲染对应组件
-const popupVisible = ref(false), showModular = ref('0');
+// 右侧PopButton，选择并渲染对应组件
+const showModular = ref('0');
 if (localStorage.getItem('showModular') === null) {
     localStorage.setItem('showModular', '0');
 } else {
@@ -768,48 +542,52 @@ const modify = () => {
 }
 
 // 关键字面板状态改变
-// const KeywordEditorChange = ref(false);
 const changeKeyWordState = () => {
-    // KeywordEditorChange.value = true;
     loadListData();
 }
 
 // 使用webview快捷搜索关键词
-const ref_WebviewBlock = ref();
+const webviewBlockRef = ref();
 const toWebView = (str: string) => {
-    if (ref_WebviewBlock.value) {
-        ref_WebviewBlock.value.toSearch(str);
-    } else {
-        showModular.value = '0';
+    // 当前显示了webview
+    if (webviewBlockRef.value) {
+        webviewBlockRef.value.toSearch(str);
+    }
+    // 当前没有显示webview
+    else {
+        showModular.value = '0'; // 则显示
         nextTick(() => {
-            ref_WebviewBlock.value.toSearch(str);
+            webviewBlockRef.value.toSearch(str);
         })
     }
 }
 
 // 掠过关键词显示卡片
 const showkeywordDetail = ref(false),
-    keywordDetail_ref = ref(), // 卡片组件实例
+    keywordDetailRef = ref(), // 卡片组件实例
     keywordDetail = ref(); // 卡片根DOM
-
 // 获得小卡片的根DOM元素
 const getkeywordDetail = (tarDOM: HTMLElement) => {
     keywordDetail.value = tarDOM;
 }
-
+// 处理数据并显示卡片数据
 let currentKid = '', currentIid = '';
 const showSpanDetail = throttle((e: MouseEvent) => {
+    // 确认目标
     if ((<HTMLElement>e.target).getAttribute('class') === 'keyWord') {
-        showkeywordDetail.value = true;
+        showkeywordDetail.value = true; // 显示
         const targetText = (<HTMLElement>e.target).innerText;
         let posX: number, posY: number, domRect = (<HTMLElement>e.target).getBoundingClientRect();
         [posX, posY] = [domRect.x + domRect.width, domRect.y + domRect.height];
+        // 获取目标数据
         keyWordArr.forEach(item => {
-            for (let i = 2; i < item.length; i++) {
+            const len = item.length;
+            for (let i = 2; i < len; i++) {
                 if (item[i] === targetText) {
                     [currentKid, currentIid] = [item[0], item[1]];
                     modifyDbforItem(item[0], item[1], (item: KeyWord) => {
-                        keywordDetail_ref.value.getCurrentKeyword(item);
+                        // 将数据交给卡片组件
+                        keywordDetailRef.value.getCurrentKeyword(item);
                     })
                     break;
                 }
@@ -818,6 +596,7 @@ const showSpanDetail = throttle((e: MouseEvent) => {
         nextTick(() => {
             keywordDetail.value.style.top = posY - keywordDetail.value.clientHeight / 2 - domRect.height / 2 + 'px';
             keywordDetail.value.style.left = posX + 10 + 'px';
+            // 鼠标离开卡片，卡片消失
             keywordDetail.value.onmouseleave = (e: MouseEvent) => {
                 showkeywordDetail.value = (<HTMLElement>e.relatedTarget).className === 'arco-trigger-content arco-popover-popup-content';
                 const arco_trigger_popup = document.querySelector('.arco-trigger-popup');
@@ -827,44 +606,62 @@ const showSpanDetail = throttle((e: MouseEvent) => {
                     }
                 }
             }
-
         })
     } else {
         showkeywordDetail.value = false;
     }
-}, 50)
+}, 50);
 
-// 小飞机快速转到关键字面板
+// 点击小飞机快速转到关键字面板
 const keyWordRef = ref();
 const displayKeyPanel = () => {
+    // 显示关键词模块
     showModular.value = '2';
     nextTick(() => {
+        // 关键词模块显示具体项目
         keyWordRef.value.needShowDetailPanel(currentKid, currentIid);
     })
 }
 
 // 控制全屏模式
+const fullScreenState = ref(false);
 //全屏状态，默认的核心区高度
-const fullScreenState = ref(false), layoutWriteHeight = ref('calc(100vh - 80px)');
+const layoutWriteHeight = ref('calc(100vh - 80px)');
 const turnfullScreen = (state: boolean) => {
     window.$API.ipcSend('fullscreen', state);
     window.$API.ipcOnce('isFullScreen', (state: boolean) => {
-        fullScreenState.value = state; // 能否全屏
-        if (state) stowTheSide(); // 若全屏，关闭右侧
-        else openTheSide(); // 否则开启右侧
-        isCollapse.value = state; // 若全屏，折叠左侧
+        // 能否全屏
+        fullScreenState.value = state;
+        // 若全屏，关闭右侧
+        if (state) {
+            stowTheSide();
+        }
+        // 否则开启右侧
+        else {
+            openTheSide();
+        }
+
+        // 若全屏，折叠左侧
+        isCollapse.value = state;
         // 修正高度，隐藏顶栏
-        if (state) layoutWriteHeight.value = 'calc(100vh - 5px)';
-        else layoutWriteHeight.value = 'calc(100vh - 80px)';
+        if (state) {
+            layoutWriteHeight.value = 'calc(100vh - 5px)';
+        } else {
+            layoutWriteHeight.value = 'calc(100vh - 80px)';
+        }
     })
 }
 
-// 纸张组件快捷添加关键词时触发
+// 纸张组件"快捷添加"关键词时触发
 const addKeyWord = () => {
-    // 如果当前侧面是关键字面板，则通知其刷新数据
-    if (showModular.value === '2') keyWordRef.value.loadKeyWodData();
-    else loadListData();
+    // 如果当前显示了关键字面板，则通知其刷新数据
+    if (showModular.value === '2') {
+        keyWordRef.value.loadKeyWodData();
+    } else {
+        loadListData();
+    }
 }
+
 // 收起右侧伸缩栏
 const resizeBoxWdith = ref(525), showSiderRight = ref(true);
 const stowTheSide = () => {
@@ -891,13 +688,13 @@ const setScrollTop = throttle(() => {
             }
         })
     })
-}, 500)
+}, 500);
 
 // 获取列表数据
 const router = useRouter();
 const booksLists: { data: Array<Volume> } = reactive({ data: [] });
 let keyWordArr: Array<Array<string>> = [];
-function loadListData() {
+function loadListData(cb?: Function): void {
     db.opus.get(query_id).then(value => {
         if (value) {
             // 加载关键词
@@ -916,6 +713,7 @@ function loadListData() {
             keywordMarks.value = genkeywordMarks(keyWordArr);
             (<Array<Marker>>mainStore.keywordMarks) = keywordMarks.value;
             paperRef.value.setBooksData(value, keywordMarks.value);
+
             // 加载卷章列表
             booksLists.data = value.data.filter((item: Volume) => {
                 // 判断目标卷是否有删除标记
@@ -927,18 +725,13 @@ function loadListData() {
                     return !it.discard;
                 })
             });
-            if (booksLists.data.length === 0) {
-                router.push({
-                    path: '/detail',
-                    query: {
-                        id: query_id
-                    }
-                })
-            }
+
             // 设置默认的scrollTop
-            for (let i = 0; i < booksLists.data.length; i++) {
+            const len1 = booksLists.data.length;
+            for (let i = 0; i < len1; i++) {
                 if (booksLists.data[i].vid === vid.value) {
-                    for (let j = 0; j < booksLists.data[i].volume.length; j++) {
+                    const len2 = booksLists.data[i].volume.length;
+                    for (let j = 0; j < len2; j++) {
                         if (booksLists.data[i].volume[j].cid === cid.value) {
                             (<HTMLElement>document.querySelector('.arco-layout-content')).scrollTop =
                                 <number>booksLists.data[i].volume[j].scrollTop;
@@ -949,17 +742,20 @@ function loadListData() {
                 }
             }
         }
+    }).then(() => {
+        if (typeof cb === 'function') cb();
     })
 }
 
-/*----自定义全局快捷键----*/
-//获取路由参数确定详情页显示的目标
-const searchInput = ref();
-window.addEventListener('keydown', shortcut);
+// 自定义全局快捷键
 window.addEventListener('click', leftMoreControl);
+function leftMoreControl(): void {
+    showLeftMore.value = '';
+}
+window.addEventListener('keydown', shortcut);
 function shortcut(e: KeyboardEvent) {
     if (deletedCid.value === cid.value) {
-        // Ctrl+S
+        // Ctrl+s
         if (e.ctrlKey === true && e.key === 's') $message.error('目标已被删除!');
     } else {
         // Ctrl+s
@@ -968,7 +764,8 @@ function shortcut(e: KeyboardEvent) {
         if (e.ctrlKey === true && e.key === 'f') {
             showSearchBox.value = true;
             nextTick(() => {
-                searchInput.value.focus();
+                // 把关键字标记和纸张ref给搜索框
+                searchBoxRef.value.setData(keywordMarks, paperRef.value);
             })
         }
     }
@@ -997,12 +794,9 @@ function shortcut(e: KeyboardEvent) {
         turnfullScreen(false);
     }
 }
-function leftMoreControl() {
-    showLeftMore.value = '';
-    isFloatToolMenu.value = false;
-}
+
 // 找到关键字数据
-function modifyDbforItem(t_kid: string, t_iid: string, hd: Function, cb?: Function) {
+function modifyDbforItem(t_kid: string, t_iid: string, hd: Function, cb?: Function): void {
     db.opus.where(':id').equals(query_id).modify(item => {
         item.theKeyWord.forEach(item => {
             if (item.kid === t_kid) {
@@ -1016,9 +810,11 @@ function modifyDbforItem(t_kid: string, t_iid: string, hd: Function, cb?: Functi
     })
 }
 
-/*---------------------生命周期---------------------*/
+// 生命周期 
 onMounted(() => {
-    topToolRef.value.getPaperRef(paperRef.value); // 将纸张的ref给头部
+    // 将纸张的ref给头部工具栏
+    topToolRef.value.getPaperRef(paperRef.value);
+    // 显示关键字小卡片
     const mainEditor = document.getElementById('mainEditor-w');
     window.addEventListener('keydown', (e: KeyboardEvent) => {
         if (e.ctrlKey) mainEditor?.addEventListener('mousemove', showSpanDetail);
@@ -1027,9 +823,13 @@ onMounted(() => {
         if (!e.ctrlKey) mainEditor?.removeEventListener('mousemove', showSpanDetail);
     })
     // 屏幕大小改变时关闭悬浮卡片
-    window.onresize = () => { showkeywordDetail.value = false; }
+    window.onresize = () => {
+        showkeywordDetail.value = false;
+    }
     // 点击任意地方关闭悬浮卡片（目标卡片禁用冒泡
-    window.addEventListener('click', () => { if (showkeywordDetail.value) showkeywordDetail.value = false; });
+    window.addEventListener('click', () => {
+        if (showkeywordDetail.value) showkeywordDetail.value = false;
+    });
 })
 onBeforeUnmount(() => {
     // 更新继续写作对应的vid_cid
@@ -1064,7 +864,6 @@ onUnmounted(() => {
 }
 
 .layout-write :deep(.arco-layout-content) {
-    /* height: calc(100vh - 80px); */
     height: v-bind(layoutWriteHeight);
     min-width: 20px;
     background-color: rgb(var(--my-bg-color));

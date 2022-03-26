@@ -4,7 +4,9 @@ import {
 } from '../../utils/colorChange';
 import { useThemeStore } from '../../store';
 
-// 全局共享部分主题数据
+/**
+ * 全局共享部分主题数据
+ */
 export function setSharedColor(theme: string) {
     const themeStore = useThemeStore();
     themeStore.primary_6 = getComputedStyle(document.body).getPropertyValue('--primary-6');
@@ -13,7 +15,9 @@ export function setSharedColor(theme: string) {
     themeStore.theme = theme;
 }
 
-// 传入RGB字符串重写主题变量(主色)
+/**
+ * 传入RGB字符串重写主题变量(主色)
+ */
 export function setupMainThemes(color: string) {
     const rgbColor = color.replace('RGB(', '').replace(')', '').split(',').map(it => parseInt(it));
     const primary1 = rgbDecreaseSaturation(rgbColor, 90); // 去饱和90%
@@ -48,7 +52,9 @@ export function setupMainThemes(color: string) {
     document.head.appendChild(style);
 }
 
-// 副色
+/**
+ * 传入RGB字符串重写主题变量(副色)
+ */
 export function setupSecondaryThemes(color: string) {
     const rgbColor = color.replace('RGB(', '').replace(')', '').split(',').map(it => parseInt(it));
     const mySecondary5 = rgbDecreaseSaturation(rgbColor, 18);

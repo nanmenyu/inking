@@ -153,16 +153,16 @@ import {
 } from '@arco-design/web-vue/es/icon';
 import PopupMenu from './PopupMenu.vue';
 import { useRoute, useRouter } from 'vue-router';
-import { db } from '../../db/db';
 import useCurrentInstance from '../../utils/useCurrentInstance';
-import { v4 } from 'uuid';
 import { throttle } from '../../utils/flowControl';
+import { db } from '../../db/db';
+import { v4 } from 'uuid';
 
 const { proxy } = useCurrentInstance();
 const $message = proxy.$message;
 const emit = defineEmits(['onBack', 'refresh', 'toDeleteAll', 'toReverse', 'toSort', 'toImport']);
 
-/*.----根据路由选择是否禁用按键----*/
+// 根据路由选择是否禁用按键
 const route = useRoute();
 //显示全部删除键（回收站页面用）
 const showAllDelete = ref(false), disableSwitch = ref(false), disableSort = ref(false);
@@ -172,8 +172,11 @@ if (route.path === '/') {
 } else {
     disableSwitch.value = true;
     disableSort.value = true;
-    if (route.path === '/recycle') showAllDelete.value = true;
-    else showAllDelete.value = false;
+    if (route.path === '/recycle') {
+        showAllDelete.value = true;
+    } else {
+        showAllDelete.value = false;
+    }
 }
 
 // 搜索项快捷跳转
@@ -189,17 +192,18 @@ const routerLink = (path: string, id: number, type?: string) => {
     }
     router.push({
         path: tempPath,
-        query: {
-            id: id
-        }
+        query: { id: id }
     })
 }
 
 // 是否以作品封面的方式显示
 const displyBlock = ref(true);
 const getDisplyBlock = localStorage.getItem('displyBlock');
-if (getDisplyBlock === null) localStorage.setItem('displyBlock', 'true');
-else displyBlock.value = getDisplyBlock === 'true' ? true : false;
+if (getDisplyBlock === null) {
+    localStorage.setItem('displyBlock', 'true');
+} else {
+    displyBlock.value = getDisplyBlock === 'true' ? true : false;
+}
 
 //切换显示样式(封面/列表)
 const swDisplay = () => {
@@ -209,11 +213,11 @@ const swDisplay = () => {
     localStorage.setItem('displyBlock', displyBlock.value.toString());
 }
 
-/*----新建|导入功能----*/
-const addnew = ref(false),
-    optionValue = ref('作品集'),
-    optionExplain = ref(['小说等【纯文本】会归类于此目录', '笔记等【富文本】会归类于此目录', 'Markdown文档会归类于此目录']),
-    fileName = ref('');
+// ----新建|导入功能----
+const addnew = ref(false), fileName = ref('');
+const optionValue = ref('作品集'),
+    optionExplain = ref(['小说等【纯文本】会归类于此目录', '笔记等【富文本】会归类于此目录', 'Markdown文档会归类于此目录']);
+
 const addto = () => {
     addnew.value = !addnew.value;
 }
@@ -233,6 +237,7 @@ const explain = computed(() => {
     return temp;
 });
 
+// 导入图书
 const importFile = () => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
@@ -256,7 +261,7 @@ const importFile = () => {
     }
 }
 
-/*----添加作品的item到数据库----*/
+// 添加作品的item到数据库
 const addFile = () => {
     // 选择数据仓库
     switch (optionValue.value) {
@@ -352,8 +357,7 @@ const reOrder = () => {
 }
 
 // 控制排序
-const sortType = ref('1'),
-    getSortType = localStorage.getItem('sortType');
+const sortType = ref('1'), getSortType = localStorage.getItem('sortType');
 if (getSortType === null) {
     localStorage.setItem('sortType', '1');
 } else {
@@ -369,8 +373,12 @@ const toSort = (type: string) => {
 let searchWord = '';
 const getSearchWord = (value: string) => {
     searchWord = value.trim();
-    if (searchWord !== '') toSearch(); // 节流搜索
-    else findSearchResult.value = _findSearchResult.value = false;
+    if (searchWord !== '') {
+        // 节流搜索
+        toSearch();
+    } else {
+        findSearchResult.value = _findSearchResult.value = false;
+    }
 }
 const findSearchResult = ref(false), _findSearchResult = ref(false);
 const opusData: Ref<Array<{ id: number, title: string }>> = ref([]);

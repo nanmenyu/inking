@@ -7,11 +7,8 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { useThemeStore } from '../store';
-import * as echarts from 'echarts';
 import { db } from '../db/db';
-
-const themeStore = useThemeStore();
+import { setDiagramChart } from '../hooks/diagramEditor';
 
 interface CateData {
     name: string;
@@ -39,11 +36,13 @@ interface GraphData {
     nodes: Array<NodeData>;
     links: Array<LinkData>;
 }
+
 const route = useRoute(), query_id = parseInt(<string>route.query.id);
-const categorieData: { value: Array<CateData> } = reactive({ value: [] });
-const nodesData: { value: Array<NodeData> } = reactive({ value: [] });
-const linksData: { value: Array<LinkData> } = reactive({ value: [] });
+const categorieData: { value: Array<CateData> } = reactive({ value: [] }); // 分类
+const nodesData: { value: Array<NodeData> } = reactive({ value: [] }); // 节点数据
+const linksData: { value: Array<LinkData> } = reactive({ value: [] }); // 节点的连线关系
 const graph: { data: GraphData } = reactive({ data: { categories: [], nodes: [], links: [] } });
+const uChart = ref();
 let opusTitle = '';
 
 db.opus.get(query_id).then(value => {
@@ -104,7 +103,7 @@ db.opus.get(query_id).then(value => {
         graph.data.categories = categorieData.value;
     }
 }).then(() => {
-    setDiagramChart(graph.data);
+    setDiagramChart(uChart.value, graph.data, opusTitle, layout.value);
 })
 
 // 切换显示布局
@@ -117,8 +116,9 @@ const switchLayout = () => {
     } else if (layout.value === 'force') {
         layout.value = 'none';
     }
-    setDiagramChart(graph.data);
+    setDiagramChart(uChart.value, graph.data, opusTitle, layout.value);
 }
+
 // 绘制圆边坐标
 function generateCirculCoord(xOffset: number, yOffset: number, radius: number, quantity: number): Array<[number, number]> {
     const coord = [], sita = (2 * Math.PI) / quantity, r = radius;
@@ -128,105 +128,6 @@ function generateCirculCoord(xOffset: number, yOffset: number, radius: number, q
     return coord.map(item => {
         return [item[0] + xOffset, item[1] + yOffset];
     });
-}
-// 绘制关系图
-const uChart = ref();
-function setDiagramChart(graph: GraphData) {
-    let myChart = echarts.getInstanceByDom(uChart.value);
-    if (myChart == null) {
-        myChart = echarts.init(uChart.value);
-    }
-    const graphName: Array<{ id: string, name: string }> = [];
-    graph.nodes.forEach(node => {
-        node.label = {
-            show: node.symbolSize >= 25 // 值大于等于25显示名称
-        };
-        graphName.push({ id: node.id, name: node.name });
-    });
-
-    // 绘制图表
-    // const intensity = ref(1); //默认关联强度
-    const textColor = getComputedStyle(document.body).getPropertyValue('--color-text-1');
-    const option: any = {
-        color: ['#3491fa', '#CC3399', '#FFCC99', '#FF6666', '#FF9999', '#FFCCCC', '#FF99CC', '#66CC99'],
-        title: {
-            text: opusTitle + '关系图',
-            // subtext: 'Default layout',
-            top: 'bottom',
-            left: 'right'
-        },
-        tooltip: {
-            formatter: (param: any) => {
-                // 边与点触发
-                if (param.dataType === 'edge') {
-                    let nameSource = '', nameTarget = '', intensityBlock = '🔥';
-                    graphName.forEach(item => {
-                        if (item.id === param.data.source) nameSource = item.name;
-                        if (item.id === param.data.target) nameTarget = item.name;
-                    })
-                    for (let i = 1; i < param.data.value; i++) {
-                        intensityBlock += '🔥';
-                    }
-                    return nameSource + ' ⬅️➡️ ' + nameTarget + '<br />'
-                        + `关联度: <span >${intensityBlock}</span>`;
-                } else if (param.dataType === 'node') {
-                    let associatedItems = '';
-                    param.data.associated.forEach((item: any) => {
-                        associatedItems += '<li>👉' + item.key.split('🞂')[1] + '</li>'
-                    })
-                    return `名称: ${param.name}<br />关联(${param.value}): <br /> <ul style="margin:0;padding-left:1em;list-style-type:none;">${associatedItems}</ul>`;
-                }
-            },
-            textStyle: {
-                align: 'left',
-            },
-        },
-        legend: [
-            {
-                top: 10,
-                textStyle: {
-                    color: textColor
-                },
-            }
-        ],
-        animationDuration: 1500,
-        animationEasingUpdate: 'quinticInOut',
-        series: [
-            {
-                type: 'graph',
-                layout: layout.value,
-                force: {
-                    repulsion: 30
-                },
-                data: graph.nodes,
-                links: graph.links,
-                categories: graph.categories,
-                roam: true,
-                label: {
-                    position: 'right',
-                    textBorderWidth: '0',
-                    color: textColor
-                },
-                lineStyle: {
-                    color: 'source',
-                    curveness: 0.3 // 边的曲度
-                },
-                emphasis: {
-                    focus: 'adjacency', //聚焦关系图中的邻接点和边的图形
-                    lineStyle: {
-                        width: 5
-                    }
-                }
-            }
-        ]
-    }
-
-    myChart.setOption(option);
-
-    window.onresize = function () {
-        //自适应大小
-        myChart!.resize();
-    };
 }
 
 </script>

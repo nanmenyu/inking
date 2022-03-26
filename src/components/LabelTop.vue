@@ -38,10 +38,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import {
-    IconLock,
-    IconPlusCircle
-} from '@arco-design/web-vue/es/icon';
+import { IconLock, IconPlusCircle } from '@arco-design/web-vue/es/icon';
 
 let selected = ref('all');
 

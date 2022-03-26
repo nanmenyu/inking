@@ -437,17 +437,6 @@ import { useRoute } from 'vue-router';
 import { Sketch } from '@ckpack/vue-color';
 import ThemeContainer from './widget/ThemeContainer.vue';
 import { useThemeStore } from '../store';
-// import writtenwords from '../assets/svg/writtenwords.svg';
-// import fontSizeIcon from '../assets/svg/fontSizeIcon.svg';
-// import lineHeighIcon from '../assets/svg/lineHeighIcon.svg';
-// import fontWeightIcon from '../assets/svg/fontWeightIcon.svg';
-// import fontFamilyIcon from '../assets/svg/fontFamilyIcon.svg';
-// import fontColorIcon from '../assets/svg/fontColorIcon.svg';
-// import paragraphIcon from '../assets/svg/paragraphIcon.svg';
-// import segSpacingIcon from '../assets/svg/segSpacingIcon.svg';
-// import textIndentIcon from '../assets/svg/textIndentIcon.svg';
-// import paraFocusIcon from '../assets/svg/paraFocusIcon.svg';
-// import otherSettingIcon from '../assets/svg/otherSettingIcon.svg';
 import paperColorIcon from '../assets/svg/paperColorIcon.svg';
 import paperBorderIcon from '../assets/svg/paperBorderIcon.svg';
 import paperSizeIcon from '../assets/svg/paperSizeIcon.svg';
@@ -459,8 +448,10 @@ import sensitiveWords from '../assets/svg/sensitiveWords.svg';
 const route = useRoute(), query_path = route.path;
 const themeStore = useThemeStore();
 const emit = defineEmits(['fullscreen']);
-/*-------------数据统计与初始化-------------*/
-const wordCount = ref(0), charCount = ref(0), paragraphs = ref(0), fontList = ref(), paperSize = ref([
+
+// 数据统计与初始化
+const wordCount = ref(0), charCount = ref(0), paragraphs = ref(0), fontList = ref();
+const paperSize = ref([
     { type: 'Max', size: 1280, now: false },
     { type: 'iPad Pro', size: 1024, now: false },
     { type: 'A4', size: 794, now: true },
@@ -478,6 +469,7 @@ const getData = (data: Pagecount) => {
     charCount.value = data.charCount;
     paragraphs.value = data.paragraphs;
 }
+
 // 获得纸张组件
 const paperRef = ref();
 const getPaperRef = (pRef: any) => {
@@ -501,19 +493,25 @@ const uLocalOption = ref({
 });
 if (query_path === '/writer') {
     const getuWritingOption = localStorage.getItem('uWritingOption');
-    if (getuWritingOption === null) localStorage.setItem('uWritingOption', JSON.stringify(uLocalOption.value));
-    else uLocalOption.value = JSON.parse(getuWritingOption);
+    if (getuWritingOption === null) {
+        localStorage.setItem('uWritingOption', JSON.stringify(uLocalOption.value));
+    } else {
+        uLocalOption.value = JSON.parse(getuWritingOption);
+    }
 } else if (query_path === '/reading') {
     const getuReadingOption = localStorage.getItem('uReadingOption');
-    if (getuReadingOption === null) localStorage.setItem('uReadingOption', JSON.stringify(uLocalOption.value));
-    else uLocalOption.value = JSON.parse(getuReadingOption);
+    if (getuReadingOption === null) {
+        localStorage.setItem('uReadingOption', JSON.stringify(uLocalOption.value));
+    } else {
+        uLocalOption.value = JSON.parse(getuReadingOption);
+    }
 }
 
-/*----获取系统字体列表备用----*/
+// 获取系统字体列表备用
 let _fontList: Array<string>, slideDown: number = 1;
 window.$API.ipcSend('count-fonts-item');
 window.$API.ipcOn('get-fonts-item', (data: Array<string>) => {
-    // 这里可以通过分析内容是中文还是英文选择是否逆序
+    // 逆序让中文字体排在前面
     _fontList = data.reverse();
     if (data.length > 20) {
         // 列表拆分为20一组
@@ -525,7 +523,7 @@ window.$API.ipcOn('get-fonts-item', (data: Array<string>) => {
     }
 });
 
-/*----通过Scroll滚动事件懒加载字字体列表----*/
+//通过Scroll滚动事件懒加载字字体列表
 const fontListNode = ref();
 let count = 0, countSlideDown = 1, scrollTop: Array<number> = [];
 // 触发节流函数
@@ -549,7 +547,7 @@ const fontlistScroll = throttle(() => {
     }
 }, 100);
 
-/*----字数统计选择----*/
+// 字数统计选择
 const choiceArr = ref([true, false, false]);
 const choice = (order: number) => {
     choiceArr.value = [false, false, false];
@@ -563,7 +561,7 @@ const showChoice = computed(() => {
     return tempStr;
 })
 
-/*----父组件调用子组件的方法----*/
+// 父组件调用子组件的方法
 // 设置字体
 const selectFont = (i: number) => {
     paperRef.value.setFont(fontList.value[i]);

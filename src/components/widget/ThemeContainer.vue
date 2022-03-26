@@ -41,11 +41,11 @@
 import { computed, ref } from 'vue';
 import { IconSunFill, IconMoonFill } from "@arco-design/web-vue/es/icon";
 import { setSharedColor, setupMainThemes, setupSecondaryThemes } from '../../hooks/setupThemes';
-// import { useThemeStore } from '../../store';
-// const themeStore = useThemeStore();
+
 const emit = defineEmits(['changePaperColor']);
 
-const themeColor = ['RGB(0,176,255)', 'RGB(0,191,166)', 'RGB(245,61,127)', 'RGB(83,109,254)', 'RGB(249,168,38)', 'RGB(253,84,78)',
+const themeColor = [
+    'RGB(0,176,255)', 'RGB(0,191,166)', 'RGB(245,61,127)', 'RGB(83,109,254)', 'RGB(249,168,38)', 'RGB(253,84,78)',
     'RGB(1,121,202)', 'RGB(0,143,145)', 'RGB(241,100,100)', 'RGB(104,103,209)', 'RGB(255,143,87)', 'RGB(253,114,109)'];
 const getLocalTheme = JSON.parse(localStorage.getItem('uTheme')!);
 const themeMode = ref(getLocalTheme.mode),
@@ -54,8 +54,11 @@ const themeMode = ref(getLocalTheme.mode),
 const colorMode = ref('main');
 
 const curChoiceColor = computed(() => {
-    if (colorMode.value === 'main') return mainThemeColor.value;
-    else return secondThemeColor.value;
+    if (colorMode.value === 'main') {
+        return mainThemeColor.value;
+    } else {
+        return secondThemeColor.value;
+    }
 })
 
 // 快速更换主题模式
@@ -125,7 +128,6 @@ body[arco-theme="dark"] {
         width: 100%;
         height: calc(100% - 40px);
         margin-top: 10px;
-        // background-color: var(--color-fill-2);
         border-radius: 10px;
 
         ul {
@@ -144,11 +146,9 @@ body[arco-theme="dark"] {
                 width: 40px;
                 height: 40px;
                 margin: 0 6px;
-                // background-color: #ff7a9e;
                 border: 2px solid transparent;
                 border-radius: 15px;
                 cursor: pointer;
-                // box-shadow: 0 4px 10px #0000001a;
             }
 
             .li-checked {

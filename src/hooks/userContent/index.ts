@@ -1,7 +1,9 @@
 import * as echarts from 'echarts';
 import { useThemeStore } from '../../store';
 
-// 绘制码字数统计(柱状图)
+/**
+ * 绘制码字数统计(柱状图)
+ */
 export function drawCodewordChart(chartDom: HTMLElement, xAxisData: any, seriesData: any): void {
     const themeStore = useThemeStore();
     let myChart = echarts.getInstanceByDom(chartDom);
@@ -56,7 +58,9 @@ export function drawCodewordChart(chartDom: HTMLElement, xAxisData: any, seriesD
     }
 }
 
-// 绘制码字数统计(折线图 365天时)
+/**
+ * 绘制码字数统计(折线图 365天时)
+ */
 export function drawLineChart(chartDom: HTMLElement, xAxisData: Array<string>, seriesData: any): void {
     const themeStore = useThemeStore();
     let myChart = echarts.getInstanceByDom(chartDom);
@@ -103,7 +107,9 @@ export function drawLineChart(chartDom: HTMLElement, xAxisData: Array<string>, s
     }
 }
 
-// 关键词词频分析(散点图)
+/**
+ * 关键词词频分析(散点图)
+ */
 export function drawScatterChart(chartDom: HTMLElement, xAxisData: any, yAxisData: any, scatterData: any): void {
     const themeStore = useThemeStore();
     let myChart = echarts.getInstanceByDom(chartDom);
@@ -182,7 +188,9 @@ export function drawScatterChart(chartDom: HTMLElement, xAxisData: any, yAxisDat
     }
 }
 
-// 关键词词频总览(饼图)
+/**
+ * 关键词词频总览(饼图)
+ */
 export function drawPieChart(chartDom: HTMLElement, pieData: any, otherPieData: Array<string>): void {
     const themeStore = useThemeStore();
     let myChart = echarts.getInstanceByDom(chartDom);
@@ -276,7 +284,9 @@ export function drawPieChart(chartDom: HTMLElement, pieData: any, otherPieData: 
     }
 }
 
-// 关键词词频趋势（折线）
+/**
+ * 关键词词频趋势（折线）
+ */
 export function drawLinesChart(chartDom: HTMLElement, xAxisData: any, lineSeriesData: any): void {
     let myChart = echarts.getInstanceByDom(chartDom);
     if (myChart) myChart!.dispose(); // 避免重复option

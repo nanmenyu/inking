@@ -1,5 +1,8 @@
 import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
 
+/**
+ * 导出TXT
+ */
 export function exportTXT(filename: string, container: HTMLElement) {
     window.$API.ipcSend('expFile', {
         type: 'TXT',
@@ -8,6 +11,9 @@ export function exportTXT(filename: string, container: HTMLElement) {
     });
 }
 
+/**
+ * 导出DOCX
+ */
 export function exportDOCX(filename: string, container: HTMLElement) {
     const htmlString = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>' + container.outerHTML + '</body></html>';
     window.$API.ipcSend('expFile', {
@@ -17,6 +23,9 @@ export function exportDOCX(filename: string, container: HTMLElement) {
     });
 }
 
+/**
+ * 导出PDF
+ */
 export function exportPDF(filename: string, container: HTMLElement) {
     // 测试17k~~~15K字左右的极限，字太多会白板
     // 输出配置项 见：https://ekoopmans.github.io/html2pdf.js/

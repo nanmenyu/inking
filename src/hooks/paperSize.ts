@@ -1,4 +1,6 @@
-// 纸张的宽度 = 内容区 + 40px的左右边距
+/**
+ * 纸张的宽度 = 内容区 + 40px的左右边距
+ */
 export const paperSize: { [key: string]: number } = {
     'Max': 1280,
     'iPad Pro': 1024,

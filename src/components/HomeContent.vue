@@ -4,7 +4,7 @@
         <Toolbar
             v-if="!multi"
             @onBack="onBack"
-            @refresh="refresh"
+            @refresh="loadData"
             @toReverse="getReverse"
             @toSort="getSort"
         ></Toolbar>
@@ -156,24 +156,19 @@
 <script setup lang="ts">
 import { ref, reactive, computed, nextTick, onUnmounted, watch } from "vue";
 import { IconCheck } from "@arco-design/web-vue/es/icon";
+import { useRouter } from 'vue-router';
 import Toolbar from "./widget/Toolbar.vue";
 import MultipleBar from "./widget/MultipleBar.vue";
 import PopupMenu from './widget/PopupMenu.vue';
-import { db } from "../db/db";
-import { useRouter } from 'vue-router';
-import timeFormat from "../utils/timeFormat";
+import { timeFormat, standTime } from "../utils/timeFormat";
 import useCurrentInstance from '../utils/useCurrentInstance';
+import { db } from "../db/db";
 import defaultCover from '../../public/static/img/default-cover.jpg';
 
 const { proxy } = useCurrentInstance();
-
-/*----数据库取值----*/
-const booksData: { data: Array<Userdb> } = reactive({
-    data: []
-});
-
 const $modal = proxy.$modal;
 const $message = proxy.$message;
+const booksData: { data: Array<Userdb> } = reactive({ data: [] });
 loadData();
 
 // 控制路由跳转
@@ -188,6 +183,7 @@ const routerLink = (id: number) => {
         })
     }
 }
+
 // 继续写作按键
 const continueWriting = (id: number) => {
     booksData.data.forEach(item => {
@@ -203,10 +199,12 @@ const continueWriting = (id: number) => {
         }
     })
 }
+
 // 反转顺序
 const getReverse = () => {
     booksData.data.reverse();
 }
+
 // 获得排序设置并给数据排序
 const getSort = (type: string) => {
     // type==1 按创建时间排序(默认)
@@ -232,34 +230,25 @@ const getSort = (type: string) => {
     }
 }
 
-// 是否以作品封面的方式显示(localStorage缓存状态)
-const displyBlock = ref(true), getDisplyBlock = localStorage.getItem('displyBlock');
-if (getDisplyBlock === null) localStorage.setItem('displyBlock', 'true');
-else displyBlock.value = getDisplyBlock === 'true' ? true : false;
+// 是否以作品封面的方式显示
+const displyBlock = ref(true);
+const getDisplyBlock = localStorage.getItem('displyBlock');
+if (getDisplyBlock === null) {
+    localStorage.setItem('displyBlock', 'true');
+} else {
+    displyBlock.value = getDisplyBlock === 'true' ? true : false;
+}
 
 // 接收子组件传参
 const onBack = (data: boolean) => {
     displyBlock.value = data;
 };
 
-// 刷新列表重新获取数据
-const refresh = loadData;
-
-// 时间格式化计算属性
-const standTime = computed(() => (ts: number, mode?: boolean) => {
-    // 选择格式,是否裁切后半部分的准确时间
-    mode = mode || false;
-    if (mode) {
-        return timeFormat(ts).split(" ")[0];
-    } else {
-        return timeFormat(ts);
-    }
-});
-
 // 简介数据处理
 const getDesc = (desc: string) => {
     return desc === '' ? '请填写作品简介......' : desc.replaceAll('<br/>', ' ');
 }
+
 // 右键置入回收站
 const putinRecycle = (id: number, title: string) => {
     $modal.warning({
@@ -274,6 +263,7 @@ const putinRecycle = (id: number, title: string) => {
         }
     })
 }
+
 // 右键重命名
 const isRename = ref(false), showName = ref('');
 let temp_id: number;
@@ -294,22 +284,18 @@ const reName = () => {
 let switchMult = false;
 window.addEventListener("keydown", multiChoice);
 window.addEventListener("keyup", multiCancel);
-
-function multiChoice(e: KeyboardEvent) {
+function multiChoice(e: KeyboardEvent): void {
     if (e.key === "Control") {
         switchMult = true;
     }
 }
-
-function multiCancel(e: KeyboardEvent) {
+function multiCancel(e: KeyboardEvent): void {
     if (e.key === "Control") {
         switchMult = false;
     }
 }
 
-const multi = ref(false),
-    myRef = ref(),
-    isdisable = ref(false);
+const multi = ref(false), myRef = ref(), isdisable = ref(false);
 const choiceItem = (i: number) => {
     if (switchMult) {
         switchMult = true;
@@ -318,8 +304,7 @@ const choiceItem = (i: number) => {
         booksData.data[i].checked = !booksData.data[i].checked;
         // 调用子组件的方法给子组件传递总个数和选中的个数
         nextTick(() => {
-            let len = booksData.data.length,
-                sele = 0;
+            let len = booksData.data.length, sele = 0;
             for (let i = 0; i < len; i++) {
                 sele += booksData.data[i].checked ? 1 : 0;
             }
@@ -327,10 +312,12 @@ const choiceItem = (i: number) => {
         });
     }
 };
+
 // 监视变化控制dropdown
 watch(() => multi.value, current => {
     isdisable.value = current;
 })
+
 // 置入选中目标到回收站
 const putSelectinRecycle = () => {
     booksData.data.forEach(async item => {
@@ -341,6 +328,7 @@ const putSelectinRecycle = () => {
     loadData();
     $message.success('删除成功!');
 }
+
 // 点击全选键
 const getSelectAll = () => {
     let temp = 0, len = booksData.data.length;
@@ -361,6 +349,7 @@ const getSelectAll = () => {
         });
     }
 };
+
 // 点击完成键
 const getComplete = () => {
     switchMult = multi.value = false;
@@ -383,6 +372,7 @@ const changeMode = (mode: string) => {
 const exportAll = () => {
     booksData.data.forEach(item => {
         if (item.id === targetId) {
+            // 导出单个TXT
             if (modeType.value === 'm1') {
                 let opusStr = '';
                 item.data.forEach((v_item, index) => {
@@ -402,7 +392,9 @@ const exportAll = () => {
                     name: item.title,
                     file: opusStr
                 });
-            } else if (modeType.value === 'm2') {
+            }
+            // 导出多个TXT
+            else if (modeType.value === 'm2') {
                 const opusArr = item.data.map(v_item => {
                     return {
                         volumeName: v_item.volumeName,
@@ -419,7 +411,9 @@ const exportAll = () => {
                     name: item.title,
                     file: opusArr
                 });
-            } else if (modeType.value === 'm3') {
+            }
+            // 导出单个DOCX
+            else if (modeType.value === 'm3') {
                 let opusHTML = '';
                 item.data.forEach(v_item => {
                     opusHTML += '<h3>' + v_item.volumeName + '</h3>';
@@ -436,7 +430,9 @@ const exportAll = () => {
                     name: item.title,
                     file: opusHTML
                 });
-            } else if (modeType.value === 'm4') {
+            }
+            // 导出多个DOCX
+            else if (modeType.value === 'm4') {
                 const opusArr = item.data.map(v_item => {
                     return {
                         volumeName: v_item.volumeName,
@@ -475,7 +471,8 @@ function loadData() {
         }
     });
 }
-/*----离开页面销毁----*/
+
+// 生命周期
 onUnmounted(() => {
     window.removeEventListener("keydown", multiChoice);
     window.removeEventListener("keyup", multiCancel);

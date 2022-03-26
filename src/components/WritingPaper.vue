@@ -4,7 +4,7 @@
         mode="writing"
         :menuItem="['复制 Ctrl+c', '粘贴 Ctrl+v', '剪切 Ctrl+x']"
         @choice="choiceContextMenuItem"
-        ref="contextMenu_ref"
+        ref="contextMenuRef"
     ></ContextMenu>
     <div id="paper-box-w" ref="pBox">
         <main @keydown="adaHeight" @keyup="getData(), input_saveDocData($event);" ref="editor">
@@ -14,44 +14,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed, watch, reactive, Ref, nextTick } from 'vue';
-import ContextMenu from './widget/ContextMenu.vue'
+import { ref, onMounted, onBeforeUnmount, computed, watch, reactive, Ref } from 'vue';
+import { useRoute } from 'vue-router';
+import ContextMenu from './widget/ContextMenu.vue';
+import { setHighlightKeyword } from '../common/editor/syntax';
+import pureTextEditor from '../common/editor';
 import getStyle from '../utils/getStyle';
 import { throttle } from '../utils/flowControl';
 import { hexToRgba } from '../utils/colorChange';
-import pureTextEditor from '../common/editor';
-import { setHighlightKeyword } from '../common/editor/syntax';
-import { db } from '../db/db';
-import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
-import { useMainStore } from '../store/index';
 import { setContentTipPos, setHTMLdata, setTranslationContent } from '../hooks/contentTip';
-import { v4 } from 'uuid';
-// import axios from 'axios';
-import { paperSize } from '../hooks/paperSize';
 import { exportTXT, exportDOCX, exportPDF } from '../hooks/paper';
+import { paperSize } from '../hooks/paperSize';
+import { useMainStore } from '../store/index';
+import { db } from '../db/db';
+import { v4 } from 'uuid';
 import prohibitedWords from '../assets/json/prohibitedWords.json';
 import '../style/toolTip.scss';
 
-const emit = defineEmits(['todata', 'addKeyWord', 'toWebView']), { proxy } = useCurrentInstance();
+const emit = defineEmits(['todata', 'addKeyWord', 'toWebView']);
+const { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
 const $message = proxy.$message;
 const mainStore = useMainStore();
-const contextMenu_ref = ref();
-const ProseMirror = ref();
-
-onMounted(() => {
-    editor.value.addEventListener('keydown', insertSpace);
-    contextMenu_ref.value.setContainer(editor.value);
-})
-onBeforeUnmount(() => {
-    clearInterval(timer);
-})
-
-const boxWidth = ref(paperSize['A4']), boxHeight = ref(1000); // 纸张宽度，纸张高度
-
+const contextMenuRef = ref();
+// 纸张宽度，纸张高度
+const boxWidth = ref(paperSize['A4']), boxHeight = ref(1000);
 // 数据库取值相关
 const route = useRoute(), query_id = parseInt(route.query.id as string);
+let ProseMirror: HTMLElement;
 
 // 刷新当前所在章id
 let vid = route.query.vid;
@@ -60,93 +51,7 @@ const setId = (newVid: string, newCid: string) => {
     [vid, cid] = [newVid, newCid];
 }
 
-/*----监视纸张和字数变化----*/
-const editor = ref();
-let data: Pagecount, chapterNumber = 0;
-let timer: any = null; // 定时器用于测速
-// 监视输入框中的各项数值
-const getData = () => {
-    chapterNumber = ProseMirror.value.innerText.replaceAll('\n', '').replaceAll('\u0020', '').replaceAll('\u3000', '').length; // 字数统计
-    data = {
-        paperHeight: getStyle(editor.value, 'height'), // 输入框的高度
-        wordCount: chapterNumber,
-        charCount: editor.value.innerText.replaceAll('\n', '').length, // 字符数（不包含换行）
-        paragraphs: editor.value.children[0].children[0].children.length // 段落数
-    };
-    // 适应纸张高度
-    adaHeight();
-    // 
-    emit('todata', data);
-    // 字数提示
-    if (data.charCount >= 15000) {
-        $modal.warning({
-            title: '单章字数过多',
-            content: '单章字符数不宜过多(>15000),因为可能会影响导出PDF的性能(不导出就随意)'
-        })
-    }
-}
-const adaHeight = () => {
-    // 纸张高度紧随编辑框的变化
-    boxHeight.value = parseInt(data.paperHeight.replace('px', '')) >= 1000 ? parseInt(data.paperHeight.replace('px', '')) : 1000;
-}
-
-// 键盘抬起时保存
-const input_saveDocData = (e: KeyboardEvent) => {
-    // 忽略一些键再保存
-    const keyToIgnore = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
-        'Shift', 'Meta', 'Alt', 'Control', 'CapsLock', 'PageUp', 'PageDown', 'Escape',
-        'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'];
-    // 只在有修改文档内容的输入时才保存
-    if (keyToIgnore.indexOf(e.key) === -1) {
-        throttleSaveDocData();
-    }
-}
-
-//  保存数据至数据库(节流)
-const throttleSaveDocData = throttle(() => { saveDocData('') }, 500);
-
-// 保存数据至数据库
-const saveDocData = (showMsg: string) => {
-    const editorData = editor.value.firstElementChild.firstElementChild.children,
-        dataArr: Array<string> = [];
-    for (let i = 0; i < editorData.length; i++) {
-        dataArr.push(editorData[i].innerText);
-    }
-    // 直接修改
-    let totalNumber = 0;
-    db.opus.where(':id').equals(query_id).modify(value => {
-        value.data.forEach(item => {
-            if (item.vid === vid) {
-                item.volume.forEach(it => {
-                    if (it.cid === cid) {
-                        it.chapter = dataArr;
-                        it.chapterNum = chapterNumber;
-                        it.updateTime = new Date().getTime();
-                        value.updateTime = new Date().getTime();// 更新修改时间;
-                    }
-                    // 顺便更新作品的总字数
-                    if (!it.discard) totalNumber += it.chapterNum ?? 0;
-                })
-            }
-        });
-    }).then(() => {
-        if (showMsg !== '') $message.success(showMsg);
-        // 更新总字数数据
-        db.opus.update(query_id, { opusNumber: totalNumber }).then(() => {
-            // 获取改变后的总字数
-            let cout_temp = 0;
-            db.opus.where(':id').between(1, Infinity).toArray().then(value => {
-                value.forEach(opus => {
-                    cout_temp += opus.opusNumber;
-                })
-            }).then(() => {
-                mainStore.TotalNumber_thisTime = cout_temp;
-            })
-        })
-    })
-}
-
-/*----修改文字、段落相关----*/
+// 修改文字、段落相关 
 let currentFont = ref('KaiTi'), currentFontSize = ref(22), currentLineHeight = ref(1.5),
     currentFontWeight = ref('normal'), currentColor = ref('#333333'), currentSpacing = ref(10),
     currentTextIndent = ref(0), currentBgcColor = ref('#ffffff'),
@@ -214,13 +119,101 @@ const setParaFocus = (type: string, isInit: boolean) => {
     if (!isInit) getData();
 }
 
-/*----另存为文件----*/
+// 监视纸张和字数变化
+const editor = ref();
+let data: Pagecount, chapterNumber = 0;
+// 监视输入框中的各项数值
+const getData = () => {
+    const allChar = ProseMirror.innerText.replaceAll('\n', '');
+    chapterNumber = allChar.replaceAll('\u0020', '').replaceAll('\u3000', '').length; // 字数统计
+    data = {
+        paperHeight: getStyle(editor.value, 'height'), // 输入框的高度
+        wordCount: chapterNumber,
+        charCount: allChar.length, // 字符数（不包含换行）
+        paragraphs: ProseMirror.children.length // 段落数
+    };
+    // 适应纸张高度
+    adaHeight();
+    // 传递数据
+    emit('todata', data);
+    // 字数提示
+    if (data.charCount >= 15000) {
+        $modal.warning({
+            title: '单章字数过多',
+            content: '单章字符数不宜过多(>15000),因为可能会影响导出PDF的性能(不导出就随意)'
+        })
+    }
+}
+// 纸张高度紧随编辑框的变化
+const adaHeight = () => {
+    boxHeight.value = parseInt(data.paperHeight.replace('px', '')) >= 1000 ? parseInt(data.paperHeight.replace('px', '')) : 1000;
+}
+
+// 键盘抬起时保存
+const input_saveDocData = (e: KeyboardEvent) => {
+    // 忽略一些键再保存
+    const keyToIgnore = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+        'Shift', 'Meta', 'Alt', 'Control', 'CapsLock', 'PageUp', 'PageDown', 'Escape',
+        'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'];
+    // 只在有修改文档内容的输入时才保存
+    if (keyToIgnore.indexOf(e.key) === -1) {
+        throttleSaveDocData();
+    }
+}
+
+//  保存数据至数据库(节流)
+const throttleSaveDocData = throttle(() => {
+    saveDocData('');
+}, 500);
+
+// 保存数据至数据库
+const saveDocData = (showMsg: string) => {
+    const editorData = ProseMirror.children;
+    const dataArr: Array<string> = [];
+    for (let i = 0; i < editorData.length; i++) {
+        dataArr.push((<HTMLElement>editorData[i]).innerText);
+    }
+    // 直接修改
+    let totalNumber = 0;
+    db.opus.where(':id').equals(query_id).modify(value => {
+        value.data.forEach(item => {
+            if (item.vid === vid) {
+                item.volume.forEach(it => {
+                    if (it.cid === cid) {
+                        it.chapter = dataArr;
+                        it.chapterNum = chapterNumber;
+                        it.updateTime = new Date().getTime();
+                        value.updateTime = new Date().getTime();// 更新修改时间;
+                    }
+                    // 顺便更新作品的总字数
+                    if (!it.discard) totalNumber += it.chapterNum ?? 0;
+                })
+            }
+        });
+    }).then(() => {
+        if (showMsg !== '') $message.success(showMsg);
+        // 更新总字数数据
+        db.opus.update(query_id, { opusNumber: totalNumber }).then(() => {
+            // 获取改变后的总字数
+            let cout_temp = 0;
+            db.opus.where(':id').between(1, Infinity).toArray().then(value => {
+                value.forEach(opus => {
+                    cout_temp += opus.opusNumber;
+                })
+            }).then(() => {
+                mainStore.TotalNumber_thisTime = cout_temp;
+            })
+        })
+    })
+}
+
+// 另存为文件
 let currentChapter = '未命名章';
 const pBox = ref();
 const expFile = (type: string) => {
     switch (type) {
         case 'txt':
-            exportTXT(currentChapter, editor.value);
+            exportTXT(currentChapter, ProseMirror);
             break;
         case 'docx':
             exportDOCX(currentChapter, pBox.value);
@@ -247,7 +240,8 @@ const expFile = (type: string) => {
 
 // 违禁词查询
 const sensitiveRetrieval = () => {
-    const words: { [key: string]: Array<string> } = prohibitedWords;// 导入敏感词库
+    // 导入敏感词库
+    const words: { [key: string]: Array<string> } = prohibitedWords;
     // 添加自定义违禁词
     words['cust'] = (localStorage.getItem('sWords') ?? '').split('/');
     // 添加非敏感词（用于忽略）
@@ -271,12 +265,12 @@ const sensitiveRetrieval = () => {
     }
 }
 
+// 获得文章数据
 const theKeyWordData: { data: Array<KeyWordGroup> } = reactive({ data: [] });
 const allNameArr: Ref<Array<string>> = ref([]); // 全部关键词名称数组
 const setBooksData = (value: Userdb, keyMarks?: Array<Marker>) => {
     theKeyWordData.data = value.theKeyWord;
     const toDisplay: Array<NodePara> = [];
-    // toDisplay = []; // 清空
     value.data.forEach(item => {
         //获取本章数据
         if (item.vid === vid) {
@@ -298,15 +292,13 @@ const setBooksData = (value: Userdb, keyMarks?: Array<Marker>) => {
     getData();
     // 读取关键字全部名称
     db.opus.get(query_id).then(value => {
-        if (value) {
-            allNameArr.value = [];
-            value.theKeyWord.forEach(item => {
-                item.data.forEach(it => {
-                    if (it.itemName !== '') allNameArr.value.push(it.itemName);
-                    if (it.otherName.length > 0) allNameArr.value = allNameArr.value.concat(it.otherName);
-                })
+        allNameArr.value = [];
+        value?.theKeyWord.forEach(item => {
+            item.data.forEach(it => {
+                if (it.itemName !== '') allNameArr.value.push(it.itemName);
+                if (it.otherName.length > 0) allNameArr.value = allNameArr.value.concat(it.otherName);
             })
-        }
+        })
     })
 }
 
@@ -323,7 +315,7 @@ const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<Marker>) =>
     // 屏蔽自带的拼写检查
     mEditor.value.firstElementChild.setAttribute('spellcheck', 'false');
     // 获得ProseMirror元素
-    ProseMirror.value = document.querySelector('.ProseMirror');
+    if (!ProseMirror) ProseMirror = document.querySelector('.ProseMirror')!;
 }
 
 // 监视选中文字的变化 设置选中文字时的工具栏
@@ -424,7 +416,7 @@ watch(computed(() => {
         emit('toWebView', currentText.value);
     }
 
-    function getHTMLdata(config: { type: string, word: string }) {
+    function getHTMLdata(config: { type: string, word: string }): void {
         contentTip2.innerHTML = '<div class="word-loading"><div class="word-loading-img"></div></div>';
         window.$API.ipcSend('reptile', config);
         window.$API.ipcOnce('getReptileData', (data: any) => {
@@ -443,25 +435,23 @@ watch(computed(() => {
 
 // 右侧菜单栏触发
 const choiceContextMenuItem = (data: { item: string, select?: string }) => {
-    const sel = window.getSelection(), range = sel!.getRangeAt(0),
-        textNode = range.startContainer, selectedText = sel?.toString() ?? '';
+    const sel = window.getSelection(), range = sel!.getRangeAt(0);
+    const textNode = range.startContainer, selectedText = sel?.toString() ?? '';
 
     if (data.item === '复制 Ctrl+c' && selectedText !== '') {
         navigator.clipboard.writeText(selectedText);
     } else if (data.item === '粘贴 Ctrl+v') {
         navigator.clipboard.readText().then(clipText => {
             (<Text>textNode).replaceData(range.startOffset, range.endOffset - range.startOffset, clipText);
-            // saveDocData('');
         })
     } else if (data.item === '剪切 Ctrl+x' && selectedText !== '') {
         (<Text>textNode).replaceData(range.startOffset, range.endOffset - range.startOffset, '');
         navigator.clipboard.writeText(selectedText);
-        // saveDocData('');
     }
 }
 
 // TAB键插入两个中文空格
-function insertSpace(e: KeyboardEvent) {
+function insertSpace(e: KeyboardEvent): void {
     const selection = window.getSelection(),
         range = selection!.getRangeAt(0),
         start = range.startContainer;
@@ -480,12 +470,18 @@ function insertSpace(e: KeyboardEvent) {
 }
 
 // 移动光标到指定位置
-function moveCursor(selection: Selection, range: Range, startNode: Node, startOffset: number) {
+function moveCursor(selection: Selection, range: Range, startNode: Node, startOffset: number): void {
     range.setStart(startNode, startOffset);
     range.setEnd(startNode, startOffset);
     selection.removeAllRanges();
     selection.addRange(range);
 }
+
+// 生命周期
+onMounted(() => {
+    editor.value.addEventListener('keydown', insertSpace);
+    contextMenuRef.value.setContainer(editor.value);
+})
 
 defineExpose({
     saveDocData, setFont, setFontSize, setLineHeight, setFontWeight, setColor, setSegSpacing, setTextIndent,
@@ -526,7 +522,6 @@ defineExpose({
     color: v-bind(currentColor);
     cursor: text;
     word-wrap: break-word;
-    /* white-space: pre-wrap; */
     white-space: break-spaces;
     -webkit-font-variant-ligatures: none;
     font-variant-ligatures: none;

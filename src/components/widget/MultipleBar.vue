@@ -65,10 +65,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import {
-    IconDelete,
-    IconRefresh,
-    IconSelectAll,
-    IconCheckCircle
+    IconDelete, IconRefresh,
+    IconSelectAll, IconCheckCircle
 } from '@arco-design/web-vue/es/icon';
 import { useRoute } from 'vue-router';
 

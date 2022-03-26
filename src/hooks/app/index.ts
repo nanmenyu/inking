@@ -6,7 +6,9 @@ interface Theme {
     getSystemFont: string | null
 }
 
-// 初始化用户数据表
+/**
+ * 初始化用户数据表
+ */
 export function initUserDB(): void {
     const mainStore = useMainStore();
 
@@ -62,7 +64,9 @@ export function initUserDB(): void {
     }
 }
 
-// 初始化字数统计
+/**
+ * 初始化字数统计
+ */
 export function initCodeword(): void {
     const mainStore = useMainStore();
     let cout_temp = 0;
@@ -76,7 +80,9 @@ export function initCodeword(): void {
     })
 }
 
-// 初始化用户默认主题
+/**
+ * 初始化用户默认主题
+ */
 export function initUserTheme(): Theme {
     let defaultTheme = {
         mode: 'light',
@@ -99,7 +105,9 @@ export function initUserTheme(): Theme {
     }
 }
 
-// 初始化用户设置项
+/**
+ * 初始化用户设置项
+ */
 export function initUserSetting(): void {
     const mainStore = useMainStore();
 

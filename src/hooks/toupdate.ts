@@ -2,6 +2,9 @@ import axios from "axios";
 import config from '../../package.json';
 import { useMainStore } from '../store';
 
+/**
+ * 检测版本更新
+ */
 export default function toupdate(proxy: Record<string, any>, haveMsg: boolean, cb?: Function) {
     const mainStore = useMainStore();
     const $message = proxy.$message;

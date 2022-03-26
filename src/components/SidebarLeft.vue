@@ -62,12 +62,10 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
-import {
-    IconRight, IconSettings, IconGithub, IconPublic
-} from '@arco-design/web-vue/es/icon';
+import { IconRight, IconSettings, IconGithub, IconPublic } from '@arco-design/web-vue/es/icon';
 import { useRoute } from 'vue-router';
 import { useThemeStore, useMainStore } from '../store';
-import * as echarts from 'echarts';
+import { setChart } from '../hooks/sidebarLeft';
 
 const themeStore = useThemeStore();
 const mainStore = useMainStore();
@@ -92,7 +90,7 @@ watch(computed(() => {
 }), () => {
     secondaryColor.value = themeStore.my_secondary_6;
     fontColor.value = themeStore.color_text_1;
-    setChart();
+    setChart(uChart.value, color.value, task.value);
 })
 
 // 检测副颜色是否发生改变
@@ -101,17 +99,35 @@ watch(computed(() => {
 }), () => {
     secondaryColor.value = themeStore.my_secondary_6;
     fontColor.value = themeStore.color_text_1;
-    setChart();
+    setChart(uChart.value, color.value, task.value);
 })
+
 // 检测每日计划是否发生改变
 watch(computed(() => {
     return mainStore.dailyPlan;
 }), () => {
-    setChart();
+    setChart(uChart.value, color.value, task.value);
 })
+
 // 今日码字数量
 const toDayCodeword = computed(() => {
     return mainStore.baseTotalNumber_today + mainStore.TotalNumber_thisTime - mainStore.contrastTotalNumber_thisTime;
+})
+
+// 图表颜色随主题色变换而变换
+const color = computed(() => {
+    return {
+        fontColor: fontColor.value,
+        secondaryColor: secondaryColor.value
+    }
+})
+
+// 图标每日任务变化
+const task = computed(() => {
+    return {
+        completed: toDayCodeword.value,
+        incomplete: Math.floor(mainStore.dailyPlan) - toDayCodeword.value
+    }
 })
 
 onMounted(() => {
@@ -119,69 +135,8 @@ onMounted(() => {
     secondaryColor.value = getComputedStyle(document.body).getPropertyValue('--my-secondary-6');
     // 获取文字色
     fontColor.value = getComputedStyle(document.body).getPropertyValue('--color-text-1');
-    setChart();
+    setChart(uChart.value, color.value, task.value);
 });
-
-function setChart() {
-    let myChart = echarts.getInstanceByDom(uChart.value);
-    if (myChart == null) myChart = echarts.init(uChart.value);
-
-    // 绘制图表
-    myChart.setOption({
-        title: [{
-            text: `今日计划\n${mainStore.dailyPlan}字`,
-            top: '25%',
-            left: 'center',
-            textStyle: {
-                fontSize: 14,
-                fontWeight: 'normal',
-                fontFamily: 'Microsoft YaHei',
-                lineHeight: 21,
-                color: `${fontColor.value}`
-            }
-        }],
-        legend: {
-            bottom: '5%',
-            itemStyle: {
-                borderWidth: 0
-            },
-            textStyle: {
-                color: `${fontColor.value}`
-            },
-            itemWidth: 14
-        },
-        tooltip: {
-            trigger: 'item'
-        },
-        series: [
-            {
-                name: '今日计划',
-                type: 'pie',
-                radius: ['60%', '75%'],
-                center: ['50%', '40%'],
-                avoidLabelOverlap: false,
-                itemStyle: {
-                    borderColor: '#fff',
-                },
-                label: {
-                    show: false,
-                    position: 'center'
-                },
-                labelLine: {
-                    show: false
-                },
-                data: [
-                    { value: toDayCodeword.value, name: '已完成' },
-                    { value: parseInt(mainStore.dailyPlan) - toDayCodeword.value, name: '未完成' }
-                ]
-            }
-        ],
-        color: [`rgb(${secondaryColor.value})`, '#ccc']
-    });
-    window.onresize = function () {//自适应大小
-        myChart!.resize();
-    };
-}
 
 </script>
 

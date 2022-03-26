@@ -70,9 +70,7 @@
 
 <script setup lang='ts'>
 import { Ref, ref, reactive, onMounted } from 'vue';
-import {
-    IconCaretRight, IconCaretLeft, IconApps
-} from '@arco-design/web-vue/es/icon';
+import { IconCaretRight, IconCaretLeft, IconApps } from '@arco-design/web-vue/es/icon';
 
 const emit = defineEmits(['getkeywordDetail', 'displayKeyPanel']);
 
@@ -92,7 +90,6 @@ const currentKeyword: { data: KeyWord } = reactive({
 }); // 当前的关键字数据
 
 const getCurrentKeyword = (data: KeyWord) => {
-    console.log('getCurrentKeyword');
     currentKeyword.data = data;
 }
 

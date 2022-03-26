@@ -26,9 +26,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import {
-    IconClose
-} from '@arco-design/web-vue/es/icon';
+import { IconClose } from '@arco-design/web-vue/es/icon';
+
 const props = defineProps<{
     title: string,
     determine: string,

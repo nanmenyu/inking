@@ -89,12 +89,10 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import {
-    IconLeft, IconRight
-} from '@arco-design/web-vue/es/icon';
+import { IconLeft, IconRight } from '@arco-design/web-vue/es/icon';
+import { useRoute } from 'vue-router';
 import { useMainStore } from '../store/index';
 import router from '../router/index';
-import { useRoute } from 'vue-router';
 import { saveTodaysCodewords } from '../hooks/db';
 
 const mainStore = useMainStore();
@@ -106,21 +104,16 @@ const downloadProgress = computed(() => {
     return mainStore.downloadProgress / 100;
 })
 
-/*----控制页面的前进后退----*/
+// 控制页面的前进后退
 const backDisable = ref(false), forwardDisable = ref(false);
-
 const back = () => {
     router.go(-1);
 }
 const forward = () => {
     router.go(1);
 }
-onMounted(() => {
-    if (window.history.state.back === null) backDisable.value = true;
-    if (window.history.state.forward === null) forwardDisable.value = true;
-})
 
-/*----控制页面的最大化、最小化和关闭----*/
+// 控制页面的最大化、最小化和关闭
 const isMax = ref(false);
 function minimizeWin() {
     window.$API.ipcSend("window-min");
@@ -151,6 +144,11 @@ if (targetPath.indexOf(route.path) !== -1) {
     leftShadow.value = '0 4px 10px #0000001a'
 }
 
+// 生命周期
+onMounted(() => {
+    if (window.history.state.back === null) backDisable.value = true;
+    if (window.history.state.forward === null) forwardDisable.value = true;
+})
 </script>
 
 <style scoped>

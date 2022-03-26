@@ -50,10 +50,6 @@ const routes: Array<RouteRecordRaw> = [
         path: '/user',
         name: 'User',
         component: () => import('../views/userPage.vue')
-    }, {
-        path: '/test',
-        name: 'Test',
-        component: () => import('../views/testPage.vue')
     }]
 
 const router = createRouter({

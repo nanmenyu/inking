@@ -92,9 +92,9 @@
 import { ref, Ref, reactive, computed } from 'vue';
 import { IconLeft, IconRight } from '@arco-design/web-vue/es/icon';
 import { useMainStore, useThemeStore } from '../store';
+import { drawCodewordChart, drawLineChart, drawScatterChart, drawPieChart, drawLinesChart } from '../hooks/userContent';
 import { db } from '../db/db';
 import * as echarts from 'echarts';
-import { drawCodewordChart, drawLineChart, drawScatterChart, drawPieChart, drawLinesChart } from '../hooks/userContent';
 
 const themeStore = useThemeStore();
 const mainStore = useMainStore();
@@ -108,16 +108,18 @@ const dailyPlan = ref(2000);
 loadCodewordData();
 
 const headerTitle = computed(() => {
-    if (currentState.value === 's1')
+    if (currentState.value === 's1') {
         return '码字数统计';
-    else if (currentState.value === 's2')
+    } else if (currentState.value === 's2') {
         return '关键词分析';
+    }
 })
 const subtitle = computed(() => {
-    if (currentState.value === 's1')
+    if (currentState.value === 's1') {
         return `近${timeFrame.value}天码字数统计`;
-    else if (currentState.value === 's2')
+    } else if (currentState.value === 's2') {
         return '关键词频率分析';
+    }
 })
 
 // 改变显示模块
