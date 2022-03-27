@@ -134,4 +134,16 @@ export function initUserSetting(): void {
     } else {
         mainStore.searchEngine = getSearchEngine;
     }
+
+    // 获取用户设置数据 ----------- 备份文件路径
+    const getBackupPath = localStorage.getItem('uBackupPath');
+    if (getBackupPath === null) {
+        window.$API.ipcSend('getBackupPath');
+        window.$API.ipcOnce('backupPath', (path: string) => {
+            localStorage.setItem('uBackupPath', path);
+            mainStore.backupPath = path;
+        })
+    } else {
+        mainStore.backupPath = getBackupPath;
+    }
 }

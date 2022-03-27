@@ -126,11 +126,13 @@ ipcMain.on('expFile', async (e, data) => {
             defaultPath: data.name + '.docx',
             filters: [{ name: 'DOCX', extensions: ['docx'] }]
         }).then(file => {
-            if (file) {
+            if (file.filePath) {
                 fs.writeFile(file.filePath, fileBuffer, err => {
                     if (err) e.sender.send('expFile-result', 'err');
                     else e.sender.send('expFile-result', 'success');
                 });
+            } else {
+                e.sender.send('expFile-result', 'cancel');
             }
         })
     } else if (data.type === 'TXT') {
@@ -139,11 +141,13 @@ ipcMain.on('expFile', async (e, data) => {
             defaultPath: data.name + '.txt',
             filters: [{ name: 'TXT', extensions: ['txt'] }]
         }).then(file => {
-            if (file) {
+            if (file.filePath) {
                 fs.writeFile(file.filePath, data.file, err => {
                     if (err) e.sender.send('expFile-result', 'err');
                     else e.sender.send('expFile-result', 'success');
                 });
+            } else {
+                e.sender.send('expFile-result', 'cancel');
             }
         })
     } else if (data.type === 'TXT_mult') {
@@ -151,7 +155,7 @@ ipcMain.on('expFile', async (e, data) => {
             title: '选择目标文件夹',
             properties: ['openDirectory']
         }).then(file => {
-            if (file) {
+            if (file.filePaths.length > 0) {
                 const basePath = file.filePaths[0] + '/' + data.name;
                 // 依次导出为TXT
                 data.file.forEach(v_item => {
@@ -162,6 +166,8 @@ ipcMain.on('expFile', async (e, data) => {
                         else e.sender.send('expFile-result', 'success');
                     })
                 });
+            } else {
+                e.sender.send('expFile-result', 'cancel');
             }
         })
     } else if (data.type === 'DOCX_mult') {
@@ -169,7 +175,7 @@ ipcMain.on('expFile', async (e, data) => {
             title: '选择目标文件夹',
             properties: ['openDirectory']
         }).then(file => {
-            if (file) {
+            if (file.filePaths.length > 0) {
                 const basePath = file.filePaths[0] + '/' + data.name;
                 // 依次导出为DOCX
                 data.file.forEach(v_item => {
@@ -184,6 +190,8 @@ ipcMain.on('expFile', async (e, data) => {
                         else e.sender.send('expFile-result', 'success');
                     })
                 });
+            } else {
+                e.sender.send('expFile-result', 'cancel');
             }
         })
     } else if (data.type === 'JSON') {
@@ -192,11 +200,13 @@ ipcMain.on('expFile', async (e, data) => {
             defaultPath: data.name + '.json',
             filters: [{ name: 'JSON', extensions: ['json'] }]
         }).then(file => {
-            if (file) {
+            if (file.filePath) {
                 fs.writeFile(file.filePath, data.file, err => {
                     if (err) e.sender.send('expFile-result', 'err');
                     else e.sender.send('expFile-result', 'success');
                 });
+            } else {
+                e.sender.send('expFile-result', 'cancel');
             }
         })
     }
@@ -213,6 +223,7 @@ ipcMain.on('reptile', (e, config) => {
         e.sender.send('getReptileData', data);
     }));
 })
+
 // API代理
 ipcMain.on('api', (e, data) => {
     if (data.type === 'youdao') {
@@ -292,4 +303,27 @@ ipcMain.on('checkForUpdate', (e, url) => {
     function sendUpdateMsg(msg, data) {
         e.sender.send('get-updateMsg', { msg, data });
     }
+})
+
+// 获得文件备份的默认路径
+ipcMain.on('getBackupPath', (e) => {
+    let path = '';
+    try {
+        path = app.getPath('documents');
+    } catch (error) {
+        path = app.getPath('userData');
+    }
+    e.sender.send('backupPath', path);
+})
+
+// 获得选择文件夹获取路径
+ipcMain.on('getFolderPath', (e) => {
+    dialog.showOpenDialog({
+        title: '选择目标文件夹',
+        properties: ['openDirectory']
+    }).then(file => {
+        if (file) {
+            e.sender.send('folderPath', file.filePaths[0]);
+        }
+    })
 })

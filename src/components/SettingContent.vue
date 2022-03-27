@@ -14,13 +14,13 @@
                     <a-trigger trigger="click" :popup-translate="[0, 0]">
                         <a-button type="outline">自定义色板</a-button>
                         <template #content>
-                            <div class="theme-container-body" title="点击孔位修改颜色">
-                                <div class="left-Sketch">
+                            <div class="theme-container-body">
+                                <div class="left-Sketch" title="不支持透明度">
                                     <Sketch v-model="curColor" />
                                 </div>
-                                <ul>
+                                <ul title="点击孔位修改颜色">
                                     <li
-                                        v-for="(color, i) in themeColor"
+                                        v-for="(color, i) in curThemeColor"
                                         :class="i === curColorIndex ? 'li-checked' : ''"
                                         @click="chooseColor(i, color)"
                                         :style="`background-color:${color}`"
@@ -29,6 +29,7 @@
                             </div>
                         </template>
                     </a-trigger>
+                    <a-button @click="reDefaultTheme" type="outline">恢复默认</a-button>
                 </a-space>
             </li>
             <li title="选择从系统中获取的字体">
@@ -61,6 +62,11 @@
                     :min="1"
                     :max="20"
                 />
+            </li>
+            <li title="设定作品文件备份的路径">
+                <span>备份存储路径</span>
+                <a-alert class="alert-path" :show-icon="false">{{ mainStore.backupPath }}</a-alert>
+                <a-button @click="choiceBackupPath" type="outline">更换</a-button>
             </li>
             <li title="快捷查词默认的引擎">
                 <span>默认查词引擎</span>
@@ -116,7 +122,7 @@
 </template>
 
 <script setup lang='ts'>
-import { onMounted, ref, Ref } from 'vue';
+import { onMounted, ref, Ref, watch } from 'vue';
 import ThemeContainer from '../components/widget/ThemeContainer.vue';
 import { useMainStore } from '../store';
 import config from '../../package.json';
@@ -124,16 +130,54 @@ import toupdate from '../hooks/toupdate';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { Sketch } from '@ckpack/vue-color';
 import { themeColor } from '../hooks/default';
+import { setSharedColor, setupMainThemes, setupSecondaryThemes } from '../hooks/setupThemes';
 
 const mainStore = useMainStore();
 const { proxy } = useCurrentInstance();
 let element_app: HTMLElement | null = null;
 
+// 初始化色板
+let colorBoard: Array<string> = [];
+const getColorBoard = localStorage.getItem('colorBoard');
+if (getColorBoard === null) {
+    colorBoard = themeColor;
+} else {
+    colorBoard = JSON.parse(getColorBoard);
+}
+
 // 调整色版
+const curThemeColor = ref(colorBoard);
 const curColorIndex = ref(0), curColor = ref(themeColor[0]);
 const chooseColor = (index: number, color: string) => {
     curColor.value = color;
     curColorIndex.value = index;
+}
+watch(curColor, (color: any) => {
+    // 选择颜色
+    if (color.rgba) {
+        curThemeColor.value[curColorIndex.value] = `RGB(${color.rgba.r},${color.rgba.g},${color.rgba.b})`;
+        localStorage.setItem('colorBoard', JSON.stringify(curThemeColor.value));
+    }
+})
+
+// 恢复默认主题
+const reDefaultTheme = () => {
+    proxy.$modal.info({
+        title: '恢复默认主题',
+        content: '是否恢复默认主题？',
+        onOk: () => {
+            const defaultTheme = {
+                mode: 'light',
+                mainColor: 'RGB(0,191,166)',
+                secondColor: 'RGB(0,176,255)'
+            }
+            localStorage.removeItem('colorBoard');
+            localStorage.setItem('uTheme', JSON.stringify(defaultTheme));
+            setSharedColor(defaultTheme.mode)
+            setupMainThemes(defaultTheme.mainColor);
+            setupSecondaryThemes(defaultTheme.secondColor);
+        }
+    })
 }
 
 // 获取字体列表
@@ -172,6 +216,18 @@ const changeNumPerpage = (value: number) => {
         localStorage.setItem('uNumPerpage', value.toString());
         mainStore.numPerpage = value;
     }
+}
+
+// 选择备份文件夹
+const choiceBackupPath = () => {
+    window.$API.ipcSend('getFolderPath');
+    window.$API.ipcOnce('folderPath', (path: string) => {
+        if (path) {
+            mainStore.backupPath = path;
+            localStorage.setItem('uBackupPath', path);
+            proxy.$message.success('路径选择成功！');
+        }
+    })
 }
 
 // 设置查词引擎

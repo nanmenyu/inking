@@ -27,7 +27,7 @@
         <div class="theme-container-body">
             <ul>
                 <li
-                    v-for="color in themeColor"
+                    v-for="color in colorBoard"
                     :class="color === curChoiceColor ? 'li-checked' : ''"
                     @click="chooseThemeColor(color)"
                     :style="`background-color:${color}`"
@@ -49,6 +49,15 @@ const themeMode = ref(getLocalTheme.mode),
     mainThemeColor = ref(getLocalTheme.mainColor),
     secondThemeColor = ref(getLocalTheme.secondColor);
 const colorMode = ref('main');
+
+// 初始化色板
+let colorBoard: Array<string> = [];
+const getColorBoard = localStorage.getItem('colorBoard');
+if (getColorBoard === null) {
+    colorBoard = themeColor;
+} else {
+    colorBoard = JSON.parse(getColorBoard);
+}
 
 const curChoiceColor = computed(() => {
     if (colorMode.value === 'main') {

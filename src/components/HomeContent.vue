@@ -172,15 +172,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, nextTick, onUnmounted, watch } from "vue";
-import { IconCheck, IconPenFill } from "@arco-design/web-vue/es/icon";
+import { ref, reactive, nextTick, onUnmounted, watch } from "vue";
+import { IconCheck } from "@arco-design/web-vue/es/icon";
 import { useRouter } from 'vue-router';
 import Toolbar from "./widget/Toolbar.vue";
 import MultipleBar from "./widget/MultipleBar.vue";
 import PopupMenu from './widget/PopupMenu.vue';
-import { timeFormat, standTime } from "../utils/timeFormat";
+import { standTime } from "../utils/timeFormat";
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { db } from "../db/db";
+import { exportOpusAsTXT, exportOpusAsDOCX, exportOpusAsTXT_, exportOpusAsDOCX_ } from '../hooks/exportOpus';
 import defaultCover from '../../public/static/img/default-cover.jpg';
 
 const { proxy } = useCurrentInstance();
@@ -392,87 +393,26 @@ const exportAll = () => {
         if (item.id === targetId) {
             // 导出单个TXT
             if (modeType.value === 'm1') {
-                let opusStr = '';
-                item.data.forEach((v_item, index) => {
-                    // 插入卷名
-                    if (index > 0) opusStr += '\n\n' + v_item.volumeName + '\n';
-                    else opusStr += v_item.volumeName + '\n'
-                    v_item.volume.forEach((c_item, i) => {
-                        // 插入章名
-                        if (i > 0) opusStr += '\n\n' + c_item.chapterName + '\n';
-                        else opusStr += '\n' + c_item.chapterName + '\n';
-                        // 插入章内容
-                        opusStr += c_item.chapter.join('\n');
-                    })
-                })
-                window.$API.ipcSend('expFile', {
-                    type: 'TXT',
-                    name: item.title,
-                    file: opusStr
-                });
+                exportOpusAsTXT(item);
             }
             // 导出多个TXT
             else if (modeType.value === 'm2') {
-                const opusArr = item.data.map(v_item => {
-                    return {
-                        volumeName: v_item.volumeName,
-                        volume: v_item.volume.map(c_item => {
-                            return {
-                                chapterName: c_item.chapterName,
-                                chapter: c_item.chapter.join('\n')
-                            }
-                        })
-                    }
-                })
-                window.$API.ipcSend('expFile', {
-                    type: 'TXT_mult',
-                    name: item.title,
-                    file: opusArr
-                });
+                exportOpusAsTXT_(item);
             }
             // 导出单个DOCX
             else if (modeType.value === 'm3') {
-                let opusHTML = '';
-                item.data.forEach(v_item => {
-                    opusHTML += '<h3>' + v_item.volumeName + '</h3>';
-                    v_item.volume.forEach(c_item => {
-                        opusHTML += '<h4>' + c_item.chapterName + '</h4>';
-                        c_item.chapter.forEach(para => {
-                            opusHTML += '<p>' + para + '</p>';
-                        })
-                    })
-                })
-                opusHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>' + opusHTML + '</body></html>';
-                window.$API.ipcSend('expFile', {
-                    type: 'DOCX',
-                    name: item.title,
-                    file: opusHTML
-                });
+                exportOpusAsDOCX(item);
             }
             // 导出多个DOCX
             else if (modeType.value === 'm4') {
-                const opusArr = item.data.map(v_item => {
-                    return {
-                        volumeName: v_item.volumeName,
-                        volume: v_item.volume.map(c_item => {
-                            return {
-                                chapterName: c_item.chapterName,
-                                chapter: '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>' + c_item.chapter.map(para => '<p>' + para + '</p>').join('') + '</body></html>'
-                            }
-                        })
-                    }
-                })
-                window.$API.ipcSend('expFile', {
-                    type: 'DOCX_mult',
-                    name: item.title,
-                    file: opusArr
-                });
+                exportOpusAsDOCX_(item);
             }
         }
     })
     window.$API.ipcOnce('expFile-result', (data: 'success' | 'err') => {
         if (data === 'success') $message.success('文件导出成功!');
         else if (data === 'err') $message.error('文件导出失败!');
+        else if (data === 'cancel') $message.info('取消导出!');
     });
     isExportAll.value = false;
 }

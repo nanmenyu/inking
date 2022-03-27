@@ -19,5 +19,6 @@ function mkdir(filePath) {
         }
         dir = dir + '/' + arr[i];
     }
+    console.log(filePath);
     fs.writeFileSync(filePath, '');
 }

@@ -32,10 +32,19 @@
         &:hover {
             border: 1px solid rgb(var(--my-secondary-6));
         }
+
+        .alert-path {
+            width: 75%;
+            max-height: 55px;
+            overflow: hidden;
+            cursor: text;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            /*显示的行数*/
+            overflow: hidden;
+        }
     }
-
-
-
 }
 
 .theme-container-body {

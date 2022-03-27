@@ -53,7 +53,7 @@ export default function toupdate(proxy: Record<string, any>, haveMsg: boolean, c
             if (typeof cb === 'function') cb();
         }
     }).catch((err) => {
-        if (haveMsg) $message.error('网络出现问题');
+        if (haveMsg) $message.error('网络/服务器出现问题');
         if (typeof cb === 'function') cb();
     })
 }

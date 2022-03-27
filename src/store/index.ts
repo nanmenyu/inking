@@ -21,6 +21,8 @@ export const useMainStore = defineStore('mainStore', {
         dailyPlan: 2000, // 每日码字计划
         numPerpage: 10, // 趋势分析每页显示数
         searchEngine: 'wordSearch_baidu', // 默认查词引擎
+        backupPath: '', // 默认备份文件夹
+        colorBoard: '', // 用户颜色版
     }),
     getters: {
     },
