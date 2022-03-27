@@ -85,6 +85,7 @@ body {
 // 颜色选择器颜色适应
 .vc-sketch[aria-label="Sketch color picker"] {
     background-color: var(--color-bg-popup);
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);
 
     .vc-sketch-field .vc-input__label {
         color: var(--color-text-1);

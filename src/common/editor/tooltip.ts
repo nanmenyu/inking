@@ -50,7 +50,7 @@ class SelectionSizetoolTip {
             }
             if (i === 1) {
                 btn.setAttribute('title', '快速查词');
-                btn.innerHTML = '&#xe61a;';
+                btn.innerHTML = '&#xe654;';
             }
             if (i === 2) {
                 btn.setAttribute('title', '快速翻译');
@@ -58,7 +58,7 @@ class SelectionSizetoolTip {
             }
             if (i === 3) {
                 btn.setAttribute('title', '右侧搜索');
-                btn.innerHTML = '&#xe915;';
+                btn.innerHTML = '&#xe62e;';
             }
             this.rightTip.append(btn);
         }

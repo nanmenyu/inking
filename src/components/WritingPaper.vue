@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed, watch, reactive, Ref } from 'vue';
+import { ref, onMounted, computed, watch, reactive, Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import ContextMenu from './widget/ContextMenu.vue';
 import { setHighlightKeyword } from '../common/editor/syntax';
@@ -25,7 +25,7 @@ import { hexToRgba } from '../utils/colorChange';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { setContentTipPos, setHTMLdata, setTranslationContent } from '../hooks/contentTip';
 import { exportTXT, exportDOCX, exportPDF } from '../hooks/paper';
-import { paperSize } from '../hooks/paperSize';
+import { paperSize } from '../hooks/default';
 import { useMainStore } from '../store/index';
 import { db } from '../db/db';
 import { v4 } from 'uuid';

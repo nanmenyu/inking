@@ -4,12 +4,32 @@
         <ul class="list">
             <li title="选择页面的主题与配色">
                 <span>系统主题</span>
-                <a-trigger trigger="click" :popup-translate="[0, 10]" show-arrow>
-                    <a-button type="outline">点击修改</a-button>
-                    <template #content>
-                        <ThemeContainer></ThemeContainer>
-                    </template>
-                </a-trigger>
+                <a-space>
+                    <a-trigger trigger="click" :popup-translate="[0, 10]">
+                        <a-button type="outline">点击修改</a-button>
+                        <template #content>
+                            <ThemeContainer></ThemeContainer>
+                        </template>
+                    </a-trigger>
+                    <a-trigger trigger="click" :popup-translate="[0, 0]">
+                        <a-button type="outline">自定义色板</a-button>
+                        <template #content>
+                            <div class="theme-container-body" title="点击孔位修改颜色">
+                                <div class="left-Sketch">
+                                    <Sketch v-model="curColor" />
+                                </div>
+                                <ul>
+                                    <li
+                                        v-for="(color, i) in themeColor"
+                                        :class="i === curColorIndex ? 'li-checked' : ''"
+                                        @click="chooseColor(i, color)"
+                                        :style="`background-color:${color}`"
+                                    ></li>
+                                </ul>
+                            </div>
+                        </template>
+                    </a-trigger>
+                </a-space>
             </li>
             <li title="选择从系统中获取的字体">
                 <span>系统字体</span>
@@ -96,16 +116,25 @@
 </template>
 
 <script setup lang='ts'>
-import { onMounted, ref, Ref, watch } from 'vue';
+import { onMounted, ref, Ref } from 'vue';
 import ThemeContainer from '../components/widget/ThemeContainer.vue';
 import { useMainStore } from '../store';
 import config from '../../package.json';
 import toupdate from '../hooks/toupdate';
 import useCurrentInstance from '../utils/useCurrentInstance';
+import { Sketch } from '@ckpack/vue-color';
+import { themeColor } from '../hooks/default';
 
 const mainStore = useMainStore();
 const { proxy } = useCurrentInstance();
 let element_app: HTMLElement | null = null;
+
+// 调整色版
+const curColorIndex = ref(0), curColor = ref(themeColor[0]);
+const chooseColor = (index: number, color: string) => {
+    curColor.value = color;
+    curColorIndex.value = index;
+}
 
 // 获取字体列表
 const currentFont = ref('默认字体');

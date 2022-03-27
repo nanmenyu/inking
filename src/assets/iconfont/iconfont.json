@@ -6,6 +6,69 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "7517988",
+      "name": "添加",
+      "font_class": "tianjia",
+      "unicode": "e610",
+      "unicode_decimal": 58896
+    },
+    {
+      "icon_id": "3181449",
+      "name": "数据备份",
+      "font_class": "shujubeifen",
+      "unicode": "e689",
+      "unicode_decimal": 59017
+    },
+    {
+      "icon_id": "1305047",
+      "name": "网络",
+      "font_class": "wangluo",
+      "unicode": "e62e",
+      "unicode_decimal": 58926
+    },
+    {
+      "icon_id": "4954922",
+      "name": "查询",
+      "font_class": "chaxun",
+      "unicode": "e654",
+      "unicode_decimal": 58964
+    },
+    {
+      "icon_id": "7551437",
+      "name": "万能",
+      "font_class": "zu",
+      "unicode": "e616",
+      "unicode_decimal": 58902
+    },
+    {
+      "icon_id": "10742895",
+      "name": "条目-选中",
+      "font_class": "item-fill",
+      "unicode": "e648",
+      "unicode_decimal": 58952
+    },
+    {
+      "icon_id": "22264567",
+      "name": "导出",
+      "font_class": "daochu",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "20289522",
+      "name": "重命名",
+      "font_class": "zhongmingming",
+      "unicode": "e82a",
+      "unicode_decimal": 59434
+    },
+    {
+      "icon_id": "18796672",
+      "name": "思维和写作",
+      "font_class": "siweihexiezuo",
+      "unicode": "e85e",
+      "unicode_decimal": 59486
+    },
+    {
       "icon_id": "18166405",
       "name": "折线图,统计图",
       "font_class": "chart-trend-full",
@@ -102,20 +165,6 @@
       "font_class": "tubiao-fanyi",
       "unicode": "e61c",
       "unicode_decimal": 58908
-    },
-    {
-      "icon_id": "8985090",
-      "name": "webx Web应用托管服务器",
-      "font_class": "webx",
-      "unicode": "e915",
-      "unicode_decimal": 59669
-    },
-    {
-      "icon_id": "8027293",
-      "name": "信息查询",
-      "font_class": "xinxichaxun",
-      "unicode": "e61a",
-      "unicode_decimal": 58906
     },
     {
       "icon_id": "7419",

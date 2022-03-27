@@ -4,12 +4,20 @@
         <div class="sidebar-user">
             <router-link to="/user">
                 <div class="user-info">
-                    <a-avatar
-                        :size="45"
-                        :trigger-icon-style="{ color: 'rgb(var(--my-secondary-6))' }"
-                        :auto-fix-font-size="false"
-                        :style="{ backgroundColor: 'rgb(var(--my-secondary-6))' }"
-                    >数</a-avatar>
+                    <a-avatar :size="45" :style="{ backgroundColor: 'transparent' }">
+                        <svg
+                            viewBox="0 0 1025 1024"
+                            version="1.1"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="45"
+                            height="45"
+                        >
+                            <path fill="rgb(var(--my-secondary-6))" p-id="40560" />
+                            <path fill="rgb(var(--my-secondary-6))" p-id="40561" />
+                            <path fill="rgb(var(--primary-6))" p-id="40562" />
+                            <path fill="rgb(var(--primary-6))" p-id="40563" />
+                        </svg>
+                    </a-avatar>
                     <div class="user-item">数据中心</div>
                     <div class="icon-right">
                         <icon-right />

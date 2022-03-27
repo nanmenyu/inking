@@ -28,50 +28,52 @@
             </a-space>
         </a-space>
     </PopupMenu>
-
     <!-- 工具栏 -->
     <div class="toolbar">
         <div class="bar-left">
-            <a-dropdown>
-                <a-button type="primary" style="margin-right: 2px;">数据备份</a-button>
-                <template #content>
-                    <a-doption @click="exportBackup">
-                        <template #icon>
-                            <icon-export />
-                        </template>
-                        <template #default>&nbsp;导出作品备份</template>
-                    </a-doption>
-                    <a-doption @click="importBackup">
-                        <template #icon>
-                            <icon-import />
-                        </template>
-                        <template #default>&nbsp;导入作品备份</template>
-                    </a-doption>
-                </template>
-            </a-dropdown>
-            <a-dropdown>
-                <a-button
-                    type="primary"
-                    style="padding: 5px;transform: translateY(1px);"
-                    title="导入 | 新建"
-                >
-                    <icon-plus :style="{ fontSize: '18px' }" />
-                </a-button>
-                <template #content>
-                    <a-doption @click="addto">
-                        <template #icon>
-                            <icon-plus />
-                        </template>
-                        <template #default>&nbsp;新建作品</template>
-                    </a-doption>
-                    <a-doption @click="importFile">
-                        <template #icon>
-                            <icon-import />
-                        </template>
-                        <template #default>&nbsp;导入书籍</template>
-                    </a-doption>
-                </template>
-            </a-dropdown>
+            <a-space size="mini">
+                <a-dropdown>
+                    <a-button type="primary" class="iconfont">&#xe689;&nbsp;数据备份</a-button>
+                    <template #content>
+                        <a-doption @click="exportBackup">
+                            <template #icon>
+                                <icon-export />
+                            </template>
+                            <template #default>&nbsp;导出作品备份</template>
+                        </a-doption>
+                        <a-doption @click="importBackup">
+                            <template #icon>
+                                <icon-import />
+                            </template>
+                            <template #default>&nbsp;导入作品备份</template>
+                        </a-doption>
+                    </template>
+                </a-dropdown>
+                <a-dropdown>
+                    <a-button
+                        type="primary"
+                        class="iconfont"
+                        style="font-size: 16px;"
+                        title="导入 | 新建"
+                    >
+                        <template #icon>&#xe610;</template>
+                    </a-button>
+                    <template #content>
+                        <a-doption @click="addto">
+                            <template #icon>
+                                <icon-plus />
+                            </template>
+                            <template #default>&nbsp;新建作品</template>
+                        </a-doption>
+                        <a-doption @click="importFile">
+                            <template #icon>
+                                <icon-import />
+                            </template>
+                            <template #default>&nbsp;导入书籍</template>
+                        </a-doption>
+                    </template>
+                </a-dropdown>
+            </a-space>
         </div>
         <div class="bar-midd">
             <a-tooltip content="反转顺序" position="top" mini>

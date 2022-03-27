@@ -355,16 +355,21 @@ import { v4 } from 'uuid';
 import { useRoute } from 'vue-router';
 import useCurrentInstance from '../utils/useCurrentInstance';
 
+interface Year {
+    id: string;
+    timeSlot: number;
+    title: string;
+    desc: string;
+    totalNum: number;
+}
+
 const { proxy } = useCurrentInstance();
 const route = useRoute();
 const query_id = parseInt(<string>route.query.id);
 const theTimeLineData: { data: Array<TimeLineGroup> } = reactive({ data: [] });
-const yearData: {
-    data:
-    Array<{ id: string, timeSlot: number, title: string, desc: string, totalNum: number }>
-} = reactive({ data: [] });
-const timeLine = reactive({ tid: '', min: -5000, max: 5000, name: '默认线' }),
-    currentYear = ref(0); // 当前年份
+const yearData: { data: Array<Year> } = reactive({ data: [] });
+const timeLine = reactive({ tid: '', min: -5000, max: 5000, name: '默认线' });
+const currentYear = ref(0); // 当前年份
 let flag = true; // 控制当前年份第一次初始化
 
 // 当前年份占总时间轴的长度比例
@@ -704,12 +709,17 @@ let currentType = '';
 const editDetail = (id: string, month: number | null, day: number | null) => {
     isEditDetail.value = true;
     currentDetail.data.forEach(item => {
-        if (item.id === id)
+        if (item.id === id) {
             [formDetail.id, formDetail.title, formDetail.content] = [id, item.title, item.desc];
+        }
     })
-    if (month && day) currentType = 'eveDay';
-    else if (month) currentType = 'eveMonth';
-    else currentType = 'eveYear';
+    if (month && day) {
+        currentType = 'eveDay';
+    } else if (month) {
+        currentType = 'eveMonth';
+    } else {
+        currentType = 'eveYear';
+    }
 }
 //确认修改详情项
 const deteEditDetail = () => {
@@ -744,7 +754,6 @@ const modify = () => {
     isEditDetail.value = false;
 }
 
-
 /* ----------------------- 选择某一年并渲染详情页 -----------------------*/
 interface Detail {
     id: string; month: number | null; day: number | null; title: string; desc: string
@@ -765,7 +774,6 @@ const choiceOneYear = (year: number) => {
         })
         currentDetail.data = summaryObj.data[year];
         currentChoice.value = year;
-        // setLineStorage();
     }
 }
 

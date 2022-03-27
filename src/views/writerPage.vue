@@ -549,6 +549,7 @@ const changeKeyWordState = () => {
 // 使用webview快捷搜索关键词
 const webviewBlockRef = ref();
 const toWebView = (str: string) => {
+    showSiderRight.value = true;
     // 当前显示了webview
     if (webviewBlockRef.value) {
         webviewBlockRef.value.toSearch(str);
@@ -691,7 +692,6 @@ const setScrollTop = throttle(() => {
 }, 500);
 
 // 获取列表数据
-const router = useRouter();
 const booksLists: { data: Array<Volume> } = reactive({ data: [] });
 let keyWordArr: Array<Array<string>> = [];
 function loadListData(cb?: Function): void {

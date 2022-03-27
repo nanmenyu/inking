@@ -43,16 +43,15 @@
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { useMainStore } from '../store';
 
-const props = defineProps<{
-    mapImg: string;
-}>();
+const props = defineProps<{ mapImg: string; }>();
 const emit = defineEmits(['clickMap']);
 const mainStore = useMainStore();
-const container_ref = ref(), canvas_ref = ref(), img_ref = ref(), log_ref = ref();
+const container_ref = ref(), img_ref = ref(), log_ref = ref();
 const anchor_ref = ref();
 const posInfor: { data: Array<PosInfor> } = reactive({ data: [] });
 const locationData: { data: Array<PosInfor> } = reactive({ data: [] });
 const canvasSize = reactive({ width: 0, height: 0 });
+
 // 全局变量
 let result = { width: 0, height: 0 }, x = 0, y = 0,
     scale = 1, minScale = 0.5, maxScale = 4,
@@ -60,6 +59,7 @@ let result = { width: 0, height: 0 }, x = 0, y = 0,
     diff = { x: 0, y: 0 }, // 相对于上一次pointermove移动差值
     lastPointermove = { x: 0, y: 0 }; // 用于计算diff
 let mapWidth: number, mapHeight: number, mapLeft: number, mapTop: number;
+
 // 图片加载完毕后
 const imgLoaded = () => {
     // 初始化
@@ -86,7 +86,6 @@ const imgLoaded = () => {
 const showAnchor = ref(true);
 const anchorPos = { coordScaleX: 0.5, coordScaleY: 0.5 };
 const clickTheImg = (e: MouseEvent) => {
-    // if (!showAnchor.value)
     showAnchor.value = true;
     // 图片内坐标的比例（图片内的绝对位置）
     anchorPos.coordScaleX = e.offsetX / img_ref.value.clientWidth;
@@ -145,6 +144,7 @@ function drag() {
         }
     });
 }
+
 // 滚轮缩放
 function wheelZoom() {
     container_ref.value.addEventListener('wheel', (e: WheelEvent) => {
@@ -179,6 +179,7 @@ function wheelZoom() {
         e.preventDefault();
     });
 }
+
 // 获得背景图片相关信息
 function getMapData() {
     // 地图的显示宽高
@@ -194,6 +195,7 @@ function getMapData() {
     canvasSize.width = containerWidth;
     canvasSize.height = containerHeight;
 }
+
 // 设置锚点在地图上的位置
 function setELementPos() {
     anchor_ref.value.style.left = mapLeft + mapWidth * anchorPos.coordScaleX - 15 + 'px';
@@ -205,6 +207,7 @@ function setMapLocation(data: Array<PosInfor>, refresh: boolean) {
     posInfor.data = data;
     if (refresh) mapDataSorting();
 }
+
 // 将指定数据群渲染到地图上
 function mapDataSorting() {
     locationData.data = posInfor.data.map(item => {
@@ -220,6 +223,7 @@ function mapDataSorting() {
         }
     })
 }
+
 // 坐标变换
 function coordTransfor(x: number, y: number): { left: number, top: number } {
     return {

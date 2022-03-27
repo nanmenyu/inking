@@ -524,28 +524,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, nextTick, onMounted, computed } from 'vue';
+import { ref, reactive, watch, nextTick, onMounted } from 'vue';
 import {
     IconClose, IconEdit, IconCloseCircle, IconPlus,
     IconDelete, IconPen, IconCaretRight, IconReply, IconFire
 } from '@arco-design/web-vue/es/icon';
 import PopupMenu from './widget/PopupMenu.vue';
 import { useRoute } from 'vue-router';
-import { db } from '../db/db';
+import useCurrentInstance from '../utils/useCurrentInstance';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import * as echarts from 'echarts';
-import useCurrentInstance from '../utils/useCurrentInstance';
+import { db } from '../db/db';
 import { v4 } from 'uuid';
+import { setNumberChart } from '../hooks/keywordEditor';
 import defaultImg from '../../public/static/img/default.png';
 import addKeyWord from '../assets/svg/addKeyWord.svg';
-
-const { proxy } = useCurrentInstance();
-const route = useRoute();
-const query_id = parseInt(<string>route.query.id);
-const emit = defineEmits(['kChange']);
-const $modal = proxy.$modal;
-const $message = proxy.$message;
 
 interface AssociatedOption {
     kid: string,
@@ -564,8 +558,27 @@ interface ListName {
     itemName?: string;
 };
 
+const { proxy } = useCurrentInstance();
+const route = useRoute();
+const query_id = parseInt(<string>route.query.id);
+const emit = defineEmits(['kChange']);
+const $modal = proxy.$modal;
+const $message = proxy.$message;
+const numberChart = ref();//准备echarts的容器
 let needDefaultLoad = true;
 if (needDefaultLoad) loadKeyWodData();
+
+// 获得主题色
+const chartColor = {
+    chartsColor: '',
+    primaryColor: '',
+    labelColor: ''
+}
+onMounted(() => {
+    chartColor.primaryColor = getComputedStyle(document.body).getPropertyValue('--primary-6');
+    chartColor.labelColor = getComputedStyle(document.body).getPropertyValue('--color-text-1');
+    chartColor.chartsColor = getComputedStyle(document.body).getPropertyValue('--my-secondary-6');
+})
 
 // 表单数据
 const form = reactive({
@@ -681,13 +694,11 @@ const saveImgData = () => {
     } else if (replaceType === 2) {
         // 1/1的关键字头图
         currentListData.data.itemImg = base64Img;
-        modifyDbforItem(curKid, curIid,
-            (it: KeyWord) => {
-                it.itemImg = base64Img;
-            },
-            () => {
-                loadKeyWodData();
-            })
+        modifyDbforItem(curKid, curIid, (it: KeyWord) => {
+            it.itemImg = base64Img;
+        }, () => {
+            loadKeyWodData();
+        })
     }
 }
 
@@ -911,7 +922,6 @@ const modifyAllItem = () => {
     modifyItemName.value = modifyItemDesc.value = false;
 }
 // 修改数据库中item的名称
-// let theNewNames_old
 watch(modifyItemName, value => {
     if (!value) {
         if (itemNameFormat.value === '') {
@@ -969,13 +979,11 @@ watch(modifyItemName, value => {
 // 修改数据库中item的描述
 watch(modifyItemDesc, value => {
     if (!value) {
-        modifyDbforItem(curKid, curIid,
-            (it: KeyWord) => {
-                it.itemDesc = currentListData.data.itemDesc;
-            },
-            () => {
-                loadKeyWodData();
-            })
+        modifyDbforItem(curKid, curIid, (it: KeyWord) => {
+            it.itemDesc = currentListData.data.itemDesc;
+        }, () => {
+            loadKeyWodData();
+        })
     }
 });
 
@@ -1238,29 +1246,27 @@ const getCascaderIntensity = (intensity: number) => {
 }
 const addNewAssociated = () => {
     isallowAddAssociated.value = false;
-    modifyDbforItem(curKid, curIid,
-        (it: KeyWord) => {
-            it.associated.push({
-                key: associatedValue,
-                value: associatedIntensity,
-                kid: associatedKid,
-                iid: associatedIid
-            })
-        },
-        () => {
-            modifyDbforItem(associatedKid, associatedIid, (it: KeyWord) => {
-                it.associated.push({
-                    key: currentGroupName.value + '🞂' + currentListData.data.itemName,
-                    value: associatedIntensity,
-                    kid: curKid,
-                    iid: curIid
-                })
-            }, () => {
-                loadKeyWodData(() => {
-                    choiceCard(curKid, curIid);
-                });
-            })
+    modifyDbforItem(curKid, curIid, (it: KeyWord) => {
+        it.associated.push({
+            key: associatedValue,
+            value: associatedIntensity,
+            kid: associatedKid,
+            iid: associatedIid
         })
+    }, () => {
+        modifyDbforItem(associatedKid, associatedIid, (it: KeyWord) => {
+            it.associated.push({
+                key: currentGroupName.value + '🞂' + currentListData.data.itemName,
+                value: associatedIntensity,
+                kid: curKid,
+                iid: curIid
+            })
+        }, () => {
+            loadKeyWodData(() => {
+                choiceCard(curKid, curIid);
+            });
+        })
+    })
     isAssociated.value = false;
 }
 // 获得5种强度对应的颜色值
@@ -1281,28 +1287,26 @@ const deleteTag = (associatedItem: { iid: string, key: string, kid: string, valu
         simple: true,
         onOk: () => {
             let tempKid: string, tempIid: string;
-            modifyDbforItem(curKid, curIid,
-                (it: KeyWord) => {
+            modifyDbforItem(curKid, curIid, (it: KeyWord) => {
+                it.associated.forEach((item, i) => {
+                    if (item.iid === associatedItem.iid) {
+                        [tempKid, tempIid] = [item.kid, item.iid]
+                        it.associated.splice(i, 1);
+                    }
+                })
+            }, () => {
+                modifyDbforItem(tempKid, tempIid, (it: KeyWord) => {
                     it.associated.forEach((item, i) => {
-                        if (item.iid === associatedItem.iid) {
-                            [tempKid, tempIid] = [item.kid, item.iid]
+                        if (item.iid === curIid) {
                             it.associated.splice(i, 1);
                         }
                     })
-                },
-                () => {
-                    modifyDbforItem(tempKid, tempIid, (it: KeyWord) => {
-                        it.associated.forEach((item, i) => {
-                            if (item.iid === curIid) {
-                                it.associated.splice(i, 1);
-                            }
-                        })
-                    }, () => {
-                        loadKeyWodData(() => {
-                            choiceCard(curKid, curIid);
-                        })
+                }, () => {
+                    loadKeyWodData(() => {
+                        choiceCard(curKid, curIid);
                     })
                 })
+            })
         }
     })
 }
@@ -1495,8 +1499,7 @@ const deleteCustomizeItem = (type: number, t_key: string) => {
                     loadKeyWodData(() => {
                         choiceCard(curKid, curIid);
                     })
-                }
-                );
+                });
             }
         })
     } else if (type === 2) {
@@ -1527,6 +1530,7 @@ const modify = () => {
     isCardEdit.value = false;
     isAssociated.value = false;
 }
+
 
 // 选择显示 字符项 数值项  数值项可视化
 const showType_right = ref('字符项'),
@@ -1566,7 +1570,7 @@ const showChart = (value: string) => {
             // 传递默认项
             if (targetChartObj.data[nowUnit.value]) {
                 // 有数据就绘图
-                setNumberChart(targetChartObj.data[nowUnit.value], nowUnit.value, maxValue.value);
+                setNumberChart(numberChart.value, targetChartObj.data[nowUnit.value], itemValueObj, nowUnit.value, maxValue.value, chartColor);
             } else {
                 // 无数据清除图
                 if (echarts.getInstanceByDom(numberChart.value)) echarts.getInstanceByDom(numberChart.value)!.dispose();
@@ -1579,14 +1583,14 @@ const checkChartItem = (unit: string) => {
     if (!(unit === nowUnit.value)) {
         nowUnit.value = unit;
         maxValue.value = Math.max(...maxValueObj[unit]);
-        setNumberChart(targetChartObj.data[unit], unit, maxValue.value);
+        setNumberChart(numberChart.value, targetChartObj.data[nowUnit.value], itemValueObj, nowUnit.value, maxValue.value, chartColor);
     }
 }
 // 调整雷达图最大值
 const inputMaxValue = (value: number) => {
     manualModify[nowUnit.value] = true;
     maxValue.value = value;
-    setNumberChart(targetChartObj.data[nowUnit.value], nowUnit.value, maxValue.value);
+    setNumberChart(numberChart.value, targetChartObj.data[nowUnit.value], itemValueObj, nowUnit.value, maxValue.value, chartColor);
 }
 // 监视Kid是否改变,判断是否有更换组的操作
 watch(tempKid, () => {
@@ -1595,7 +1599,7 @@ watch(tempKid, () => {
 })
 
 // 是否默认唤起特定目标面板
-function needShowDetailPanel(kid: string, iid: string) {
+function needShowDetailPanel(kid: string, iid: string): void {
     needDefaultLoad = false;
     loadKeyWodData(() => {
         choiceCard(kid, iid);
@@ -1604,7 +1608,7 @@ function needShowDetailPanel(kid: string, iid: string) {
 
 // 获取的全部数据
 const theKeyWord: { data: Array<KeyWordGroup> } = reactive({ data: [] })
-function loadKeyWodData(cb?: Function) {
+function loadKeyWodData(cb?: Function): void {
     db.opus.get(query_id).then(value => {
         theKeyWord.data = value!.theKeyWord;
         getAssociatedOptions();
@@ -1614,7 +1618,7 @@ function loadKeyWodData(cb?: Function) {
     })
 }
 
-function getAssociatedOptions() {
+function getAssociatedOptions(): void {
     // 获得关联项目数据
     associatedOptions.value = [];
     theKeyWord.data.forEach(item => {
@@ -1656,111 +1660,6 @@ function modifyDbforItem(t_kid: string, t_iid: string, hd: Function, cb?: Functi
 function deepClone_JSON(obj: object) {
     let _obj = JSON.stringify(obj);
     return JSON.parse(_obj);
-}
-
-const primaryColor = ref(''), labelColor = ref(''), chartsColor = ref('');
-onMounted(() => {
-    // 获得主题色
-    primaryColor.value = getComputedStyle(document.body).getPropertyValue('--primary-6');
-    labelColor.value = getComputedStyle(document.body).getPropertyValue('--color-text-1');
-    chartsColor.value = getComputedStyle(document.body).getPropertyValue('--my-secondary-6');
-})
-
-//准备echarts的容器
-const numberChart = ref();
-function setNumberChart(targetData: Array<{ key: string, value: number }>, unit: string, curMax: number) {
-    let n_chart = echarts.getInstanceByDom(numberChart.value);
-    if (n_chart == null) n_chart = echarts.init(numberChart.value);
-
-    const indicatorData: Array<{ name: string, max: number }> = [],
-        data_value: Array<number> = [];
-    targetData.forEach(item => {
-        data_value.push(item.value);
-        indicatorData.push({
-            name: item.key,
-            max: curMax
-        })
-    });
-    // 获得目标单位的每个关键字的数字总量
-    const itemTotal: Array<number> = [];
-    itemValueObj.forEach(item => {
-        if (item[unit] !== undefined) {
-            let num = 0;
-            item[unit].forEach(it => {
-                num += it;
-            })
-            itemTotal.push(num);
-        }
-    })
-    // 大——>小排序
-    itemTotal.sort(function (a, b) { return b - a });
-    n_chart.setOption({
-        color: [`rgb(${chartsColor.value})`],
-        tooltip: {
-            trigger: 'axis'
-        },
-        radar: {
-            indicator: indicatorData,
-            axisName: {
-                formatter: function (params: string) {
-                    // 限制name的长度,多余部分用省略号代替
-                    return params.length > 10 ? params.slice(1, 10) + '...' : params;
-                },
-                color: `rgb(${primaryColor.value})`
-            },
-        },
-        series: [
-            {
-                type: 'radar',
-                tooltip: {
-                    trigger: 'item',
-                    formatter: function (params: any) {
-                        let sum = 0
-                        for (let i = 0; i < params.value.length; i++) {
-                            sum = sum + params.value[i];
-                        }
-                        const ranking = itemTotal.indexOf(sum) + 1;
-                        return '总量: ' + sum + '<br />' + '排名: ' + ranking + '/' + itemTotal.length;
-                    },
-                    textStyle: {
-                        align: 'left'
-                    }
-                },
-                data: [
-                    {
-                        value: data_value,
-                        name: '数据可视化',
-                        symbol: 'rect',
-                        symbolSize: 4,
-                        areaStyle: {
-                            color: new echarts.graphic.RadialGradient(0.1, 0.6, 1, [
-                                {
-                                    color: `rgba(${chartsColor.value}, 0.1)`,
-                                    offset: 0
-                                },
-                                {
-                                    color: `rgba(${chartsColor.value}, 0.9)`,
-                                    offset: 1
-                                }
-                            ])
-                        },
-                        emphasis: {
-                            areaStyle: {
-                                color: `rgb(${chartsColor.value})`
-                            }
-                        },
-                        label: {
-                            show: true,
-                            color: labelColor.value,
-                            formatter: function (params: any) {
-                                return params.value + unit;
-                            }
-                        }
-                    }
-                ]
-            }
-        ]
-    });
 }
 
 defineExpose({

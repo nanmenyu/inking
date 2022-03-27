@@ -79,7 +79,6 @@
             </a-form-item>
         </a-form>
     </PopupMenu>
-
     <div class="plot">
         <a-resize-box :directions="['left', 'right']" class="resize-box">
             <template #resize-trigger="{ direction }">
@@ -115,23 +114,35 @@
                 </div>
                 <details
                     v-if="thePlotData.data.length > 0"
-                    v-for="(item, index) in thePlotData.data[nowPlotKey].summary"
+                    v-for="item in thePlotData.data[nowPlotKey].summary"
                     :key="item.sid"
                 >
                     <!-- 大标题 -->
-                    <a-dropdown trigger="contextMenu" alignPoint :style="{ display: 'block' }">
+                    <a-dropdown
+                        trigger="contextMenu"
+                        alignPoint
+                        :style="{ display: 'block', fontSize: '14px' }"
+                    >
                         <summary title="按住shift并点击可多项展开">
                             <span class="summary-title">{{ item.itemsName }}</span>
                         </summary>
                         <template #content>
-                            <a-doption @click="openEditSummaryItem(item.sid, null)">添加新条目</a-doption>
+                            <a-doption
+                                @click="openEditSummaryItem(item.sid, null)"
+                                class="iconfont"
+                            >&#xe648;&nbsp;&nbsp;添加新条目</a-doption>
                             <a-doption
                                 @click="openGroupReName(item.itemsName, item.sid, 'add')"
-                            >添加新组</a-doption>
+                                class="iconfont"
+                            >&#xe616;&nbsp;&nbsp;添加新组</a-doption>
                             <a-doption
                                 @click="openGroupReName(item.itemsName, item.sid, 'rename')"
-                            >重命名</a-doption>
-                            <a-doption @click="deleteGroup(item.itemsName, item.sid)">删除</a-doption>
+                                class="iconfont"
+                            >&#xe82a;&nbsp;&nbsp;重命名</a-doption>
+                            <a-doption
+                                @click="deleteGroup(item.itemsName, item.sid)"
+                                class="iconfont"
+                            >&#xe7f2;&nbsp;&nbsp;删除</a-doption>
                         </template>
                     </a-dropdown>
                     <!-- 内容区 -->
@@ -170,15 +181,13 @@
 </template>
 
 <script setup lang="ts">
-import {
-    IconFire, IconEdit, IconDelete
-} from '@arco-design/web-vue/es/icon';
-import { computed, nextTick, onMounted, reactive, ref, Ref } from 'vue';
+import { IconFire, IconEdit, IconDelete } from '@arco-design/web-vue/es/icon';
+import { computed, nextTick, reactive, ref, Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import PopupMenu from './widget/PopupMenu.vue';
+import useCurrentInstance from '../utils/useCurrentInstance';
 import { db } from '../db/db';
 import { v4 } from 'uuid';
-import useCurrentInstance from '../utils/useCurrentInstance';
 
 const { proxy } = useCurrentInstance();
 const route = useRoute();
@@ -189,23 +198,6 @@ const nowPlotKey = ref(0); // 当前渲染数据的索引
 
 loadPlotData();
 
-onMounted(() => {
-    // 获得全部details的DOM块?????????????
-
-    // let ds = [...document.querySelectorAll('details')];
-    // ds.forEach(d => d.addEventListener('click', (e: MouseEvent) => {
-    //     if (!e.ctrlKey) {
-    //         ds.filter(i => i != d).forEach(i => i.removeAttribute('open'));
-    //     }
-    // }))
-    // nextTick(() => {
-    //     let ds = [...document.querySelectorAll('details')];
-    //     console.log(ds);
-
-    //     ds.forEach(d => d.addEventListener('click', e => e.shiftKey || ds.filter(i => i != d).forEach(i => i.removeAttribute('open'))))
-    // })
-})
-
 /* ----------------------- tab及内容相关-----------------------*/
 // 计算重要性字符个数
 const statusGenerat = (qua: number) => {
@@ -215,12 +207,14 @@ const statusGenerat = (qua: number) => {
     }
     return str;
 }
+
 // 选择tab切换线
 const chocieTab = (key: string) => {
     thePlotData.data.forEach((item, index) => {
         if (item.id === key) nowPlotKey.value = index;
     })
 }
+
 // 添加新备忘录
 const isNewPlotGroup = ref(false), curPlotName = ref('');
 const panelName_Plot = ref('新建备忘录');
@@ -237,16 +231,6 @@ const showNewPlotGroup = (mode: 'add' | 'rename') => {
     }
 }
 const plotReName = () => {
-    // 局部处理函数
-    function loadDB(msg: string, cb: Function) {
-        db.opus.where(':id').equals(query_id).modify(item => {
-            cb(item);
-        }).then(() => {
-            isNewPlotGroup.value = false;
-            proxy.$message.success(msg);
-            loadPlotData();
-        })
-    }
     if (mode_plot.value === 'add') {
         loadDB('添加新备忘录成功！', (item: Userdb) => {
             item.thePlot.push({
@@ -264,7 +248,16 @@ const plotReName = () => {
             item.thePlot[nowPlotKey.value].name = curPlotName.value;
         })
     }
-
+    // 局部处理函数
+    function loadDB(msg: string, cb: Function) {
+        db.opus.where(':id').equals(query_id).modify(item => {
+            cb(item);
+        }).then(() => {
+            isNewPlotGroup.value = false;
+            proxy.$message.success(msg);
+            loadPlotData();
+        })
+    }
 }
 // 删除备忘录
 const deletePlotGroup = (key: string) => {
@@ -316,17 +309,6 @@ const openGroupReName = (name: string, sid: string, type: 'add' | 'rename') => {
 }
 // 待办组重命名/添加
 const groupReName = () => {
-    // 局部处理函数
-    function loadDB(msg: string, cb: Function) {
-        db.opus.where(':id').equals(query_id).modify(item => {
-            cb(item);
-        }).then(() => {
-            isGroupReName.value = false;
-            proxy.$message.success(msg);
-            loadPlotData();
-        })
-    }
-
     if (mode_group.value === 'rename') {
         loadDB('重命名成功！', (item: Userdb) => {
             item.thePlot[nowPlotKey.value].summary.forEach(it => {
@@ -340,6 +322,16 @@ const groupReName = () => {
                 itemsName: curGroupName.value,
                 items: []
             })
+        })
+    }
+    // 局部处理函数
+    function loadDB(msg: string, cb: Function) {
+        db.opus.where(':id').equals(query_id).modify(item => {
+            cb(item);
+        }).then(() => {
+            isGroupReName.value = false;
+            proxy.$message.success(msg);
+            loadPlotData();
         })
     }
 }
@@ -364,7 +356,8 @@ const deleteGroup = (name: string, sid: string) => {
 
 /* ----------------------- 打开组内条目设置面板-----------------------*/
 const isNewSummaryItem = ref(false);
-const mode_item: Ref<'add' | 'edit'> = ref('add'), summaryIndex: Ref<number | null> = ref(0);
+const mode_item: Ref<'add' | 'edit'> = ref('add');
+const summaryIndex: Ref<number | null> = ref(0);
 const summaryForm = reactive({
     title: '',
     imp: 1,
@@ -393,21 +386,6 @@ const openEditSummaryItem = (sid: string, index: number | null) => {
     curSid.value = sid;
 }
 const editSummaryItem = () => {
-    // 局部处理函数
-    function loadDB(msg: string, cb: Function) {
-        db.opus.where(':id').equals(query_id).modify(item => {
-            item.thePlot[nowPlotKey.value].summary.forEach(it => {
-                if (it.sid === curSid.value) {
-                    cb(it);
-                };
-            })
-        }).then(() => {
-            isNewSummaryItem.value = false;
-            proxy.$message.success(msg);
-            loadPlotData();
-        })
-    }
-
     if (mode_item.value === 'add') {
         loadDB('添加成功！', (it: Summary) => {
             it.items.push({
@@ -422,6 +400,20 @@ const editSummaryItem = () => {
             it.items[summaryIndex.value!].title = summaryForm.title;
             it.items[summaryIndex.value!].imp = summaryForm.imp;
             it.items[summaryIndex.value!].con = summaryForm.con;
+        })
+    }
+    // 局部处理函数
+    function loadDB(msg: string, cb: Function) {
+        db.opus.where(':id').equals(query_id).modify(item => {
+            item.thePlot[nowPlotKey.value].summary.forEach(it => {
+                if (it.sid === curSid.value) {
+                    cb(it);
+                };
+            })
+        }).then(() => {
+            isNewSummaryItem.value = false;
+            proxy.$message.success(msg);
+            loadPlotData();
         })
     }
 }
@@ -451,12 +443,23 @@ const modify = () => {
 }
 
 // 获取数据
-function loadPlotData() {
+function loadPlotData(): void {
     db.opus.get(query_id).then(value => {
         if (value) {
             thePlotData.data = value.thePlot;
             tabsData.value = thePlotData.data.map(item => [item.id, item.name]);
         };
+    }).then(() => {
+        nextTick(() => {
+            let ds = [...document.querySelectorAll('details')];
+            // 默认每次只能有一个展开
+            ds.forEach(d => {
+                d.addEventListener('click', e => {
+                    // 按住shift可以展开多个
+                    e.shiftKey || ds.filter(i => i != d).forEach(i => i.removeAttribute('open'))
+                })
+            })
+        })
     })
 }
 </script>

@@ -63,7 +63,7 @@
                 style="margin-top: 100px;"
                 description="暂无数据,左上角添加"
             />
-            <!-- 新封面 -->
+            <!-- 封面 -->
             <div v-for="(item, i) in booksData.data" :key="item.id" class="book-cover">
                 <a-dropdown
                     trigger="contextMenu"
@@ -89,12 +89,22 @@
                         </div>
                     </div>
                     <template #content>
-                        <a-doption @click="continueWriting(item.id as number)">✍🏻&nbsp;继续写作</a-doption>
-                        <a-doption @click="showReName(item.id as number, item.title)">🔤&nbsp;重命名</a-doption>
+                        <a-doption
+                            @click="continueWriting(item.id as number)"
+                            class="iconfont"
+                        >&#xe85e;&nbsp;&nbsp;继续写作</a-doption>
+                        <a-doption
+                            @click="showReName(item.id as number, item.title)"
+                            class="iconfont"
+                        >&#xe82a;&nbsp;&nbsp;重命名</a-doption>
                         <a-doption
                             @click="putinRecycle(item.id as number, item.title)"
-                        >🗑️&nbsp;置入回收站</a-doption>
-                        <a-doption @click="showExportOption(item.id as number)">📁&nbsp;导出</a-doption>
+                            class="iconfont"
+                        >&#xe7f2;&nbsp;&nbsp;置入回收站</a-doption>
+                        <a-doption
+                            @click="showExportOption(item.id as number)"
+                            class="iconfont"
+                        >&#xe602;&nbsp;&nbsp;导出</a-doption>
                     </template>
                 </a-dropdown>
                 <div class="book-shadow"></div>
@@ -137,14 +147,22 @@
                             </div>
                         </div>
                         <template #content>
-                            <a-doption @click="continueWriting(item.id as number)">✍🏻&nbsp;继续写作</a-doption>
+                            <a-doption
+                                @click="continueWriting(item.id as number)"
+                                class="iconfont"
+                            >&#xe85e;&nbsp;&nbsp;继续写作</a-doption>
                             <a-doption
                                 @click="showReName(item.id as number, item.title)"
-                            >🔤&nbsp;重命名</a-doption>
+                                class="iconfont"
+                            >&#xe82a;&nbsp;&nbsp;重命名</a-doption>
                             <a-doption
                                 @click="putinRecycle(item.id as number, item.title)"
-                            >🗑️&nbsp;置入回收站</a-doption>
-                            <a-doption @click="showExportOption(item.id as number)">📁&nbsp;导出</a-doption>
+                                class="iconfont"
+                            >&#xe7f2;&nbsp;&nbsp;置入回收站</a-doption>
+                            <a-doption
+                                @click="showExportOption(item.id as number)"
+                                class="iconfont"
+                            >&#xe602;&nbsp;&nbsp;导出</a-doption>
                         </template>
                     </a-dropdown>
                 </div>
@@ -155,7 +173,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, nextTick, onUnmounted, watch } from "vue";
-import { IconCheck } from "@arco-design/web-vue/es/icon";
+import { IconCheck, IconPenFill } from "@arco-design/web-vue/es/icon";
 import { useRouter } from 'vue-router';
 import Toolbar from "./widget/Toolbar.vue";
 import MultipleBar from "./widget/MultipleBar.vue";

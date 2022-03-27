@@ -7,14 +7,14 @@
 </template>
 
 <script setup lang='ts'>
-import { nextTick, onMounted, ref, watch, computed } from 'vue';
+import { nextTick, ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { db } from '../db/db';
-import { paperSize } from '../hooks/paperSize';
+import { paperSize } from '../hooks/default';
 import pureTextEditor from '../common/editor';
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { useMainStore } from '../store/index';
-import { exportTXT, exportDOCX, exportPDF } from '../hooks/paper';
+import { exportDOCX, exportPDF } from '../hooks/paper';
 import { setContentTipPos, setHTMLdata, setTranslationContent } from '../hooks/contentTip';
 import '../style/toolTip.scss';
 
