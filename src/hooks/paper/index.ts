@@ -7,7 +7,8 @@ export function exportTXT(filename: string, container: HTMLElement) {
     window.$API.ipcSend('expFile', {
         type: 'TXT',
         name: filename,
-        file: container.innerText
+        file: container.innerText,
+        path: ''
     });
 }
 
@@ -19,7 +20,8 @@ export function exportDOCX(filename: string, container: HTMLElement) {
     window.$API.ipcSend('expFile', {
         type: 'DOCX',
         name: filename,
-        file: htmlString
+        file: htmlString,
+        path: ''
     });
 }
 

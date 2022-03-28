@@ -170,10 +170,14 @@
                                     :title="it.chapterName"
                                 >{{ it.chapterName }}</a-menu-item>
                                 <template #content>
-                                    <a-doption @click="showReName('c', it.cid, it.chapterName)">重命名</a-doption>
+                                    <a-doption
+                                        @click="showReName('c', it.cid, it.chapterName)"
+                                        class="iconfont"
+                                    >&#xe82a;&nbsp;&nbsp;重命名</a-doption>
                                     <a-doption
                                         @click="deleteChapter(item.vid, it.cid, it.chapterName)"
-                                    >删除章</a-doption>
+                                        class="iconfont"
+                                    >&#xe7f2;&nbsp;&nbsp;删除章</a-doption>
                                 </template>
                             </a-dropdown>
                         </a-sub-menu>
@@ -259,7 +263,7 @@
 <script setup lang="ts">
 import { ref, onUnmounted, reactive, onMounted, nextTick, onBeforeUnmount, Ref } from 'vue';
 import { IconCaretRight, IconCaretLeft, IconRightCircle, IconLeft, IconRight } from '@arco-design/web-vue/es/icon';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import TitleBlock from '../components/TitleBlock.vue';
 import TopToolbar from '../components/TopToolbar.vue';
 import WritingPaper from '../components/WritingPaper.vue';

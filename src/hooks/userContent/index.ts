@@ -205,6 +205,7 @@ export function drawPieChart(chartDom: HTMLElement, pieData: any, otherPieData: 
     })
 
     myChart.setOption({
+        color: ['#3fb1e3', '#6be6c1', '#a0a7e6', '#c4ebad', '#96dee8', '#d0648a', '#22c3aa', '#f2b3c9', '#4ea397', '#f58db2'],
         title: [{
             text: '前20个关键词',
             left: '25%',
@@ -236,7 +237,7 @@ export function drawPieChart(chartDom: HTMLElement, pieData: any, otherPieData: 
         series: [{
             name: '前20个关键词',
             type: 'pie',
-            radius: [50, 250],
+            radius: [20, 250],
             center: ['25%', '50%'],
             roseType: 'area',
             label: {
@@ -249,7 +250,7 @@ export function drawPieChart(chartDom: HTMLElement, pieData: any, otherPieData: 
         }, {
             name: '后20个关键词',
             type: 'pie',
-            radius: [50, 250],
+            radius: [20, 250],
             center: ['75%', '50%'],
             roseType: 'area',
             label: {
@@ -293,6 +294,7 @@ export function drawLinesChart(chartDom: HTMLElement, xAxisData: any, lineSeries
     myChart = echarts.init(chartDom);
 
     myChart.setOption({
+        color: ['#3fb1e3', '#6be6c1', '#a0a7e6', '#c4ebad', '#96dee8', '#d0648a', '#22c3aa', '#f2b3c9', '#4ea397', '#f58db2'],
         xAxis: {
             type: 'category',
             data: xAxisData

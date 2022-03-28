@@ -4,7 +4,9 @@ import { v4 } from 'uuid';
 /**
  * 导出目标作品为单个TXT文件
  */
-export function exportOpusAsTXT(opus: Userdb) {
+export function exportOpusAsTXT(opus: Userdb, name?: string, path?: string) {
+    path = path ?? '';
+    name = filterFilename(name ?? opus.title);
     let opusStr = '';
     opus.data.forEach((v_item, index) => {
         // 未标记删除的卷
@@ -32,15 +34,17 @@ export function exportOpusAsTXT(opus: Userdb) {
     })
     window.$API.ipcSend('expFile', {
         type: 'TXT',
-        name: filterFilename(opus.title),
-        file: opusStr
+        name: name,
+        file: opusStr,
+        path: path
     });
 }
 
 /**
  * 导出目标作品为单个DOCX文件
  */
-export function exportOpusAsDOCX(opus: Userdb) {
+export function exportOpusAsDOCX(opus: Userdb, path?: string) {
+    path = path ?? '';
     let opusHTML = '';
     opus.data.forEach(v_item => {
         // 未标记删除的卷
@@ -61,14 +65,16 @@ export function exportOpusAsDOCX(opus: Userdb) {
     window.$API.ipcSend('expFile', {
         type: 'DOCX',
         name: filterFilename(opus.title),
-        file: opusHTML
+        file: opusHTML,
+        path: path
     });
 }
 
 /**
  * 导出目标作品为多个TXT文件
  */
-export function exportOpusAsTXT_(opus: Userdb) {
+export function exportOpusAsTXT_(opus: Userdb, path?: string) {
+    path = path ?? '';
     const opusArr: Array<{ volumeName: string, volume: Array<{ chapterName: string, chapter: string }> }> = [];
     opus.data.forEach(v_item => {
         // 未标记删除的卷
@@ -93,14 +99,16 @@ export function exportOpusAsTXT_(opus: Userdb) {
     window.$API.ipcSend('expFile', {
         type: 'TXT_mult',
         name: filterFilename(opus.title),
-        file: opusArr
+        file: opusArr,
+        path: path
     });
 }
 
 /**
  * 导出目标作品为多个DOCX文件
  */
-export function exportOpusAsDOCX_(opus: Userdb) {
+export function exportOpusAsDOCX_(opus: Userdb, path?: string) {
+    path = path ?? '';
     const opusArr: Array<{ volumeName: string, volume: Array<{ chapterName: string, chapter: string }> }> = [];
     opus.data.forEach(v_item => {
         // 未标记删除的卷
@@ -124,15 +132,17 @@ export function exportOpusAsDOCX_(opus: Userdb) {
     window.$API.ipcSend('expFile', {
         type: 'DOCX_mult',
         name: filterFilename(opus.title),
-        file: opusArr
+        file: opusArr,
+        path: path
     });
 }
 
 /**
  * 导出备份json
  */
-export function exportOpusBackup(cb?: Function, name?: string,) {
+export function exportOpusBackup(cb?: Function, name?: string, path?: string) {
     name = name ?? 'inkingBackup' + new Date().getTime(); // 默认文件名
+    path = path ?? '';
     let inkingBackup: Array<Userdb> = [];
 
     db.opus.where(':id').between(1, Infinity).toArray().then(value => {
@@ -141,7 +151,8 @@ export function exportOpusBackup(cb?: Function, name?: string,) {
         window.$API.ipcSend('expFile', {
             type: 'JSON',
             name: name,
-            file: JSON.stringify(inkingBackup)
+            file: JSON.stringify(inkingBackup),
+            path: path
         });
         if (typeof cb === 'function') cb();
     })

@@ -47,7 +47,7 @@ export function setDiagramChart(chartDom: HTMLElement, graph: GraphData, opusTit
     // const intensity = ref(1); //默认关联强度
     const textColor = getComputedStyle(document.body).getPropertyValue('--color-text-1');
     const option: any = {
-        color: ['#3491fa', '#CC3399', '#FFCC99', '#FF6666', '#FF9999', '#FFCCCC', '#FF99CC', '#66CC99'],
+        color: ['#3fb1e3', '#6be6c1', '#a0a7e6', '#c4ebad', '#96dee8', '#d0648a', '#22c3aa', '#f2b3c9', '#4ea397', '#f58db2'],
         title: {
             text: opusTitle + '关系图',
             // subtext: 'Default layout',

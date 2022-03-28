@@ -69,7 +69,7 @@
                     class="alert-path"
                     :show-icon="false"
                     type="success"
-                >{{ mainStore.backupPath }}</a-alert>
+                >{{ mainStore.backupPath }}\inkingBackup</a-alert>
                 <a-button @click="choiceBackupPath" type="outline">更换</a-button>
             </li>
             <li title="快捷查词默认的引擎">

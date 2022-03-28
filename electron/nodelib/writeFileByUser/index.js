@@ -3,7 +3,7 @@ const fs = require('fs');
 
 module.exports = (filePath, data) => {
     if (!fs.existsSync(filePath)) mkdir(filePath);
-    fs.appendFile(filePath, data, 'utf8', err => {
+    fs.writeFileSync(filePath, data, 'utf8', err => {
         if (err) return err;
     })
 }

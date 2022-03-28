@@ -39,7 +39,7 @@
                 正在下载更新:
                 <a-progress :percent="downloadProgress" />
             </span>
-            <span v-else>📢:Arco Design ProArco Pro v2.0 全新上线 🎉</span>
+            <span v-else>🎉 Inking v{{ config.version }}</span>
         </div>
         <div class="right">
             <span @click="minimizeWin">
@@ -88,13 +88,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { IconLeft, IconRight } from '@arco-design/web-vue/es/icon';
 import { useRoute } from 'vue-router';
 import { useMainStore } from '../store/index';
 import router from '../router/index';
 import { saveTodaysCodewords } from '../hooks/db';
-import { v4 } from 'uuid';
+import { exportOpusBackup, exportOpusAsTXT } from '../hooks/exportOpus';
+import { db } from '../db/db';
+import config from '../../package.json';
 
 const mainStore = useMainStore();
 // 顶部显示下载进度
@@ -124,22 +126,36 @@ function maximizeWin() {
     isMax.value = !isMax.value;
 }
 function closeWin() {
-    // /inkingBackup/inkingBackup123232.json (1个)
-
-    // /inkingBackup/作品名uuidV4().txt (多个)
-
-    // /inkingBackup/作品名uuidV4()/章节....
-
-    console.log(mainStore.backupPath);
-
-    if (route.path === '/writer') {
-        // 从写作页直接关闭时
-        saveTodaysCodewords(() => {
-            // window.$API.ipcSend('window-close');
-        })
-    } else {
-        // window.$API.ipcSend('window-close');
-    }
+    // inkingBackup/inkingBackup.json
+    const path = mainStore.backupPath + '/inkingBackup';
+    // 导出备份json
+    exportOpusBackup(() => {
+        window.$API.ipcOnce('expFile-result', () => {
+            db.opus.where(":id").between(1, Infinity).toArray().then(value => {
+                const len = value.filter(item => item.discard === 'f').length;
+                let temp = 0;
+                value.forEach(item => {
+                    if (item.discard === 'f') {
+                        // 导出回收站之外的作品到多个txt中
+                        exportOpusAsTXT(item, item.id + '_' + item.title, path);
+                        window.$API.ipcOnce('expFile-result', () => {
+                            temp++;
+                            if (temp >= len) {
+                                if (route.path === '/writer') {
+                                    // 从写作页直接关闭时
+                                    saveTodaysCodewords(() => {
+                                        window.$API.ipcSend('window-close');
+                                    })
+                                } else {
+                                    window.$API.ipcSend('window-close');
+                                }
+                            }
+                        })
+                    }
+                })
+            })
+        });
+    }, 'inkingBackup', path);
 }
 
 // 通过route修改样式

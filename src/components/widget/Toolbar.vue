@@ -129,12 +129,20 @@
                 search-button
             />
             <div @mousedown.prevent v-if="findSearchResult" class="search-result">
-                <div
-                    v-for="item in opusData"
-                    :key="item.id"
-                    @click="routerLink('/detail', item.id)"
-                    class="result-item iconfont"
-                >{{ '&#xe60f;&nbsp;&nbsp;&nbsp;&nbsp;' + item.title }}</div>
+                <!-- <div v-if="discard"></div> -->
+                <span v-for="item in opusData" :key="item.id">
+                    <div
+                        v-if="item.discard === 't'"
+                        class="result-item iconfont"
+                        style="opacity: 0.5;"
+                    >{{ '&#xe7f2;&nbsp;&nbsp;&nbsp;&nbsp;' + item.title }}</div>
+                    <div
+                        v-else
+                        @click="routerLink('/detail', item.id)"
+                        class="result-item iconfont"
+                    >{{ '&#xe60f;&nbsp;&nbsp;&nbsp;&nbsp;' + item.title }}</div>
+                </span>
+
                 <div
                     v-for="item in ebooks"
                     :key="item.id"
@@ -148,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, Ref, computed, watch } from 'vue';
+import { ref, Ref, computed } from 'vue';
 import {
     IconPlus, IconImport, IconSwap, IconExport,
     IconApps, IconUnorderedList, IconDelete
@@ -384,7 +392,7 @@ const getSearchWord = (value: string) => {
     }
 }
 const findSearchResult = ref(false), _findSearchResult = ref(false);
-const opusData: Ref<Array<{ id: number, title: string }>> = ref([]);
+const opusData: Ref<Array<{ id: number, title: string, discard: string }>> = ref([]);
 const ebooks: Ref<Array<{ id: number, title: string, type: string }>> = ref([]);
 const toSearch = throttle(async () => {
     if (searchWord !== '') {
@@ -395,7 +403,8 @@ const toSearch = throttle(async () => {
                 if (item.title.indexOf(searchWord) !== -1) {
                     opusData.value.push({
                         id: item.id!,
-                        title: item.title
+                        title: item.title,
+                        discard: item.discard
                     });
                 }
             })

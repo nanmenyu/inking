@@ -3,7 +3,7 @@
   "version": "0.1.4",
   "main": "electron/main.js",
   "private": true,
-  "description": "墨迹写作,基于electron和Vue3的文字创作工具",
+  "description": "墨迹写作, 深度、简洁、直观的文字创作工具",
   "author": "nanmenyu <nanmenyu@foxmail.com>",
   "license": "MIT",
   "keywords": [

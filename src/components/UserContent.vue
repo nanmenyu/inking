@@ -37,19 +37,48 @@
                 <!-- 关键词模块 -->
                 <a-radio-group
                     v-if="currentState === 's2'"
-                    @change="choiceAnalysisMode"
                     :default-value="keMode"
                     type="button"
                     style="border-radius:10px"
                 >
-                    <a-radio value="m1" style="border-radius: 10px;">详细</a-radio>
-                    <a-radio value="m2" style="border-radius: 10px;">总览</a-radio>
+                    <a-radio
+                        value="m1"
+                        @click="choiceAnalysisMode('m1', currentKGroup)"
+                        style="border-radius: 10px;"
+                    >详细</a-radio>
+                    <a-radio
+                        value="m2"
+                        @click="choiceAnalysisMode('m2', currentKGroup)"
+                        style="border-radius: 10px;"
+                    >总览</a-radio>
                     <a-radio
                         value="m3"
+                        @click="choiceAnalysisMode('m3', currentKGroup)"
                         style="border-radius: 10px;"
-                    >趋势{{ keMode === 'm3' ? (currentPage + '/' + numberOfPages) : '' }}</a-radio>
+                    >趋势{{ keMode === 'm3' && numberOfPages !== 0 ? (currentPage + '/' + numberOfPages) : '' }}</a-radio>
+                    <!-- 作品和分组 -->
                     <a-dropdown>
-                        <a-button type="text" style="border-radius: 10px;">{{ currentOpus }}</a-button>
+                        <a-button
+                            type="text"
+                            style="border-radius: 10px;"
+                            :disabled="keMode === 'm2'"
+                            title="选择关键词组"
+                        >{{ currentKGroup === '' ? '全部' : currentKGroup }}</a-button>
+                        <template #content>
+                            <a-doption @click="selectKGroup('')">全部</a-doption>
+                            <a-doption
+                                v-for="(item, i) in keyWordGroup"
+                                @click="selectKGroup(item)"
+                                :key="i"
+                            >{{ item }}</a-doption>
+                        </template>
+                    </a-dropdown>
+                    <a-dropdown>
+                        <a-button
+                            type="text"
+                            style="border-radius: 10px;"
+                            title="选择作品"
+                        >{{ currentOpus }}</a-button>
                         <template #content>
                             <a-doption
                                 v-for="item in opusList"
@@ -129,7 +158,7 @@ const changeCurrentState = (state: 's1' | 's2') => {
     if (state === 's1') {
         choiceCodewordRange(timeFrame.value);
     } else if (state === 's2') {
-        choiceAnalysisMode(keMode.value);
+        choiceAnalysisMode(keMode.value, '');
     }
 }
 
@@ -168,11 +197,20 @@ const choiceCodewordRange = (value: string) => {
 // 选择要分析的作品
 const opusList: Ref<Array<[number, string]>> = ref([]);
 const currentOpusKey = ref(1);
-const currentOpus = ref('')
+const currentOpus = ref('');
 const selectOpus = (key: number, value: string) => {
     currentOpus.value = value;
     currentOpusKey.value = key;
-    choiceAnalysisMode(keMode.value);
+    currentKGroup.value = '';
+    choiceAnalysisMode(keMode.value, '');
+}
+
+// 选择要展示的分组
+const keyWordGroup: Ref<Array<string>> = ref([]);
+const currentKGroup = ref('');
+const selectKGroup = (gname: string) => {
+    currentKGroup.value = gname;
+    choiceAnalysisMode(keMode.value, gname);
 }
 
 // 选择关键词分析模式
@@ -188,24 +226,36 @@ const lineSeriesData: Ref<Array<{
     smooth: true
 }>> = ref([]);
 const numberPerPage = mainStore.numPerpage; // 每页多少条数据
-const choiceAnalysisMode = (mode: string) => {
+const choiceAnalysisMode = (mode: string, group: string) => {
     keMode.value = mode;
     showChartBtn.value = false;
     db.opus.get(currentOpusKey.value).then(value => {
         if (value) {
             const keyWordArr: Array<Array<string>> = [];
+            keyWordGroup.value = []; // 清空关键词组名数组 
             value.theKeyWord.forEach(item => {
                 let tempArr: Array<string> = [];
+                // 关键词组名数组
+                keyWordGroup.value.push(item.kGroupName);
                 item.data.forEach(it => {
                     tempArr = it.otherName;
                     tempArr.unshift(it.itemName);
+                    tempArr.unshift(item.kGroupName); // 首位放置组名
                     keyWordArr.push([...new Set(tempArr)]);// 去重
                 })
             })
             // 章名称数组
             const xAxisData: Array<string> = [];
             // 关键字主名数组
-            const yAxisData: Array<string> = keyWordArr.map(item => item[0]);
+            let newKeyWordArr: Array<Array<string>> = [];
+            if (group !== '') {
+                newKeyWordArr = keyWordArr.filter(item => {
+                    return item[0] === group;
+                })
+            } else {
+                newKeyWordArr = keyWordArr;
+            }
+            const yAxisData: Array<string> = newKeyWordArr.map(item => item[1]);
             // 散点图数据
             const scatterData: Array<Array<number>> = [];
             value.data.forEach(item => {
@@ -226,13 +276,16 @@ const choiceAnalysisMode = (mode: string) => {
                     }
                 })
             })
-
+            // 根据类别绘图
+            // 关键词词频分析(散点图)
             if (mode === 'm1') {
-                // 关键词词频分析(散点图)
                 drawScatterChart(chart_ref.value, xAxisData, yAxisData, scatterData);
-            } else if (mode === 'm2') {
-                // 关键词词频总览(饼图)
+            }
+            // 关键词词频总览(饼图)
+            else if (mode === 'm2') {
                 const tempData: { [key: string]: number } = {};
+                // 这里不需要按组分类
+                const yAxisData = keyWordArr.map(item => item[1]);
                 // 计算总频次
                 scatterData.forEach(item => {
                     if (!tempData[yAxisData[item[1]]]) tempData[yAxisData[item[1]]] = 0;
@@ -252,22 +305,28 @@ const choiceAnalysisMode = (mode: string) => {
                     }
                 }
                 drawPieChart(chart_ref.value, pieData, otherPieData);
-            } else if (mode === 'm3') {
-                // 关键词词频趋势（折线）
+            }
+            // 关键词词频趋势（折线）
+            else if (mode === 'm3') {
                 const tempData: { [key: string]: Array<number> } = {};
+                // 散点转坐标
                 scatterData.forEach(item => {
                     if (!tempData[yAxisData[item[1]]]) tempData[yAxisData[item[1]]] = [];
-                    tempData[yAxisData[item[1]]].push(item[2]);
+                    // 当yAxisData[item[1]]不为undefined时
+                    if (yAxisData[item[1]]) tempData[yAxisData[item[1]]].push(item[2]);
                 })
                 // 暴露总数据
                 lineSeriesData.value = [];//先清空旧数据
+                // 格式化
                 for (let key in tempData) {
-                    lineSeriesData.value.push({
-                        name: key,
-                        data: tempData[key],
-                        type: 'line',
-                        smooth: true
-                    })
+                    if (key) {
+                        lineSeriesData.value.push({
+                            name: key,
+                            data: tempData[key],
+                            type: 'line',
+                            smooth: true
+                        })
+                    }
                 }
                 lineXAxisData.value = xAxisData; // 暴露x轴数据
                 // 分页(10页)

@@ -28,7 +28,6 @@ export function setChart(chartDom: HTMLElement, color: ChartColor, task: ChartTa
             textStyle: {
                 fontSize: 14,
                 fontWeight: 'normal',
-                fontFamily: 'Microsoft YaHei',
                 lineHeight: 21,
                 color: `${color.fontColor}`
             }
@@ -52,9 +51,6 @@ export function setChart(chartDom: HTMLElement, color: ChartColor, task: ChartTa
             radius: ['60%', '75%'],
             center: ['50%', '40%'],
             avoidLabelOverlap: false,
-            itemStyle: {
-                borderColor: '#fff',
-            },
             label: {
                 show: false,
                 position: 'center'

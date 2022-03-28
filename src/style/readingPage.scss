@@ -1,7 +1,4 @@
-.sider-right {
-    min-width: 50px;
-    // padding-left: 50px;
-}
+@include open-fold-button;
 
 .sider-right-content {
     position: relative;
@@ -32,7 +29,7 @@
 
 .resizebox-demo-line {
     flex: 1;
-    background-color: #e5e6eb;
+    background-color: var(--color-border);
 }
 
 .resizebox-demo-vertical {
@@ -41,11 +38,11 @@
     .resizebox-demo-line {
         width: 2px;
         height: 100%;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s ease-in-out;
 
         &:hover {
             width: 6px;
-            background-color: #ccc;
+            background-color: var(--color-secondary-hover);
         }
     }
 }
@@ -53,11 +50,11 @@
 .resizebox-demo-horizontal {
     .resizebox-demo-line {
         height: 2px;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s ease-in-out;
 
         &:hover {
             width: 6px;
-            background-color: #ccc;
+            background-color: var(--color-secondary-hover);
         }
     }
 }

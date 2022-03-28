@@ -114,118 +114,102 @@ ipcMain.on('deleteFolder', (e, path) => {
     deleteFolder(path);
 })
 
-// 转html至txt/docx/json
+// 导出txt/docx/json
 ipcMain.on('expFile', async (e, data) => {
     if (data.type === 'DOCX') {
         const fileBuffer = await HTMLtoDOCX(data.file, null, {
             table: { row: { cantSplit: true } },
             footer: true
         });
-        dialog.showSaveDialog({
-            title: '导出为DOCX',
-            defaultPath: data.name + '.docx',
-            filters: [{ name: 'DOCX', extensions: ['docx'] }]
-        }).then(file => {
-            if (file.filePath) {
-                fs.writeFile(file.filePath, fileBuffer, err => {
-                    if (err) {
-                        e.sender.send('expFile-result', 'err');
-                    } else {
-                        e.sender.send('expFile-result', 'success');
-                    }
-                });
-            } else {
-                e.sender.send('expFile-result', 'cancel');
-            }
-        })
+        if (data.path) {
+            writeFile(data.path + '/' + data.name + '.docx', fileBuffer);
+        } else {
+            dialog.showSaveDialog({
+                title: '导出为DOCX',
+                defaultPath: data.name + '.docx',
+                filters: [{ name: 'DOCX', extensions: ['docx'] }]
+            }).then(file => {
+                writeFile(file.filePath, fileBuffer);
+            })
+        }
     } else if (data.type === 'TXT') {
-        dialog.showSaveDialog({
-            title: '导出为TXT',
-            defaultPath: data.name + '.txt',
-            filters: [{ name: 'TXT', extensions: ['txt'] }]
-        }).then(file => {
-            if (file.filePath) {
-                fs.writeFile(file.filePath, data.file, err => {
-                    if (err) {
-                        e.sender.send('expFile-result', 'err');
-                    } else {
-                        e.sender.send('expFile-result', 'success');
-                    }
-                });
+        if (data.path) {
+            writeFile(data.path + '/' + data.name + '.txt', data.file);
+        } else {
+            dialog.showSaveDialog({
+                title: '导出为TXT',
+                defaultPath: data.name + '.txt',
+                filters: [{ name: 'TXT', extensions: ['txt'] }]
+            }).then(file => {
+                writeFile(file.filePath, data.file);
+            })
+        }
+    } else if (data.type === 'JSON') {
+        if (data.path) {
+            writeFile(data.path + '/' + data.name + '.json', data.file);
+        } else {
+            dialog.showSaveDialog({
+                title: '导出为JSON',
+                defaultPath: data.name + '.json',
+                filters: [{ name: 'JSON', extensions: ['json'] }]
+            }).then(file => {
+                writeFile(file.filePath, data.file);
+            })
+        }
+    } else if (data.type === 'TXT_mult' || data.type === 'DOCX_mult') {
+        if (data.path) {
+            writeMultFile([data.path]);
+        } else {
+            dialog.showOpenDialog({
+                title: '选择目标文件夹',
+                properties: ['openDirectory']
+            }).then(file => {
+                writeMultFile(file.filePaths);
+            })
+        }
+    }
+
+    function writeFile(filePath, data) {
+        if (filePath) {
+            if (writeFileByUser(filePath, data)) {
+                e.sender.send('expFile-result', 'err');
             } else {
-                e.sender.send('expFile-result', 'cancel');
+                e.sender.send('expFile-result', 'success');
             }
-        })
-    } else if (data.type === 'TXT_mult') {
-        dialog.showOpenDialog({
-            title: '选择目标文件夹',
-            properties: ['openDirectory']
-        }).then(file => {
-            if (file.filePaths.length > 0) {
-                const basePath = file.filePaths[0] + '/' + data.name;
-                deleteFolder(basePath); // 先清除已有的文件夹
-                // 依次导出为TXT
-                data.file.forEach(v_item => {
-                    const volumePath = basePath + '/' + v_item.volumeName;
-                    v_item.volume.forEach(c_item => {
-                        const chapterPath = volumePath + '/' + c_item.chapterName + '.txt';
-                        if (writeFileByUser(chapterPath, c_item.chapter)) {
-                            e.sender.send('expFile-result', 'err');
-                        } else {
-                            e.sender.send('expFile-result', 'success');
-                        }
-                    })
-                });
-            } else {
-                e.sender.send('expFile-result', 'cancel');
-            }
-        })
-    } else if (data.type === 'DOCX_mult') {
-        dialog.showOpenDialog({
-            title: '选择目标文件夹',
-            properties: ['openDirectory']
-        }).then(file => {
-            if (file.filePaths.length > 0) {
-                const basePath = file.filePaths[0] + '/' + data.name;
-                deleteFolder(basePath); // 先清除已有的文件夹
-                // 依次导出为DOCX
-                data.file.forEach(v_item => {
-                    const volumePath = basePath + '/' + v_item.volumeName;
-                    v_item.volume.forEach(async c_item => {
-                        const chapterPath = volumePath + '/' + c_item.chapterName + '.docx';
-                        const fileBuffer = await HTMLtoDOCX(c_item.chapter, null, {
+        } else {
+            e.sender.send('expFile-result', 'cancel');
+        }
+    }
+
+    function writeMultFile(filePaths) {
+        if (filePaths.length > 0) {
+            const basePath = filePaths[0] + '/' + data.name;
+            deleteFolder(basePath); // 先清除已有的文件夹
+            // 依次导出为DOCX/TXT
+            data.file.forEach(v_item => {
+                const volumePath = basePath + '/' + v_item.volumeName;
+                v_item.volume.forEach(async c_item => {
+                    let filePath = volumePath + '/' + c_item.chapterName + '.txt';
+                    let fileData = c_item.chapter;
+
+                    if (data.type === 'DOCX_mult') {
+                        filePath = volumePath + '/' + c_item.chapterName + '.docx';
+                        fileData = await HTMLtoDOCX(c_item.chapter, null, {
                             table: { row: { cantSplit: true } },
                             footer: true
                         });
-                        if (writeFileByUser(chapterPath, fileBuffer)) {
-                            e.sender.send('expFile-result', 'err');
-                        } else {
-                            e.sender.send('expFile-result', 'success');
-                        }
-                    })
-                });
-            } else {
-                e.sender.send('expFile-result', 'cancel');
-            }
-        })
-    } else if (data.type === 'JSON') {
-        dialog.showSaveDialog({
-            title: '导出为JSON',
-            defaultPath: data.name + '.json',
-            filters: [{ name: 'JSON', extensions: ['json'] }]
-        }).then(file => {
-            if (file.filePath) {
-                fs.writeFile(file.filePath, data.file, err => {
-                    if (err) {
+                    }
+
+                    if (writeFileByUser(filePath, fileData)) {
                         e.sender.send('expFile-result', 'err');
                     } else {
                         e.sender.send('expFile-result', 'success');
                     }
-                });
-            } else {
-                e.sender.send('expFile-result', 'cancel');
-            }
-        })
+                })
+            });
+        } else {
+            e.sender.send('expFile-result', 'cancel');
+        }
     }
 })
 
