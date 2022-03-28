@@ -1,6 +1,5 @@
 // 写文件，文件夹不存在则创建
 const fs = require('fs');
-const dirCache = {};
 
 module.exports = (filePath, data) => {
     if (!fs.existsSync(filePath)) mkdir(filePath);
@@ -10,6 +9,7 @@ module.exports = (filePath, data) => {
 }
 
 function mkdir(filePath) {
+    const dirCache = {};
     const arr = filePath.split('/');
     let dir = arr[0];
     for (let i = 1; i < arr.length; i++) {
@@ -19,6 +19,6 @@ function mkdir(filePath) {
         }
         dir = dir + '/' + arr[i];
     }
-    console.log(filePath);
+
     fs.writeFileSync(filePath, '');
 }

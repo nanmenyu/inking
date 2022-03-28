@@ -65,7 +65,11 @@
             </li>
             <li title="设定作品文件备份的路径">
                 <span>备份存储路径</span>
-                <a-alert class="alert-path" :show-icon="false">{{ mainStore.backupPath }}</a-alert>
+                <a-alert
+                    class="alert-path"
+                    :show-icon="false"
+                    type="success"
+                >{{ mainStore.backupPath }}</a-alert>
                 <a-button @click="choiceBackupPath" type="outline">更换</a-button>
             </li>
             <li title="快捷查词默认的引擎">

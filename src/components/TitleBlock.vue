@@ -94,6 +94,7 @@ import { useRoute } from 'vue-router';
 import { useMainStore } from '../store/index';
 import router from '../router/index';
 import { saveTodaysCodewords } from '../hooks/db';
+import { v4 } from 'uuid';
 
 const mainStore = useMainStore();
 // 顶部显示下载进度
@@ -123,13 +124,21 @@ function maximizeWin() {
     isMax.value = !isMax.value;
 }
 function closeWin() {
+    // /inkingBackup/inkingBackup123232.json (1个)
+
+    // /inkingBackup/作品名uuidV4().txt (多个)
+
+    // /inkingBackup/作品名uuidV4()/章节....
+
+    console.log(mainStore.backupPath);
+
     if (route.path === '/writer') {
         // 从写作页直接关闭时
         saveTodaysCodewords(() => {
-            window.$API.ipcSend('window-close');
+            // window.$API.ipcSend('window-close');
         })
     } else {
-        window.$API.ipcSend('window-close');
+        // window.$API.ipcSend('window-close');
     }
 }
 

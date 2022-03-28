@@ -177,18 +177,16 @@ const saveDocData = (showMsg: string) => {
     let totalNumber = 0;
     db.opus.where(':id').equals(query_id).modify(value => {
         value.data.forEach(item => {
-            if (item.vid === vid) {
-                item.volume.forEach(it => {
-                    if (it.cid === cid) {
-                        it.chapter = dataArr;
-                        it.chapterNum = chapterNumber;
-                        it.updateTime = new Date().getTime();
-                        value.updateTime = new Date().getTime();// 更新修改时间;
-                    }
-                    // 顺便更新作品的总字数
-                    if (!it.discard) totalNumber += it.chapterNum ?? 0;
-                })
-            }
+            item.volume.forEach(it => {
+                if (item.vid === vid && it.cid === cid) {
+                    it.chapter = dataArr;
+                    it.chapterNum = chapterNumber;
+                    it.updateTime = new Date().getTime();
+                    value.updateTime = new Date().getTime();// 更新修改时间;
+                }
+                // 顺便更新作品的总字数
+                if (!it.discard) totalNumber += it.chapterNum ?? 0;
+            })
         });
     }).then(() => {
         if (showMsg !== '') $message.success(showMsg);
@@ -314,8 +312,8 @@ const refreshPaper = (displayData: Array<NodePara>, keyMarks?: Array<Marker>) =>
     });
     // 屏蔽自带的拼写检查
     mEditor.value.firstElementChild.setAttribute('spellcheck', 'false');
-    // 获得ProseMirror元素
-    if (!ProseMirror) ProseMirror = document.querySelector('.ProseMirror')!;
+    // 获得ProseMirror元素(必须重新获得)
+    ProseMirror = document.querySelector('.ProseMirror')!;
 }
 
 // 监视选中文字的变化 设置选中文字时的工具栏

@@ -157,6 +157,7 @@ import PopupMenu from './PopupMenu.vue';
 import { useRoute, useRouter } from 'vue-router';
 import useCurrentInstance from '../../utils/useCurrentInstance';
 import { throttle } from '../../utils/flowControl';
+import { exportOpusBackup } from '../../hooks/exportOpus';
 import { db } from '../../db/db';
 import { v4 } from 'uuid';
 
@@ -270,7 +271,7 @@ const addFile = () => {
         // 向指定数据库追加条目
         case '作品集':
             db.opus.add({
-                author: '用户1234',
+                author: '佚名',
                 title: fileName.value,
                 createTime: new Date().getTime(),
                 updateTime: new Date().getTime(),
@@ -425,21 +426,12 @@ const toSearch = throttle(async () => {
 // 导出作品的备份数据
 const exportBackup = async () => {
     // 全部数据库数据
-    let inkingBackup: Array<Userdb> = [];
-    await db.opus.where(':id').between(1, Infinity).toArray().then(value => {
-        inkingBackup = value;
+    exportOpusBackup(() => {
+        window.$API.ipcOnce('expFile-result', (data: 'success' | 'err') => {
+            if (data === 'success') $message.success('导出成功!');
+            else if (data === 'err') $message.error('导出失败!');
+        });
     })
-
-    window.$API.ipcSend('expFile', {
-        type: 'JSON',
-        name: 'inkingBackup' + new Date().getTime(),
-        file: JSON.stringify(inkingBackup)
-    });
-
-    window.$API.ipcOnce('expFile-result', (data: 'success' | 'err') => {
-        if (data === 'success') $message.success('导出成功!');
-        else if (data === 'err') $message.error('导出失败!');
-    });
 }
 
 // 导入作品备份
