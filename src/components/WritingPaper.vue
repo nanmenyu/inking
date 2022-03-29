@@ -441,10 +441,14 @@ const choiceContextMenuItem = (data: { item: string, select?: string }) => {
     } else if (data.item === '粘贴 Ctrl+v') {
         navigator.clipboard.readText().then(clipText => {
             (<Text>textNode).replaceData(range.startOffset, range.endOffset - range.startOffset, clipText);
+        }).then(() => {
+            saveDocData('');
         })
     } else if (data.item === '剪切 Ctrl+x' && selectedText !== '') {
         (<Text>textNode).replaceData(range.startOffset, range.endOffset - range.startOffset, '');
-        navigator.clipboard.writeText(selectedText);
+        navigator.clipboard.writeText(selectedText).then(() => {
+            saveDocData('');
+        })
     }
 }
 

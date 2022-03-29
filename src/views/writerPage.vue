@@ -775,11 +775,9 @@ function shortcut(e: KeyboardEvent) {
     }
     // 拉开/缩紧右侧栏 Ctrl+[/]
     if (e.ctrlKey === true && e.key === '[') {
-        console.log('拉开');
         if (showSiderRight.value && resizeBoxWdith.value < window.innerWidth - 200) resizeBoxWdith.value += 100;
     }
     if (e.ctrlKey === true && e.key === ']') {
-        console.log('关闭');
         if (showSiderRight.value && resizeBoxWdith.value > 250) resizeBoxWdith.value -= 100;
     }
     // 展开/关闭右侧栏 Ctrl+{/}(Ctrl+Shift+[/])

@@ -629,7 +629,7 @@ const changeTimeLine = (index: number) => {
     defaultPos.value = index;
     currentDetail.data = [];
     getTimeLineData();
-    // setLineStorage();
+    setLineStorage();
 }
 // 删除某一历史点(全年)
 const deleteOneYear = (year: number) => {
@@ -774,23 +774,28 @@ const choiceOneYear = (year: number) => {
         })
         currentDetail.data = summaryObj.data[year];
         currentChoice.value = year;
+        currentYear.value = year;
+        setLineStorage();
     }
 }
 
 
 /* ----------------------- 非触发事件 -----------------------*/
-// 读取本地缓存
+// 读取本地缓存并初始化
 const defaultPos = ref(0);
-// const timeLineCache = localStorage.getItem('timeLineCache');
-// if (timeLineCache) {
-//     let temp = JSON.parse(timeLineCache);
-//     temp.forEach((item: { query_id: number; selectYear: number; selectLine: number; }) => {
-//         if (item.query_id === query_id) {
-//             currentChoice.value = item.selectYear;
-//             defaultPos.value = item.selectLine;
-//         }
-//     })
-// }
+const timeLineCache = localStorage.getItem('timeLineCache');
+if (timeLineCache === null) {
+    localStorage.setItem('timeLineCache', JSON.stringify([{ id: query_id, year: currentChoice.value, line: defaultPos.value }]));
+} else {
+    let temp = JSON.parse(timeLineCache);
+    temp.forEach((item: { id: number; year: number; line: number; }) => {
+        if (item.id === query_id) {
+            currentChoice.value = item.year;
+            defaultPos.value = item.line;
+        }
+    })
+}
+
 // 获取数据
 let summaryObj: {
     data: { [key: number]: Array<Detail> }
@@ -896,12 +901,21 @@ function slidingTimeline(e: MouseEvent) {
 
 }
 // 缓存数据
-// function setLineStorage() {
-//     if (timeLineCache) {
-//         let temp = JSON.parse(timeLineCache);
-//         localStorage.setItem('timeLineCache', JSON.stringify({ query_id: query_id, selectYear: currentChoice.value, selectLine: defaultPos.value }));
-//     }
-// }
+function setLineStorage() {
+    const timeLineCache = localStorage.getItem('timeLineCache');
+    let temp = JSON.parse(timeLineCache!), flag = false;
+    temp.forEach((item: { id: number; year: number; line: number; }) => {
+        if (item.id === query_id) {
+            item.year = currentChoice.value;
+            item.line = defaultPos.value;
+            flag = true;
+        }
+    })
+    if (!flag) {
+        temp.push({ id: query_id, year: currentChoice.value, line: defaultPos.value });
+    }
+    localStorage.setItem('timeLineCache', JSON.stringify(temp));
+}
 defineExpose({ setSliderState });
 </script>
 

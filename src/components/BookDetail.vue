@@ -446,7 +446,7 @@ import { db } from '../db/db';
 import { v4 } from 'uuid';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
-import defaultCover from '../../public/static/img/default-cover.jpg';
+import defaultCover from '../../public/static/img/default-cover.svg';
 import category from '../assets/json/book_category.json';
 
 interface Form {

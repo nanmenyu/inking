@@ -18,7 +18,7 @@
                 </router-link>
             </div>
             <button
-                @click="back"
+                @click="back(-1)"
                 :disabled="backDisable"
                 :class="backDisable ? 'disabled' : 'not-disabled'"
                 title="后退"
@@ -26,7 +26,7 @@
                 <icon-left :style="{ fontSize: '16px', marginLeft: '-2px' }" />
             </button>
             <button
-                @click="forward"
+                @click="back(1)"
                 :disabled="forwardDisable"
                 :class="forwardDisable ? 'disabled' : 'not-disabled'"
                 title="前进"
@@ -109,11 +109,8 @@ const downloadProgress = computed(() => {
 
 // 控制页面的前进后退
 const backDisable = ref(false), forwardDisable = ref(false);
-const back = () => {
-    router.go(-1);
-}
-const forward = () => {
-    router.go(1);
+const back = (offset: 1 | -1) => {
+    router.go(offset);
 }
 
 // 控制页面的最大化、最小化和关闭
@@ -198,7 +195,6 @@ body[arco-theme="dark"] .header .left {
     align-items: center;
     width: 250px;
     line-height: 40px;
-    /* background-color: v-bind(leftColor); */
     background-color: rgb(var(--my-bg-color));
     border-radius: 0 40px 0 0;
     box-shadow: v-bind(leftShadow);
@@ -209,7 +205,6 @@ body[arco-theme="dark"] .header .left {
     align-items: center;
     width: 100px;
     text-decoration: none;
-    /* margin-top: 10px; */
     cursor: pointer;
     /* 避免拖动属性导致不能点击 */
     -webkit-app-region: no-drag;
@@ -228,10 +223,8 @@ body[arco-theme="dark"] .header .left {
     width: 25px;
     height: 25px;
     margin-left: 20px;
-    /* transform: translateY(-7.5px); */
     border: none;
     border-radius: 50%;
-    /* background-color: #ebebeb; */
     background-color: var(--color-secondary);
     /* 避免拖动属性导致不能点击 */
     -webkit-app-region: no-drag;

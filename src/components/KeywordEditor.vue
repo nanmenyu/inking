@@ -127,7 +127,7 @@
                             <h3 v-show="modifyItemName" title="格式：主名/别名/别名...">
                                 <a-input
                                     @mousedown.stop
-                                    v-model="itemNameFormat"
+                                    v-model.trim="itemNameFormat"
                                     :style="{ width: '300px' }"
                                     :max-length="50"
                                     show-word-limit
@@ -855,7 +855,6 @@ const choiceCardItem = (kid: string, iid: string) => {
     otherNameString = otherNameString === '' ? '' : '/' + otherNameString;
     // 删除最后一个别名最后的斜杠
     otherNameString = otherNameLastChar === '/' ? otherNameString.slice(0, otherNameString.length - 1) : otherNameString;
-    console.log();
     itemNameFormat.value = currentListData.data.itemName + otherNameString;
     // 关联标签排序
     const tempArr: Array<Array<Associated>> = [[], [], [], [], []];

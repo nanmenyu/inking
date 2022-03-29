@@ -54,12 +54,12 @@
                     </a-tooltip>
                 </router-link>
             </div>
-            <div>
+            <div @click="openWithBrowser('https://fanyi.baidu.com/translate')">
                 <a-tooltip content="官网" mini>
                     <icon-public />
                 </a-tooltip>
             </div>
-            <div>
+            <div @click="openWithBrowser('https://github.com/nanmenyu/inking')">
                 <a-tooltip content="源码" mini>
                     <icon-github />
                 </a-tooltip>
@@ -137,6 +137,11 @@ const task = computed(() => {
         incomplete: Math.floor(mainStore.dailyPlan) - toDayCodeword.value
     }
 })
+
+// 用浏览器打开链接
+const openWithBrowser = (url: string) => {
+    window.$API.openExternalUrl(url);
+}
 
 onMounted(() => {
     // 获得副主题色

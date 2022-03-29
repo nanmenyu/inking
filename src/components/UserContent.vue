@@ -147,7 +147,7 @@ const subtitle = computed(() => {
     if (currentState.value === 's1') {
         return `近${timeFrame.value}天码字数统计`;
     } else if (currentState.value === 's2') {
-        return '关键词频率分析';
+        return '关键词频率分析(只显示主名，但别名也参与统计)';
     }
 })
 
@@ -223,6 +223,7 @@ const lineSeriesData: Ref<Array<{
     name: string,
     data: Array<number>,
     type: 'line',
+    symbol: 'none',
     smooth: true
 }>> = ref([]);
 const numberPerPage = mainStore.numPerpage; // 每页多少条数据
@@ -238,10 +239,13 @@ const choiceAnalysisMode = (mode: string, group: string) => {
                 // 关键词组名数组
                 keyWordGroup.value.push(item.kGroupName);
                 item.data.forEach(it => {
-                    tempArr = it.otherName;
-                    tempArr.unshift(it.itemName);
-                    tempArr.unshift(item.kGroupName); // 首位放置组名
-                    keyWordArr.push([...new Set(tempArr)]);// 去重
+                    // 过滤掉名称数组中可能的假值（如空字符串）
+                    tempArr = it.otherName.filter(name => name);
+                    if (it.itemName) tempArr.unshift(it.itemName);
+                    if (tempArr.length > 0) {
+                        tempArr.unshift(item.kGroupName); // 首位放置组名
+                        keyWordArr.push([...new Set(tempArr)]);// 去重
+                    }
                 })
             })
             // 章名称数组
@@ -255,22 +259,25 @@ const choiceAnalysisMode = (mode: string, group: string) => {
             } else {
                 newKeyWordArr = keyWordArr;
             }
+            // 获得y轴名称数组
             const yAxisData: Array<string> = newKeyWordArr.map(item => item[1]);
+            newKeyWordArr.forEach(item => item.shift()); // 去重首位分组标记
             // 散点图数据
-            const scatterData: Array<Array<number>> = [];
+            const scatterData: Array<Array<number>> = [];// x y num
+            let indexNum = 0; // x轴的索引,章索引
             value.data.forEach(item => {
-                item.volume.forEach((it, index) => {
+                item.volume.forEach(it => {
                     if (!it.discard) {
+                        indexNum++;
                         // 每一章
                         const chapter = it.chapter.join('');
-                        keyWordArr.forEach((key, i) => {
+                        newKeyWordArr.forEach((key, i) => {
                             let num = 0;
                             key.forEach(name => {
                                 // 计算主名及别名的总频率
                                 num += patch(name, chapter);
                             });
-                            // console.log(key, [index, i, num]);
-                            scatterData.push([index, i, num]);
+                            scatterData.push([indexNum - 1, i, num]);
                         })
                         xAxisData.push(it.chapterName);
                     }
@@ -285,7 +292,7 @@ const choiceAnalysisMode = (mode: string, group: string) => {
             else if (mode === 'm2') {
                 const tempData: { [key: string]: number } = {};
                 // 这里不需要按组分类
-                const yAxisData = keyWordArr.map(item => item[1]);
+                const yAxisData = keyWordArr.map(item => item[0]);
                 // 计算总频次
                 scatterData.forEach(item => {
                     if (!tempData[yAxisData[item[1]]]) tempData[yAxisData[item[1]]] = 0;
@@ -304,6 +311,7 @@ const choiceAnalysisMode = (mode: string, group: string) => {
                         otherPieData.push(key);
                     }
                 }
+                pieData.sort((a, b) => b.value - a.value); // 排序
                 drawPieChart(chart_ref.value, pieData, otherPieData);
             }
             // 关键词词频趋势（折线）
@@ -323,6 +331,7 @@ const choiceAnalysisMode = (mode: string, group: string) => {
                         lineSeriesData.value.push({
                             name: key,
                             data: tempData[key],
+                            symbol: 'none',
                             type: 'line',
                             smooth: true
                         })

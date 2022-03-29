@@ -122,6 +122,12 @@ export function drawScatterChart(chartDom: HTMLElement, xAxisData: any, yAxisDat
             position: 'top',
             formatter: (param: any) => {
                 return `${param.name}<br />${param.marker} ${yAxisData[param.value[1]]}  ${param.value[2]}次`
+            },
+            axisPointer: {
+                type: 'cross',
+                label: {
+                    backgroundColor: `rgb(${themeStore.my_secondary_6})`
+                }
             }
         },
         grid: {
@@ -178,7 +184,7 @@ export function drawScatterChart(chartDom: HTMLElement, xAxisData: any, yAxisDat
             },
             data: scatterData,
             animationDelay: function (idx: number) {
-                return idx * 5;
+                return idx;
             }
         }]
     })
@@ -239,7 +245,7 @@ export function drawPieChart(chartDom: HTMLElement, pieData: any, otherPieData: 
             type: 'pie',
             radius: [20, 250],
             center: ['25%', '50%'],
-            roseType: 'area',
+            // roseType: 'area',
             label: {
                 show: false
             },
@@ -252,7 +258,7 @@ export function drawPieChart(chartDom: HTMLElement, pieData: any, otherPieData: 
             type: 'pie',
             radius: [20, 250],
             center: ['75%', '50%'],
-            roseType: 'area',
+            // roseType: 'area',
             label: {
                 show: false
             },

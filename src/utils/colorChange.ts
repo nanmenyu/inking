@@ -28,7 +28,7 @@ export function hexToRgba(hex: string, opacity: number): string {
 }
 
 
-/*
+/**
  * 增加三原色的饱和度。
  * value 要增加饱和度的颜色值。长度为3的整型数组，第1个成员是红色通道值，第2个成员是绿色通道值，第3个成员是蓝色通道值。
  * degress 取值为百分比值，0表示不增加饱和度，100表示将饱和度增加至最大。
@@ -76,7 +76,7 @@ export function rgbIncreaseSaturation(value: Array<number>, degress: number): Ar
     return newArray;
 }
 
-/*
+/**
  * 降低三原色的饱和度。
  * value 要降低饱和度的颜色值。长度为3的整型数组，第1个成员是红色通道值，第2个成员是绿色通道值，第3个成员是蓝色通道值。
  * degress 取值为百分比值，0表示不降低饱和度，100表示将饱和度降低至最小。
@@ -100,7 +100,7 @@ export function rgbDecreaseSaturation(value: Array<number>, degress: number): Ar
     return newArray;
 }
 
-/*
+/**
  * 增加三原色的亮度。
  * value 要增加亮度的颜色值。长度为3的整型数组，第1个成员是红色通道值，第2个成员是绿色通道值，第3个成员是蓝色通道值。
  * degress 取值为百分比值，0表示不增加亮度，100表示将亮度增加至最大。
@@ -129,7 +129,7 @@ export function rgbIncreaseBrightness(value: Array<number>, degress: number): Ar
     return newValue;
 }
 
-/*
+/**
  * 降低三原色的亮度。
  * value 要降低亮度的颜色值。长度为3的整型数组，第1个成员是红色通道值，第2个成员是绿色通道值，第3个成员是蓝色通道值。
  * degress 取值为百分比值，0表示不降低亮度，100表示将亮度降低至最小。

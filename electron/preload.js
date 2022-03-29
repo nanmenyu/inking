@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, shell } = require('electron');
 
 // 将主进程的方法挂载到全局
 contextBridge.exposeInMainWorld('$API', {
@@ -9,5 +9,8 @@ contextBridge.exposeInMainWorld('$API', {
     },
     'ipcOnce': (type, fn) => {
         ipcRenderer.once(type, (event, ...args) => fn(...args));
+    },
+    'openExternalUrl': (url) => {
+        shell.openExternal(url);
     }
 })

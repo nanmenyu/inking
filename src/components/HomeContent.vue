@@ -105,6 +105,10 @@
                             @click="showExportOption(item.id as number)"
                             class="iconfont"
                         >&#xe602;&nbsp;&nbsp;导出</a-doption>
+                        <a-doption
+                            @click="exportBackup(item.id as number)"
+                            class="iconfont"
+                        >&#xe689;&nbsp;&nbsp;备份</a-doption>
                     </template>
                 </a-dropdown>
                 <div class="book-shadow"></div>
@@ -163,6 +167,10 @@
                                 @click="showExportOption(item.id as number)"
                                 class="iconfont"
                             >&#xe602;&nbsp;&nbsp;导出</a-doption>
+                            <a-doption
+                                @click="exportBackup(item.id as number)"
+                                class="iconfont"
+                            >&#xe689;&nbsp;&nbsp;备份</a-doption>
                         </template>
                     </a-dropdown>
                 </div>
@@ -182,7 +190,7 @@ import { standTime } from "../utils/timeFormat";
 import useCurrentInstance from '../utils/useCurrentInstance';
 import { db } from "../db/db";
 import { exportOpusAsTXT, exportOpusAsDOCX, exportOpusAsTXT_, exportOpusAsDOCX_ } from '../hooks/exportOpus';
-import defaultCover from '../../public/static/img/default-cover.jpg';
+import defaultCover from '../../public/static/img/default-cover.svg';
 
 const { proxy } = useCurrentInstance();
 const $modal = proxy.$modal;
@@ -415,6 +423,22 @@ const exportAll = () => {
         else if (data === 'cancel') $message.info('取消导出!');
     });
     isExportAll.value = false;
+}
+
+// 导出单个作品的备份json
+const exportBackup = (id: number) => {
+    db.opus.get(id).then(data => {
+        window.$API.ipcSend('expFile', {
+            type: 'JSON',
+            name: data!.title + '_' + new Date().getTime(),
+            file: JSON.stringify([data]),
+            path: ''
+        });
+        window.$API.ipcOnce('expFile-result', (data: 'success' | 'err') => {
+            if (data === 'success') $message.success('导出成功!');
+            else if (data === 'err') $message.error('导出失败!');
+        });
+    })
 }
 
 function loadData() {

@@ -33,6 +33,9 @@
                     >{{ item.reTime }}天</a-avatar>
                 </a-tooltip>
                 <span :title="item.title">{{ item.title }}</span>
+                <a-link v-if="!multi" @click="markDelete(item.id as number)">
+                    <icon-delete />
+                </a-link>
                 <a-link v-if="!multi" @click="markRestore(item.id as number)">还原</a-link>
                 <div v-else>
                     <div v-if="!item.checked" class="btn-unchecked"></div>
@@ -48,7 +51,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onUnmounted, nextTick } from "vue";
-import { IconCheck } from "@arco-design/web-vue/es/icon";
+import { IconCheck, IconDelete } from "@arco-design/web-vue/es/icon";
 import Toolbar from "./widget/Toolbar.vue";
 import MultipleBar from "./widget/MultipleBar.vue";
 import { timeFormat } from "../utils/timeFormat";
@@ -73,10 +76,32 @@ loadData();
 
 // 从回收站还原数据
 const markRestore = (id: number) => {
-    db.opus.update(id, { discard: 'f' }).then(() => {
-        loadData();
-        $message.success('还原成功!');
-    });
+    $modal.info({
+        title: "还原数据",
+        content: "是否将目标作品还原？",
+        simple: true,
+        onOk: () => {
+            db.opus.update(id, { discard: 'f' }).then(() => {
+                loadData();
+                $message.success('还原成功!');
+            });
+        }
+    })
+}
+
+// 彻底删除目标作品
+const markDelete = (id: number) => {
+    $modal.warning({
+        title: "删除数据",
+        content: "是否彻底删除目标作品？",
+        simple: true,
+        onOk: () => {
+            db.opus.delete(id).then(() => {
+                loadData();
+                $message.success('删除成功!');
+            });
+        }
+    })
 }
 
 // 点击一键全清
@@ -119,13 +144,20 @@ const getDeleteSelect = () => {
 
 // 点击还原选中键
 const getRestoreSelect = () => {
-    booksData.data.forEach(async item => {
-        if (item.checked) {
-            await db.opus.update(item.id!, { discard: 'f' });
+    $modal.info({
+        title: "还原数据",
+        content: "是否将选中的目标还原？",
+        simple: true,
+        onOk: () => {
+            booksData.data.forEach(async item => {
+                if (item.checked) {
+                    await db.opus.update(item.id!, { discard: 'f' });
+                }
+            });
+            loadData();
+            $message.success('还原成功!');
         }
-    });
-    loadData();
-    $message.success('还原成功!');
+    })
 }
 
 // 点击全选键
