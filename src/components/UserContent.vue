@@ -286,7 +286,8 @@ const choiceAnalysisMode = (mode: string, group: string) => {
             // 根据类别绘图
             // 关键词词频分析(散点图)
             if (mode === 'm1') {
-                drawScatterChart(chart_ref.value, xAxisData, yAxisData, scatterData);
+                // 过滤掉次数为0的scatterData数据
+                drawScatterChart(chart_ref.value, xAxisData, yAxisData, scatterData.filter(it => it[2] > 0));
             }
             // 关键词词频总览(饼图)
             else if (mode === 'm2') {

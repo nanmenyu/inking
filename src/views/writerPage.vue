@@ -622,6 +622,7 @@ const keyWordRef = ref();
 const displayKeyPanel = () => {
     // 显示关键词模块
     showModular.value = '2';
+    openTheSide(); // 开启右侧
     nextTick(() => {
         // 关键词模块显示具体项目
         keyWordRef.value.needShowDetailPanel(currentKid, currentIid);

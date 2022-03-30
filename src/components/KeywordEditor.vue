@@ -125,15 +125,27 @@
                                 </a-popover>
                             </h3>
                             <h3 v-show="modifyItemName" title="格式：主名/别名/别名...">
-                                <a-input
-                                    @mousedown.stop
-                                    v-model.trim="itemNameFormat"
-                                    :style="{ width: '300px' }"
-                                    :max-length="50"
-                                    show-word-limit
-                                    size="small"
-                                    placeholder="修改关键词"
-                                />
+                                <a-space>
+                                    <a-input
+                                        @mousedown.stop
+                                        v-model.trim="itemNameFormat"
+                                        :style="{ width: '300px' }"
+                                        :max-length="50"
+                                        show-word-limit
+                                        size="small"
+                                        placeholder="修改关键词"
+                                    />
+                                    <a-button
+                                        @mousedown.stop
+                                        @click="confirmModifyItemName"
+                                        type="primary"
+                                        size="small"
+                                    >
+                                        <template #icon>
+                                            <icon-plus />
+                                        </template>
+                                    </a-button>
+                                </a-space>
                             </h3>
                             <div
                                 v-show="!modifyItemDesc"
@@ -740,7 +752,7 @@ const confirmKeywordGroup = () => {
             // })
         } else {
             //修改原有关键组
-            let path: string;
+            // let path: string;
             db.opus.where(':id').equals(query_id).modify(item => {
                 item.theKeyWord.forEach(it => {
                     if (curKid === it.kid) {
@@ -848,14 +860,7 @@ const choiceCardItem = (kid: string, iid: string) => {
     })[0];
     currentListData.data = deepClone_JSON(tempData);
     checkedItem.value = iid;
-
-    // 只有一个主名没有别名时，删除主名后面添加的斜杠
-    let otherNameString = currentListData.data.otherName.join('/'),
-        otherNameLastChar = otherNameString.charAt(otherNameString.length - 1);
-    otherNameString = otherNameString === '' ? '' : '/' + otherNameString;
-    // 删除最后一个别名最后的斜杠
-    otherNameString = otherNameLastChar === '/' ? otherNameString.slice(0, otherNameString.length - 1) : otherNameString;
-    itemNameFormat.value = currentListData.data.itemName + otherNameString;
+    itemNameFormat.value = currentListData.data.itemName + '/' + currentListData.data.otherName.join('/');
     // 关联标签排序
     const tempArr: Array<Array<Associated>> = [[], [], [], [], []];
     currentListData.data.associated.forEach((item: { iid: string, key: string, kid: string, value: number }) => {
@@ -898,11 +903,7 @@ const choiceCardItem = (kid: string, iid: string) => {
         return item.children.length > 0;
     })
 }
-watch(itemNameFormat, value => {
-    const tempArr = value.split('/');
-    currentListData.data.itemName = tempArr[0];
-    currentListData.data.otherName = tempArr.slice(1);
-})
+
 // 修改关键词item名和item描述
 const modifyItemName = ref(false), modifyItemDesc = ref(false);
 const modifyItem = (type: string, value: boolean) => {
@@ -920,61 +921,67 @@ const modifyItem = (type: string, value: boolean) => {
 const modifyAllItem = () => {
     modifyItemName.value = modifyItemDesc.value = false;
 }
-// 修改数据库中item的名称
-watch(modifyItemName, value => {
-    if (!value) {
-        if (itemNameFormat.value === '') {
-            $message.warning('名称不能为空');
-        } else {
-            modifyDbforItem(curKid, curIid, (it: KeyWord) => {
-                const theOldNames = [], theNewNames = itemNameFormat.value.split('/');
-                theOldNames.push(it.itemName);
-                it.otherName.forEach(name => {
-                    theOldNames.push(name);
-                })
-                // 获得新旧名称数组中的公有部分
-                const publicPart = [...new Set(theOldNames)].filter(x => new Set(theNewNames).has(x));
-                const diffPart = theNewNames.filter((x) => !publicPart.some((item) => x === item));
-
-                // 新旧数据不一致时才添加
-                if (theOldNames.join('') !== theNewNames.join('')) {
-                    let flag = true;
-                    // 避免全部关键字名重复
-                    let allNameArr: Array<string> = [];
-                    theKeyWord.data.forEach(item => {
-                        item.data.forEach(it => {
-                            if (it.itemName !== '') allNameArr.push(it.itemName);
-                            if (it.otherName.length > 0) allNameArr = allNameArr.concat(it.otherName);
-                        })
-                    })
-                    // 遍历多出来的部分名字，查看是否有重复
-                    for (let i in diffPart) {
-                        if (diffPart[i] !== '' && allNameArr.indexOf(diffPart[i]) !== -1) flag = false;
-                    }
-                    if (flag) {
-                        modifyDbforItem(curKid, curIid,
-                            (it: KeyWord) => {
-                                it.itemName = currentListData.data.itemName;
-                                const tempArr: Array<string> = [];
-                                currentListData.data.otherName.forEach((oName: string) => {
-                                    tempArr.push(oName);
-                                })
-                                it.otherName = tempArr;
-                            },
-                            () => {
-                                loadKeyWodData(() => {
-                                    choiceCard(curKid, curIid);
-                                })
-                            })
-                    } else {
-                        $message.warning('关键词名称均不能相同');
-                        itemNameFormat.value = theOldNames.join('/');
-                    }
-                }
+// 确认修改关键词的主名与别名
+const confirmModifyItemName = () => {
+    // 拆分并过滤掉不合理的假值（如空字符串
+    const theNewNames = itemNameFormat.value.split('/').filter(item => item);
+    if (theNewNames.length > 0) {
+        // 更新数据
+        currentListData.data.itemName = theNewNames[0];
+        currentListData.data.otherName = theNewNames.slice(1);
+        // 修改数据库中的名称数据
+        modifyDbforItem(curKid, curIid, (it: KeyWord) => {
+            const theOldNames = [];
+            theOldNames.push(it.itemName);
+            it.otherName.forEach(name => {
+                theOldNames.push(name);
             })
-        }
+            // 获得新旧名称数组中的公有部分
+            const publicPart = [...new Set(theOldNames)].filter(x => new Set(theNewNames).has(x));
+            const diffPart = theNewNames.filter((x) => !publicPart.some((item) => x === item));
+
+            // 新旧数据不一致时才添加
+            if (theOldNames.join('') !== theNewNames.join('')) {
+                let flag = true;
+                // 避免全部关键字名重复
+                let allNameArr: Array<string> = [];
+                theKeyWord.data.forEach(item => {
+                    item.data.forEach(it => {
+                        if (it.itemName !== '') allNameArr.push(it.itemName);
+                        if (it.otherName.length > 0) allNameArr = allNameArr.concat(it.otherName);
+                    })
+                })
+                // 遍历多出来的部分名字，查看是否有重复
+                for (let i in diffPart) {
+                    if (diffPart[i] !== '' && allNameArr.indexOf(diffPart[i]) !== -1) flag = false;
+                }
+                if (flag) {
+                    modifyDbforItem(curKid, curIid,
+                        (it: KeyWord) => {
+                            it.itemName = currentListData.data.itemName;
+                            const tempArr: Array<string> = [];
+                            currentListData.data.otherName.forEach((oName: string) => {
+                                tempArr.push(oName);
+                            })
+                            it.otherName = tempArr;
+                        }, () => {
+                            loadKeyWodData(() => {
+                                choiceCard(curKid, curIid);
+                                $message.success('修改名称成功！');
+                                modifyItemName.value = false;
+                            })
+                        })
+                } else {
+                    $message.warning('关键词名称均不能相同');
+                    itemNameFormat.value = theOldNames.join('/');
+                }
+            }
+        })
+    } else {
+        $message.warning('名称不能为空');
     }
-});
+}
+
 // 修改数据库中item的描述
 watch(modifyItemDesc, value => {
     if (!value) {

@@ -10,7 +10,7 @@ export default function toupdate(proxy: Record<string, any>, haveMsg: boolean, c
     const $message = proxy.$message;
     const $modal = proxy.$modal;
 
-    axios.get('http://localhost:8888/update').then(res => {
+    axios.get('https://inking-app-3g71u4uxff7c8113-1305098148.ap-shanghai.app.tcloudbase.com/update').then(res => {
         if (res.data.version !== config.version) {
             // 发现新版本
             $modal.info({

@@ -45,8 +45,14 @@
                         <div class="title">{{ item.title }}</div>
                     </div>
                     <template #content>
-                        <a-doption @click="showRenameBox(item.id, item.title)">重命名</a-doption>
-                        <a-doption @click="deleteFile(item.id, item.title)">移除</a-doption>
+                        <a-doption
+                            @click="showRenameBox(item.id, item.title)"
+                            class="iconfont"
+                        >&#xe82a;&nbsp;&nbsp;重命名</a-doption>
+                        <a-doption
+                            @click="deleteFile(item.id, item.title)"
+                            class="iconfont"
+                        >&#xe7f2;&nbsp;&nbsp;移除</a-doption>
                     </template>
                 </a-dropdown>
             </div>
