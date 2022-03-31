@@ -54,8 +54,8 @@
                     </a-tooltip>
                 </router-link>
             </div>
-            <div @click="openWithBrowser('https://fanyi.baidu.com/translate')">
-                <a-tooltip content="官网" mini>
+            <div @click="openWithBrowser('https://inkingapp.cn/')">
+                <a-tooltip content="官网 inkingapp.cn" mini>
                     <icon-public />
                 </a-tooltip>
             </div>

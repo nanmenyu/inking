@@ -3,12 +3,12 @@ const {
     // protocol,
     BrowserWindow,
     session,
-    // Menu,
+    Menu,
     ipcMain,
     dialog
 } = require('electron');
 const path = require('path');
-const fs = require('fs');
+// const fs = require('fs');
 const jschardet = require("jschardet");
 const fontList = require('./nodelib/getFontList');
 const b64toFile = require('./nodelib/b64toFile');
@@ -44,14 +44,8 @@ async function createWindow() {
     } else {
         // 不在开发模式时加载 index.html
         win.loadURL(`file://${path.join(__dirname, '../dist/index.html')}`);
-
-        win.webContents.openDevTools();
+        Menu.setApplicationMenu(null);
     }
-    // // 打开开发工具
-    // if (NODE_ENV === "development") {
-    //     win.webContents.openDevTools()
-    // }
-    // updateHandle();
 }
 
 app.commandLine.appendSwitch('ignore-certificate-errors');    //忽略ssl证书的检测

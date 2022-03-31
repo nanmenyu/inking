@@ -1,6 +1,6 @@
 {
   "name": "inking",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "main": "electron/main.js",
   "private": true,
   "description": "墨迹写作, 深度、简洁、直观的文字创作工具",

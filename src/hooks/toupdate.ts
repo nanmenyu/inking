@@ -15,7 +15,7 @@ export default function toupdate(proxy: Record<string, any>, haveMsg: boolean, c
             // 发现新版本
             $modal.info({
                 title: '发现新版本',
-                content: `发现新版本v${res.data.version}，是否开启下载更新？`,
+                content: res.data.msg,
                 onOk: () => {
                     window.$API.ipcSend('checkForUpdate', res.data.upDateUrl);
                     window.$API.ipcOn('get-updateMsg', (data: { msg: number, data: any }) => {
