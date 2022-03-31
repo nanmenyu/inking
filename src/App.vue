@@ -15,7 +15,7 @@ const { proxy } = useCurrentInstance();
 initUserDB();
 
 // 初始化字数统计
-initCodeword()
+initCodeword();
 
 // 初始化用户主题（风格、配色、字体）
 const theme = initUserTheme();

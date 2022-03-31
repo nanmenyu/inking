@@ -1,6 +1,6 @@
 {
   "name": "inking",
-  "version": "1.0.0",
+  "version": "0.1.4",
   "main": "electron/main.js",
   "private": true,
   "description": "墨迹写作, 深度、简洁、直观的文字创作工具",
@@ -80,9 +80,8 @@
     "cross-env": "^7.0.3",
     "dexie": "^3.2.0",
     "echarts": "^5.2.2",
-    "electron": "^13.0.0",
+    "electron": "^15.5.0",
     "electron-builder": "^22.14.13",
-    "electron-log": "^4.4.5",
     "epubjs": "^0.3.71",
     "html2pdf.js": "^0.10.1",
     "pdfjs-dist": "^2.13.216",

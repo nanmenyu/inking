@@ -54,7 +54,7 @@
                     </a-tooltip>
                 </router-link>
             </div>
-            <div @click="openWithBrowser('https://inkingapp.cn/')">
+            <div @click="openWithBrowser('http://inkingapp.cn/')">
                 <a-tooltip content="官网 inkingapp.cn" mini>
                     <icon-public />
                 </a-tooltip>
@@ -91,6 +91,32 @@ switch (route.path) {
         break;
 }
 
+// 今日码字数量
+const toDayCodeword = computed(() => {
+    return mainStore.baseTotalNumber_today + mainStore.TotalNumber_thisTime - mainStore.contrastTotalNumber_thisTime;
+})
+
+// 图表颜色随主题色变换而变换
+const color = computed(() => {
+    return {
+        fontColor: fontColor.value,
+        secondaryColor: secondaryColor.value
+    }
+})
+
+// 图表每日任务变化
+const task = computed(() => {
+    return {
+        completed: toDayCodeword.value,
+        incomplete: Math.floor(mainStore.dailyPlan) - toDayCodeword.value
+    }
+})
+
+// 用浏览器打开链接
+const openWithBrowser = (url: string) => {
+    window.$API.openExternalUrl(url);
+}
+
 // 检测主题变化修改颜色
 const secondaryColor = ref(''), fontColor = ref('');
 watch(computed(() => {
@@ -112,36 +138,16 @@ watch(computed(() => {
 
 // 检测每日计划是否发生改变
 watch(computed(() => {
-    return mainStore.dailyPlan;
+    return task.value;
 }), () => {
     setChart(uChart.value, color.value, task.value);
 })
 
-// 今日码字数量
-const toDayCodeword = computed(() => {
-    return mainStore.baseTotalNumber_today + mainStore.TotalNumber_thisTime - mainStore.contrastTotalNumber_thisTime;
-})
-
-// 图表颜色随主题色变换而变换
-const color = computed(() => {
-    return {
-        fontColor: fontColor.value,
-        secondaryColor: secondaryColor.value
-    }
-})
-
-// 图标每日任务变化
-const task = computed(() => {
-    return {
-        completed: toDayCodeword.value,
-        incomplete: Math.floor(mainStore.dailyPlan) - toDayCodeword.value
-    }
-})
-
-// 用浏览器打开链接
-const openWithBrowser = (url: string) => {
-    window.$API.openExternalUrl(url);
-}
+// watch(computed(() => {
+//     return mainStore.baseTotalNumber_thisTime;
+// }), () => {
+//     setChart(uChart.value, color.value, task.value);
+// })
 
 onMounted(() => {
     // 获得副主题色

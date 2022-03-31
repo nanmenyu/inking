@@ -67,11 +67,11 @@ export function initUserDB(): void {
 /**
  * 初始化字数统计
  */
-export function initCodeword(): void {
+export async function initCodeword(): Promise<void> {
     const mainStore = useMainStore();
     let cout_temp = 0;
 
-    db.opus.where(':id').between(1, Infinity).toArray().then(value => {
+    await db.opus.where(':id').between(1, Infinity).toArray().then(value => {
         value.forEach(opus => {
             cout_temp += opus.opusNumber;
         })

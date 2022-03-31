@@ -25,7 +25,7 @@ const contextmenu = ref(), showContextmenu = ref(false);
 const setContainer = (container: HTMLElement) => {
     container.addEventListener('contextmenu', (e: MouseEvent) => {
         showContextmenu.value = true;
-        const posX = e.screenX, posY = e.screenY;
+        const posX = e.clientX, posY = e.clientY;
         nextTick(() => {
             contextmenu.value.style.left = posX + 8 + 'px';
             contextmenu.value.style.top = posY + 4 + 'px';
