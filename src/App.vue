@@ -8,8 +8,10 @@ import useCurrentInstance from './utils/useCurrentInstance';
 import { setSharedColor, setupMainThemes, setupSecondaryThemes } from './hooks/setupThemes';
 import { initUserDB, initCodeword, initUserTheme, initUserSetting } from './hooks/app';
 import toupdate from './hooks/toupdate';
+import { useMainStore } from './store';
 
 const { proxy } = useCurrentInstance();
+const mainStore = useMainStore();
 
 // 初始化用户数据表
 initUserDB();
@@ -36,6 +38,8 @@ onMounted(() => {
   nextTick(() => {
     // 进软件执行一次检测更新
     toupdate(proxy, false);
+    // mainStore.firstEntry = new Date().getTime();
+    // console.log(mainStore.firstEntry);
   })
 })
 </script>

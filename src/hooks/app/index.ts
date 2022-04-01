@@ -77,6 +77,7 @@ export async function initCodeword(): Promise<void> {
         })
     }).then(() => {
         mainStore.contrastTotalNumber_thisTime = mainStore.TotalNumber_thisTime = mainStore.baseTotalNumber_thisTime = cout_temp;
+        mainStore.firstEntry = true;
     })
 }
 

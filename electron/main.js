@@ -44,7 +44,7 @@ async function createWindow() {
     } else {
         // 不在开发模式时加载 index.html
         win.loadURL(`file://${path.join(__dirname, '../dist/index.html')}`);
-        // Menu.setApplicationMenu(null);
+        Menu.setApplicationMenu(null);
     }
 }
 

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 
 export const useMainStore = defineStore('mainStore', {
     state: () => ({
+        firstEntry: false, // 第一次进入软件的标志
         downloading: false, // 是否正在更新(下载) 
         downloadProgress: 0, // 下载更新的进度
         currentUserId: 0, //当前对应用户表的ID 

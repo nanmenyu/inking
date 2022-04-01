@@ -128,11 +128,15 @@ function closeWin() {
     // 导出备份json
     exportOpusBackup(() => {
         window.$API.ipcOnce('expFile-result', () => {
+            // 导出备份TXT
             db.opus.where(":id").between(1, Infinity).toArray().then(value => {
-                const len = value.filter(item => item.discard === 'f').length;
+                const newValue = value.filter(item => item.discard === 'f');
+                const len = newValue.length;
                 let temp = 0;
-                value.forEach(item => {
-                    if (item.discard === 'f') {
+                if (len === 0) {
+                    window.$API.ipcSend('window-close');
+                } else {
+                    newValue.forEach(item => {
                         // 导出回收站之外的作品到多个txt中
                         exportOpusAsTXT(item, item.id + '_' + item.title, path);
                         window.$API.ipcOnce('expFile-result', () => {
@@ -148,8 +152,8 @@ function closeWin() {
                                 }
                             }
                         })
-                    }
-                })
+                    })
+                }
             })
         });
     }, 'inkingBackup', path);

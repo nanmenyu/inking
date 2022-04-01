@@ -39,7 +39,7 @@
                 <a-progress
                     type="circle"
                     title="今日计划完成度"
-                    :percent="todayPercent.toFixed(3)"
+                    :percent="parseFloat(todayPercent.toFixed(3))"
                     :color="{
                         '0%': 'rgb(var(--my-secondary-5))',
                         '100%': 'rgb(var(--my-secondary-6))',
@@ -229,7 +229,7 @@ const toDayCodeword = computed(() => {
 
 // 今日码字数量占比
 const todayPercent = computed(() => {
-    return toDayCodeword.value / parseInt(mainStore.dailyPlan);
+    return toDayCodeword.value / Math.floor(mainStore.dailyPlan);
 })
 
 const preloadFile = 'file://' + window.$API.__dirname + '/webview/preload.js';

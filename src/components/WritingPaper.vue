@@ -31,6 +31,7 @@ import { db } from '../db/db';
 import { v4 } from 'uuid';
 import prohibitedWords from '../assets/json/prohibitedWords.json';
 import '../style/toolTip.scss';
+import { nextTick } from 'process';
 
 const emit = defineEmits(['todata', 'addKeyWord', 'toWebView']);
 const { proxy } = useCurrentInstance();
@@ -111,7 +112,7 @@ const setPaperSize = (type: string, isInit: boolean) => {
 const setParaFocus = (type: string, isInit: boolean) => {
     if (type === 'open') {
         // 将当前选择的文字颜色变为透明的rgba
-        currentColor.value = hexToRgba(focusColor.value, 0.3);
+        currentColor.value = hexToRgba(focusColor.value.slice(0, 7), 0.3);
     } else {
         // 文字颜色恢复原状
         currentColor.value = focusColor.value;
@@ -168,6 +169,7 @@ const throttleSaveDocData = throttle(() => {
 
 // 保存数据至数据库
 const saveDocData = (showMsg: string) => {
+    console.log('save');
     const editorData = ProseMirror.children;
     const dataArr: Array<string> = [];
     for (let i = 0; i < editorData.length; i++) {
@@ -442,12 +444,14 @@ const choiceContextMenuItem = (data: { item: string, select?: string }) => {
         navigator.clipboard.readText().then(clipText => {
             (<Text>textNode).replaceData(range.startOffset, range.endOffset - range.startOffset, clipText);
         }).then(() => {
-            saveDocData('');
+            getData();
+            throttleSaveDocData();
         })
     } else if (data.item === '剪切 Ctrl+x' && selectedText !== '') {
         (<Text>textNode).replaceData(range.startOffset, range.endOffset - range.startOffset, '');
         navigator.clipboard.writeText(selectedText).then(() => {
-            saveDocData('');
+            getData();
+            throttleSaveDocData();
         })
     }
 }

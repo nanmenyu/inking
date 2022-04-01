@@ -91,6 +91,36 @@ switch (route.path) {
         break;
 }
 
+// 用浏览器打开链接
+const openWithBrowser = (url: string) => {
+    window.$API.openExternalUrl(url);
+}
+
+// 检测主题变化修改颜色
+const secondaryColor = ref(''), fontColor = ref('');
+watch(computed(() => {
+    return themeStore.theme;
+}), () => {
+    secondaryColor.value = themeStore.my_secondary_6;
+    fontColor.value = themeStore.color_text_1;
+    setChart(uChart.value, color.value, task.value);
+})
+// 检测副颜色是否发生改变
+watch(computed(() => {
+    return themeStore.my_secondary_6;
+}), () => {
+    secondaryColor.value = themeStore.my_secondary_6;
+    fontColor.value = themeStore.color_text_1;
+    setChart(uChart.value, color.value, task.value);
+})
+
+// 检测每日计划是否发生改变
+watch(computed(() => {
+    return mainStore.dailyPlan;
+}), () => {
+    setChart(uChart.value, color.value, task.value);
+})
+
 // 今日码字数量
 const toDayCodeword = computed(() => {
     return mainStore.baseTotalNumber_today + mainStore.TotalNumber_thisTime - mainStore.contrastTotalNumber_thisTime;
@@ -112,49 +142,19 @@ const task = computed(() => {
     }
 })
 
-// 用浏览器打开链接
-const openWithBrowser = (url: string) => {
-    window.$API.openExternalUrl(url);
-}
-
-// 检测主题变化修改颜色
-const secondaryColor = ref(''), fontColor = ref('');
-watch(computed(() => {
-    return themeStore.theme;
-}), () => {
-    secondaryColor.value = themeStore.my_secondary_6;
-    fontColor.value = themeStore.color_text_1;
-    setChart(uChart.value, color.value, task.value);
-})
-
-// 检测副颜色是否发生改变
-watch(computed(() => {
-    return themeStore.my_secondary_6;
-}), () => {
-    secondaryColor.value = themeStore.my_secondary_6;
-    fontColor.value = themeStore.color_text_1;
-    setChart(uChart.value, color.value, task.value);
-})
-
-// 检测每日计划是否发生改变
-watch(computed(() => {
-    return task.value;
-}), () => {
-    setChart(uChart.value, color.value, task.value);
-})
-
-// watch(computed(() => {
-//     return mainStore.baseTotalNumber_thisTime;
-// }), () => {
-//     setChart(uChart.value, color.value, task.value);
-// })
-
 onMounted(() => {
     // 获得副主题色
     secondaryColor.value = getComputedStyle(document.body).getPropertyValue('--my-secondary-6');
     // 获取文字色
     fontColor.value = getComputedStyle(document.body).getPropertyValue('--color-text-1');
-    setChart(uChart.value, color.value, task.value);
+    // 初次进入时延时展示右侧每日任务动画,调整异步执行栈，解决打包后出现的BUG
+    if (mainStore.firstEntry) {
+        setChart(uChart.value, color.value, task.value);
+    } else {
+        setTimeout(() => {
+            setChart(uChart.value, color.value, task.value);
+        }, 100)
+    }
 });
 
 </script>
