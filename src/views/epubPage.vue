@@ -49,6 +49,7 @@ import TitleBlock from '../components/TitleBlock.vue';
 import { IconCaretRight, IconCaretLeft } from '@arco-design/web-vue/es/icon';
 import { db } from '../db/db';
 import ePub from 'epubjs';
+// import JSZip from 'jszip';
 
 const route = useRoute(), query_id = parseInt(route.query.id as string);
 const catalogItme: Ref<Array<any>> = ref([]); // 目录数据
@@ -62,29 +63,33 @@ const directoryJump = (url: string) => {
 
 function loadFileData() {
     db.ebooks.get(query_id).then(value => {
-        const book = ePub(value?.data! as any);
-        rendition = book.renderTo(container.value, {
-            width: '100%',
-            height: '100%',
-            manager: 'continuous',
-            flow: 'scrolled'
-        });
-        rendition.display();
-        rendition.themes.fontSize(24 + 'px');
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(value?.data!);
+        reader.onload = function (e) {
+            const bookdata = e.target!.result;
+            const book = ePub();
+            book.open(bookdata as ArrayBuffer);
 
-        // rendition.on('selected', function (cfiRange: any) {
-        //     book.getRange(cfiRange).then(range => {
-        //         console.log(range.toString());
-        //     })
-        // })
-
-        book.loaded.navigation.then(function (toc: any) {
-            // 获得电子书的目录
-            toc.forEach((chapter: any) => {
-                catalogItme.value.push(chapter);
+            rendition = book.renderTo(container.value, {
+                width: '100%',
+                height: '100%',
+                manager: 'continuous',
+                flow: 'scrolled'
             });
-        })
+            rendition.display();
+            rendition.themes.fontSize(24 + 'px');
 
+            if (document.body.getAttribute('arco-theme') === 'dark') {
+                rendition.themes.default({ body: { color: '#fff' } })
+            }
+
+            book.loaded.navigation.then(function (toc: any) {
+                // 获得电子书的目录
+                toc.forEach((chapter: any) => {
+                    catalogItme.value.push(chapter);
+                });
+            })
+        }
     })
 }
 

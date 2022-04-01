@@ -474,7 +474,11 @@
                     </ul>
                 </div>
                 <div class="detail-right" style="border: none;">
-                    <a-form :model="form.template" style="margin-top: 20px;">
+                    <a-form
+                        :model="form.template"
+                        style="margin-top: 20px;"
+                        :disabled="templateData.value.length === 0"
+                    >
                         <a-form-item field="模板名" label="模板名">
                             <a-input v-model.trim="form.template.title" placeholder="自定义模板名" />
                         </a-form-item>
@@ -847,7 +851,7 @@ const choiceCard = (id: string, targetIid?: string) => {
     currentListName.data.length !== 0 ? choiceCardItem(id, targetIid) : currentListData.data = [];
 }
 // 点击具体关键字项
-const currentListData: { data: any } = reactive({ data: [] });
+const currentListData: { data: any } = reactive({ data: {} });
 const itemNameFormat = ref(''); // 所有名称字符串
 const currentAssociated: { data: Array<{ iid: string, key: string, kid: string, value: number }> } = reactive({ data: [] });
 const choiceCardItem = (kid: string, iid: string) => {
@@ -902,6 +906,7 @@ const choiceCardItem = (kid: string, iid: string) => {
     associatedOptions.value = associatedOptions.value.filter(item => {
         return item.children.length > 0;
     })
+    console.log(currentListData.data);
 }
 
 // 修改关键词item名和item描述
@@ -1202,7 +1207,7 @@ const addNewKeyWord = () => {
                 item.maxNamLen = (item.maxNamLen || 0) + 1;
                 item.data.push({
                     iid: v4(),
-                    itemImg: '/static/img/default.png',
+                    itemImg: '',
                     itemName: '主名' + item.maxNamLen,
                     otherName: [],
                     itemDesc: '暂无相关简介',
