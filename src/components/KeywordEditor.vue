@@ -223,9 +223,10 @@
                                 :default-value="1"
                                 @change="getCascaderIntensity"
                                 title="选择关联强度(1-5)"
+                                :count="5"
                             >
-                                <template #character="index">
-                                    <icon-fire v-if="index >= 0" />
+                                <template #character>
+                                    <icon-fire />
                                 </template>
                             </a-rate>
                             <a-button

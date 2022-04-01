@@ -46,9 +46,9 @@
     >
         <a-form :model="summaryForm" style="overflow: hidden;" layout="inline">
             <a-form-item field="imp" label="重要性">
-                <a-rate v-model="summaryForm.imp" title="选择重要性(1-5)">
-                    <template #character="index">
-                        <icon-fire v-if="index >= 0" />
+                <a-rate v-model="summaryForm.imp" title="选择重要性(1-5)" :count="5">
+                    <template #character>
+                        <icon-fire />
                     </template>
                 </a-rate>
             </a-form-item>
