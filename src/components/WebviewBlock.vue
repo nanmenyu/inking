@@ -112,7 +112,7 @@
         <div class="topChoice">
             <a-tabs
                 @change="changeSearch"
-                :default-active-key="defaultSiteKey"
+                :default-active-key="parseInt(defaultSiteKey)"
                 size="small"
                 type="text"
             >
@@ -182,7 +182,7 @@
 <script setup lang='ts'>
 import { computed, nextTick, reactive, ref, Ref } from 'vue';
 import {
-    IconLeft, IconRight, IconRefresh, IconDown, IconHome, IconPlus, IconDelete,
+    IconLeft, IconRight, IconRefresh, IconHome, IconPlus, IconDelete,
     IconCaretLeft, IconCaretRight, IconStar, IconStarFill, IconPublic, IconLink,
     IconClose
 } from '@arco-design/web-vue/es/icon';

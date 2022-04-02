@@ -187,7 +187,7 @@ const saveDocData = (showMsg: string) => {
                     value.updateTime = new Date().getTime();// 更新修改时间;
                 }
                 // 顺便更新作品的总字数
-                if (!it.discard) totalNumber += it.chapterNum ?? 0;
+                if (!item.discard && !it.discard) totalNumber += it.chapterNum ?? 0;
             })
         });
     }).then(() => {

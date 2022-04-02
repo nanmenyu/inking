@@ -76,7 +76,11 @@
     <div class="layout-write">
         <a-layout>
             <a-layout-header v-show="!fullScreenState">
-                <TopToolbar @fullscreen="turnfullScreen" ref="topToolRef"></TopToolbar>
+                <TopToolbar
+                    @fullscreen="turnfullScreen"
+                    @keyHighlight="setHighlight"
+                    ref="topToolRef"
+                ></TopToolbar>
             </a-layout-header>
             <a-layout>
                 <a-layout-sider
@@ -281,7 +285,7 @@ import useCurrentInstance from '../utils/useCurrentInstance';
 import { throttle } from '../utils/flowControl';
 import genkeywordMarks from '../utils/genkeywordMarks';
 import { useMainStore } from '../store/index';
-import { saveTodaysCodewords } from '../hooks/db';
+import { saveTodaysCodewords, refreshOpusNumber } from '../hooks/db';
 import { db } from '../db/db';
 import { v4 } from 'uuid';
 import '../style/writerPage.scss';
@@ -298,7 +302,12 @@ const paperRef = ref(); // 纸张
 const topToolRef = ref(); // 顶部工具栏
 const searchBoxRef = ref(); // 搜索框
 const showIframeWrap = ref(false); // 遮罩
+const needHighlight = ref(true); // 是否需要高亮关键词
 const keywordMarks: Ref<Array<Marker>> = ref([]);
+const getWritingOption = localStorage.getItem('uWritingOption');
+if (getWritingOption) {
+    needHighlight.value = JSON.parse(getWritingOption).uHighlight === 'close' ? false : true;
+}
 loadListData();
 
 // 转发纸张-->头部工具栏的数据
@@ -410,8 +419,10 @@ const deleteVolume = (vid: string, vname: string) => {
                     }
                 }
             }).then(() => {
-                loadListData();
-                $message.success('删除成功!');
+                refreshOpusNumber(query_id, () => {
+                    loadListData();
+                    $message.success('删除成功!');
+                })
             })
         }
     })
@@ -441,20 +452,22 @@ const deleteChapter = (dvid: string, dcid: string, cname: string) => {
                     }
                 }
             }).then(() => {
-                // 删除的目标是当前编辑的目标
-                if (dvid === vid.value && dcid === cid.value) {
-                    deletedCid.value = dcid;
-                    paperRef.value.refreshPaper([{
-                        type: "paragraph",
-                        content: [{
-                            type: "text",
-                            text: ''
-                        }]
-                    }]);
-                } else {
-                    loadListData();
-                }
-                $message.success('删除成功!');
+                refreshOpusNumber(query_id, () => {
+                    // 删除的目标是当前编辑的目标
+                    if (dvid === vid.value && dcid === cid.value) {
+                        deletedCid.value = dcid;
+                        paperRef.value.refreshPaper([{
+                            type: "paragraph",
+                            content: [{
+                                type: "text",
+                                text: ''
+                            }]
+                        }]);
+                    } else {
+                        loadListData();
+                    }
+                    $message.success('删除成功!');
+                })
             })
         }
     })
@@ -677,6 +690,12 @@ const openTheSide = () => {
     showSiderRight.value = true;
 }
 
+// 是否显示关键词高亮
+const setHighlight = (value: boolean) => {
+    needHighlight.value = value;
+    loadListData();
+}
+
 // 获取页面上下相对位置并保存
 let tempScrollTop = 0; // 放在外面才能保证目前保存的是最新的
 const getScrollTop = (e: Event) => {
@@ -717,8 +736,12 @@ function loadListData(cb?: Function): void {
             // 渲染关键词
             keywordMarks.value = genkeywordMarks(keyWordArr);
             (<Array<Marker>>mainStore.keywordMarks) = keywordMarks.value;
-            paperRef.value.setBooksData(value, keywordMarks.value);
-
+            // 是否需要高亮关键词
+            if (needHighlight.value) {
+                paperRef.value.setBooksData(value, keywordMarks.value);
+            } else {
+                paperRef.value.setBooksData(value, []);
+            }
             // 加载卷章列表
             booksLists.data = value.data.filter((item: Volume) => {
                 // 判断目标卷是否有删除标记

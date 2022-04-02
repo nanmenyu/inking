@@ -442,6 +442,7 @@ import useCurrentInstance from '../utils/useCurrentInstance';
 import { timeFormat, standTime } from '../utils/timeFormat';
 import showTimePipe from '../utils/showTimePipe';
 import randomNum from '../utils/randomNum';
+import { refreshOpusNumber } from '../hooks/db';
 import { db } from '../db/db';
 import { v4 } from 'uuid';
 import Cropper from 'cropperjs';
@@ -718,8 +719,10 @@ const deleteVolume = (vid: string, vname: string) => {
                     }
                 }
             }).then(() => {
-                loadData();
-                $message.success('删除成功!');
+                refreshOpusNumber(query_id, () => {
+                    loadData();
+                    $message.success('删除成功!');
+                })
             })
         }
     })
@@ -748,8 +751,10 @@ const deleteChapter = (vid: string, cid: string, cname: string) => {
                     }
                 }
             }).then(() => {
-                loadData();
-                $message.success('删除成功!');
+                refreshOpusNumber(query_id, () => {
+                    loadData();
+                    $message.success('删除成功!');
+                })
             })
         }
     })
@@ -869,9 +874,11 @@ const restoreSelect = () => {
                 }
             }
         }).then(() => {
-            isWastepaperBasket.value = false;
-            loadData();
-            $message.success('还原成功!');
+            refreshOpusNumber(query_id, () => {
+                isWastepaperBasket.value = false;
+                loadData();
+                $message.success('还原成功!');
+            })
         })
     }
 }

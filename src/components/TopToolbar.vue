@@ -369,6 +369,23 @@
                 <a-doption @click="sensitiveRetrieval">
                     <img :src="sensitiveWords" style="transform: translateY(4px)" />&nbsp;&nbsp;敏感词检索
                 </a-doption>
+                <a-trigger position="right" :popup-translate="[5, 0]">
+                    <a-doption>
+                        <img :src="keywordIcon" style="transform: translateY(4px)" />&nbsp;&nbsp;关键词高亮
+                    </a-doption>
+                    <template #content>
+                        <div class="trigger" style="padding: 10px 20px;">
+                            <a-switch @change="changeHighlight" :model-value="isHighlight">
+                                <template #checked-icon>
+                                    <icon-check />
+                                </template>
+                                <template #unchecked-icon>
+                                    <icon-close />
+                                </template>
+                            </a-switch>
+                        </div>
+                    </template>
+                </a-trigger>
             </template>
         </a-dropdown>
         <!-- 导出 -->
@@ -445,9 +462,10 @@ import expTXTIcon from '../assets/svg/expTXTIcon.svg';
 import expDOCXIcon from '../assets/svg/expDOCXIcon.svg';
 import expPDFIcon from '../assets/svg/expPDFIcon.svg';
 import sensitiveWords from '../assets/svg/sensitiveWords.svg';
+import keywordIcon from '../assets/svg/keyword.svg';
 const route = useRoute(), query_path = route.path;
 const themeStore = useThemeStore();
-const emit = defineEmits(['fullscreen']);
+const emit = defineEmits(['fullscreen', 'keyHighlight']);
 
 // 数据统计与初始化
 const wordCount = ref(0), charCount = ref(0), paragraphs = ref(0), fontList = ref();
@@ -489,7 +507,8 @@ const uLocalOption = ref({
     uShowBorder: 'open',
     uBgcColor: themeStore.theme === 'light' ? '#ffffffff' : '#17171aff',
     uRoundType: 'none',
-    uPaperSize: 'A4'
+    uPaperSize: 'A4',
+    uHighlight: 'open'
 });
 if (query_path === '/writer') {
     const getuWritingOption = localStorage.getItem('uWritingOption');
@@ -680,6 +699,15 @@ const changeParaFocus = () => {
         uLocalOption.value.uParaFocus = paraFocus.value;
         localStorage.setItem('uWritingOption', JSON.stringify(uLocalOption.value));
     }
+}
+
+// 设置关键词高亮
+const isHighlight = ref(uLocalOption.value.uHighlight === 'close' ? false : true);
+const changeHighlight = (value: boolean) => {
+    isHighlight.value = value;
+    emit('keyHighlight', value);
+    uLocalOption.value.uHighlight = value ? 'open' : 'close';
+    localStorage.setItem('uWritingOption', JSON.stringify(uLocalOption.value));
 }
 
 // 设置全屏模式
