@@ -10,14 +10,20 @@ inking是个人开发的开源桌面码字软件，面向的群体主要是网�
 
 1. 安装源码
 
-`npm install`
+```
+npm install
+```
 
 2. 以electron的方式运行
 
-`npm run electron:serve`
+```
+npm run electron:serve
+```
 
 3. electron打包
 
-`npm run electron:build`
+```
+npm run electron:build
+```
 
 如果electron安装错误可以尝试cnpm
