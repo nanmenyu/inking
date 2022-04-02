@@ -1,7 +1,23 @@
-## 安装  运行  打包
-### npm install
-### npm run electron:serve
-### npm run electron:build
+### 介绍
 
-## 注意
-为了降低打包后的安装包体积，请将声明在dependencies中的*所有项*转移到devDependencies下。该做法是为了避免打包时将体积巨大且无用的node_modules转移到app.asar中，可以大幅减小体积。实测在早期开发版本(v0.1.2)中，安装包从70.7MB减小到57.5MB(减小了18.6%)，免安装包从275MB减小到184MB(减小了33%)。
+inking是个人开发的开源桌面码字软件，面向的群体主要是网文写手，包含写作（核心）和阅读（附带）两大模块，内置关系图、灵感备忘、时间线、地图、webview等辅助模块，助力高效创作！
+
+![预览](http://inkingapp.cn/img/bg.png)
+
+更多介绍请查看[官网](http://inkingapp.cn/)和[文档](https://inking-app-3g71u4uxff7c8113-1305098148.tcloudbaseapp.com/)
+
+### 源码构建
+
+1. 安装源码
+
+`npm install`
+
+2. 以electron的方式运行
+
+`npm run electron:serve`
+
+3. electron打包
+
+`npm run electron:build`
+
+如果electron安装错误可以尝试cnpm
